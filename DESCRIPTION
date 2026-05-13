@@ -1,0 +1,33 @@
+Package: lagseq
+Title: Modern Lag Sequential Analysis with Tidy Transition Networks
+Version: 0.1.0
+Authors@R:
+    person("Mohammed", "Saqr", email = "saqr@saqr.me",
+           role = c("aut", "cre", "cph"))
+Description: A unified, pipe-friendly interface for lag sequential analysis
+    of categorical event sequences. Provides classical, two-cell,
+    bidirectional, parallel-dominance, and non-parallel-dominance engines
+    via a single 'lsa()' constructor with a pluggable engine registry,
+    sequence-level bootstrap and permutation inference, group and
+    stationarity tests, and tidy edge tables ready for transition-network
+    visualization. All numerical methods are implemented from primary
+    literature and cross-validated against published worked examples and
+    base-R primitives. Plot output inherits the 'cograph' protocol when
+    installed.
+License: MIT + file LICENSE
+URL: https://github.com/mohsaqr/lagseq
+BugReports: https://github.com/mohsaqr/lagseq/issues
+Language: en-US
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: R (>= 4.1.0)
+Imports:
+    stats,
+    utils
+Suggests:
+    testthat (>= 3.0.0),
+    cograph,
+    Nestimate
+Config/testthat/edition: 3
+LazyData: true
