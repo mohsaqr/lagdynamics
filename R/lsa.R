@@ -9,7 +9,17 @@
 #' slots for observed/expected/probability/residual matrices and a
 #' long-format edge table suitable for transition-network visualization.
 #'
-#' @param data Sequence input (any form accepted by [lsa_data()]).
+#' @param data Sequence input (any form accepted by [lsa_data()]),
+#'   *or* a raw long-format event-log `data.frame` when the `actor` /
+#'   `action` arguments are supplied (see below). Accepted already-
+#'   sequenced forms include vectors, lists of sequences, wide
+#'   matrices/data.frames, transition-count matrices, and sequence-
+#'   bearing objects from sibling packages (`tna`, `group_tna`,
+#'   Nestimate `nestimate_data`, TraMineR `stslist`).
+#'   `NA` and empty-string cells are treated as missingness, not as a
+#'   state: they are dropped wherever they occur and no transition is
+#'   counted into or out of them. To model missingness as its own
+#'   state, recode it (e.g. `NA -> "missing"`) before calling `lsa()`.
 #' @param lag Positive integer. The transition lag. Default `1`.
 #' @param engine Character scalar. The engine name, registered via
 #'   [register_lsa_engine()]. Built-in engines: `"classical"`,
@@ -20,12 +30,48 @@
 #'   (default), `"greater"`, or `"less"`.
 #' @param alpha Numeric. Significance threshold used to mark edges as
 #'   significant in `fit$edges$significant`. Default `0.05`.
-#' @param structural_zeros Optional `K x K` 0/1 matrix. A `0` marks a
-#'   cell as a structural zero (forbidden transition). When supplied,
-#'   the engine uses iterative proportional fitting and Christensen's
-#'   design-matrix residuals (see `inst/REFERENCES.md` §2.2, §4.2).
-#'   A common pattern is `1 - diag(K)` to forbid self-transitions.
+#' @param structural_zeros Optional `K x K` 0/1 matrix. **Default
+#'   `NULL`: every cell, including the diagonal, is part of the model
+#'   -- self-transitions and every observed transition are kept**.
+#'   Supply this only when you want to explicitly *opt out* of certain
+#'   cells (e.g. because the coding scheme makes them impossible by
+#'   construction). A `0` marks a cell as a structural zero (forbidden
+#'   transition); a `1` marks an estimable cell. When supplied, the
+#'   engine switches to iterative proportional fitting and
+#'   Christensen's design-matrix residuals (see `inst/REFERENCES.md`
+#'   §2.2, §4.2). Pass `1 - diag(K)` to opt out of self-transitions.
 #' @param labels Optional character vector of state labels.
+#' @param group Optional grouping for a multi-group fit. A vector with
+#'   one entry per input sequence (length `n_sequences`); sequences are
+#'   partitioned by group and a separate `lsa` fit is built for each.
+#'   All group fits share one global label set (derived from the full
+#'   data) so their `K x K` matrices are directly comparable, even when
+#'   a group never visits some state. Returns an `lsa_group` object (a
+#'   named list of `lsa` fits). Requires event-level input; a
+#'   pre-computed transition matrix cannot be split by group. Default
+#'   `NULL` (single-group fit).
+#' @param actor,action,time,order,session Column names (each a single
+#'   string) for **long-format** event-log input. Supplying `action`
+#'   (and `actor`) switches `lsa()` into long-format mode: the raw log
+#'   in `data` is sequenced into event sequences by grouping rows per
+#'   `actor` (optionally crossed with an explicit `session` id),
+#'   ordering within each group by `order` if given else by `time`, and
+#'   -- when `time` is given and no `session` column is -- starting a
+#'   new session whenever the gap between consecutive events exceeds
+#'   `time_threshold` seconds. All `NULL` by default (input is taken
+#'   as already-sequenced). Cannot be combined with `group`.
+#' @param time_threshold Numeric. Maximum gap in seconds between
+#'   consecutive events before a new session is started in long-format
+#'   mode. Default `900` (15 minutes). Ignored unless `time` is given
+#'   and `session` is not.
+#' @param custom_format Optional `strptime` format string for parsing
+#'   the `time` column (e.g. `"%Y-%m-%d %H:%M:%S"`). Default `NULL`
+#'   (native date/time classes and ISO strings are parsed directly).
+#' @param is_unix_time Logical. Treat the `time` column as a Unix
+#'   epoch. Default `FALSE`.
+#' @param unix_time_unit Character. Unit of the Unix epoch when
+#'   `is_unix_time = TRUE`: `"seconds"` (default), `"milliseconds"`, or
+#'   `"microseconds"`.
 #' @param params Optional named list of engine-specific parameters
 #'   forwarded to the engine function.
 #' @param ... Additional engine-specific parameters (merged into
@@ -40,16 +86,27 @@
 #'   \item{weights}{`K x K` matrix used as the default edge weight for
 #'     plotting. Equal to `obs` (counts) by default.}
 #'   \item{nodes}{Data frame: `id, label, name, outgoing, incoming`.}
-#'   \item{edges}{Tidy edge frame.}
-#'   \item{data}{The canonical `lsa_data` object.}
-#'   \item{transitions}{The `lsa_transitions` object.}
-#'   \item{engine}{Engine name used.}
-#'   \item{params}{Immutable snapshot of all parameters used (recipe).}
+#'   \item{edges}{Tidy edge frame (the same numbers as the matrices, in
+#'     long one-row-per-transition form).}
 #'   \item{directed}{Logical scalar; `TRUE` for directed engines,
 #'     `FALSE` for `bidirectional`.}
-#'   \item{method}{Equal to `engine` for cograph compatibility.}
-#'   \item{meta}{List with engine info, version, and call.}
+#'   \item{method}{Engine name (the slot the `cograph_network` protocol
+#'     reads). The engine is also recorded in `params$engine`.}
+#'   \item{inits}{Named numeric initial-state distribution (proportion
+#'     of sequences starting in each state, sums to 1); `NULL` for
+#'     transition-matrix input.}
+#'   \item{data}{The canonical `lsa_data` object (events + seq_id).}
+#'   \item{params}{Immutable snapshot of all parameters used (recipe),
+#'     including `params$engine`.}
+#'   \item{meta}{List with source, IPF info, version, and call.}
 #' }
+#'
+#' When `group` is supplied, returns an object of class
+#' `c("lsa_group", "list")`: a named list of `lsa` fits (one per group
+#' level) carrying `levels`, `group_sizes`, `labels`, and `engine`
+#' attributes. Downstream verbs ([lsa_to_tna()],
+#' [significant_transitions()], [reliability_lsa()], etc.) dispatch on
+#' it and return grouped results.
 #'
 #' @examples
 #' seq <- c("Question", "Explain", "Agree",
@@ -70,6 +127,16 @@ lsa <- function(data,
                 alpha = 0.05,
                 structural_zeros = NULL,
                 labels = NULL,
+                group = NULL,
+                actor = NULL,
+                action = NULL,
+                time = NULL,
+                order = NULL,
+                session = NULL,
+                time_threshold = 900,
+                custom_format = NULL,
+                is_unix_time = FALSE,
+                unix_time_unit = "seconds",
                 params = list(),
                 ...) {
   call <- match.call()
@@ -77,6 +144,35 @@ lsa <- function(data,
   stopifnot(
     is.numeric(alpha), length(alpha) == 1L, alpha > 0, alpha < 1
   )
+
+  # Long-format mode: a raw event log is sequenced into a list of event
+  # sequences before any analysis. Triggered by supplying `action`.
+  if (!is.null(action)) {
+    if (is.null(actor)) {
+      stop("Long-format sequencing needs both `actor` and `action` ",
+           "column names.", call. = FALSE)
+    }
+    if (!is.null(group)) {
+      stop("`group` cannot be combined with long-format sequencing. ",
+           "Sequence first (lsa(log, actor=, action=)), then re-group ",
+           "the recovered sequences in a second call.", call. = FALSE)
+    }
+    data <- .prepare_long(
+      data, actor = actor, action = action, time = time, order = order,
+      session = session, time_threshold = time_threshold,
+      custom_format = custom_format, is_unix_time = is_unix_time,
+      unix_time_unit = unix_time_unit
+    )
+  }
+
+  if (!is.null(group)) {
+    return(.lsa_grouped(
+      data = data, group = group, lag = lag, engine = engine,
+      alternative = alternative, alpha = alpha,
+      structural_zeros = structural_zeros, labels = labels,
+      params = params, call = call, ...
+    ))
+  }
 
   d  <- lsa_data(data, labels = labels)
   tx <- lsa_transitions(d, lag = lag)
@@ -108,15 +204,96 @@ lsa <- function(data,
   ))
 
   .build_lsa_object(
-    result = result, data = d, transitions = tx,
+    result = result, data = d,
     engine = engine, params = params, alpha = alpha,
     structural_zeros = structural_zeros, alternative = alternative,
     lag = lag, call = call
   )
 }
 
+# Multi-group fit. Partition the input sequences by `group`, then fit
+# the engine once per group on a SHARED global label set so every
+# group's K x K matrices index the same states (a group that never
+# visits a state still gets a full-size matrix with zeros). Returns a
+# named list of `lsa` fits with class "lsa_group". Mirrors tna's
+# `group_tna` (a list of single-group models) so the same downstream
+# verbs can dispatch on it.
+.lsa_grouped <- function(data, group, lag, engine, alternative, alpha,
+                         structural_zeros, labels, params, call, ...) {
+  d <- lsa_data(data, labels = labels)
+  if (!identical(d$source, "events")) {
+    stop("Grouped lsa() requires event-level sequence data; a ",
+         "pre-computed transition matrix cannot be split by group.",
+         call. = FALSE)
+  }
+  # One element per sequence, in original sequence order. Forcing the
+  # factor levels to seq_len(n_sequences) avoids the lexicographic
+  # reordering that split() would otherwise apply to integer ids.
+  per_seq <- split(d$events,
+                   factor(d$seq_id, levels = seq_len(d$n_sequences)))
+  S <- length(per_seq)
+  g <- .resolve_group(group, S)
+  levs <- levels(g)
+  global_labels <- d$labels
+
+  fits <- lapply(levs, function(lv) {
+    idx <- which(g == lv)
+    # per_seq[idx] is a list of integer-coded sequences; passing
+    # labels = global_labels makes lsa() read those integers as indices
+    # into the shared label set rather than re-deriving labels per group.
+    lsa(data = per_seq[idx], lag = lag, engine = engine,
+        alternative = alternative, alpha = alpha,
+        structural_zeros = structural_zeros, labels = global_labels,
+        params = params, ...)
+  })
+  names(fits) <- levs
+
+  structure(
+    fits,
+    levels = levs,
+    group_sizes = as.integer(table(g)[levs]),
+    labels = global_labels,
+    engine = engine,
+    call = call,
+    class = c("lsa_group", "list")
+  )
+}
+
+# Validate and normalise the grouping vector to a factor of length S
+# (one entry per sequence). Empty levels are dropped so downstream
+# fits and prints never carry a zero-sequence group.
+.resolve_group <- function(group, S) {
+  if (length(group) != S) {
+    stop(sprintf(
+      paste0("`group` must have one entry per sequence: got length %d ",
+             "but the data has %d sequences."),
+      length(group), S), call. = FALSE)
+  }
+  if (anyNA(group)) {
+    stop("`group` must not contain NA.", call. = FALSE)
+  }
+  g <- if (is.factor(group)) droplevels(group) else as.factor(group)
+  g
+}
+
+#' @export
+print.lsa_group <- function(x, ...) {
+  labels <- attr(x, "labels")
+  sizes <- attr(x, "group_sizes")
+  cat("<lsa_group>\n")
+  cat(sprintf("  engine:    %s\n", attr(x, "engine")))
+  cat(sprintf("  states:    %d (%s)\n", length(labels),
+              paste(utils::head(labels, 10), collapse = ", ")))
+  cat(sprintf("  groups:    %d\n", length(x)))
+  for (i in seq_along(x)) {
+    cat(sprintf("    - %-12s %d sequences\n",
+                paste0(names(x)[i], ":"), sizes[i]))
+  }
+  invisible(x)
+}
+
 # Assemble the public S3 object with stable, fully-documented slots.
-.build_lsa_object <- function(result, data, transitions, engine,
+.build_lsa_object <- function(result, data, engine,
                               params, alpha, structural_zeros,
                               alternative, lag, call) {
   K <- length(data$labels)
@@ -149,10 +326,20 @@ lsa <- function(data,
   )
 
   nodes <- .build_nodes(obs = obs, labels = labels)
+  inits <- .initial_dist(data)
 
   is_directed <- !identical(engine, "bidirectional")
 
+  # Slots are grouped by role. The statistical matrices stay flat
+  # (fit$obs, fit$adj_res, ...) because that access is idiomatic and
+  # used everywhere; the long `edges` table is the same numbers in tidy
+  # form. The engine name is stored ONCE as `method` (the name the
+  # cograph_network protocol reads) and again only inside `params` as
+  # the immutable recipe -- no third standalone `engine` copy. The
+  # `lsa_transitions` helper is not stored: it duplicated `obs`/`edges`
+  # and nothing downstream read it.
   fit <- list(
+    # --- statistical matrices (K x K) ---
     obs = obs,
     exp = exp_mat,
     prob = prob,
@@ -163,14 +350,16 @@ lsa <- function(data,
     kappa_z = k_z,
     kappa_p = k_p,
     lrx2 = result$lrx2,
+    # --- cograph_network protocol ---
     weights = obs,
     nodes = nodes,
     edges = edges,
-    data = data,
-    transitions = transitions,
     directed = is_directed,
     method = engine,
-    engine = engine,
+    # --- initial-state distribution (NULL for matrix input) ---
+    inits = inits,
+    # --- provenance ---
+    data = data,
     params = list(
       lag = lag,
       engine = engine,
@@ -250,4 +439,21 @@ lsa <- function(data,
     stringsAsFactors = FALSE,
     row.names = NULL
   )
+}
+
+# Initial-state distribution: the proportion of sequences that start in
+# each state (named, sums to 1), matching tna's `inits` / Nestimate's
+# `initial`. Returns NULL when the fit came from a transition matrix
+# (no sequences, so no notion of a starting state).
+.initial_dist <- function(data) {
+  if (!identical(data$source, "events") || is.null(data$events)) {
+    return(NULL)
+  }
+  per <- split(data$events,
+               factor(data$seq_id, levels = seq_len(data$n_sequences)))
+  first <- vapply(per, function(s) s[1L], integer(1L))
+  counts <- tabulate(first, nbins = data$n_states)
+  inits <- counts / sum(counts)
+  names(inits) <- data$labels
+  inits
 }

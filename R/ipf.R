@@ -22,9 +22,13 @@
 #' and column marginals converge to those of `obs` within `tol`.
 #'
 #' @param obs Numeric `K x K` matrix of observed counts.
-#' @param structure Numeric `K x K` 0/1 matrix. A `1` means the cell is
-#'   estimable; a `0` means the cell is a structural zero. Defaults to
-#'   `1 - diag(K)` (the "no self-transitions" pattern).
+#' @param structure Numeric `K x K` 0/1 matrix. **Default
+#'   `matrix(1, K, K)`: every cell, including the diagonal, is
+#'   estimable -- self-transitions and every observed cell are kept.**
+#'   A `0` marks a cell as a structural zero (forbidden), a `1` marks
+#'   it as estimable. Pass an explicit pattern (e.g. `1 - diag(K)`)
+#'   only when you want to *opt out* of specific cells because the
+#'   coding scheme makes them impossible by construction.
 #' @param tol Numeric. Convergence tolerance on marginal differences.
 #'   Default `1e-8`.
 #' @param max_iter Integer. Maximum number of row+column scaling
@@ -60,7 +64,10 @@ lsa_ipf <- function(obs, structure = NULL, tol = 1e-8, max_iter = 200L) {
     nrow(obs) == ncol(obs), nrow(obs) >= 2L
   )
   K <- nrow(obs)
-  if (is.null(structure)) structure <- 1 - diag(K)
+  # No structural zeros by default. Self-transitions are kept; the
+  # diagonal is part of the model. Users who want to forbid
+  # self-transitions must pass structure = 1 - diag(K) explicitly.
+  if (is.null(structure)) structure <- matrix(1L, K, K)
   stopifnot(
     is.matrix(structure), nrow(structure) == K, ncol(structure) == K,
     all(structure %in% c(0, 1))

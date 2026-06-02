@@ -110,7 +110,10 @@ stability_lsa <- function(fit,
   edges <- data.frame(
     from         = grid$from,
     to           = grid$to,
-    observed_sig = as.vector(fit$p) < recipe$alpha,
+    observed_sig = {
+      p_vec <- as.vector(fit$p)
+      is.finite(p_vec) & p_vec < recipe$alpha
+    },
     stability    = stability,
     stable       = stability >= min_stable,
     stringsAsFactors = FALSE,

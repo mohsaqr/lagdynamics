@@ -57,6 +57,15 @@
 #' positions (event-level) to deterministically replay the bootstrap
 #' across sessions, processes, or languages.
 #'
+#' **NA handling.** Per-cell summary statistics (`mean`, `se`,
+#' `ci_low`, `ci_high`, `p_boot`) are computed with `na.rm = TRUE`,
+#' so replicates that produced `NA` for a given cell (for example
+#' structural-zero cells, or cells whose row marginal collapsed to
+#' zero in the resampled data) are excluded from that cell's
+#' summary. The summary therefore reflects only the finite
+#' replicates; cells whose every replicate was `NA` come back as
+#' `NA` themselves.
+#'
 #' @return An object of class `c("lsa_bootstrap", "list")` with:
 #' \describe{
 #'   \item{edges}{Tidy per-edge data frame with observed + bootstrap

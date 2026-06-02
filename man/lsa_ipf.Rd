@@ -9,9 +9,13 @@ lsa_ipf(obs, structure = NULL, tol = 1e-08, max_iter = 200L)
 \arguments{
 \item{obs}{Numeric \verb{K x K} matrix of observed counts.}
 
-\item{structure}{Numeric \verb{K x K} 0/1 matrix. A \code{1} means the cell is
-estimable; a \code{0} means the cell is a structural zero. Defaults to
-\code{1 - diag(K)} (the "no self-transitions" pattern).}
+\item{structure}{Numeric \verb{K x K} 0/1 matrix. \strong{Default
+\code{matrix(1, K, K)}: every cell, including the diagonal, is
+estimable -- self-transitions and every observed cell are kept.}
+A \code{0} marks a cell as a structural zero (forbidden), a \code{1} marks
+it as estimable. Pass an explicit pattern (e.g. \code{1 - diag(K)})
+only when you want to \emph{opt out} of specific cells because the
+coding scheme makes them impossible by construction.}
 
 \item{tol}{Numeric. Convergence tolerance on marginal differences.
 Default \code{1e-8}.}

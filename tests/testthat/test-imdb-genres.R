@@ -48,12 +48,13 @@ test_that("imdb: LR p-value == pchisq() at 1e-12", {
                tolerance = 1e-12)
 })
 
-test_that("imdb: structural-zero variant zeros the diagonal", {
+test_that("imdb: structural-zero variant zeros exp and NAs residuals on diagonal", {
   S <- 1 - diag(16)
   fit <- lsa(imdb_genres$sequence, engine = "classical",
              structural_zeros = S)
   expect_true(all(diag(fit$exp) == 0))
-  expect_true(all(diag(fit$adj_res) == 0))
+  # Forbidden cells are non-estimable: residuals are NA.
+  expect_true(all(is.na(diag(fit$adj_res))))
 })
 
 test_that("imdb: large dataset doesn't break Yule's Q computation", {

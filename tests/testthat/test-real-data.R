@@ -52,11 +52,13 @@ test_that("engagement: LR p-value matches pchisq()", {
   )
 })
 
-test_that("engagement: structural-zero variant still has zero diagonal", {
+test_that("engagement: structural-zero variant zeros exp and NAs residuals on diagonal", {
   S <- 1 - diag(3)
   fit <- lsa(engagement, engine = "classical", structural_zeros = S)
   expect_true(all(diag(fit$exp) == 0))
-  expect_true(all(diag(fit$adj_res) == 0))
+  # Forbidden cells are non-estimable: residuals and p-values are NA.
+  expect_true(all(is.na(diag(fit$adj_res))))
+  expect_true(all(is.na(diag(fit$p))))
 })
 
 test_that("engagement: edges frame nrows = K * K and signs are coherent", {
@@ -97,8 +99,9 @@ test_that("group_regulation_long: per-actor list-of-sequences input", {
   # Split into one sequence per actor (canonical multi-sequence input).
   seqs <- split(df$Action, df$Actor)
   fit <- lsa(seqs, engine = "classical")
-  # K = number of distinct actions, transitions counted within actor.
-  expect_equal(fit$transitions$n_transitions, sum(fit$obs))
+  # Lag-1 within-sequence: total transitions = events - sequences.
+  expect_equal(sum(fit$obs),
+               fit$data$n_events - fit$data$n_sequences)
   # Marginals are finite, totals consistent.
   expect_true(all(is.finite(fit$obs)))
   expect_gt(sum(fit$obs), 0)

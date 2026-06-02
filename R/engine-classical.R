@@ -43,6 +43,14 @@
     ipf_info <- NULL
   } else {
     ipf <- lsa_ipf(obs, structure = structural_zeros)
+    if (!isTRUE(ipf$converged)) {
+      warning(sprintf(
+        paste0("IPF did not converge after %d iterations (max margin ",
+               "diff = %.3g). Residuals and p-values for the ",
+               "structural-zero fit may be unreliable."),
+        ipf$iterations, ipf$max_margin_diff
+      ), call. = FALSE)
+    }
     exp_mat <- ipf$fit
     ipf_info <- ipf[c("iterations", "converged", "max_margin_diff")]
   }
@@ -126,10 +134,14 @@
     return(list(z = z, hat = NULL))
   }
   # §4.2 Christensen with structural zeros via design-matrix hat.
+  # Non-estimable cells (structural zeros and cells with degenerate
+  # denominators) are returned as NA, not 0: zero would falsely
+  # encode "exactly expected" and produce p = 1 on cells where no
+  # test is defined.
   S <- structural_zeros
   keep <- which(S == 1, arr.ind = TRUE)
   if (nrow(keep) == 0L) {
-    return(list(z = matrix(0, K, K), hat = NULL))
+    return(list(z = matrix(NA_real_, K, K), hat = NULL))
   }
   rows_kept <- keep[, 1L]
   cols_kept <- keep[, 2L]
@@ -140,19 +152,22 @@
   ev <- exp_mat[cbind(rows_kept, cols_kept)]
   W <- diag(ev, nrow = length(ev))
   XtWX <- crossprod(X, W %*% X)
-  if (abs(det(XtWX)) < .Machine$double.eps) {
-    warning("Design matrix is singular; falling back to no-structural-zero ",
-            "residual formula. This is an approximation only.",
-            call. = FALSE)
+  # Rank-based singularity check: det() loses precision on larger
+  # tables and can falsely accept near-singular matrices.
+  if (qr(XtWX)$rank < ncol(XtWX)) {
+    warning("Design matrix is singular under the supplied ",
+            "structural-zero pattern; falling back to the ",
+            "no-structural-zero residual formula. This is an ",
+            "approximation only.", call. = FALSE)
     return(.adjusted_residuals(obs, exp_mat, rt, ct, N,
                                structural_zeros = NULL))
   }
   H <- X %*% solve(XtWX) %*% crossprod(X, W)
   h_diag <- diag(H)
-  z <- matrix(0, K, K)
+  z <- matrix(NA_real_, K, K)
   denom <- ev * (1 - h_diag)
   ok <- is.finite(denom) & denom > 0
-  z_vals <- numeric(length(ev))
+  z_vals <- rep(NA_real_, length(ev))
   z_vals[ok] <- (obs[cbind(rows_kept, cols_kept)][ok] - ev[ok]) /
     sqrt(denom[ok])
   z[cbind(rows_kept, cols_kept)] <- z_vals
@@ -218,9 +233,26 @@
   if (is.null(structural_zeros)) {
     df <- (K - 1L)^2
   } else {
-    s_zeros <- sum(structural_zeros == 0)
-    df <- (K - 1L)^2 - s_zeros
-    df <- max(df, 1L)
+    # Quasi-independence df: (# estimable cells) - rank(row + col
+    # design under the structural-zero pattern). For non-degenerate
+    # patterns this equals (K-1)^2 - s_zeros, but if a pattern leaves
+    # an entire row or column with no estimable cell, the
+    # corresponding effect is non-identifiable and rank(X) drops,
+    # giving the correctly larger residual df. Forcing df >= 1 (as
+    # the previous formula did) is a silent misuse of pchisq().
+    keep <- which(structural_zeros == 1, arr.ind = TRUE)
+    n_estimable <- nrow(keep)
+    if (n_estimable == 0L) {
+      return(list(statistic = NA_real_, df = NA_integer_, p = NA_real_))
+    }
+    X <- stats::model.matrix(
+      ~ factor(keep[, 1L], levels = seq_len(K)) +
+        factor(keep[, 2L], levels = seq_len(K))
+    )
+    df <- n_estimable - qr(X)$rank
+  }
+  if (!is.finite(df) || df <= 0L) {
+    return(list(statistic = g2, df = df, p = NA_real_))
   }
   p <- stats::pchisq(g2, df = df, lower.tail = FALSE)
   list(statistic = g2, df = df, p = p)

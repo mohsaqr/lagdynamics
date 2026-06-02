@@ -22,6 +22,14 @@
 #'   `i`, column `j` is the count of `i -> j` transitions. In this case
 #'   `events` and `seq_id` are not available and downstream resampling
 #'   tools that need event-level data will error.
+#' - A sequence-bearing object from a sibling package: a `tna` or
+#'   `group_tna` (sequences read from its `$data` slot), a `tna_data`
+#'   (from `tna::prepare_data()`) or Nestimate `nestimate_data`
+#'   (`$sequence_data`), or a TraMineR `stslist`. The stored event
+#'   sequences are recovered and analysed.
+#'   A `tna` built from a bare matrix (no retained sequences) errors,
+#'   because transition *counts* cannot be recovered from probability
+#'   weights.
 #'
 #' @param x Sequence input. See Details.
 #' @param labels Optional character vector of label names for the
@@ -68,6 +76,15 @@
 lsa_data <- function(x, labels = NULL) {
   if (inherits(x, "lsa_data")) return(x)
 
+  # Recover sequences from a sibling-package object (tna / group_tna,
+  # nestimate_data, TraMineR stslist, ...) before the generic shape
+  # heuristics run. Without this, a fitted object -- which is just a
+  # list -- would be silently misread as "a list of sequences".
+  if (.is_seq_object(x)) {
+    seqs <- .sequences_from_object(x)
+    return(.lsa_data_from_sequences(seqs, labels = labels))
+  }
+
   if (.is_transition_matrix(x)) {
     return(.lsa_data_from_matrix(x, labels = labels))
   }
@@ -83,8 +100,11 @@ lsa_data <- function(x, labels = NULL) {
   is.matrix(x) && is.numeric(x) && nrow(x) == ncol(x) && nrow(x) >= 2L
 }
 
-# Coerce vector / list / wide matrix-or-df into a list of vectors,
-# stripping NA and empty strings at the ends of each sequence.
+# Coerce vector / list / wide matrix-or-df into a list of vectors.
+# NA and empty-string cells are dropped wherever they occur, not just
+# at the ends: they represent missingness, not a state, so nothing
+# transitions into or out of them. To model missingness as a state,
+# recode (e.g. NA -> "missing") before calling lsa().
 .as_sequence_list <- function(x) {
   if (is.atomic(x) && is.null(dim(x))) {
     return(list(.clean_sequence(x)))
@@ -108,7 +128,9 @@ lsa_data <- function(x, labels = NULL) {
        call. = FALSE)
 }
 
-# Strip NA and empty-string sentinels. Preserve type.
+# Drop NA and empty-string cells anywhere in the vector. NA is treated
+# as missingness, not as a state, so the observed-state stream is the
+# raw vector with sentinels removed and the remaining order preserved.
 .clean_sequence <- function(v) {
   v <- unname(v)
   if (is.character(v)) v <- v[!is.na(v) & nzchar(v)]

@@ -31,6 +31,11 @@
   alternative <- match.arg(alternative)
   stopifnot(is.numeric(continuity), length(continuity) == 1L,
             continuity >= 0)
+  if (!is.null(structural_zeros)) {
+    stop("Engine 'two_cell' does not support structural_zeros. ",
+         "Use engine = 'classical' for structural-zero handling.",
+         call. = FALSE)
+  }
 
   obs <- transitions$obs
   K   <- nrow(obs)

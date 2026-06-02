@@ -89,6 +89,15 @@ length equals the original \code{T}.
 matrix (sequence-level) or \verb{R x n_blocks} matrix of start
 positions (event-level) to deterministically replay the bootstrap
 across sessions, processes, or languages.
+
+\strong{NA handling.} Per-cell summary statistics (\code{mean}, \code{se},
+\code{ci_low}, \code{ci_high}, \code{p_boot}) are computed with \code{na.rm = TRUE},
+so replicates that produced \code{NA} for a given cell (for example
+structural-zero cells, or cells whose row marginal collapsed to
+zero in the resampled data) are excluded from that cell's
+summary. The summary therefore reflects only the finite
+replicates; cells whose every replicate was \code{NA} come back as
+\code{NA} themselves.
 }
 \examples{
 \donttest{

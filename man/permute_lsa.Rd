@@ -36,7 +36,13 @@ replaces internal RNG.}
 
 \item{verbose}{Logical. Print progress every 100 replicates.}
 
-\item{...}{Reserved.}
+\item{...}{Reserved.
+
+\strong{NA handling.} The exceedance count that drives \code{p_perm} is
+computed with \code{na.rm = TRUE}, so replicates that produced \code{NA}
+for a cell (structural-zero cells, zero-margin cells in the
+permuted table) are excluded from that cell's tally rather than
+counted as either an exceedance or a non-exceedance.}
 }
 \value{
 An object of class \code{c("lsa_permutation", "list")} with:

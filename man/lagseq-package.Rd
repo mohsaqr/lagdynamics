@@ -10,8 +10,8 @@ A unified, pipe-friendly interface for lag sequential analysis (LSA) of
 categorical event sequences. Provides classical, two-cell,
 bidirectional, parallel-dominance, and non-parallel-dominance engines
 via a single \code{\link[=lsa]{lsa()}} constructor with a pluggable engine registry,
-sequence-level bootstrap and permutation inference, group and
-stationarity tests, and tidy edge tables ready for transition-network
+sequence-level bootstrap and permutation inference, case-drop
+stability, and tidy edge tables ready for transition-network
 visualization.
 }
 \section{Design principles}{
@@ -41,16 +41,33 @@ Convenience wrappers: \code{lsa_classical()}, \code{lsa_two_cell()},
 Engine registry: \code{register_lsa_engine()}, \code{get_lsa_engine()},
 \code{list_lsa_engines()}
 
-Inference: \code{bootstrap_lsa()}, \code{permute_lsa()}, \code{stability_lsa()}
+Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}},
+\code{\link[=reliability_lsa]{reliability_lsa()}}
 
-Comparison: \code{compare_lsa()}, \code{group_lsa()}, \code{stationarity_lsa()}
+Filtering: \code{\link[=significant_transitions]{significant_transitions()}},
+\code{\link[=overrepresented_transitions]{overrepresented_transitions()}}, \code{\link[=underrepresented_transitions]{underrepresented_transitions()}},
+\code{\link[=common_transitions]{common_transitions()}}
 
-Filtering: \code{significant_transitions()},
-\code{overrepresented_transitions()}, \code{underrepresented_transitions()},
-\code{common_transitions()}
+TNA / igraph bridge: \code{\link[=lsa_to_tna]{lsa_to_tna()}}, \code{\link[=as.igraph.lsa]{as.igraph.lsa()}}. These
+convert an \code{lsa} fit into the native object of a downstream network
+package; the analysis itself (centralities via \code{tna::centralities()},
+centrality stability via \code{tna::estimate_cs()}, pruning via
+\code{tna::prune()}, communities via \code{tna::communities()}) is performed by
+that package. lagseq stays the \emph{converter}, not the analyser, and is
+not coupled to \code{tna} at install time.
+}
 
-Plotting: \code{plot.lsa()}, \code{plot_lsa_heatmap()}, \code{plot_lsa_network()},
-\code{plot_lsa_residuals()}, \code{plot_lsa_flow()}
+\section{Roadmap (not yet implemented)}{
+
+
+Native plot methods (\code{plot.lsa()}, heatmap/network/residual/flow
+variants), between-group network comparison (\code{compare_lsa()},
+\code{group_lsa()}), and stationarity tests (\code{stationarity_lsa()}) are
+planned but not yet exported. Until then, network visualization
+works through the \code{c("lsa", "cograph_network")} class and the
+\code{cograph} package's plot machinery, and between-group comparison
+is possible by routing each group's fit through \code{\link[=lsa_to_tna]{lsa_to_tna()}} and
+using \code{tna::compare()}.
 }
 
 \references{

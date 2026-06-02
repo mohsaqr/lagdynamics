@@ -72,3 +72,64 @@ test_that("permute_lsa: as.data.frame returns the edges frame", {
   pm <- permute_lsa(fit, R = 20)
   expect_identical(as.data.frame(pm), pm$edges)
 })
+
+test_that(".shuffle_within_sequences preserves each sequence's multiset", {
+  # Regression for the pre-fix bug at R/permute_lsa.R:109 where the
+  # within-sequence shuffle used sample.int(length(sp)) as the source
+  # indices. For sequences after the first that produced indices
+  # 1..length(sp), reading from positions that belong to sequence 1
+  # and copying them into sequence 2's slots. Disjoint-alphabet
+  # inputs are the sharpest signature: a correct shuffler can never
+  # introduce seq 1's symbols into seq 2's positions.
+  set.seed(20260514L)
+  seq1 <- rep(c("a", "b"), times = 5L)   # alphabet {a, b}
+  seq2 <- rep(c("x", "y"), times = 5L)   # alphabet {x, y}
+  events <- c(seq1, seq2)
+  seq_positions <- list(seq_len(10L), 10L + seq_len(10L))
+  for (rep in seq_len(200L)) {
+    out <- lagseq:::.shuffle_within_sequences(events, seq_positions)
+    expect_identical(sort(out[seq_positions[[1L]]]), sort(seq1))
+    expect_identical(sort(out[seq_positions[[2L]]]), sort(seq2))
+  }
+})
+
+test_that(".shuffle_within_sequences is safe on singleton and integer events", {
+  # Two defensive checks: (1) singleton sequences must be left
+  # unchanged; (2) integer event codes must not be misinterpreted by
+  # R's sample() quirk where sample(5L) returns sample(1:5). Using
+  # sample.int() inside the helper avoids that pitfall.
+  set.seed(7L)
+  events <- c(3L, 1L, 4L, 7L)
+  seq_positions <- list(seq_len(3L), 4L)
+  for (rep in seq_len(50L)) {
+    out <- lagseq:::.shuffle_within_sequences(events, seq_positions)
+    expect_identical(out[4L], 7L)
+    expect_identical(sort(out[seq_len(3L)]), c(1L, 3L, 4L))
+  }
+})
+
+test_that("permute_lsa within_sequence=TRUE keeps disjoint alphabets disjoint", {
+  # End-to-end version of the bug. With two disjoint-alphabet
+  # sequences, correct within-sequence shuffling cannot create
+  # cross-alphabet transitions, so the column marginals for x and y
+  # stay positive and the residuals on seq 2's within-alphabet cells
+  # remain finite and varying. Pre-fix, seq 2's slots filled with seq
+  # 1's symbols, collapsing the x/y column marginals to zero and
+  # producing NaN/NA residuals.
+  set.seed(20260514L)
+  seqs <- list(
+    rep(c("a", "b"), times = 6L),
+    rep(c("x", "y"), times = 6L)
+  )
+  fit <- lsa(seqs, engine = "classical",
+             labels = c("a", "b", "x", "y"))
+  pm <- permute_lsa(fit, R = 50L, within_sequence = TRUE)
+  expect_false(any(is.na(pm$perm_adj_res)),
+               info = "no NA in residuals under correct shuffling")
+  # as.vector() is column-major, so cell (i, j) maps to
+  # index (j - 1) * K + i. K = 4 with order (a, b, x, y).
+  idx_xy <- (4L - 1L) * 4L + 3L           # cell (x, y)
+  idx_yx <- (3L - 1L) * 4L + 4L           # cell (y, x)
+  expect_gt(stats::var(pm$perm_adj_res[, idx_xy]), 1e-6)
+  expect_gt(stats::var(pm$perm_adj_res[, idx_yx]), 1e-6)
+})

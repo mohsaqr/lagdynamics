@@ -4,8 +4,8 @@
 #' categorical event sequences. Provides classical, two-cell,
 #' bidirectional, parallel-dominance, and non-parallel-dominance engines
 #' via a single [lsa()] constructor with a pluggable engine registry,
-#' sequence-level bootstrap and permutation inference, group and
-#' stationarity tests, and tidy edge tables ready for transition-network
+#' sequence-level bootstrap and permutation inference, case-drop
+#' stability, and tidy edge tables ready for transition-network
 #' visualization.
 #'
 #' @section Design principles:
@@ -32,16 +32,31 @@
 #' Engine registry: `register_lsa_engine()`, `get_lsa_engine()`,
 #' `list_lsa_engines()`
 #'
-#' Inference: `bootstrap_lsa()`, `permute_lsa()`, `stability_lsa()`
+#' Inference: [bootstrap_lsa()], [permute_lsa()], [stability_lsa()],
+#' [reliability_lsa()]
 #'
-#' Comparison: `compare_lsa()`, `group_lsa()`, `stationarity_lsa()`
+#' Filtering: [significant_transitions()],
+#' [overrepresented_transitions()], [underrepresented_transitions()],
+#' [common_transitions()]
 #'
-#' Filtering: `significant_transitions()`,
-#' `overrepresented_transitions()`, `underrepresented_transitions()`,
-#' `common_transitions()`
+#' TNA / igraph bridge: [lsa_to_tna()], [as.igraph.lsa()]. These
+#' convert an `lsa` fit into the native object of a downstream network
+#' package; the analysis itself (centralities via `tna::centralities()`,
+#' centrality stability via `tna::estimate_cs()`, pruning via
+#' `tna::prune()`, communities via `tna::communities()`) is performed by
+#' that package. lagseq stays the *converter*, not the analyser, and is
+#' not coupled to `tna` at install time.
 #'
-#' Plotting: `plot.lsa()`, `plot_lsa_heatmap()`, `plot_lsa_network()`,
-#' `plot_lsa_residuals()`, `plot_lsa_flow()`
+#' @section Roadmap (not yet implemented):
+#'
+#' Native plot methods (`plot.lsa()`, heatmap/network/residual/flow
+#' variants), between-group network comparison (`compare_lsa()`,
+#' `group_lsa()`), and stationarity tests (`stationarity_lsa()`) are
+#' planned but not yet exported. Until then, network visualization
+#' works through the `c("lsa", "cograph_network")` class and the
+#' `cograph` package's plot machinery, and between-group comparison
+#' is possible by routing each group's fit through [lsa_to_tna()] and
+#' using `tna::compare()`.
 #'
 #' @references
 #'

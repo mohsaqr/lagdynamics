@@ -19,6 +19,11 @@
                                        ...) {
   stopifnot(inherits(transitions, "lsa_transitions"))
   alternative <- match.arg(alternative)
+  if (!is.null(structural_zeros)) {
+    stop("Engine 'parallel_dominance' does not support ",
+         "structural_zeros. Use engine = 'classical' for ",
+         "structural-zero handling.", call. = FALSE)
+  }
 
   obs <- transitions$obs
   K   <- nrow(obs)

@@ -3,7 +3,7 @@
 #' @export
 print.lsa_bootstrap <- function(x, ...) {
   cat("<lsa_bootstrap>\n")
-  cat(sprintf("  engine:        %s\n", x$fit$engine))
+  cat(sprintf("  engine:        %s\n", x$fit$method))
   cat(sprintf("  level:         %s\n", x$level))
   cat(sprintf("  replicates:    %d\n", x$R))
   cat(sprintf("  CI level:      %.0f%%\n", 100 * x$level_alpha))
@@ -16,7 +16,7 @@ print.lsa_bootstrap <- function(x, ...) {
 #' @export
 print.lsa_permutation <- function(x, ...) {
   cat("<lsa_permutation>\n")
-  cat(sprintf("  engine:        %s\n", x$fit$engine))
+  cat(sprintf("  engine:        %s\n", x$fit$method))
   cat(sprintf("  replicates:    %d\n", x$R))
   cat(sprintf("  within seq:    %s\n", x$within_sequence))
   alpha <- x$fit$params$alpha
@@ -29,7 +29,7 @@ print.lsa_permutation <- function(x, ...) {
 #' @export
 print.lsa_stability <- function(x, ...) {
   cat("<lsa_stability>\n")
-  cat(sprintf("  engine:        %s\n", x$fit$engine))
+  cat(sprintf("  engine:        %s\n", x$fit$method))
   cat(sprintf("  replicates:    %d\n", x$R))
   cat(sprintf("  proportion:    %.0f%%\n", 100 * x$proportion))
   cat(sprintf("  min stable:    %.0f%%\n", 100 * x$min_stable))

@@ -32,10 +32,11 @@ table ready for transition-network visualization.
   `cograph_network` class means `cograph::splot()` works on a fit
   unchanged.
 - **Recipe pattern.** Configuration is snapshotted on the fit in
-  `$params`. Bootstrap, permutation, comparison, and grouping all read
+  `$params`. Bootstrap, permutation, and stability inference all read
   from that single snapshot to prevent config drift.
-- **Single runtime dependency policy.** Base R plus `ggplot2` and
-  `grid`. Nothing else.
+- **Minimal-dependency policy.** Runtime imports are base R only
+  (`stats`, `utils`). `cograph` is a soft, `Suggests`-level dependency
+  used only when present for visualization.
 
 ## Quick start
 
@@ -56,20 +57,25 @@ fit$nodes                   # one row per state, with in/out totals
 # Filter helpers
 significant_transitions(fit, alpha = 0.05)
 overrepresented_transitions(fit)
+underrepresented_transitions(fit)
+common_transitions(fit, min_count = 2)
 
 # Inference
 boot <- bootstrap_lsa(fit, R = 1000)
 perm <- permute_lsa(fit, R = 1000)
+stab <- stability_lsa(fit, R = 500)
+rel  <- reliability_lsa(fit, R = 100)
 
-# Plotting (works without cograph)
-plot(fit, type = "network")
-plot(fit, type = "heatmap")
+# TNA / igraph interop (require `tna` / `igraph` to be installed).
+# lagseq converts; the downstream package does the analysis.
+net   <- lsa_to_tna(fit, weights = "prob")
+cents <- tna::centralities(net)
+g     <- igraph::as.igraph(fit)
 
-# Plotting via cograph (when installed)
-fit |>
-  ln_palette("residual_diverging") |>
-  ln_edges(weight = "count", color = "adj_res", filter = significant) |>
-  cograph::splot(layout = "circle")
+# Visualization
+# lsa fits inherit class "cograph_network", so the cograph package
+# can render them once installed. Native plot methods are on the
+# roadmap (see Status).
 ```
 
 ## Engines
@@ -88,6 +94,22 @@ Users can register custom engines via `register_lsa_engine()`.
 
 v0.1.0 — under active development. See `lsa_plan.md` for the build
 roadmap and `HANDOFF.md` for the current session state.
+
+**Implemented:** classical / two-cell / bidirectional / parallel-
+and non-parallel-dominance engines; structural-zero handling via IPF
+with rank-based quasi-independence df (classical engine); bootstrap
+(sequence-level + stationary block), permutation, case-drop stability,
+and split-half reliability inference; significance / over- / under- /
+common-transition filter helpers; TNA / igraph bridge
+(`lsa_to_tna.lsa()`, `as.igraph.lsa()`) that converts a fit into the native
+object of the broader `tna` / `igraph` toolkits (centralities, pruning,
+communities, etc.) without making either a hard dependency. Multi-group
+fits (`lsa(group = )` → `lsa_group`) are supported across the filter,
+reliability, and bridge layers.
+
+**Roadmap:** native plot methods (`plot.lsa()`), between-group
+comparison (`compare_lsa()`, `group_lsa()`), stationarity tests
+(`stationarity_lsa()`).
 
 ## License
 

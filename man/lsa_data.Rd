@@ -52,6 +52,14 @@ terminate a sequence.
 \code{i}, column \code{j} is the count of \code{i -> j} transitions. In this case
 \code{events} and \code{seq_id} are not available and downstream resampling
 tools that need event-level data will error.
+\item A sequence-bearing object from a sibling package: a \code{tna} or
+\code{group_tna} (sequences read from its \verb{$data} slot), a \code{tna_data}
+(from \code{tna::prepare_data()}) or Nestimate \code{nestimate_data}
+(\verb{$sequence_data}), or a TraMineR \code{stslist}. The stored event
+sequences are recovered and analysed.
+A \code{tna} built from a bare matrix (no retained sequences) errors,
+because transition \emph{counts} cannot be recovered from probability
+weights.
 }
 }
 \examples{

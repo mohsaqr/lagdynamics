@@ -32,6 +32,12 @@
 #' @param verbose Logical. Print progress every 100 replicates.
 #' @param ... Reserved.
 #'
+#' **NA handling.** The exceedance count that drives `p_perm` is
+#' computed with `na.rm = TRUE`, so replicates that produced `NA`
+#' for a cell (structural-zero cells, zero-margin cells in the
+#' permuted table) are excluded from that cell's tally rather than
+#' counted as either an exceedance or a non-exceedance.
+#'
 #' @return An object of class `c("lsa_permutation", "list")` with:
 #' \describe{
 #'   \item{edges}{Tidy per-edge data frame with observed counts and
@@ -103,12 +109,7 @@ permute_lsa <- function(fit,
       perm <- as.integer(shuffles[[b]])
       new_events <- events[perm]
     } else if (within_sequence && d$n_sequences > 1L) {
-      new_events <- events
-      for (sp in seq_positions) {
-        if (length(sp) >= 2L) {
-          new_events[sp] <- new_events[sample.int(length(sp))]
-        }
-      }
+      new_events <- .shuffle_within_sequences(events, seq_positions)
     } else {
       new_events <- events[sample.int(T)]
     }
@@ -161,4 +162,24 @@ permute_lsa <- function(fit,
     ),
     class = c("lsa_permutation", "list")
   )
+}
+
+# Independently permute the events inside each sequence's positions.
+# seq_positions is a list of integer index vectors into `events`, one
+# entry per sequence. Reads and writes stay inside each sp, so
+# disjoint-alphabet sequences cannot bleed into one another.
+#
+# Indexing note: the source positions are sp[sample.int(length(sp))],
+# NOT sample.int(length(sp)). The latter (pre-fix) form yields indices
+# 1..length(sp), which for sequences after the first reads from the
+# wrong region of events and copies one sequence's content into
+# another. sample.int() is used (not sample(sp)) to avoid R's
+# sample(x) quirk where a length-1 integer x is treated as 1:x.
+.shuffle_within_sequences <- function(events, seq_positions) {
+  for (sp in seq_positions) {
+    if (length(sp) >= 2L) {
+      events[sp] <- events[sp[sample.int(length(sp))]]
+    }
+  }
+  events
 }

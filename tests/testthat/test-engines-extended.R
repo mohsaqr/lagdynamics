@@ -30,10 +30,10 @@ test_that("five engines are registered after package load", {
 })
 
 test_that("convenience wrappers dispatch to the right engine", {
-  expect_equal(lsa_two_cell(LITTLE)$engine, "two_cell")
-  expect_equal(lsa_bidirectional(LITTLE)$engine, "bidirectional")
-  expect_equal(lsa_parallel_dominance(LITTLE)$engine, "parallel_dominance")
-  expect_equal(lsa_nonparallel_dominance(LITTLE)$engine,
+  expect_equal(lsa_two_cell(LITTLE)$method, "two_cell")
+  expect_equal(lsa_bidirectional(LITTLE)$method, "bidirectional")
+  expect_equal(lsa_parallel_dominance(LITTLE)$method, "parallel_dominance")
+  expect_equal(lsa_nonparallel_dominance(LITTLE)$method,
                "nonparallel_dominance")
 })
 

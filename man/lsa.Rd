@@ -27,12 +27,32 @@ lsa(
   alpha = 0.05,
   structural_zeros = NULL,
   labels = NULL,
+  group = NULL,
+  actor = NULL,
+  action = NULL,
+  time = NULL,
+  order = NULL,
+  session = NULL,
+  time_threshold = 900,
+  custom_format = NULL,
+  is_unix_time = FALSE,
+  unix_time_unit = "seconds",
   params = list(),
   ...
 )
 }
 \arguments{
-\item{data}{Sequence input (any form accepted by \code{\link[=lsa_data]{lsa_data()}}).}
+\item{data}{Sequence input (any form accepted by \code{\link[=lsa_data]{lsa_data()}}),
+\emph{or} a raw long-format event-log \code{data.frame} when the \code{actor} /
+\code{action} arguments are supplied (see below). Accepted already-
+sequenced forms include vectors, lists of sequences, wide
+matrices/data.frames, transition-count matrices, and sequence-
+bearing objects from sibling packages (\code{tna}, \code{group_tna},
+Nestimate \code{nestimate_data}, TraMineR \code{stslist}).
+\code{NA} and empty-string cells are treated as missingness, not as a
+state: they are dropped wherever they occur and no transition is
+counted into or out of them. To model missingness as its own
+state, recode it (e.g. \code{NA -> "missing"}) before calling \code{lsa()}.}
 
 \item{...}{Additional engine-specific parameters (merged into
 \code{params}).}
@@ -51,13 +71,55 @@ adjusted-residual and kappa p-values: one of \code{"two.sided"}
 \item{alpha}{Numeric. Significance threshold used to mark edges as
 significant in \code{fit$edges$significant}. Default \code{0.05}.}
 
-\item{structural_zeros}{Optional \verb{K x K} 0/1 matrix. A \code{0} marks a
-cell as a structural zero (forbidden transition). When supplied,
-the engine uses iterative proportional fitting and Christensen's
-design-matrix residuals (see \code{inst/REFERENCES.md} §2.2, §4.2).
-A common pattern is \code{1 - diag(K)} to forbid self-transitions.}
+\item{structural_zeros}{Optional \verb{K x K} 0/1 matrix. \strong{Default
+\code{NULL}: every cell, including the diagonal, is part of the model
+-- self-transitions and every observed transition are kept}.
+Supply this only when you want to explicitly \emph{opt out} of certain
+cells (e.g. because the coding scheme makes them impossible by
+construction). A \code{0} marks a cell as a structural zero (forbidden
+transition); a \code{1} marks an estimable cell. When supplied, the
+engine switches to iterative proportional fitting and
+Christensen's design-matrix residuals (see \code{inst/REFERENCES.md}
+§2.2, §4.2). Pass \code{1 - diag(K)} to opt out of self-transitions.}
 
 \item{labels}{Optional character vector of state labels.}
+
+\item{group}{Optional grouping for a multi-group fit. A vector with
+one entry per input sequence (length \code{n_sequences}); sequences are
+partitioned by group and a separate \code{lsa} fit is built for each.
+All group fits share one global label set (derived from the full
+data) so their \verb{K x K} matrices are directly comparable, even when
+a group never visits some state. Returns an \code{lsa_group} object (a
+named list of \code{lsa} fits). Requires event-level input; a
+pre-computed transition matrix cannot be split by group. Default
+\code{NULL} (single-group fit).}
+
+\item{actor, action, time, order, session}{Column names (each a single
+string) for \strong{long-format} event-log input. Supplying \code{action}
+(and \code{actor}) switches \code{lsa()} into long-format mode: the raw log
+in \code{data} is sequenced into event sequences by grouping rows per
+\code{actor} (optionally crossed with an explicit \code{session} id),
+ordering within each group by \code{order} if given else by \code{time}, and
+-- when \code{time} is given and no \code{session} column is -- starting a
+new session whenever the gap between consecutive events exceeds
+\code{time_threshold} seconds. All \code{NULL} by default (input is taken
+as already-sequenced). Cannot be combined with \code{group}.}
+
+\item{time_threshold}{Numeric. Maximum gap in seconds between
+consecutive events before a new session is started in long-format
+mode. Default \code{900} (15 minutes). Ignored unless \code{time} is given
+and \code{session} is not.}
+
+\item{custom_format}{Optional \code{strptime} format string for parsing
+the \code{time} column (e.g. \code{"\%Y-\%m-\%d \%H:\%M:\%S"}). Default \code{NULL}
+(native date/time classes and ISO strings are parsed directly).}
+
+\item{is_unix_time}{Logical. Treat the \code{time} column as a Unix
+epoch. Default \code{FALSE}.}
+
+\item{unix_time_unit}{Character. Unit of the Unix epoch when
+\code{is_unix_time = TRUE}: \code{"seconds"} (default), \code{"milliseconds"}, or
+\code{"microseconds"}.}
 
 \item{params}{Optional named list of engine-specific parameters
 forwarded to the engine function.}
@@ -72,16 +134,27 @@ elements:
 \item{weights}{\verb{K x K} matrix used as the default edge weight for
 plotting. Equal to \code{obs} (counts) by default.}
 \item{nodes}{Data frame: \verb{id, label, name, outgoing, incoming}.}
-\item{edges}{Tidy edge frame.}
-\item{data}{The canonical \code{lsa_data} object.}
-\item{transitions}{The \code{lsa_transitions} object.}
-\item{engine}{Engine name used.}
-\item{params}{Immutable snapshot of all parameters used (recipe).}
+\item{edges}{Tidy edge frame (the same numbers as the matrices, in
+long one-row-per-transition form).}
 \item{directed}{Logical scalar; \code{TRUE} for directed engines,
 \code{FALSE} for \code{bidirectional}.}
-\item{method}{Equal to \code{engine} for cograph compatibility.}
-\item{meta}{List with engine info, version, and call.}
+\item{method}{Engine name (the slot the \code{cograph_network} protocol
+reads). The engine is also recorded in \code{params$engine}.}
+\item{inits}{Named numeric initial-state distribution (proportion
+of sequences starting in each state, sums to 1); \code{NULL} for
+transition-matrix input.}
+\item{data}{The canonical \code{lsa_data} object (events + seq_id).}
+\item{params}{Immutable snapshot of all parameters used (recipe),
+including \code{params$engine}.}
+\item{meta}{List with source, IPF info, version, and call.}
 }
+
+When \code{group} is supplied, returns an object of class
+\code{c("lsa_group", "list")}: a named list of \code{lsa} fits (one per group
+level) carrying \code{levels}, \code{group_sizes}, \code{labels}, and \code{engine}
+attributes. Downstream verbs (\code{\link[=lsa_to_tna]{lsa_to_tna()}},
+\code{\link[=significant_transitions]{significant_transitions()}}, \code{\link[=reliability_lsa]{reliability_lsa()}}, etc.) dispatch on
+it and return grouped results.
 }
 \description{
 Fits a lag sequential analysis (LSA) on categorical event sequence
