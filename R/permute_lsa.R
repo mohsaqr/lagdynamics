@@ -130,12 +130,21 @@ permute_lsa <- function(fit,
   }
 
   obs_adj <- as.vector(fit$adj_res)
-  # Phipson-Smyth two-sided p-value with +1 correction.
+  # Phipson-Smyth two-sided p-value with +1 correction. Non-estimable
+  # cells (NA observed residual, e.g. structural zeros or zero-margin
+  # rows) must NOT be tested: with an NA observed value every
+  # comparison is NA, colSums(na.rm = TRUE) collapses to 0 exceedances,
+  # and p would spuriously become 1/(R + 1) -- flagging a forbidden
+  # transition as significant. Such cells get p = NA. The denominator
+  # is the count of FINITE null replicates per cell (not a flat R), so
+  # cells whose null is partly non-estimable are still scaled correctly.
   abs_obs <- abs(obs_adj)
   exceed <- colSums(abs(perm_adj_res) >= matrix(abs_obs, R, K * K,
                                                  byrow = TRUE),
                      na.rm = TRUE)
-  p_perm <- (1 + exceed) / (1 + R)
+  n_finite <- colSums(is.finite(perm_adj_res))
+  p_perm <- (1 + exceed) / (1 + n_finite)
+  p_perm[!is.finite(obs_adj) | n_finite == 0L] <- NA_real_
 
   alpha <- recipe$alpha
   grid <- expand.grid(from = labels, to = labels,

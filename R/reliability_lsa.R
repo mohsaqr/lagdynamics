@@ -109,12 +109,20 @@ reliability_lsa.lsa <- function(fit,
       ev <- unlist(hs, use.names = FALSE)
       sid <- rep.int(seq_along(idx),
                      times = vapply(hs, length, integer(1)))
-      .refit_from_events(events = ev, seq_id = sid,
-                         labels = d$labels, recipe = recipe)
+      # A half made up only of singleton sequences contributes zero
+      # transitions and the engine errors. That is a property of the
+      # random split, not of the fit, so the replicate returns NA
+      # rather than crashing the whole run.
+      tryCatch(
+        .refit_from_events(events = ev, seq_id = sid,
+                           labels = d$labels, recipe = recipe),
+        error = function(e) NULL
+      )
     }
 
     f1 <- refit_half(idx_1)
     f2 <- refit_half(idx_2)
+    if (is.null(f1) || is.null(f2)) return(NA_real_)
     w1 <- as.vector(pull_weights(f1))
     w2 <- as.vector(pull_weights(f2))
     ok <- is.finite(w1) & is.finite(w2)

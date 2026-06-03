@@ -77,26 +77,37 @@
 # `time_threshold`. Handles Unix epochs, custom strptime formats,
 # native date/time classes, and already-numeric columns.
 .parse_time <- function(v, custom_format, is_unix_time, unix_time_unit) {
-  if (isTRUE(is_unix_time)) {
-    div <- switch(match.arg(unix_time_unit,
-                            c("seconds", "milliseconds", "microseconds")),
-                  seconds = 1, milliseconds = 1e3, microseconds = 1e6)
-    return(as.numeric(v) / div)
-  }
-  if (!is.null(custom_format)) {
-    return(as.numeric(as.POSIXct(as.character(v),
-                                 format = custom_format, tz = "UTC")))
-  }
-  if (inherits(v, c("POSIXct", "POSIXt", "Date"))) return(as.numeric(v))
-  if (is.numeric(v)) return(as.numeric(v))
-  parsed <- suppressWarnings(tryCatch(
-    as.numeric(as.POSIXct(as.character(v), tz = "UTC")),
-    error = function(e) rep(NA_real_, length(v))
-  ))
-  if (anyNA(parsed)) {
-    stop("Could not parse the `time` column as date/time. Supply ",
-         "`custom_format` (a strptime format) or `is_unix_time = TRUE`.",
-         call. = FALSE)
+  parsed <- suppressWarnings(
+    if (isTRUE(is_unix_time)) {
+      div <- switch(match.arg(unix_time_unit,
+                              c("seconds", "milliseconds", "microseconds")),
+                    seconds = 1, milliseconds = 1e3, microseconds = 1e6)
+      as.numeric(v) / div
+    } else if (!is.null(custom_format)) {
+      as.numeric(as.POSIXct(as.character(v),
+                            format = custom_format, tz = "UTC"))
+    } else if (inherits(v, c("POSIXct", "POSIXt", "Date"))) {
+      as.numeric(v)
+    } else if (is.numeric(v)) {
+      as.numeric(v)
+    } else {
+      tryCatch(as.numeric(as.POSIXct(as.character(v), tz = "UTC")),
+               error = function(e) rep(NA_real_, length(v)))
+    }
+  )
+  # Every branch is NA-checked, not just the character fallback: an
+  # unparseable custom format, a missing POSIXct/numeric value, or a bad
+  # Unix epoch would otherwise yield NA times that silently drop their
+  # events during ordering/session splitting and corrupt the counts.
+  bad <- which(!is.finite(parsed))
+  if (length(bad)) {
+    stop(sprintf(
+      paste0("`time` could not be parsed for %d row(s) (e.g. row %s). ",
+             "Fix the values, supply `custom_format`, or set ",
+             "`is_unix_time = TRUE`; lagseq will not silently drop ",
+             "events with unparseable times."),
+      length(bad), paste(utils::head(bad, 5L), collapse = ", ")),
+      call. = FALSE)
   }
   parsed
 }

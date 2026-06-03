@@ -133,3 +133,19 @@ test_that("permute_lsa within_sequence=TRUE keeps disjoint alphabets disjoint", 
   expect_gt(stats::var(pm$perm_adj_res[, idx_xy]), 1e-6)
   expect_gt(stats::var(pm$perm_adj_res[, idx_yx]), 1e-6)
 })
+
+test_that("permute_lsa never flags non-estimable (structural-zero) cells", {
+  set.seed(1)
+  fit <- lsa(engagement, structural_zeros = 1 - diag(3))
+  # Diagonal is forbidden -> NA observed residual.
+  expect_true(all(is.na(diag(fit$adj_res))))
+  pm <- permute_lsa(fit, R = 50)
+  diag_rows <- pm$edges[pm$edges$from == pm$edges$to, ]
+  # Forbidden cells must get NA p and never be significant (regression:
+  # they previously collapsed to p = 1/(R+1) and passed alpha).
+  expect_true(all(is.na(diag_rows$p_perm)))
+  expect_false(any(diag_rows$significant, na.rm = TRUE))
+  # Estimable off-diagonal cells still get finite p-values.
+  off <- pm$edges[pm$edges$from != pm$edges$to, ]
+  expect_true(all(is.finite(off$p_perm)))
+})

@@ -49,6 +49,14 @@
 #'   (`type` is `"frequency"` for counts, `"relative"` otherwise). For
 #'   an `lsa_group`, a `group_tna` (named list of `tna` objects).
 #'
+#'   The `data`/`inits` slots (the sequences tna resamples from) are
+#'   attached only for `weights = "prob"` or `"count"`, which tna can
+#'   re-estimate faithfully. For `"adj_res"` and `"lift"` they are
+#'   omitted with a warning, because tna's resampling verbs would
+#'   re-estimate a probability network rather than the residual/lift
+#'   scale carried in `weights`; the non-resampling verbs
+#'   (`centralities`, `prune`, ...) still work.
+#'
 #' @examples
 #' \dontrun{
 #' fit <- lsa(engagement, engine = "classical")
@@ -82,17 +90,31 @@ lsa_to_tna.lsa <- function(x,
   # When the fit was built from event sequences we rebuild tna's
   # `tna_seq_data` matrix and attach it as `$data`, so tna's
   # sequence-based verbs (bootstrap, permutation_test, estimate_cs) and
-  # the `inits` it derives all work. NOTE: those verbs re-estimate from
-  # the sequences using the object's `type`, so they reflect a Standard
-  # (relative) or Frequency network -- they match weights = "prob" /
-  # "count" but NOT the residual / lift networks, whose scale lives only
-  # in `$weights` and is consumed by the non-resampling verbs.
+  # the `inits` it derives all work.
+  #
+  # BUT only for weights that tna can faithfully re-estimate from
+  # sequences: "prob" (relative) and "count" (frequency). For "adj_res"
+  # and "lift", `$weights` holds a residual/association scale that tna
+  # has no concept of -- its resampling would silently re-estimate a
+  # probability network from `$data`, so the bootstrap/permutation
+  # diagnostics would describe a DIFFERENT network than `$weights`. To
+  # avoid that mismatch we omit `$data` (and `inits`) for those scales
+  # and warn; centralities/prune still work off `$weights`.
   # Transition-matrix fits have no sequences, so `$data` stays NULL.
   type <- if (weights == "count") "frequency" else "relative"
-  seqdata <- .lsa_seqdata_matrix(x)
-  inits <- x$inits
+  resampleable <- weights %in% c("prob", "count")
+  seqdata <- if (resampleable) .lsa_seqdata_matrix(x) else NULL
+  if (!resampleable && !is.null(.lsa_seqdata_matrix(x))) {
+    warning("lsa_to_tna(weights = '", weights, "') omits the $data slot: ",
+            "tna's sequence-resampling verbs (bootstrap, ",
+            "permutation_test, estimate_cs) would re-estimate a ",
+            "probability network, not the '", weights, "' scale in ",
+            "$weights. Use weights = 'prob'/'count' for resampling, or ",
+            "resample with lagseq (permute_lsa/bootstrap_lsa) instead.",
+            call. = FALSE)
+  }
   structure(
-    list(weights = W, inits = inits,
+    list(weights = W, inits = if (resampleable) x$inits else NULL,
          labels = rownames(W), data = seqdata),
     type = type,
     scaling = character(0L),

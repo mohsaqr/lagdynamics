@@ -86,3 +86,30 @@ test_that("unparseable time without a format errors clearly", {
   expect_error(lsa(log, actor = "user", action = "act", time = "bad"),
                "Could not parse the `time` column")
 })
+
+test_that("every time-parse branch errors on NA instead of dropping events", {
+  mk <- function(tcol) data.frame(u = c("a", "a", "a"),
+                                   act = c("x", "y", "z"), t = tcol,
+                                   stringsAsFactors = FALSE)
+  # POSIXct with a missing value.
+  expect_error(
+    lsa(mk(as.POSIXct(c("2025-01-01 10:00", NA, "2025-01-01 10:02"),
+                      tz = "UTC")),
+        actor = "u", action = "act", time = "t"),
+    "could not be parsed")
+  # custom_format that fails on one row.
+  expect_error(
+    lsa(mk(c("2025-01-01", "NOPE", "2025-01-03")),
+        actor = "u", action = "act", time = "t",
+        custom_format = "%Y-%m-%d"),
+    "could not be parsed")
+  # Unix epoch with NA.
+  expect_error(
+    lsa(mk(c(1735725600, NA, 1735725720)),
+        actor = "u", action = "act", time = "t", is_unix_time = TRUE),
+    "could not be parsed")
+  # numeric with NA.
+  expect_error(
+    lsa(mk(c(1, NA, 3)), actor = "u", action = "act", time = "t"),
+    "could not be parsed")
+})

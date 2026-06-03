@@ -33,6 +33,14 @@ For an \code{lsa} fit, a \code{tna} object with \code{weights}, \code{inits},
 \code{labels}, \code{data} slots and \code{type}/\code{scaling}/\code{class} attributes
 (\code{type} is \code{"frequency"} for counts, \code{"relative"} otherwise). For
 an \code{lsa_group}, a \code{group_tna} (named list of \code{tna} objects).
+
+The \code{data}/\code{inits} slots (the sequences tna resamples from) are
+attached only for \code{weights = "prob"} or \code{"count"}, which tna can
+re-estimate faithfully. For \code{"adj_res"} and \code{"lift"} they are
+omitted with a warning, because tna's resampling verbs would
+re-estimate a probability network rather than the residual/lift
+scale carried in \code{weights}; the non-resampling verbs
+(\code{centralities}, \code{prune}, ...) still work.
 }
 \description{
 Convert an \code{lsa} fit to a \code{tna}-class network object usable by the

@@ -31,7 +31,8 @@ test_that("lsa_to_tna.lsa weights = 'count' carries observed counts and frequenc
 test_that("lsa_to_tna.lsa weights = 'adj_res' clips negatives (tna requires non-negative)", {
   skip_if_not_installed("tna")
   fit <- lsa(engagement, engine = "classical")
-  net <- lsa_to_tna(fit, weights = "adj_res")
+  # adj_res omits $data and warns (see dedicated test below).
+  net <- suppressWarnings(lsa_to_tna(fit, weights = "adj_res"))
   expect_true(all(net$weights >= 0))
   # Cells where original adj_res was positive should appear unchanged.
   ref <- fit$adj_res
@@ -97,4 +98,20 @@ test_that("lsa_to_tna leaves $data NULL for transition-matrix fits", {
   skip_if_not_installed("tna")
   tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3)
   expect_null(lsa_to_tna(lsa(tm))$data)
+})
+
+test_that("lsa_to_tna omits $data + warns for residual/lift scales", {
+  skip_if_not_installed("tna")
+  fit <- lsa(engagement, engine = "classical")
+  # prob / count are resampleable -> $data attached, no warning.
+  expect_silent(p <- lsa_to_tna(fit, weights = "prob"))
+  expect_false(is.null(p$data))
+  expect_silent(c <- lsa_to_tna(fit, weights = "count"))
+  expect_false(is.null(c$data))
+  # adj_res / lift would resample on the wrong scale -> $data omitted + warn.
+  for (w in c("adj_res", "lift")) {
+    expect_warning(net <- lsa_to_tna(fit, weights = w), "omits the .data slot")
+    expect_null(net$data)
+    expect_null(net$inits)
+  }
 })

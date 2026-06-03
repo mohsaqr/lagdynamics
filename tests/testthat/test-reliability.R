@@ -80,3 +80,15 @@ test_that("reliability_lsa: identical halves give correlation 1", {
   rel <- reliability_lsa(fit, R = 30L)
   expect_gt(rel$mean, 0.5)
 })
+
+test_that("reliability_lsa survives singleton sequences (zero-transition halves)", {
+  set.seed(7)
+  # 4 length-2 sequences + 6 singletons: some random halves have 0 transitions.
+  seqs <- c(replicate(4, c("a", "b"), simplify = FALSE),
+            replicate(6, "a", simplify = FALSE))
+  fit <- lsa(seqs)
+  # Must not error; degenerate splits return NA replicates.
+  expect_no_error(rel <- reliability_lsa(fit, R = 50))
+  expect_s3_class(rel, "lsa_reliability")
+  expect_true(sum(is.finite(rel$correlations)) >= 1L)
+})
