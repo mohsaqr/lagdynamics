@@ -1,6 +1,6 @@
 # Main constructor. Reads canonical lsa_data + lsa_transitions, dispatches
 # to the named engine via the registry, and assembles the S3 fit object
-# with stable named slots in the style of Nestimate's netobject.
+# with stable named slots.
 
 #' Lag Sequential Analysis
 #'
@@ -14,13 +14,18 @@
 #'   `action` arguments are supplied (see below). Accepted already-
 #'   sequenced forms include vectors, lists of sequences, wide
 #'   matrices/data.frames, transition-count matrices, and sequence-
-#'   bearing objects from sibling packages (`tna`, `group_tna`,
-#'   Nestimate `nestimate_data`, TraMineR `stslist`).
+#'   bearing objects (`tna`, `group_tna`, `nestimate_data`, `stslist`).
 #'   `NA` and empty-string cells are treated as missingness, not as a
 #'   state: they are dropped wherever they occur and no transition is
 #'   counted into or out of them. To model missingness as its own
 #'   state, recode it (e.g. `NA -> "missing"`) before calling `lsa()`.
-#' @param lag Positive integer. The transition lag. Default `1`.
+#' @param lag Integer. The transition lag. Default `1`. Positive lags
+#'   count successors (state at `t -> t + lag`); negative lags count
+#'   predecessors (what occurred `|lag|` steps before); `0` pairs each
+#'   event with itself (degenerate for single-stream event data --
+#'   genuine co-occurrence needs concurrent codes, not yet supported).
+#'   Pre-computed transition-matrix input supports `lag = 1` only. To
+#'   analyse several lags at once, see [lsa_lags()].
 #' @param engine Character scalar. The engine name, registered via
 #'   [register_lsa_engine()]. Built-in engines: `"classical"`,
 #'   `"two_cell"`, `"bidirectional"`, `"parallel_dominance"`,
@@ -77,24 +82,33 @@
 #' @param ... Additional engine-specific parameters (merged into
 #'   `params`).
 #'
-#' @return An object of class `c("lsa", "cograph_network")` with
-#' elements:
+#' @return An object of class `c("lsa", "cograph_network")`. Read it with
+#' the verbs rather than by reaching into slots: [transitions()] for the
+#' tidy edge table, [nodes()], [tests()], [initial()], and [summary()]
+#' for the other results, and [plot()]/[plot_transitions()] to draw it.
+#' Every number a verb returns is backed by these slots:
 #' \describe{
-#'   \item{obs, exp, prob, adj_res, p, yules_q, kappa, kappa_z, kappa_p}{
-#'     `K x K` matrices.}
-#'   \item{lrx2}{List `(statistic, df, p)` from the tablewise LR test.}
+#'   \item{edges}{The tidy one-row-per-transition frame that backs
+#'     [transitions()] (with extra `cograph_network` protocol columns).}
+#'   \item{nodes}{Data frame backing [nodes()]: `id, label, name,
+#'     outgoing, incoming`.}
+#'   \item{obs, exp, prob, prob_col, adj_res, p, yules_q, kappa,
+#'     kappa_z, kappa_p}{The same per-cell quantities as `edges`, in
+#'     `K x K` matrix form (`prob` is row-conditional P(to | from),
+#'     `prob_col` column-conditional P(from | to)). Convenient for
+#'     matrix algebra; not the primary interface.}
+#'   \item{lrx2, x2}{Lists `(statistic, df, p)` backing [tests()]: the
+#'     tablewise likelihood-ratio (G^2) and Pearson chi-square tests of
+#'     independence; `NULL` for engines without an expected table.}
+#'   \item{inits}{Named numeric vector backing [initial()] (proportion
+#'     of sequences starting in each state, sums to 1); `NULL` for
+#'     transition-matrix input.}
 #'   \item{weights}{`K x K` matrix used as the default edge weight for
 #'     plotting. Equal to `obs` (counts) by default.}
-#'   \item{nodes}{Data frame: `id, label, name, outgoing, incoming`.}
-#'   \item{edges}{Tidy edge frame (the same numbers as the matrices, in
-#'     long one-row-per-transition form).}
 #'   \item{directed}{Logical scalar; `TRUE` for directed engines,
 #'     `FALSE` for `bidirectional`.}
 #'   \item{method}{Engine name (the slot the `cograph_network` protocol
-#'     reads). The engine is also recorded in `params$engine`.}
-#'   \item{inits}{Named numeric initial-state distribution (proportion
-#'     of sequences starting in each state, sums to 1); `NULL` for
-#'     transition-matrix input.}
+#'     reads). Also recorded in `params$engine`.}
 #'   \item{data}{The canonical `lsa_data` object (events + seq_id).}
 #'   \item{params}{Immutable snapshot of all parameters used (recipe),
 #'     including `params$engine`.}
@@ -105,7 +119,7 @@
 #' `c("lsa_group", "list")`: a named list of `lsa` fits (one per group
 #' level) carrying `levels`, `group_sizes`, `labels`, and `engine`
 #' attributes. Downstream verbs ([lsa_to_tna()],
-#' [significant_transitions()], [reliability_lsa()], etc.) dispatch on
+#' [transitions()], [reliability_lsa()], etc.) dispatch on
 #' it and return grouped results.
 #'
 #' @examples
@@ -215,9 +229,8 @@ lsa <- function(data,
 # the engine once per group on a SHARED global label set so every
 # group's K x K matrices index the same states (a group that never
 # visits a state still gets a full-size matrix with zeros). Returns a
-# named list of `lsa` fits with class "lsa_group". Mirrors tna's
-# `group_tna` (a list of single-group models) so the same downstream
-# verbs can dispatch on it.
+# named list of `lsa` fits with class "lsa_group" (a named list of
+# single-group fits) so the same downstream verbs can dispatch on it.
 .lsa_grouped <- function(data, group, lag, engine, alternative, alpha,
                          structural_zeros, labels, params, call, ...) {
   d <- lsa_data(data, labels = labels)
@@ -319,8 +332,16 @@ print.lsa_group <- function(x, ...) {
   if (!is.null(k_z))    dimnames(k_z)    <- list(labels, labels)
   if (!is.null(k_p))    dimnames(k_p)    <- list(labels, labels)
 
+  # Column-conditional probabilities P(from | to): the probability that
+  # a transition INTO state j came FROM state i. Complements `prob`,
+  # which is the row-conditional P(to | from).
+  prob_col <- .col_conditional(obs)
+  # Pearson tablewise chi-square alongside the LR G^2, on the same model
+  # (so it shares lrx2's df). NULL when the engine has no expected table.
+  x2 <- .pearson_x2(obs, exp_mat, lrx2 = result$lrx2)
+
   edges <- .build_edges(
-    obs = obs, exp_mat = exp_mat, prob = prob,
+    obs = obs, exp_mat = exp_mat, prob = prob, prob_col = prob_col,
     z = z, p = p, yulesq = yulesq, kappa = kappa,
     k_z = k_z, k_p = k_p, labels = labels, lag = lag, alpha = alpha
   )
@@ -343,13 +364,16 @@ print.lsa_group <- function(x, ...) {
     obs = obs,
     exp = exp_mat,
     prob = prob,
+    prob_col = prob_col,
     adj_res = z,
     p = p,
     yules_q = yulesq,
     kappa = kappa,
     kappa_z = k_z,
     kappa_p = k_p,
+    # --- tablewise tests of independence ---
     lrx2 = result$lrx2,
+    x2 = x2,
     # --- cograph_network protocol ---
     weights = obs,
     nodes = nodes,
@@ -386,8 +410,8 @@ print.lsa_group <- function(x, ...) {
   fit
 }
 
-.build_edges <- function(obs, exp_mat, prob, z, p, yulesq, kappa,
-                          k_z, k_p, labels, lag, alpha) {
+.build_edges <- function(obs, exp_mat, prob, prob_col, z, p, yulesq,
+                          kappa, k_z, k_p, labels, lag, alpha) {
   K <- length(labels)
   # `from`/`to` are INTEGER node ids (matching `nodes$id`) to satisfy
   # the cograph_network protocol; human-readable state names live on
@@ -409,6 +433,7 @@ print.lsa_group <- function(x, ...) {
     count      = count,
     expected   = exp_v,
     prob       = vec(prob),
+    prob_col   = vec(prob_col),
     adj_res    = vec(z),
     p          = vec(p),
     yules_q    = vec(yulesq),
@@ -425,6 +450,10 @@ print.lsa_group <- function(x, ...) {
                        ifelse(count < exp_v, "under", "expected"))
   edges$significant <- is.finite(edges$p) & edges$p < alpha
   edges$edge <- paste(edges$from_label, edges$to_label, sep = " -> ")
+  # `weight` is the cograph_network protocol's edge-weight column,
+  # matching the `weights` matrix slot (counts by default). Downstream
+  # renderers (cograph::splot edge labels/widths) read edges$weight.
+  edges$weight <- count
   edges
 }
 
@@ -442,9 +471,8 @@ print.lsa_group <- function(x, ...) {
 }
 
 # Initial-state distribution: the proportion of sequences that start in
-# each state (named, sums to 1), matching tna's `inits` / Nestimate's
-# `initial`. Returns NULL when the fit came from a transition matrix
-# (no sequences, so no notion of a starting state).
+# each state (named, sums to 1). Returns NULL when the fit came from a
+# transition matrix (no sequences, so no notion of a starting state).
 .initial_dist <- function(data) {
   if (!identical(data$source, "events") || is.null(data$events)) {
     return(NULL)
@@ -456,4 +484,31 @@ print.lsa_group <- function(x, ...) {
   inits <- counts / sum(counts)
   names(inits) <- data$labels
   inits
+}
+
+# Column-conditional probabilities P(from | to) = obs[i, j] / sum_i
+# obs[i, j]: of the transitions that arrive in target j, what fraction
+# came from source i. Columns with no incoming transitions are NA.
+.col_conditional <- function(obs) {
+  cs <- colSums(obs)
+  pc <- sweep(obs, 2L, cs, "/")
+  if (any(cs == 0)) pc[, cs == 0] <- NA_real_
+  pc
+}
+
+# Pearson tablewise chi-square on the same independence model as the LR
+# G^2, so it shares lrx2's degrees of freedom (correct under structural
+# zeros / quasi-independence). NULL when the engine has no expected
+# table or no LR test to borrow the df from.
+.pearson_x2 <- function(obs, exp_mat, lrx2) {
+  if (is.null(exp_mat) || is.null(lrx2)) return(NULL)
+  ok <- is.finite(exp_mat) & exp_mat > 0
+  stat <- sum((obs[ok] - exp_mat[ok])^2 / exp_mat[ok])
+  df <- lrx2$df
+  p <- if (is.finite(df) && df > 0) {
+    stats::pchisq(stat, df = df, lower.tail = FALSE)
+  } else {
+    NA_real_
+  }
+  list(statistic = stat, df = df, p = p)
 }

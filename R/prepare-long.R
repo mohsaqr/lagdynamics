@@ -7,9 +7,8 @@
 # -- when a `time` column is given -- start a new session whenever the
 # gap between consecutive events exceeds `time_threshold` seconds.
 #
-# The argument names and the 900-second default match the sibling
-# ecosystem (tna::prepare_data, Nestimate::prepare) for familiarity,
-# but the implementation is independent base R with no for-loops.
+# The 900-second default is conventional; the implementation is
+# independent base R with no for-loops.
 
 # Build a list of action sequences from a long-format data.frame.
 .prepare_long <- function(data, actor, action, time = NULL, order = NULL,

@@ -46,7 +46,7 @@
 lsa_transitions <- function(x, lag = 1) {
   if (!inherits(x, "lsa_data")) x <- lsa_data(x)
   stopifnot(
-    is.numeric(lag), length(lag) == 1L, lag >= 1, lag == round(lag)
+    is.numeric(lag), length(lag) == 1L, lag == round(lag)
   )
   lag <- as.integer(lag)
 
@@ -66,13 +66,21 @@ lsa_transitions <- function(x, lag = 1) {
 }
 
 # Vectorized count of transitions at a given lag, summed over
-# sequences. Implements §1 of inst/REFERENCES.md.
+# sequences. Implements §1 of inst/REFERENCES.md. `lag` may be any
+# integer: positive counts successors (from at t, to at t + lag),
+# negative counts predecessors (to at t + lag, i.e. |lag| steps before
+# from), and 0 pairs each event with itself (the degenerate diagonal --
+# meaningful only for concurrent-code data, which lagseq does not model).
 .count_transitions <- function(events, seq_id, K, lag) {
   n <- length(events)
-  if (n < lag + 1L) {
+  if (n < abs(lag) + 1L) {
     return(matrix(0L, K, K))
   }
-  from_idx <- seq_len(n - lag)
+  if (lag >= 0L) {
+    from_idx <- seq_len(n - lag)
+  } else {
+    from_idx <- seq.int(1L - lag, n)
+  }
   to_idx   <- from_idx + lag
   # Only retain transitions where from and to belong to the same seq.
   keep <- seq_id[from_idx] == seq_id[to_idx]

@@ -24,6 +24,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends: R (>= 4.1.0)
 Imports:
+    grid,
     stats,
     utils
 Suggests:
@@ -32,6 +33,10 @@ Suggests:
     Nestimate,
     tna,
     igraph,
-    TraMineR
+    TraMineR,
+    knitr,
+    rmarkdown,
+    ggplot2
 Config/testthat/edition: 3
 LazyData: true
+VignetteBuilder: knitr

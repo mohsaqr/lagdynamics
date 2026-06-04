@@ -1,3 +1,7 @@
+# `.data` is the tidy-eval pronoun used inside ggplot2::aes() in the plot
+# functions; declare it so R CMD check does not flag "no visible binding".
+utils::globalVariables(".data")
+
 .onLoad <- function(libname, pkgname) {
   .register_builtin_engines()
   # .register_builtin_layouts()    # Step 7

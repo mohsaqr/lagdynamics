@@ -1,8 +1,8 @@
-# Case-drop stability for an LSA fit. Adapted from the Nestimate /
-# bootnet "centrality stability" pattern: subsample sequences (or
-# events for single-sequence input), refit, and track which edges
-# remain significant. An edge is "stable" if it stays significant
-# under most subsamples.
+# Case-drop stability for an LSA fit. Follows the "centrality
+# stability" pattern: subsample sequences (or events for
+# single-sequence input), refit, and track which edges remain
+# significant. An edge is "stable" if it stays significant under most
+# subsamples.
 
 #' Case-Drop Stability for an LSA Fit
 #'

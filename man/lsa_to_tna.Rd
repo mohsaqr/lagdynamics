@@ -19,10 +19,10 @@ lsa_to_tna(x, ...)
 \item{...}{Method-specific arguments.}
 
 \item{weights}{Character. Which matrix to expose as the tna edge
-weights. One of \code{"prob"} (row-normalised probabilities, default,
-matches Standard TNA), \code{"count"} (raw observed counts, matches
-Frequency TNA / FTNA), \code{"adj_res"} (adjusted residuals, residual
-network), or \code{"lift"} (observed / expected, association strength).
+weights. One of \code{"prob"} (row-normalised probabilities, default),
+\code{"count"} (raw observed counts), \code{"adj_res"} (adjusted residuals,
+residual network), or \code{"lift"} (observed / expected, association
+strength).
 \code{tna} requires non-negative weights, so the \code{"adj_res"} choice
 always clips negative residuals to \code{0} (returning the
 over-representation network). To work with signed residuals, use
@@ -48,10 +48,9 @@ Convert an \code{lsa} fit to a \code{tna}-class network object usable by the
 routines. Requires the \code{tna} package (declared in Suggests).
 }
 \details{
-The function is deliberately \strong{not} named \code{as_tna}: the \code{Nestimate}
-package exports an \code{as_tna} generic, and lagseq avoids overlapping
-export names with sibling packages so the two can be loaded together
-without masking each other. \code{lsa_to_tna()} is lagseq's own,
+The function is deliberately \strong{not} named \code{as_tna}, to avoid
+overlapping export names with other packages so they can be loaded
+together without masking each other. \code{lsa_to_tna()} is lagseq's own,
 collision-free converter.
 }
 \examples{

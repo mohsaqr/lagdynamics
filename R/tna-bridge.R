@@ -4,15 +4,16 @@
 # when the target package is not installed but lagseq itself loads
 # without them.
 #
-# Weight semantics. TNA and FTNA answer different questions: a
-# probability-weighted network models *transition tendency* (where
-# does the chain go next?), while a count-weighted network models
-# *volume* (how many transitions of this type occurred?). We expose
-# four weight choices instead of collapsing them:
+# Weight semantics. A probability-weighted network and a count-weighted
+# network answer different questions: a probability-weighted network
+# models *transition tendency* (where does the chain go next?), while a
+# count-weighted network models *volume* (how many transitions of this
+# type occurred?). We expose four weight choices instead of collapsing
+# them:
 #
-#   prob    : row-normalised transition probabilities (Standard TNA)
-#   count   : raw observed transition counts (Frequency TNA / FTNA)
-#   adj_res : Haberman / Christensen adjusted residuals (residual TNA)
+#   prob    : row-normalised transition probabilities
+#   count   : raw observed transition counts
+#   adj_res : Haberman / Christensen adjusted residuals
 #   lift    : observed / expected, association strength
 #
 # Non-finite cells (NA from structural zeros or zero-margin rows) are
@@ -25,19 +26,18 @@
 #' `tna` package's centrality, pruning, community, and bootstrap
 #' routines. Requires the `tna` package (declared in Suggests).
 #'
-#' The function is deliberately **not** named `as_tna`: the `Nestimate`
-#' package exports an `as_tna` generic, and lagseq avoids overlapping
-#' export names with sibling packages so the two can be loaded together
-#' without masking each other. `lsa_to_tna()` is lagseq's own,
+#' The function is deliberately **not** named `as_tna`, to avoid
+#' overlapping export names with other packages so they can be loaded
+#' together without masking each other. `lsa_to_tna()` is lagseq's own,
 #' collision-free converter.
 #'
 #' @param x An `lsa` fit from [lsa()], or an `lsa_group` from
 #'   `lsa(..., group = )`.
 #' @param weights Character. Which matrix to expose as the tna edge
-#'   weights. One of `"prob"` (row-normalised probabilities, default,
-#'   matches Standard TNA), `"count"` (raw observed counts, matches
-#'   Frequency TNA / FTNA), `"adj_res"` (adjusted residuals, residual
-#'   network), or `"lift"` (observed / expected, association strength).
+#'   weights. One of `"prob"` (row-normalised probabilities, default),
+#'   `"count"` (raw observed counts), `"adj_res"` (adjusted residuals,
+#'   residual network), or `"lift"` (observed / expected, association
+#'   strength).
 #'   `tna` requires non-negative weights, so the `"adj_res"` choice
 #'   always clips negative residuals to `0` (returning the
 #'   over-representation network). To work with signed residuals, use

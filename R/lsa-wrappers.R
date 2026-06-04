@@ -1,5 +1,4 @@
-# Convenience wrappers. Each one pins a specific engine, in the
-# style of Nestimate's `build_tna()` / `build_ftna()`.
+# Convenience wrappers. Each one pins a specific engine.
 
 #' @rdname lsa
 #' @export

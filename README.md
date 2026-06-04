@@ -3,8 +3,7 @@
 > Modern, tidy lag sequential analysis for categorical event sequences.
 
 `lagseq` provides a unified, pipe-friendly interface for lag sequential
-analysis (LSA), in the style of [Nestimate](https://github.com/mohsaqr/Nestimate)
-and [cograph](https://github.com/sonsoleslp/cograph). A single `lsa()`
+analysis (LSA). A single `lsa()`
 constructor with a pluggable engine registry exposes the classical and
 extended LSA family — classical, two-cell, bidirectional,
 parallel-dominance, and non-parallel-dominance — and returns a tidy edge
@@ -34,9 +33,10 @@ table ready for transition-network visualization.
 - **Recipe pattern.** Configuration is snapshotted on the fit in
   `$params`. Bootstrap, permutation, and stability inference all read
   from that single snapshot to prevent config drift.
-- **Minimal-dependency policy.** Runtime imports are base R only
-  (`stats`, `utils`). `cograph` is a soft, `Suggests`-level dependency
-  used only when present for visualization.
+- **Minimal-dependency policy.** Runtime imports are base packages only
+  (`grid`, `stats`, `utils`). The plotting and interop packages
+  (`ggplot2`, `cograph`, `tna`, `Nestimate`, `igraph`, `TraMineR`) are
+  soft `Suggests`, used only when present.
 
 ## Quick start
 
@@ -50,15 +50,14 @@ seq <- c("Question", "Explain", "Agree",
 fit <- lsa(seq, lag = 1, engine = "classical")
 fit
 
-# Tidy outputs
-fit$edges                   # one row per transition, with residuals + p
-fit$nodes                   # one row per state, with in/out totals
-
-# Filter helpers
-significant_transitions(fit, alpha = 0.05)
-overrepresented_transitions(fit)
-underrepresented_transitions(fit)
-common_transitions(fit, min_count = 2)
+# Reading the fit — one verb per result, each returns a tidy data.frame
+transitions(fit)                          # one row per transition
+transitions(fit, significant = TRUE)      # significant only
+transitions(fit, direction = "over")      # over-represented
+transitions(fit, min_count = 2)           # frequently observed
+nodes(fit)                                # one row per state
+tests(fit)                                # tablewise independence tests
+initial(fit)                              # initial-state distribution
 
 # Inference
 boot <- bootstrap_lsa(fit, R = 1000)
@@ -66,17 +65,48 @@ perm <- permute_lsa(fit, R = 1000)
 stab <- stability_lsa(fit, R = 500)
 rel  <- reliability_lsa(fit, R = 100)
 
-# TNA / igraph interop (require `tna` / `igraph` to be installed).
-# lagseq converts; the downstream package does the analysis.
-net   <- lsa_to_tna(fit, weights = "prob")
-cents <- tna::centralities(net)
-g     <- igraph::as.igraph(fit)
+# Plotting — one verb, pick the view with `type`
+plot(fit)                                 # residual heatmap (default)
+plot(fit, type = "network")               # transition network
+plot(fit, type = "chord")                 # chord diagram
+plot(fit, type = "sunburst")              # polar sunburst
+plot(bootstrap_lsa(fit))                  # circular bootstrap CI forest
 
-# Visualization
-# lsa fits inherit class "cograph_network", so the cograph package
-# can render them once installed. Native plot methods are on the
-# roadmap (see Status).
+# Interop — convert a fit to another toolkit's native object
+# (lagseq converts; the downstream package does the analysis).
+net   <- lsa_to_tna(fit, weights = "prob")  # -> tna object
+cents <- tna::centralities(net)
+g     <- igraph::as.igraph(fit)             # -> igraph object
 ```
+
+## Compatibility with `tna` and `Nestimate`
+
+`lagseq` is a converter, not a competing analyser: it interoperates with
+the `tna` and `Nestimate` ecosystems at both ends, and keeps **zero
+exported-name overlap** with either.
+
+**Input** — `lsa()` accepts the sequence objects those packages already
+use, so a fit drops straight into an existing pipeline:
+
+```r
+lsa(tna_object)                  # a `tna` model / sequence object
+lsa(nestimate_data)              # a `Nestimate` `nestimate_data` object
+lsa(stslist)                     # a `TraMineR` state-sequence object
+lsa(long_log, actor = , action = , time = )   # or a raw long event log
+```
+
+**Output** — a fit is a directed weighted network, so it converts in one
+call to the native object those toolkits analyse (centralities, pruning,
+communities, …):
+
+```r
+lsa_to_tna(fit, weights = "prob")    # -> `tna` object (also works on a grouped fit)
+igraph::as.igraph(fit)               # -> `igraph` object
+```
+
+`tna`, `Nestimate`, `igraph`, and `TraMineR` stay optional (`Suggests`);
+the converters and ingestors error informatively only if the relevant
+package is missing.
 
 ## Engines
 
@@ -92,24 +122,23 @@ Users can register custom engines via `register_lsa_engine()`.
 
 ## Status
 
-v0.1.0 — under active development. See `lsa_plan.md` for the build
-roadmap and `HANDOFF.md` for the current session state.
+v0.1.0.
 
 **Implemented:** classical / two-cell / bidirectional / parallel-
 and non-parallel-dominance engines; structural-zero handling via IPF
 with rank-based quasi-independence df (classical engine); bootstrap
 (sequence-level + stationary block), permutation, case-drop stability,
-and split-half reliability inference; significance / over- / under- /
-common-transition filter helpers; TNA / igraph bridge
-(`lsa_to_tna.lsa()`, `as.igraph.lsa()`) that converts a fit into the native
-object of the broader `tna` / `igraph` toolkits (centralities, pruning,
-communities, etc.) without making either a hard dependency. Multi-group
-fits (`lsa(group = )` → `lsa_group`) are supported across the filter,
-reliability, and bridge layers.
+and split-half reliability inference; a single tidy `transitions()` verb
+(with `significant` / `direction` / `min_count` selectors) plus
+`nodes()`, `tests()`, and `initial()`; plotting via one `plot(fit, type = )`
+verb — heatmap, network, chord, sunburst, and a circular bootstrap
+forest, with grouped fits drawn one panel per group; and the `tna` /
+`igraph` bridge (`lsa_to_tna()`, `as.igraph()`). Multi-group fits
+(`lsa(group = )` → `lsa_group`) are supported across every reading,
+plotting, inference, and bridge layer.
 
-**Roadmap:** native plot methods (`plot.lsa()`), between-group
-comparison (`compare_lsa()`, `group_lsa()`), stationarity tests
-(`stationarity_lsa()`).
+**Roadmap:** between-group comparison (`compare_lsa()`) and
+stationarity tests (`stationarity_lsa()`).
 
 ## License
 

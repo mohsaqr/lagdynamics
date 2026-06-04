@@ -1,17 +1,15 @@
-# Tidy filter helpers over an lsa fit's edge table. Each helper returns
-# a data.frame with the same columns as fit$edges, so they compose with
-# base R subsetting and other tidy operations.
+# The transitions() verb: the one predictable way to read an lsa fit's
+# edges as a tidy data.frame, with optional filters. Replaces the old
+# significant_/overrepresented_/underrepresented_/common_transitions
+# family with a single verb whose arguments select the subset.
 #
-# Each is an S3 generic: the `.lsa` method filters a single fit; the
-# `.lsa_group` method maps that filter over the per-group fits and
-# row-binds the results with a leading `group` column. The grouped
-# output stays a plain base data.frame (not a tibble) to match the
-# package's base-R house style.
+# transitions(fit) returns every transition; the arguments narrow it.
+# On a grouped fit the per-group results are row-bound with a leading
+# `group` column. Base data.frame throughout (no tibble dependency).
 
-# Row-bind a per-group filter into one long data.frame with a leading
-# `group` column. Groups that contribute no rows are dropped; if every
-# group is empty, a zero-row frame with the correct columns is returned
-# so callers can rely on a stable shape.
+# Row-bind a per-group result into one data.frame with a leading
+# `group` column. Empty groups are dropped; an all-empty result keeps
+# the correct columns so the shape is stable.
 .bind_group_edges <- function(x, fun, ...) {
   parts <- lapply(x, fun, ...)
   pieces <- Map(function(df, g) {
@@ -30,164 +28,88 @@
   out
 }
 
-#' Filter Transitions by Significance
+#' Transitions of an LSA Fit (Tidy)
 #'
-#' Returns the subset of `fit$edges` whose adjusted-residual p-value
-#' falls below `alpha`. Cells with non-finite p-values (structural
-#' zeros, zero-margin rows, or non-estimable cells) are excluded.
+#' The canonical way to read a fit's transitions as a tidy
+#' one-row-per-transition `data.frame`. `transitions(fit)` returns every
+#' transition; the arguments narrow it.
 #'
-#' @param fit An `lsa` object returned by [lsa()].
-#' @param alpha Numeric scalar in `(0, 1)`. Significance threshold.
-#'   Default `NULL`, which uses the alpha snapshotted on the fit
-#'   (`fit$params$alpha`).
+#' @param fit An `lsa` fit from [lsa()], or a grouped `lsa_group`.
+#' @param significant Logical. Keep only transitions whose adjusted-
+#'   residual p-value is below `alpha`. Default `FALSE` (keep all).
+#' @param direction One of `"any"` (default), `"over"`
+#'   (over-represented: significant with a positive residual), or
+#'   `"under"` (under-represented: significant with a negative
+#'   residual). Selecting a direction implies `significant = TRUE`.
+#' @param min_count Optional integer. Keep only transitions observed at
+#'   least this many times. Default `NULL` (no count filter).
+#' @param alpha Significance threshold. Default `NULL`, which uses the
+#'   alpha recorded on the fit (`fit$params$alpha`).
 #'
-#' @return A data.frame with the same columns as `fit$edges`,
-#'   containing only the significant rows. Row order is preserved.
+#' @return A `data.frame`, one row per transition, with columns `from`,
+#'   `to` (the source and target **state names**), `lag`, `count`,
+#'   `expected`, `prob` (row-conditional), `prob_col` (column-
+#'   conditional), `adj_res`, `p`, `yules_q`, `kappa`, `kappa_z`,
+#'   `kappa_p`, `lift`, `sign`, `significant`. A grouped fit gains a
+#'   leading `group` column. Row names are reset.
 #'
 #' @examples
-#' fit <- lsa(engagement, engine = "classical")
-#' significant_transitions(fit)
-#' significant_transitions(fit, alpha = 0.01)
+#' fit <- lsa(group_regulation)
+#' transitions(fit)                       # all transitions
+#' transitions(fit, significant = TRUE)   # significant ones
+#' transitions(fit, direction = "over")   # over-represented
+#' transitions(fit, min_count = 500)      # frequently observed
 #'
-#' For a grouped fit (`lsa_group`), the filter is applied within each
-#' group and the results are row-bound into one data.frame with a
-#' leading `group` column.
-#'
-#' @seealso [overrepresented_transitions()],
-#'   [underrepresented_transitions()], [common_transitions()]
+#' @seealso [lsa()], [nodes()], [tests()]
 #'
 #' @export
-significant_transitions <- function(fit, ...) {
-  UseMethod("significant_transitions")
+transitions <- function(fit, significant = FALSE,
+                        direction = c("any", "over", "under"),
+                        min_count = NULL, alpha = NULL) {
+  UseMethod("transitions")
 }
 
-#' @rdname significant_transitions
+#' @rdname transitions
 #' @export
-significant_transitions.lsa <- function(fit, alpha = NULL, ...) {
+transitions.lsa <- function(fit, significant = FALSE,
+                            direction = c("any", "over", "under"),
+                            min_count = NULL, alpha = NULL) {
+  direction <- match.arg(direction)
   if (is.null(alpha)) alpha <- fit$params$alpha
-  stopifnot(is.numeric(alpha), length(alpha) == 1L,
-            alpha > 0, alpha < 1)
+  stopifnot(is.numeric(alpha), length(alpha) == 1L, alpha > 0, alpha < 1)
   e <- fit$edges
-  e[is.finite(e$p) & e$p < alpha, , drop = FALSE]
+  if (isTRUE(significant) || direction != "any") {
+    e <- e[is.finite(e$p) & e$p < alpha, , drop = FALSE]
+  }
+  if (direction == "over") {
+    e <- e[is.finite(e$adj_res) & e$adj_res > 0, , drop = FALSE]
+  } else if (direction == "under") {
+    e <- e[is.finite(e$adj_res) & e$adj_res < 0, , drop = FALSE]
+  }
+  if (!is.null(min_count)) {
+    stopifnot(is.numeric(min_count), length(min_count) == 1L,
+              is.finite(min_count), min_count >= 1)
+    e <- e[is.finite(e$count) & e$count >= min_count, , drop = FALSE]
+  }
+  # Project a tidy, name-keyed view. The endpoints are the state names
+  # (`from`/`to`); the integer ids, duplicate `weight`/`edge`, and other
+  # cograph-protocol fields stay on `fit$edges`, not in the accessor.
+  keep <- c("from_label", "to_label", "lag", "count", "expected", "prob",
+            "prob_col", "adj_res", "p", "yules_q", "kappa", "kappa_z",
+            "kappa_p", "lift", "sign", "significant")
+  e <- e[, keep, drop = FALSE]
+  names(e)[1:2] <- c("from", "to")
+  rownames(e) <- NULL
+  e
 }
 
-#' @rdname significant_transitions
+#' @rdname transitions
 #' @export
-significant_transitions.lsa_group <- function(fit, alpha = NULL, ...) {
-  .bind_group_edges(fit, significant_transitions, alpha = alpha, ...)
-}
-
-#' Filter Overrepresented (Positive-Residual) Transitions
-#'
-#' Returns significant transitions where the observed count exceeds
-#' the expected count under independence (i.e. positive adjusted
-#' residual). These are the cells where the focal transition occurs
-#' more often than chance.
-#'
-#' @inheritParams significant_transitions
-#'
-#' @return A data.frame with the same columns as `fit$edges`.
-#'
-#' @examples
-#' fit <- lsa(engagement, engine = "classical")
-#' overrepresented_transitions(fit)
-#'
-#' @seealso [significant_transitions()],
-#'   [underrepresented_transitions()]
-#'
-#' @export
-overrepresented_transitions <- function(fit, ...) {
-  UseMethod("overrepresented_transitions")
-}
-
-#' @rdname overrepresented_transitions
-#' @export
-overrepresented_transitions.lsa <- function(fit, alpha = NULL, ...) {
-  e <- significant_transitions(fit, alpha = alpha)
-  e[is.finite(e$adj_res) & e$adj_res > 0, , drop = FALSE]
-}
-
-#' @rdname overrepresented_transitions
-#' @export
-overrepresented_transitions.lsa_group <- function(fit, alpha = NULL,
-                                                   ...) {
-  .bind_group_edges(fit, overrepresented_transitions, alpha = alpha, ...)
-}
-
-#' Filter Underrepresented (Negative-Residual) Transitions
-#'
-#' Returns significant transitions where the observed count is below
-#' the expected count under independence (negative adjusted residual).
-#' These are the cells where the focal transition is actively avoided
-#' relative to chance.
-#'
-#' @inheritParams significant_transitions
-#'
-#' @return A data.frame with the same columns as `fit$edges`.
-#'
-#' @examples
-#' fit <- lsa(engagement, engine = "classical")
-#' underrepresented_transitions(fit)
-#'
-#' @seealso [significant_transitions()],
-#'   [overrepresented_transitions()]
-#'
-#' @export
-underrepresented_transitions <- function(fit, ...) {
-  UseMethod("underrepresented_transitions")
-}
-
-#' @rdname underrepresented_transitions
-#' @export
-underrepresented_transitions.lsa <- function(fit, alpha = NULL, ...) {
-  e <- significant_transitions(fit, alpha = alpha)
-  e[is.finite(e$adj_res) & e$adj_res < 0, , drop = FALSE]
-}
-
-#' @rdname underrepresented_transitions
-#' @export
-underrepresented_transitions.lsa_group <- function(fit, alpha = NULL,
-                                                    ...) {
-  .bind_group_edges(fit, underrepresented_transitions, alpha = alpha,
-                    ...)
-}
-
-#' Filter Frequently-Observed Transitions
-#'
-#' Returns transitions whose observed count is at least `min_count`.
-#' This is a descriptive volume filter independent of statistical
-#' significance, useful for trimming long-tail noise from a transition
-#' network before visualisation.
-#'
-#' @param fit An `lsa` object returned by [lsa()].
-#' @param min_count Integer scalar `>= 1`. Minimum observed count.
-#'   Default `1L` (keep every transition that was observed at least
-#'   once).
-#'
-#' @return A data.frame with the same columns as `fit$edges`.
-#'
-#' @examples
-#' fit <- lsa(engagement, engine = "classical")
-#' common_transitions(fit, min_count = 3)
-#'
-#' @seealso [significant_transitions()]
-#'
-#' @export
-common_transitions <- function(fit, ...) {
-  UseMethod("common_transitions")
-}
-
-#' @rdname common_transitions
-#' @export
-common_transitions.lsa <- function(fit, min_count = 1L, ...) {
-  stopifnot(is.numeric(min_count), length(min_count) == 1L,
-            min_count >= 1L)
-  e <- fit$edges
-  e[is.finite(e$count) & e$count >= min_count, , drop = FALSE]
-}
-
-#' @rdname common_transitions
-#' @export
-common_transitions.lsa_group <- function(fit, min_count = 1L, ...) {
-  .bind_group_edges(fit, common_transitions, min_count = min_count, ...)
+transitions.lsa_group <- function(fit, significant = FALSE,
+                                  direction = c("any", "over", "under"),
+                                  min_count = NULL, alpha = NULL) {
+  direction <- match.arg(direction)
+  .bind_group_edges(fit, transitions, significant = significant,
+                    direction = direction, min_count = min_count,
+                    alpha = alpha)
 }

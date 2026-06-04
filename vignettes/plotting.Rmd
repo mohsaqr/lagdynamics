@@ -1,0 +1,148 @@
+---
+title: "Plotting LSA fits"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Plotting LSA fits}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dpi = 100,
+                      fig.width = 6.5, fig.height = 5.2, out.width = "100%",
+                      fig.align = "center")
+set.seed(1)
+library(lagseq)
+options(digits = 3)
+has_gg <- requireNamespace("ggplot2", quietly = TRUE)
+has_cg <- requireNamespace("cograph", quietly = TRUE)
+fit <- lsa(group_regulation)                       # single fit
+gf  <- lsa(group_regulation,                       # grouped fit
+           group = rep(c("A", "B"), length.out = nrow(group_regulation)))
+```
+
+`lagseq` has one plotting verb, **`plot(fit, type = )`**. Every view
+shares a single palette: **warm (red) = over-represented, cool (blue) =
+avoided**, the adjusted residual against chance. The views differ only in
+geometry, never in meaning.
+
+| `type` | view | backend |
+|---|---|---|
+| `"heatmap"` (default) | `from x to` grid | ggplot2 |
+| `"network"` | transition network | cograph `splot()` |
+| `"chord"` | chord diagram | cograph `plot_chord()` |
+| `"sunburst"` | polar rose | ggplot2 |
+| — | bootstrap CI forest | ggplot2 (`plot()` on a bootstrap) |
+
+**Single or grouped.** `plot()` works the same on one fit and on a
+grouped fit: a grouped fit draws **one full-size figure per group** by
+default (`combined = FALSE`); pass `combined = TRUE` to tile them into a
+single compact figure. Each view below is shown both ways. The ggplot
+views need `ggplot2`; the network and chord need `cograph` (both
+*Suggests*).
+
+## Sunburst — `type = "sunburst"`
+
+A polar portrait of the transition table. Source states are named along
+the inner ring. Two styles: **`"rose"`** (default; equal slots, bar
+height = frequency, fill = residual) and **`"wedge"`** (angular width =
+frequency share, tiny wedges omitted).
+
+```{r sunburst, eval = has_gg}
+plot(fit, type = "sunburst")                       # single fit, rose
+plot(fit, type = "sunburst", style = "wedge")      # frequency wedges
+```
+
+```{r sunburst-group, eval = has_gg}
+plot(gf, type = "sunburst")                        # grouped: one per group
+```
+
+## Heatmap — `type = "heatmap"` (default)
+
+Rows are source states ordered by outgoing volume; the salient cell of
+each row is bold. `which` picks the matrix.
+
+```{r heatmap, eval = has_gg}
+plot(fit)                     # single fit, adjusted residuals (default)
+plot(fit, which = "prob")     # transition probabilities
+```
+
+```{r heatmap-group, eval = has_gg}
+plot(gf)                      # grouped: one heatmap per group
+```
+
+## Network — `type = "network"`
+
+The directed transition network. The default weight is the **residual**,
+so colour means something (warm = over-represented, cool = avoided). The
+non-signed weights (`"count"`, `"prob"`, `"lift"`) are all non-negative,
+so they draw in a single neutral colour with magnitude carried by edge
+width.
+
+```{r network, eval = has_cg}
+plot(fit, type = "network")                       # single fit
+plot(fit, type = "network", weights = "count")    # frequency network (width)
+```
+
+```{r network-group, eval = has_cg}
+plot(gf, type = "network")                        # grouped: one per group
+```
+
+`prob` (row-conditional) and `count` (raw frequency) are the same graph
+with different edge weights: `prob` normalises each source's out-edges to
+sum to 1, which promotes rare-source transitions relative to busy ones.
+
+## Chord — `type = "chord"`
+
+States are arcs on a ring; each transition is a filled ribbon (width =
+frequency, fill = residual).
+
+```{r chord, eval = has_cg}
+plot(fit, type = "chord")                         # single fit
+```
+
+```{r chord-group, eval = has_cg}
+plot(gf, type = "chord")                          # grouped: one per group
+```
+
+## Bootstrap forest — `plot()` on a bootstrap
+
+Resampling has its own circular view: each transition is a spoke spanning
+its bootstrap confidence interval, a square marks the estimate, and a
+dashed ring marks the null. Stable-residual edges are coloured by
+direction; the rest are grey.
+
+```{r forest, eval = has_gg}
+b <- bootstrap_lsa(fit, R = 300)
+plot(b)                          # residual CIs, circular
+plot(b, show_nonsig = FALSE)     # significant transitions only
+```
+
+Bootstrap one group at a time to compare them:
+
+```{r forest-group, eval = has_gg}
+plot(bootstrap_lsa(gf$A, R = 300))   # group A's bootstrap forest
+```
+
+## The worker functions
+
+`plot(fit, type = )` is a thin front door over four exported workers, in
+case you want a view's full argument list inline:
+
+```{r workers, eval = FALSE}
+plot_transitions(fit, weights = "residuals", significant = TRUE)  # network
+plot_chords(fit, width = "prob")                                  # chord
+plot_polar(fit, style = "wedge", labels = "all")                  # sunburst
+plot_forest(bootstrap_lsa(fit), n_top = 12)                       # forest
+```
+
+## In short
+
+```r
+plot(fit)                        # residual heatmap (default)
+plot(fit, type = "network")      # transition network
+plot(fit, type = "chord")        # chord diagram
+plot(fit, type = "sunburst")     # polar rose
+plot(bootstrap_lsa(fit))         # circular bootstrap forest
+plot(gf)                         # grouped: one panel per group (any type)
+```

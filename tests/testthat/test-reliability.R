@@ -92,3 +92,22 @@ test_that("reliability_lsa survives singleton sequences (zero-transition halves)
   expect_s3_class(rel, "lsa_reliability")
   expect_true(sum(is.finite(rel$correlations)) >= 1L)
 })
+
+test_that("as.data.frame() tidies reliability into one row per replicate", {
+  fit <- lsa(engagement, engine = "classical")
+  rel <- reliability_lsa(fit, R = 20)
+  d <- as.data.frame(rel)
+  expect_s3_class(d, "data.frame")
+  expect_setequal(names(d), c("replicate", "correlation"))
+  expect_equal(nrow(d), 20L)
+  expect_identical(d$replicate, seq_len(20L))
+})
+
+test_that("as.data.frame() tidies grouped reliability with a group column", {
+  fit <- lsa(engagement, group = rep(c("a", "b"), length.out = 136))
+  rel <- reliability_lsa(fit, R = 15)
+  d <- as.data.frame(rel)
+  expect_identical(names(d), c("group", "replicate", "correlation"))
+  expect_setequal(unique(d$group), names(fit))
+  expect_equal(nrow(d), 15L * length(fit))
+})

@@ -199,11 +199,10 @@
 }
 
 # §7: unidirectional kappa, event-level expectation.
-# Matches the canonical convention used by O'Connor's SEQUENTIAL
-# (1999, p. 720) and Bakeman & Quera's GSEQ: et[i,j] = n_i * n_j / n
+# Expected frequencies under independence: et[i,j] = n_i * n_j / n
 # for ALL cells including the diagonal. The Wampold (1989)
 # theoretical formula with et[i,i] = n_i * (n_i - 1) / n is the
-# alternative but is not what published LSA tools actually compute.
+# alternative but is not what the published LSA outputs actually use.
 .unidirectional_kappa <- function(obs, n_i, n_j, n) {
   K <- nrow(obs)
   et <- outer(n_i, n_j) / n

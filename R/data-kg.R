@@ -49,7 +49,7 @@
 #' The published values were extracted verbatim from the spreadsheet
 #' deposited at \doi{10.17632/bdwcj7vw94.1} (sheets
 #' `"整体分析"`, `"低结果"`, `"中结果"`, `"高结果"`). The author used
-#' GSEQ-style output (matrices labeled JNTF for joint transition
+#' the published output (matrices labeled JNTF for joint transition
 #' frequencies and ADJR for adjusted residuals) computed from the
 #' wide-format sequence sheet `"整体数据"`.
 #'

@@ -22,10 +22,9 @@
 #'   `i`, column `j` is the count of `i -> j` transitions. In this case
 #'   `events` and `seq_id` are not available and downstream resampling
 #'   tools that need event-level data will error.
-#' - A sequence-bearing object from a sibling package: a `tna` or
+#' - A sequence-bearing object: a `tna` or
 #'   `group_tna` (sequences read from its `$data` slot), a `tna_data`
-#'   (from `tna::prepare_data()`) or Nestimate `nestimate_data`
-#'   (`$sequence_data`), or a TraMineR `stslist`. The stored event
+#'   or `nestimate_data` (`$sequence_data`), or an `stslist`. The stored event
 #'   sequences are recovered and analysed.
 #'   A `tna` built from a bare matrix (no retained sequences) errors,
 #'   because transition *counts* cannot be recovered from probability
@@ -76,8 +75,8 @@
 lsa_data <- function(x, labels = NULL) {
   if (inherits(x, "lsa_data")) return(x)
 
-  # Recover sequences from a sibling-package object (tna / group_tna,
-  # nestimate_data, TraMineR stslist, ...) before the generic shape
+  # Recover sequences from an external object (tna / group_tna,
+  # nestimate_data, stslist, ...) before the generic shape
   # heuristics run. Without this, a fitted object -- which is just a
   # list -- would be silently misread as "a list of sequences".
   if (.is_seq_object(x)) {

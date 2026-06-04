@@ -47,8 +47,7 @@ lsa(
 \code{action} arguments are supplied (see below). Accepted already-
 sequenced forms include vectors, lists of sequences, wide
 matrices/data.frames, transition-count matrices, and sequence-
-bearing objects from sibling packages (\code{tna}, \code{group_tna},
-Nestimate \code{nestimate_data}, TraMineR \code{stslist}).
+bearing objects (\code{tna}, \code{group_tna}, \code{nestimate_data}, \code{stslist}).
 \code{NA} and empty-string cells are treated as missingness, not as a
 state: they are dropped wherever they occur and no transition is
 counted into or out of them. To model missingness as its own
@@ -57,7 +56,13 @@ state, recode it (e.g. \code{NA -> "missing"}) before calling \code{lsa()}.}
 \item{...}{Additional engine-specific parameters (merged into
 \code{params}).}
 
-\item{lag}{Positive integer. The transition lag. Default \code{1}.}
+\item{lag}{Integer. The transition lag. Default \code{1}. Positive lags
+count successors (state at \code{t -> t + lag}); negative lags count
+predecessors (what occurred \verb{|lag|} steps before); \code{0} pairs each
+event with itself (degenerate for single-stream event data --
+genuine co-occurrence needs concurrent codes, not yet supported).
+Pre-computed transition-matrix input supports \code{lag = 1} only. To
+analyse several lags at once, see \code{\link[=lsa_lags]{lsa_lags()}}.}
 
 \item{engine}{Character scalar. The engine name, registered via
 \code{\link[=register_lsa_engine]{register_lsa_engine()}}. Built-in engines: \code{"classical"},
@@ -125,24 +130,32 @@ epoch. Default \code{FALSE}.}
 forwarded to the engine function.}
 }
 \value{
-An object of class \code{c("lsa", "cograph_network")} with
-elements:
+An object of class \code{c("lsa", "cograph_network")}. Read it with
+the verbs rather than by reaching into slots: \code{\link[=transitions]{transitions()}} for the
+tidy edge table, \code{\link[=nodes]{nodes()}}, \code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{\link[=summary]{summary()}}
+for the other results, and \code{\link[=plot]{plot()}}/\code{\link[=plot_transitions]{plot_transitions()}} to draw it.
+Every number a verb returns is backed by these slots:
 \describe{
-\item{obs, exp, prob, adj_res, p, yules_q, kappa, kappa_z, kappa_p}{
-\verb{K x K} matrices.}
-\item{lrx2}{List \verb{(statistic, df, p)} from the tablewise LR test.}
+\item{edges}{The tidy one-row-per-transition frame that backs
+\code{\link[=transitions]{transitions()}} (with extra \code{cograph_network} protocol columns).}
+\item{nodes}{Data frame backing \code{\link[=nodes]{nodes()}}: \verb{id, label, name, outgoing, incoming}.}
+\item{obs, exp, prob, prob_col, adj_res, p, yules_q, kappa,
+kappa_z, kappa_p}{The same per-cell quantities as \code{edges}, in
+\verb{K x K} matrix form (\code{prob} is row-conditional P(to | from),
+\code{prob_col} column-conditional P(from | to)). Convenient for
+matrix algebra; not the primary interface.}
+\item{lrx2, x2}{Lists \verb{(statistic, df, p)} backing \code{\link[=tests]{tests()}}: the
+tablewise likelihood-ratio (G^2) and Pearson chi-square tests of
+independence; \code{NULL} for engines without an expected table.}
+\item{inits}{Named numeric vector backing \code{\link[=initial]{initial()}} (proportion
+of sequences starting in each state, sums to 1); \code{NULL} for
+transition-matrix input.}
 \item{weights}{\verb{K x K} matrix used as the default edge weight for
 plotting. Equal to \code{obs} (counts) by default.}
-\item{nodes}{Data frame: \verb{id, label, name, outgoing, incoming}.}
-\item{edges}{Tidy edge frame (the same numbers as the matrices, in
-long one-row-per-transition form).}
 \item{directed}{Logical scalar; \code{TRUE} for directed engines,
 \code{FALSE} for \code{bidirectional}.}
 \item{method}{Engine name (the slot the \code{cograph_network} protocol
-reads). The engine is also recorded in \code{params$engine}.}
-\item{inits}{Named numeric initial-state distribution (proportion
-of sequences starting in each state, sums to 1); \code{NULL} for
-transition-matrix input.}
+reads). Also recorded in \code{params$engine}.}
 \item{data}{The canonical \code{lsa_data} object (events + seq_id).}
 \item{params}{Immutable snapshot of all parameters used (recipe),
 including \code{params$engine}.}
@@ -153,7 +166,7 @@ When \code{group} is supplied, returns an object of class
 \code{c("lsa_group", "list")}: a named list of \code{lsa} fits (one per group
 level) carrying \code{levels}, \code{group_sizes}, \code{labels}, and \code{engine}
 attributes. Downstream verbs (\code{\link[=lsa_to_tna]{lsa_to_tna()}},
-\code{\link[=significant_transitions]{significant_transitions()}}, \code{\link[=reliability_lsa]{reliability_lsa()}}, etc.) dispatch on
+\code{\link[=transitions]{transitions()}}, \code{\link[=reliability_lsa]{reliability_lsa()}}, etc.) dispatch on
 it and return grouped results.
 }
 \description{

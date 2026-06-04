@@ -35,9 +35,8 @@
 #' Inference: [bootstrap_lsa()], [permute_lsa()], [stability_lsa()],
 #' [reliability_lsa()]
 #'
-#' Filtering: [significant_transitions()],
-#' [overrepresented_transitions()], [underrepresented_transitions()],
-#' [common_transitions()]
+#' Reading a fit (tidy data frames): [transitions()], [nodes()],
+#' [tests()], [initial()], and [summary()].
 #'
 #' TNA / igraph bridge: [lsa_to_tna()], [as.igraph.lsa()]. These
 #' convert an `lsa` fit into the native object of a downstream network
@@ -61,7 +60,7 @@
 #' @references
 #'
 #' Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
-#' Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+#' Sequential analysis}. Cambridge University Press.
 #'
 #' Bakeman, R., & Gottman, J. M. (1997). \emph{Observing interaction: An
 #' introduction to sequential analysis} (2nd ed.). Cambridge University

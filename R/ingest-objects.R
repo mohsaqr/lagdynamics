@@ -1,22 +1,21 @@
-# Sequence recovery from sibling-package objects. lagseq is the
-# sequence *analyser*; whenever another package hands us an object that
-# already carries event sequences, we extract those sequences and feed
-# them through the normal lsa_data() pipeline. This is an input
-# convenience and does not couple lagseq to the source package: every
-# extractor reads plain list/matrix/attribute structure, never the
-# source package's functions.
+# Sequence recovery from external objects. lagseq is the sequence
+# *analyser*; whenever an object that already carries event sequences is
+# passed in, we extract those sequences and feed them through the normal
+# lsa_data() pipeline. This is an input convenience and does not couple
+# lagseq to the source package: every extractor reads plain
+# list/matrix/attribute structure, never the source package's functions.
 #
 # Supported sources:
 #   tna / group_tna          -> $data (a tna_seq_data code matrix)
 #   tna_seq_data             -> the code matrix directly
-#   tna_data (tna::prepare_data)   -> $sequence_data (wide label df)
-#   nestimate_data (Nestimate)     -> $sequence_data (wide label df)
-#   stslist (TraMineR)       -> factor state matrix + alphabet
+#   tna_data                 -> $sequence_data (wide label df)
+#   nestimate_data           -> $sequence_data (wide label df)
+#   stslist                  -> factor state matrix + alphabet
 #
-# Nestimate's build_*() models are tna-class objects, so they are
-# handled by the `tna` branch with no extra code. tna::prepare_data and
-# Nestimate::prepare emit structurally identical wide-sequence
-# containers (both carry $sequence_data), so they share one branch.
+# A model carrying the `tna` class is handled by the `tna` branch with
+# no extra code. The `tna_data` and `nestimate_data` containers are
+# structurally identical (both carry $sequence_data), so they share one
+# branch.
 
 # Does `x` carry recoverable event sequences from a known source?
 .is_seq_object <- function(x) {
@@ -37,8 +36,8 @@
   if (inherits(x, "tna"))           return(.seqs_from_tna(x))
   if (inherits(x, "tna_seq_data"))  return(.seqs_from_seqdata_matrix(x))
   if (inherits(x, c("tna_data", "nestimate_data"))) {
-    # Both tna::prepare_data and Nestimate::prepare emit a wide
-    # one-row-per-session label table in $sequence_data.
+    # Both carry a wide one-row-per-session label table in
+    # $sequence_data.
     sd <- x$sequence_data
     if (is.null(sd)) {
       stop("This ", class(x)[1L], " object has no $sequence_data.",
@@ -83,7 +82,7 @@
   rows[vapply(rows, length, integer(1L)) > 0L]
 }
 
-# Decode a TraMineR stslist into a list of label sequences. Cells are
+# Decode an stslist into a list of label sequences. Cells are
 # factor-coded states; the void/NA sentinels mark gaps, which we drop
 # (consistent with lagseq's NA-as-missingness convention).
 .seqs_from_stslist <- function(x) {

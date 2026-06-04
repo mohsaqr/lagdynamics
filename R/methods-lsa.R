@@ -1,6 +1,6 @@
-# S3 methods for the lsa class. Print is a compact, visual summary in
-# the style of the tna / Nestimate model prints (typed header, key
-# stats, an initial-state bar chart, and the strongest transitions).
+# S3 methods for the lsa class. Print is a compact, visual model summary
+# (typed header, key stats, an initial-state bar chart, and the
+# strongest transitions).
 # summary() adds the full matrices; as.data.frame() returns the tidy
 # edge table for downstream tooling.
 
@@ -9,7 +9,7 @@
 .lsa_bar <- function(frac, width = 24L) {
   n <- as.integer(round(frac * width))
   vapply(n, function(k) {
-    strrep("█", max(0L, k))
+    strrep("\u2588", max(0L, k))
   }, character(1L))
 }
 
@@ -31,7 +31,7 @@ print.lsa <- function(x, ...) {
   dir <- if (isTRUE(x$directed)) "directed" else "undirected"
 
   # --- header ---
-  cat(sprintf("Lag Sequential Analysis  —  %s  (lag %d, %s)\n",
+  cat(sprintf("Lag Sequential Analysis  \u2014  %s  (lag %d, %s)\n",
               x$method, x$params$lag, dir))
   if (identical(x$data$source, "events")) {
     cat(sprintf("  %d states | %d transitions | %d events | %d sequences\n",
@@ -44,7 +44,7 @@ print.lsa <- function(x, ...) {
               paste(utils::head(labels, 12), collapse = ", ")))
   lr <- x$lrx2
   if (!is.null(lr) && is.finite(lr$statistic)) {
-    cat(sprintf("  independence: G² = %.1f, df = %d, p %s\n",
+    cat(sprintf("  independence: G\u00b2 = %.1f, df = %d, p %s\n",
                 lr$statistic, lr$df,
                 format.pval(lr$p, digits = 3, eps = 2.2e-16)))
   }
@@ -67,7 +67,7 @@ print.lsa <- function(x, ...) {
     }
   }
 
-  # --- initial-state distribution bar chart (tna / Nestimate style) ---
+  # --- initial-state distribution bar chart ---
   if (!is.null(x$inits) && any(x$inits > 0)) {
     cat("\n  Initial states:\n")
     ord <- order(-x$inits)
@@ -110,7 +110,9 @@ summary.lsa <- function(object, ...) {
   print(round(object$prob, 3))
   cat("\nAdjusted residuals (adj_res):\n")
   print(round(object$adj_res, 3))
-  invisible(object)
+  # Return the tidy one-row summary (invisibly): summary() prints the
+  # human view above, but `s <- summary(fit)` captures tidy data.
+  invisible(.lsa_glance(object))
 }
 
 #' @export
@@ -118,6 +120,48 @@ as.data.frame.lsa <- function(x, row.names = NULL, optional = FALSE,
                               ...) {
   out <- x$edges
   if (!is.null(row.names)) rownames(out) <- row.names
+  out
+}
+
+# One-row tidy overview of a fit (engine, sizes, significance counts,
+# tablewise tests). Returned invisibly by summary.lsa(); also the body
+# of the public fit_summary() accessor.
+.lsa_glance <- function(fit) {
+  e <- fit$edges
+  d <- fit$data
+  scal <- function(v) if (is.null(v)) NA_real_ else as.numeric(v)
+  data.frame(
+    engine        = fit$method,
+    lag           = fit$params$lag,
+    n_states      = nrow(fit$obs),
+    n_sequences   = if (is.null(d$n_sequences)) NA_integer_
+                    else as.integer(d$n_sequences),
+    n_events      = if (is.null(d$n_events)) NA_integer_
+                    else as.integer(d$n_events),
+    n_transitions = sum(fit$obs),
+    n_significant = sum(e$significant, na.rm = TRUE),
+    alpha         = fit$params$alpha,
+    lrx2          = scal(fit$lrx2$statistic),
+    lrx2_df       = if (is.null(fit$lrx2)) NA_integer_
+                    else as.integer(fit$lrx2$df),
+    lrx2_p        = scal(fit$lrx2$p),
+    x2            = scal(fit$x2$statistic),
+    x2_df         = if (is.null(fit$x2)) NA_integer_
+                    else as.integer(fit$x2$df),
+    x2_p          = scal(fit$x2$p),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+}
+
+#' @export
+summary.lsa_group <- function(object, ...) {
+  # Grouped summary: one tidy row per group (no rich per-group dump).
+  parts <- Map(function(f, g) cbind(group = g, .lsa_glance(f),
+                                    stringsAsFactors = FALSE),
+               unclass(object), names(object))
+  out <- do.call(rbind, parts)
+  rownames(out) <- NULL
   out
 }
 

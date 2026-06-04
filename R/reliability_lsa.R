@@ -185,6 +185,34 @@ print.lsa_reliability_group <- function(x, ...) {
   invisible(x)
 }
 
+#' Tidy the per-replicate split-half correlations.
+#'
+#' @param x An `lsa_reliability` (or `lsa_reliability_group`) object.
+#' @param row.names,optional,... Ignored (method signature compatibility).
+#' @return A `data.frame`, one row per replicate, with columns
+#'   `replicate` and `correlation` (a grouped object gains a leading
+#'   `group` column). `NA` correlations from degenerate splits are kept.
+#' @export
+as.data.frame.lsa_reliability <- function(x, row.names = NULL,
+                                          optional = FALSE, ...) {
+  data.frame(replicate = seq_len(x$R),
+             correlation = as.numeric(x$correlations),
+             stringsAsFactors = FALSE, row.names = row.names)
+}
+
+#' @rdname as.data.frame.lsa_reliability
+#' @export
+as.data.frame.lsa_reliability_group <- function(x, row.names = NULL,
+                                                optional = FALSE, ...) {
+  parts <- lapply(x, as.data.frame)
+  pieces <- Map(function(df, g) cbind(group = rep(g, nrow(df)), df,
+                                      stringsAsFactors = FALSE),
+                parts, names(x))
+  out <- do.call(rbind, pieces)
+  rownames(out) <- NULL
+  out
+}
+
 #' @export
 print.lsa_reliability <- function(x, ...) {
   cat("<lsa_reliability>\n")

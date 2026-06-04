@@ -84,7 +84,7 @@ test_that("unparseable time without a format errors clearly", {
   log <- make_log()
   log$bad <- c("foo", "bar", "baz", "qux", "a", "b", "c")
   expect_error(lsa(log, actor = "user", action = "act", time = "bad"),
-               "Could not parse the `time` column")
+               "`time` could not be parsed")
 })
 
 test_that("every time-parse branch errors on NA instead of dropping events", {

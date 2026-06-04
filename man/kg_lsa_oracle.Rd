@@ -33,7 +33,7 @@ independent third-party validation oracle for \code{\link[=lsa]{lsa()}}.
 The published values were extracted verbatim from the spreadsheet
 deposited at \doi{10.17632/bdwcj7vw94.1} (sheets
 \code{"整体分析"}, \code{"低结果"}, \code{"中结果"}, \code{"高结果"}). The author used
-GSEQ-style output (matrices labeled JNTF for joint transition
+the published output (matrices labeled JNTF for joint transition
 frequencies and ADJR for adjusted residuals) computed from the
 wide-format sequence sheet \code{"整体数据"}.
 

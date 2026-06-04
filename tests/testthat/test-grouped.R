@@ -61,49 +61,58 @@ test_that("single-group lsa() is unchanged when group is NULL", {
   expect_false(inherits(fit, "lsa_group"))
 })
 
-# --- grouped filter helpers --------------------------------------------
+# --- grouped transitions() ---------------------------------------------
 
-test_that("significant_transitions.lsa_group binds a long frame with a group col", {
+test_that("transitions() on a group binds a long frame with a group col", {
   fit <- lsa(engagement, group = make_group())
-  st <- significant_transitions(fit)
+  st <- transitions(fit, significant = TRUE)
   expect_s3_class(st, "data.frame")
-  expect_false(inherits(st, "tbl_df"))   # base-R house style, not tibble
   expect_true("group" %in% names(st))
-  # group must be the leading column.
-  expect_identical(names(st)[1L], "group")
-  # Every group label seen is a real level.
+  expect_identical(names(st)[1L], "group")           # leading column
   expect_true(all(st$group %in% names(fit)))
-  # Same downstream columns as the single-group edge frame, plus group.
-  single_cols <- names(significant_transitions(fit$high))
+  single_cols <- names(transitions(fit$high, significant = TRUE))
   expect_setequal(names(st), c("group", single_cols))
 })
 
-test_that("grouped over/under filters keep only the right residual sign", {
+test_that("grouped direction over/under keeps the right residual sign", {
   fit <- lsa(engagement, group = make_group())
-  ov <- overrepresented_transitions(fit)
-  un <- underrepresented_transitions(fit)
+  ov <- transitions(fit, direction = "over")
+  un <- transitions(fit, direction = "under")
   expect_true(all(ov$adj_res > 0))
   expect_true(all(un$adj_res < 0))
   expect_true("group" %in% names(ov))
   expect_true("group" %in% names(un))
 })
 
-test_that("grouped common_transitions respects min_count per group", {
+test_that("grouped transitions(min_count=) respects the threshold per group", {
   fit <- lsa(engagement, group = make_group())
-  cm <- common_transitions(fit, min_count = 3L)
+  cm <- transitions(fit, min_count = 3L)
   expect_true(all(cm$count >= 3L))
   expect_true("group" %in% names(cm))
 })
 
-test_that("grouped filter returns a stable zero-row frame when nothing passes", {
+test_that("grouped transitions returns a stable zero-row frame when empty", {
   fit <- lsa(engagement, group = make_group())
-  # No transition is observed a billion times, so every group is empty.
-  cm <- common_transitions(fit, min_count = 1e9)
+  cm <- transitions(fit, min_count = 1e9)
   expect_equal(nrow(cm), 0L)
   expect_identical(names(cm)[1L], "group")
-  # Columns still match the single-group shape (+ group).
   expect_setequal(names(cm),
-                  c("group", names(common_transitions(fit$high))))
+                  c("group", names(transitions(fit$high, min_count = 1e9))))
+})
+
+# --- grouped nodes() / tests() / initial() -----------------------------
+
+test_that("grouped reading verbs bind tidy group-prefixed frames", {
+  fit <- lsa(engagement, group = make_group())
+  for (verb in list(nodes, tests, initial)) {
+    out <- verb(fit)
+    expect_s3_class(out, "data.frame")
+    expect_identical(names(out)[1L], "group")          # leading column
+    expect_setequal(unique(out$group), names(fit))
+    # Same columns as the single-fit verb, plus the group column.
+    single <- names(verb(fit$high))
+    expect_setequal(names(out), c("group", single))
+  }
 })
 
 # --- grouped tna / igraph bridge ---------------------------------------

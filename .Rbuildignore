@@ -18,3 +18,8 @@
 ^tmp$
 ^local_testing_and_equivalence$
 ^Rplots\.pdf$
+^equivalence_testing$
+^CODE_REVIEW_TRANSITION_NETWORKS\.md$
+^TODO\.md$
+^MEMORY\.md$
+^AGENTS?\.md$

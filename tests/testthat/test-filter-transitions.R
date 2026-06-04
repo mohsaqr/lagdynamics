@@ -1,70 +1,75 @@
-test_that("significant_transitions returns rows with p < alpha", {
+# The transitions() verb and its filter arguments.
+
+test_that("transitions(fit) returns the tidy name-keyed edge frame", {
   fit <- lsa(engagement, engine = "classical")
-  sig <- significant_transitions(fit, alpha = 0.05)
-  expect_s3_class(sig, "data.frame")
-  expect_identical(colnames(sig), colnames(fit$edges))
+  tr <- transitions(fit)
+  expect_s3_class(tr, "data.frame")
+  # Name-keyed endpoints, distinct per-cell stats, no protocol cruft.
+  expect_identical(colnames(tr),
+    c("from", "to", "lag", "count", "expected", "prob", "prob_col",
+      "adj_res", "p", "yules_q", "kappa", "kappa_z", "kappa_p", "lift",
+      "sign", "significant"))
+  expect_false(any(c("from_label", "to_label", "weight", "edge") %in%
+                     colnames(tr)))
+  # from/to carry state names, matching nodes()$state.
+  expect_type(tr$from, "character")
+  expect_setequal(unique(c(tr$from, tr$to)), nodes(fit)$state)
+  expect_equal(nrow(tr), nrow(fit$obs)^2)
+  expect_identical(rownames(tr), as.character(seq_len(nrow(tr))))
+})
+
+test_that("transitions(significant = TRUE) keeps p < alpha", {
+  fit <- lsa(engagement, engine = "classical")
+  sig <- transitions(fit, significant = TRUE, alpha = 0.05)
   expect_true(all(sig$p < 0.05))
   expect_true(all(is.finite(sig$p)))
 })
 
-test_that("significant_transitions defaults to the fit's alpha", {
+test_that("transitions defaults to the fit's alpha", {
   fit <- lsa(engagement, engine = "classical", alpha = 0.01)
-  sig_default <- significant_transitions(fit)
-  sig_explicit <- significant_transitions(fit, alpha = 0.01)
-  expect_identical(sig_default, sig_explicit)
-  expect_true(all(sig_default$p < 0.01))
+  d <- transitions(fit, significant = TRUE)
+  e <- transitions(fit, significant = TRUE, alpha = 0.01)
+  expect_identical(d, e)
+  expect_true(all(d$p < 0.01))
 })
 
-test_that("significant_transitions excludes NA p-values", {
-  # Structural-zero fit produces NA p-values on forbidden cells.
-  # Those rows must not appear in the significant set.
-  K <- 3
-  sz <- 1 - diag(K)            # forbid self-transitions
-  fit <- lsa(engagement, engine = "classical", structural_zeros = sz)
-  sig <- significant_transitions(fit)
-  expect_false(any(is.na(sig$p)))
+test_that("transitions(significant=) excludes NA p-values", {
+  fit <- lsa(engagement, engine = "classical",
+             structural_zeros = 1 - diag(3))
+  expect_false(any(is.na(transitions(fit, significant = TRUE)$p)))
 })
 
-test_that("over/under partition significant transitions by sign", {
+test_that("direction over/under partition significant transitions by sign", {
   fit <- lsa(engagement, engine = "classical")
-  sig  <- significant_transitions(fit)
-  over <- overrepresented_transitions(fit)
-  under <- underrepresented_transitions(fit)
-  # Every over row has adj_res > 0; every under row has adj_res < 0.
+  sig  <- transitions(fit, significant = TRUE)
+  over <- transitions(fit, direction = "over")
+  under <- transitions(fit, direction = "under")
   expect_true(all(over$adj_res > 0))
   expect_true(all(under$adj_res < 0))
-  # Disjoint and exhaustive (modulo zero residuals, which are rare on
-  # real data but should still be handled).
   expect_equal(nrow(over) + nrow(under),
                sum(is.finite(sig$adj_res) & sig$adj_res != 0))
 })
 
-test_that("common_transitions filters by minimum observed count", {
+test_that("min_count filters by minimum observed count", {
   fit <- lsa(engagement, engine = "classical")
-  c1 <- common_transitions(fit, min_count = 1L)
-  c5 <- common_transitions(fit, min_count = 5L)
+  c1 <- transitions(fit, min_count = 1L)
+  c5 <- transitions(fit, min_count = 5L)
   expect_true(all(c1$count >= 1L))
   expect_true(all(c5$count >= 5L))
   expect_true(nrow(c5) <= nrow(c1))
 })
 
-test_that("filter helpers reject non-lsa input", {
-  expect_error(significant_transitions(list(edges = data.frame())),
-               class = "simpleError")
-  expect_error(common_transitions("not a fit"),
-               class = "simpleError")
+test_that("transitions rejects out-of-range alpha", {
+  fit <- lsa(engagement, engine = "classical")
+  expect_error(transitions(fit, significant = TRUE, alpha = 0))
+  expect_error(transitions(fit, significant = TRUE, alpha = 1))
+  expect_error(transitions(fit, significant = TRUE, alpha = c(0.05, 0.01)))
 })
 
-test_that("significant_transitions rejects out-of-range alpha", {
+test_that("transitions(min_count=) rejects NA / non-positive thresholds", {
   fit <- lsa(engagement, engine = "classical")
-  expect_error(significant_transitions(fit, alpha = 0))
-  expect_error(significant_transitions(fit, alpha = 1))
-  expect_error(significant_transitions(fit, alpha = -0.1))
-  expect_error(significant_transitions(fit, alpha = c(0.05, 0.01)))
-})
-
-test_that("common_transitions rejects min_count < 1", {
-  fit <- lsa(engagement, engine = "classical")
-  expect_error(common_transitions(fit, min_count = 0))
-  expect_error(common_transitions(fit, min_count = -1))
+  expect_error(transitions(fit, min_count = NA_real_))   # was silent all-NA rows
+  expect_error(transitions(fit, min_count = 0))
+  expect_error(transitions(fit, min_count = -5))
+  expect_s3_class(transitions(fit, min_count = 100), "data.frame")  # valid
 })

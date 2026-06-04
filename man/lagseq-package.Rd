@@ -44,9 +44,8 @@ Engine registry: \code{register_lsa_engine()}, \code{get_lsa_engine()},
 Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}},
 \code{\link[=reliability_lsa]{reliability_lsa()}}
 
-Filtering: \code{\link[=significant_transitions]{significant_transitions()}},
-\code{\link[=overrepresented_transitions]{overrepresented_transitions()}}, \code{\link[=underrepresented_transitions]{underrepresented_transitions()}},
-\code{\link[=common_transitions]{common_transitions()}}
+Reading a fit (tidy data frames): \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}},
+\code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{\link[=summary]{summary()}}.
 
 TNA / igraph bridge: \code{\link[=lsa_to_tna]{lsa_to_tna()}}, \code{\link[=as.igraph.lsa]{as.igraph.lsa()}}. These
 convert an \code{lsa} fit into the native object of a downstream network
@@ -72,7 +71,7 @@ using \code{tna::compare()}.
 
 \references{
 Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
-Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+Sequential analysis}. Cambridge University Press.
 
 Bakeman, R., & Gottman, J. M. (1997). \emph{Observing interaction: An
 introduction to sequential analysis} (2nd ed.). Cambridge University
