@@ -2,6 +2,12 @@
 
 > Modern, tidy lag sequential analysis for categorical event sequences.
 
+<!-- badges: start -->
+[![r-universe status](https://mohsaqr.r-universe.dev/badges/lagseq)](https://mohsaqr.r-universe.dev/lagseq)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+<!-- badges: end -->
+
 `lagseq` provides a unified, pipe-friendly interface for lag sequential
 analysis (LSA). A single `lsa()`
 constructor with a pluggable engine registry exposes the classical and
@@ -37,6 +43,27 @@ table ready for transition-network visualization.
   (`grid`, `stats`, `utils`). The plotting and interop packages
   (`ggplot2`, `cograph`, `tna`, `Nestimate`, `igraph`, `TraMineR`) are
   soft `Suggests`, used only when present.
+
+## Installation
+
+Install the latest build from [r-universe](https://mohsaqr.r-universe.dev/lagseq)
+(recommended — pre-built, no compiler required):
+
+```r
+install.packages("lagseq", repos = "https://mohsaqr.r-universe.dev")
+```
+
+Or install the development version from GitHub:
+
+```r
+# install.packages("remotes")
+remotes::install_github("mohsaqr/lagseq")
+```
+
+`lagseq` needs only base R at runtime (`grid`, `stats`, `utils`). The
+plotting and interop packages (`ggplot2`, `cograph`, `tna`, `Nestimate`,
+`igraph`, `TraMineR`) are optional `Suggests` — install only the ones
+you need.
 
 ## Quick start
 
