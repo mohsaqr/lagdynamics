@@ -59,14 +59,12 @@ not coupled to \code{tna} at install time.
 \section{Roadmap (not yet implemented)}{
 
 
-Native plot methods (\code{plot.lsa()}, heatmap/network/residual/flow
-variants), between-group network comparison (\code{compare_lsa()},
-\code{group_lsa()}), and stationarity tests (\code{stationarity_lsa()}) are
-planned but not yet exported. Until then, network visualization
-works through the \code{c("lsa", "cograph_network")} class and the
-\code{cograph} package's plot machinery, and between-group comparison
-is possible by routing each group's fit through \code{\link[=lsa_to_tna]{lsa_to_tna()}} and
-using \code{tna::compare()}.
+A dedicated between-group network comparison verb (\code{compare_lsa()})
+and stationarity tests (\code{stationarity_lsa()}) are planned but not
+yet exported. Until then, multi-group fits are built directly with
+\code{lsa(data, group = ...)}, and between-group comparison is possible
+by routing each group's fit through \code{\link[=lsa_to_tna]{lsa_to_tna()}} and using
+\code{tna::compare()}.
 }
 
 \references{

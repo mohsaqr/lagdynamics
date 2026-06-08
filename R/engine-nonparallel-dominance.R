@@ -48,9 +48,12 @@
 
   p_val <- .normal_p(z, alternative)
 
-  # Exact binomial test on each cell (i, j) where pair total > 0.
-  # Convention: alternative "two.sided" tests P(i->j) != 1/2 given the
-  # pair total. The test is symmetric so binomial_p[i,j] == binomial_p[j,i].
+  # Exact binomial test on each cell (i, j) where pair total > 0,
+  # testing P(i->j) against 1/2 given the pair total under `alternative`.
+  # binomial_p[i, j] == binomial_p[j, i] holds only for the two-sided
+  # alternative; for "greater"/"less" the two directions are tested with
+  # the same one-sided rule and are NOT equal (each cell reports the
+  # p-value for that direction's dominance).
   binomial_p <- matrix(NA_real_, K, K)
   for (i in seq_len(K)) {
     for (j in seq_len(K)) {

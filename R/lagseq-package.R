@@ -48,14 +48,12 @@
 #'
 #' @section Roadmap (not yet implemented):
 #'
-#' Native plot methods (`plot.lsa()`, heatmap/network/residual/flow
-#' variants), between-group network comparison (`compare_lsa()`,
-#' `group_lsa()`), and stationarity tests (`stationarity_lsa()`) are
-#' planned but not yet exported. Until then, network visualization
-#' works through the `c("lsa", "cograph_network")` class and the
-#' `cograph` package's plot machinery, and between-group comparison
-#' is possible by routing each group's fit through [lsa_to_tna()] and
-#' using `tna::compare()`.
+#' A dedicated between-group network comparison verb (`compare_lsa()`)
+#' and stationarity tests (`stationarity_lsa()`) are planned but not
+#' yet exported. Until then, multi-group fits are built directly with
+#' `lsa(data, group = ...)`, and between-group comparison is possible
+#' by routing each group's fit through [lsa_to_tna()] and using
+#' `tna::compare()`.
 #'
 #' @references
 #'

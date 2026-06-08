@@ -98,10 +98,27 @@ permute_lsa <- function(fit,
   # Per-sequence index lists for within-sequence shuffling.
   seq_positions <- split(seq_len(T), seq_id)
 
-  # Pre-validate user-supplied shuffles.
+  # Pre-validate user-supplied shuffles. Each element must be a genuine
+  # permutation of seq_len(T): used directly as events[perm], a vector
+  # with duplicates, gaps, out-of-range indices, or NA would silently
+  # drop/duplicate events or inject NA and still return an object,
+  # breaking the documented reproducible-replay contract.
   if (!is.null(shuffles)) {
-    stopifnot(is.list(shuffles), length(shuffles) >= R)
+    if (!is.list(shuffles) || length(shuffles) < R) {
+      stop(sprintf("`shuffles` must be a list of length >= R (%d).", R),
+           call. = FALSE)
+    }
     shuffles <- shuffles[seq_len(R)]
+    target <- seq_len(T)
+    bad <- which(!vapply(shuffles, .is_permutation, logical(1), n = T))
+    if (length(bad) > 0L) {
+      stop(sprintf(
+        "`shuffles[[%d]]` is not a permutation of seq_len(%d). Each ",
+        bad[1L], T),
+        "shuffle must contain every integer 1..n_events exactly once, ",
+        "with no NA, duplicates, or out-of-range values.",
+        call. = FALSE)
+    }
   }
 
   worker <- function(b) {
@@ -191,4 +208,14 @@ permute_lsa <- function(fit,
     }
   }
   events
+}
+
+# TRUE iff `p` is a permutation of seq_len(n): integer-valued, length n,
+# finite, and a bijection onto 1..n. Used to reject malformed replay
+# hooks before they reach events[perm].
+.is_permutation <- function(p, n) {
+  if (length(p) != n) return(FALSE)
+  p <- suppressWarnings(as.integer(p))
+  if (anyNA(p)) return(FALSE)
+  all(sort(p) == seq_len(n))
 }

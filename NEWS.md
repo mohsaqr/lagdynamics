@@ -20,19 +20,25 @@ implemented from primary literature (Bakeman & Quera 1995; Sackett
   `lsa_bidirectional()`, `lsa_parallel_dominance()`,
   `lsa_nonparallel_dominance()`.
 - Sequence-level bootstrap (`bootstrap_lsa()`), permutation
-  (`permute_lsa()`), and case-drop stability (`stability_lsa()`).
-- Group, stationarity, and comparison verbs: `group_lsa()`,
-  `stationarity_lsa()`, `compare_lsa()`.
+  (`permute_lsa()`), case-drop stability (`stability_lsa()`), and
+  split-half reliability (`reliability_lsa()`).
+- Multi-group fits via `lsa(data, group = ...)`, returning an
+  `lsa_group` object with grouped `transitions()`, `nodes()`,
+  `tests()`, and `initial()` methods.
 - Tidy edge tables and S3 objects of class
   `c("lsa", "cograph_network")` for seamless integration with the
   `cograph` plotting layer.
-- Pipe-friendly aesthetic setters in the style of cograph's `sn_*`
-  chain: `ln_layout()`, `ln_theme()`, `ln_palette()`, `ln_edges()`,
-  `ln_nodes()`.
+- Network interop: `lsa_to_tna()` converts a fit to a `tna` object and
+  `as.igraph()` to an `igraph` graph (lagseq converts; the downstream
+  package does the analysis).
 - Reproducibility hooks (`indices=`, `shuffles=`) for bit-identical
   cross-language verification.
 
+Planned for a future release: between-group comparison
+(`compare_lsa()`) and stationarity testing (`stationarity_lsa()`).
+
 ### Dependencies
 
-Single-runtime-dep policy: base R plus `ggplot2` and `grid`. All other
-packages are in `Suggests:` and used only when present.
+Lean runtime: base R plus `grid` (`Imports: grid, stats, utils`). The
+plotting and interop packages (`ggplot2`, `cograph`, `tna`, `Nestimate`,
+`igraph`, `TraMineR`) are soft `Suggests`, used only when present.

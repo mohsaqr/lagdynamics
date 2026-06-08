@@ -16,8 +16,12 @@
 #' - A list of atomic vectors — treated as multiple independent
 #'   sequences; transitions are not counted across sequence boundaries.
 #' - A wide matrix or data.frame with rows = sequences, columns =
-#'   ordered time points. Missing values (`NA`) and empty strings
-#'   terminate a sequence.
+#'   ordered time points. Missing values (`NA`) and empty strings are
+#'   treated as missingness, not as a state: they are dropped wherever
+#'   they occur in a row and the surrounding events close up, so no
+#'   transition is counted into or out of a gap. To model missingness
+#'   as its own state, recode it (e.g. `NA -> "missing"`) before
+#'   calling [lsa()].
 #' - A square numeric matrix of pre-computed transition counts. Row
 #'   `i`, column `j` is the count of `i -> j` transitions. In this case
 #'   `events` and `seq_id` are not available and downstream resampling
@@ -171,6 +175,15 @@ lsa_data <- function(x, labels = NULL) {
 
 # Build canonical lsa_data from a pre-computed transition matrix.
 .lsa_data_from_matrix <- function(m, labels = NULL) {
+  # Reject non-finite cells before the sign check: an NA would make
+  # any(m < 0) itself NA ("missing value where TRUE/FALSE needed"), and
+  # an Inf count would pass straight through into the engine and yield a
+  # plausible-looking but invalid fit (NaN expecteds, all-NA residuals,
+  # a tablewise test that spuriously reports perfect independence).
+  if (anyNA(m) || !all(is.finite(m))) {
+    stop("Transition matrix must contain only finite counts ",
+         "(no NA, NaN, or Inf).", call. = FALSE)
+  }
   if (any(m < 0)) {
     stop("Transition matrix must be non-negative.", call. = FALSE)
   }
@@ -206,6 +219,28 @@ lsa_data <- function(x, labels = NULL) {
   )
 }
 
+# Coerce a numeric/logical event vector to 1-based integer codes, but
+# only when every value is a whole number >= 1. Without the whole-number
+# guard, as.integer() would silently truncate fractional codes
+# (1.9 -> 1, 2.8 -> 2), relabelling the sequence into a different one
+# than the user supplied.
+.whole_event_codes <- function(flat) {
+  if (anyNA(flat)) stop("Integer events contain NA.", call. = FALSE)
+  if (!all(is.finite(flat))) {
+    stop("Event codes must be finite (no NaN or Inf).", call. = FALSE)
+  }
+  if (!isTRUE(all(flat == floor(flat)))) {
+    stop("Numeric event codes must be whole numbers; fractional values ",
+         "such as 1.9 are not valid category codes. Pass character ",
+         "labels instead if these are not integer codes.", call. = FALSE)
+  }
+  ints <- as.integer(flat)
+  if (min(ints) < 1L) {
+    stop("Integer event codes must be >= 1.", call. = FALSE)
+  }
+  ints
+}
+
 # Unified label resolution and integer matching. When `labels` is
 # supplied, integers are treated as 1-based indices into `labels`;
 # character/factor input is matched by name. When `labels` is NULL,
@@ -217,11 +252,7 @@ lsa_data <- function(x, labels = NULL) {
       stop("`labels` must be unique.", call. = FALSE)
     }
     if (is.numeric(flat) || is.integer(flat) || is.logical(flat)) {
-      ints <- as.integer(flat)
-      if (anyNA(ints)) stop("Integer events contain NA.", call. = FALSE)
-      if (min(ints) < 1L) {
-        stop("Integer event codes must be >= 1.", call. = FALSE)
-      }
+      ints <- .whole_event_codes(flat)
       if (max(ints) > length(labels)) {
         stop(sprintf(
           "Maximum event code %d exceeds `labels` length %d.",
@@ -247,11 +278,7 @@ lsa_data <- function(x, labels = NULL) {
     return(list(labels = levels(flat), events_int = as.integer(flat)))
   }
   if (is.numeric(flat) || is.integer(flat) || is.logical(flat)) {
-    ints <- as.integer(flat)
-    if (anyNA(ints)) stop("Integer events contain NA.", call. = FALSE)
-    if (min(ints) < 1L) {
-      stop("Integer event codes must be >= 1.", call. = FALSE)
-    }
+    ints <- .whole_event_codes(flat)
     K <- max(ints)
     return(list(labels = paste("Code", seq_len(K)), events_int = ints))
   }

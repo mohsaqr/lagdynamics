@@ -46,8 +46,12 @@ single sequence.
 \item A list of atomic vectors — treated as multiple independent
 sequences; transitions are not counted across sequence boundaries.
 \item A wide matrix or data.frame with rows = sequences, columns =
-ordered time points. Missing values (\code{NA}) and empty strings
-terminate a sequence.
+ordered time points. Missing values (\code{NA}) and empty strings are
+treated as missingness, not as a state: they are dropped wherever
+they occur in a row and the surrounding events close up, so no
+transition is counted into or out of a gap. To model missingness
+as its own state, recode it (e.g. \code{NA -> "missing"}) before
+calling \code{\link[=lsa]{lsa()}}.
 \item A square numeric matrix of pre-computed transition counts. Row
 \code{i}, column \code{j} is the count of \code{i -> j} transitions. In this case
 \code{events} and \code{seq_id} are not available and downstream resampling

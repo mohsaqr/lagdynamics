@@ -16,8 +16,11 @@
 #'
 #' @param x Either an [lsa_data] object or any input accepted by
 #'   [lsa_data()] (which will be coerced).
-#' @param lag Positive integer. The lag at which to count transitions.
-#'   Default `1`.
+#' @param lag Integer. The lag at which to count transitions; default
+#'   `1`. A positive lag counts successors (`from` at `t`, `to` at
+#'   `t + lag`), a negative lag counts predecessors, and `0` pairs each
+#'   event with itself (a degenerate diagonal). Must be a single finite
+#'   whole number.
 #'
 #' @return An object of class `c("lsa_transitions", "list")` with
 #'   elements:
@@ -46,7 +49,7 @@
 lsa_transitions <- function(x, lag = 1) {
   if (!inherits(x, "lsa_data")) x <- lsa_data(x)
   stopifnot(
-    is.numeric(lag), length(lag) == 1L, lag == round(lag)
+    is.numeric(lag), length(lag) == 1L, is.finite(lag), lag == round(lag)
   )
   lag <- as.integer(lag)
 

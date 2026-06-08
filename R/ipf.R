@@ -63,6 +63,16 @@ lsa_ipf <- function(obs, structure = NULL, tol = 1e-8, max_iter = 200L) {
     is.matrix(obs), is.numeric(obs),
     nrow(obs) == ncol(obs), nrow(obs) >= 2L
   )
+  # IPF is defined for a non-negative finite count table. NA/Inf would
+  # propagate into the scaling passes and return a converged-looking but
+  # meaningless fit; negative "counts" are outside the model entirely.
+  if (anyNA(obs) || !all(is.finite(obs))) {
+    stop("`obs` must contain only finite counts (no NA, NaN, or Inf).",
+         call. = FALSE)
+  }
+  if (any(obs < 0)) {
+    stop("`obs` must be a non-negative count matrix.", call. = FALSE)
+  }
   K <- nrow(obs)
   # No structural zeros by default. Self-transitions are kept; the
   # diagonal is part of the model. Users who want to forbid

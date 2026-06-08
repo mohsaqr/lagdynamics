@@ -27,10 +27,14 @@
 #'   block length. Default `NULL` -> `ceiling(sqrt(T))`.
 #' @param level_alpha Numeric. Confidence level for percentile
 #'   intervals. Default `0.95`.
-#' @param indices Optional `R x S` integer matrix where row `b` lists
-#'   the sequence (or event-block start) indices to use on resample
-#'   `b`. When supplied, replaces internal RNG and enables
-#'   bit-identical reproducibility across runs. See Details.
+#' @param indices Optional integer matrix of replay indices, one row
+#'   per resample (row `b` is used for resample `b`). For sequence-level
+#'   bootstrap it must be `R x S` with each entry a sequence index in
+#'   `1..S`. For event-level bootstrap it is `R x T` with each entry an
+#'   event position in `1..T` (the fully expanded positions, not block
+#'   starts). When supplied, replaces internal RNG and enables
+#'   bit-identical reproducibility across runs. Dimensions and ranges
+#'   are validated. See Details.
 #' @param parallel Logical. Use multi-core resampling. Default
 #'   `FALSE`. Requires base R only (`parallel` package).
 #' @param n_cores Integer. Worker count when `parallel = TRUE`.
@@ -53,9 +57,12 @@
 #' length equals the original `T`.
 #'
 #' **Reproducibility hook.** Supply `indices` as an `R x S` integer
-#' matrix (sequence-level) or `R x n_blocks` matrix of start
-#' positions (event-level) to deterministically replay the bootstrap
-#' across sessions, processes, or languages.
+#' matrix of sequence indices (sequence-level) or an `R x T` matrix of
+#' event positions (event-level) to deterministically replay the
+#' bootstrap across sessions, processes, or languages. The event-level
+#' matrix holds the fully expanded resampled positions, i.e. the same
+#' form produced internally, so a captured `indices_used` can be fed
+#' straight back in.
 #'
 #' **NA handling.** Per-cell summary statistics (`mean`, `se`,
 #' `ci_low`, `ci_high`, `p_boot`) are computed with `na.rm = TRUE`,
@@ -137,15 +144,13 @@ bootstrap_lsa <- function(fit,
 
   # Pre-compute resample indices.
   if (!is.null(indices)) {
-    stopifnot(is.matrix(indices), nrow(indices) >= R)
-    indices <- indices[seq_len(R), , drop = FALSE]
-    storage.mode(indices) <- "integer"
+    indices <- .validate_boot_indices(indices, R = R, level = level_used,
+                                      S = d$n_sequences, T = d$n_events)
   } else if (level_used == "sequence") {
     S <- d$n_sequences
     indices <- matrix(sample.int(S, R * S, replace = TRUE), R, S)
   } else {
-    bl <- if (is.null(block_length)) ceiling(sqrt(d$n_events)) else
-            as.integer(block_length)
+    bl <- .validate_block_length(block_length, T = d$n_events)
     indices <- .stationary_indices(R = R, T = d$n_events,
                                    mean_block = bl)
   }
@@ -212,6 +217,56 @@ bootstrap_lsa <- function(fit,
 }
 
 # --- helpers ----------------------------------------------------------
+
+# Validate a user-supplied replay-index matrix. For sequence-level
+# resampling each row must list exactly S sequence indices in 1..S; for
+# event-level resampling each row is a vector of event positions in
+# 1..T (the same expanded form .stationary_indices() produces, NOT
+# block-start positions). Without these checks a wrong-width matrix
+# silently resamples a different number of units and an out-of-range or
+# NA index reaches per_seq[idx] / d$events[idx], breaking the documented
+# bit-identical replay contract.
+.validate_boot_indices <- function(indices, R, level, S, T) {
+  if (!is.matrix(indices) || !is.numeric(indices)) {
+    stop("`indices` must be a numeric matrix.", call. = FALSE)
+  }
+  if (nrow(indices) < R) {
+    stop(sprintf("`indices` has %d rows but R = %d are required.",
+                 nrow(indices), R), call. = FALSE)
+  }
+  indices <- indices[seq_len(R), , drop = FALSE]
+  if (anyNA(indices) || !all(is.finite(indices)) ||
+      !isTRUE(all(indices == floor(indices)))) {
+    stop("`indices` must contain only finite whole numbers ",
+         "(no NA, NaN, Inf, or fractional values).", call. = FALSE)
+  }
+  hi <- if (level == "sequence") S else T
+  unit <- if (level == "sequence") "sequence" else "event"
+  if (level == "sequence" && ncol(indices) != S) {
+    stop(sprintf(
+      "`indices` has %d columns but sequence-level replay needs exactly ",
+      ncol(indices)),
+      sprintf("S = %d (one column per resampled sequence).", S),
+      call. = FALSE)
+  }
+  if (min(indices) < 1L || max(indices) > hi) {
+    stop(sprintf("`indices` values must be in 1..%d (%s positions).",
+                 hi, unit), call. = FALSE)
+  }
+  storage.mode(indices) <- "integer"
+  indices
+}
+
+# Validate the event-level mean block length. NULL -> ceiling(sqrt(T)).
+.validate_block_length <- function(block_length, T) {
+  if (is.null(block_length)) return(ceiling(sqrt(T)))
+  if (!is.numeric(block_length) || length(block_length) != 1L ||
+      !is.finite(block_length) || block_length < 1) {
+    stop("`block_length` must be a single finite number >= 1.",
+         call. = FALSE)
+  }
+  as.integer(block_length)
+}
 
 # Pre-compute indices for stationary block bootstrap.
 # Each row is a length-T integer vector of event positions to sample.
@@ -327,9 +382,10 @@ bootstrap_lsa <- function(fit,
   s_prob   <- summarize_one(boot_prob,    obs_prob,   "prob")
   s_yulesq <- summarize_one(boot_yulesq,  obs_yulesq, "yules_q")
 
-  # Two-sided bootstrap p-value: 2 * min(P(stat <= 0), P(stat >= 0))
-  p_boot_count   <- 2 * pmin(colMeans(boot_obs     <= 0, na.rm = TRUE),
-                              colMeans(boot_obs     >= 0, na.rm = TRUE))
+  # Two-sided bootstrap p-value on adjusted residuals:
+  # 2 * min(P(stat <= 0), P(stat >= 0)). Only residuals get a bootstrap
+  # p-value; a p-value "around zero" is not meaningful for non-negative
+  # counts or probabilities, so those columns report CIs only.
   p_boot_adj     <- 2 * pmin(colMeans(boot_adj_res <= 0, na.rm = TRUE),
                               colMeans(boot_adj_res >= 0, na.rm = TRUE))
   stable_adj <- sign(s_adj$ci_low) == sign(s_adj$ci_high) &

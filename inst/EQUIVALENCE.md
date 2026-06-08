@@ -1,10 +1,10 @@
 # lagseq Equivalence Report
 
-> **Status:** scaffold — this file will be populated as engines and
-> tests are implemented in Steps 2 through 7. The final published
-> version (with engine v0.1.0) will report dataset counts, comparison
-> counts, and pass rates per oracle in the style of psychaj's
-> equivalence report.
+> **Status:** the five core engines are implemented and validated; the
+> achieved pass rates below cover the classical engine against base-R
+> primitives and published worked examples. Oracle rows for functions
+> not yet exported (`stationarity_lsa`) are marked *planned* and are
+> not part of the current battery.
 
 ## Methodology
 
@@ -49,7 +49,7 @@ reference during implementation or validation.
 | `nonparallel_dominance` | Worked-table match | Wampold (1984) Table 3 | 0.01 |
 | `bootstrap_lsa` | Percentile CI | `stats::quantile(stat_b, c(.025, .975))` | exact |
 | `permute_lsa` | p-value with +1 correction | hand computation on tiny permutation set | exact |
-| `stationarity_lsa` | LR test | `stats::pchisq(G2_S, df_S, lower.tail = FALSE)` | 1e-12 |
+| `stationarity_lsa` *(planned)* | LR test | `stats::pchisq(G2_S, df_S, lower.tail = FALSE)` | 1e-12 |
 
 ## Reproducibility hooks
 
@@ -137,9 +137,10 @@ output cell-by-cell.
 | Kappa p-values | 4 dp | 4.5e-05 |
 | chi-square primitive cross-check on same input | — | **1e-12** |
 
-Every cell of every output matrix agrees with the paper at better
-than the paper's own printed precision. This is the bit-identity
-result against the canonical published LSA reference.
+Every cell of every output matrix agrees with the canonical published
+LSA reference to within the paper's own printed precision (the paper
+reports rounded values, so differences are at the rounding level, not
+exact binary equality).
 
 ### Test suite totals (after Step 3b)
 

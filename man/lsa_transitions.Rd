@@ -10,8 +10,11 @@ lsa_transitions(x, lag = 1)
 \item{x}{Either an \link{lsa_data} object or any input accepted by
 \code{\link[=lsa_data]{lsa_data()}} (which will be coerced).}
 
-\item{lag}{Positive integer. The lag at which to count transitions.
-Default \code{1}.}
+\item{lag}{Integer. The lag at which to count transitions; default
+\code{1}. A positive lag counts successors (\code{from} at \code{t}, \code{to} at
+\code{t + lag}), a negative lag counts predecessors, and \code{0} pairs each
+event with itself (a degenerate diagonal). Must be a single finite
+whole number.}
 }
 \value{
 An object of class \code{c("lsa_transitions", "list")} with

@@ -34,10 +34,14 @@ block length. Default \code{NULL} -> \code{ceiling(sqrt(T))}.}
 \item{level_alpha}{Numeric. Confidence level for percentile
 intervals. Default \code{0.95}.}
 
-\item{indices}{Optional \verb{R x S} integer matrix where row \code{b} lists
-the sequence (or event-block start) indices to use on resample
-\code{b}. When supplied, replaces internal RNG and enables
-bit-identical reproducibility across runs. See Details.}
+\item{indices}{Optional integer matrix of replay indices, one row
+per resample (row \code{b} is used for resample \code{b}). For sequence-level
+bootstrap it must be \verb{R x S} with each entry a sequence index in
+\verb{1..S}. For event-level bootstrap it is \verb{R x T} with each entry an
+event position in \verb{1..T} (the fully expanded positions, not block
+starts). When supplied, replaces internal RNG and enables
+bit-identical reproducibility across runs. Dimensions and ranges
+are validated. See Details.}
 
 \item{parallel}{Logical. Use multi-core resampling. Default
 \code{FALSE}. Requires base R only (\code{parallel} package).}
@@ -86,9 +90,12 @@ wrap around the event stream and are concatenated until total
 length equals the original \code{T}.
 
 \strong{Reproducibility hook.} Supply \code{indices} as an \verb{R x S} integer
-matrix (sequence-level) or \verb{R x n_blocks} matrix of start
-positions (event-level) to deterministically replay the bootstrap
-across sessions, processes, or languages.
+matrix of sequence indices (sequence-level) or an \verb{R x T} matrix of
+event positions (event-level) to deterministically replay the
+bootstrap across sessions, processes, or languages. The event-level
+matrix holds the fully expanded resampled positions, i.e. the same
+form produced internally, so a captured \code{indices_used} can be fed
+straight back in.
 
 \strong{NA handling.} Per-cell summary statistics (\code{mean}, \code{se},
 \code{ci_low}, \code{ci_high}, \code{p_boot}) are computed with \code{na.rm = TRUE},

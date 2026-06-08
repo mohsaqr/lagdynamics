@@ -72,6 +72,7 @@ stability_lsa <- function(fit,
   per_seq <- split(d$events, d$seq_id)
   S <- length(per_seq)
   n_keep <- max(1L, round(S * proportion))
+  K <- d$n_states
 
   worker <- function(b) {
     if (S >= 2L) {
@@ -87,9 +88,18 @@ stability_lsa <- function(fit,
       new_events <- d$events[start:(start + m - 1L)]
       new_seq_id <- rep.int(1L, length(new_events))
     }
-    fb <- .refit_from_events(events = new_events,
-                              seq_id = new_seq_id,
-                              labels = d$labels, recipe = recipe)
+    # A subsample of only singleton sequences contributes zero
+    # transitions and the engine errors. That is a property of the
+    # random case-drop, not of the fit, so the replicate yields an
+    # all-NA significance row rather than aborting the whole run --
+    # matching reliability_lsa()'s degenerate-split handling.
+    fb <- tryCatch(
+      .refit_from_events(events = new_events,
+                         seq_id = new_seq_id,
+                         labels = d$labels, recipe = recipe),
+      error = function(e) NULL
+    )
+    if (is.null(fb)) return(rep(NA, K * K))
     as.vector(fb$p < recipe$alpha)
   }
 
@@ -97,7 +107,6 @@ stability_lsa <- function(fit,
   results <- .run_parallel(worker, R = R, parallel = parallel,
                            n_cores = n_cores, verbose = verbose)
 
-  K <- d$n_states
   stab_mat <- do.call(rbind, results)        # R x K^2 logical
   stab_mat[is.na(stab_mat)] <- FALSE
   storage.mode(stab_mat) <- "logical"
