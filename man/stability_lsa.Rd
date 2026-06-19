@@ -61,7 +61,7 @@ significant. Edges with stability >= \code{min_stable} (default
 \donttest{
 fit <- lsa(engagement, engine = "classical")
 st <- stability_lsa(fit, R = 100)
-head(st$edges[order(-st$edges$stability), ])
+head(as.data.frame(st))
 }
 
 }

@@ -132,6 +132,26 @@ test_that("bootstrap_lsa() rejects an invalid block_length", {
   expect_error(bootstrap_lsa(fit, R = 1, block_length = NA), "block_length")
 })
 
+test_that("resampling helpers reject non-scalar and non-integer R values", {
+  fit <- lsa(list(c("a", "b", "a", "b", "a"), c("b", "a", "b", "a")),
+             engine = "classical")
+  expect_error(bootstrap_lsa(fit, R = c(1, 2)))
+  expect_error(bootstrap_lsa(fit, R = 1.5))
+  expect_error(permute_lsa(fit, R = c(1, 2)))
+  expect_error(permute_lsa(fit, R = 1.5))
+  expect_error(stability_lsa(fit, R = c(1, 2)))
+  expect_error(stability_lsa(fit, R = 1.5))
+  expect_error(reliability_lsa(fit, R = c(1, 2)))
+  expect_error(reliability_lsa(fit, R = 1.5))
+})
+
+test_that("bootstrap_lsa() rejects non-scalar confidence levels", {
+  fit <- lsa(list(c("a", "b", "a", "b", "a"), c("b", "a", "b", "a")),
+             engine = "classical")
+  expect_error(bootstrap_lsa(fit, R = 1, level_alpha = c(0.9, 0.95)))
+  expect_error(bootstrap_lsa(fit, R = 1, level_alpha = NA_real_))
+})
+
 # --- stability_lsa(): degenerate subsamples do not abort the run -------
 
 test_that("stability_lsa() tolerates all-singleton subsamples", {
@@ -142,4 +162,20 @@ test_that("stability_lsa() tolerates all-singleton subsamples", {
   st <- expect_no_error(stability_lsa(fit, R = 30, proportion = 0.5))
   expect_s3_class(st, "lsa_stability")
   expect_equal(nrow(st$edges), fit$data$n_states^2)
+})
+
+test_that("loops = FALSE matches 1 - diag(K) and forbids the diagonal", {
+  set.seed(7L)
+  seqs <- split(sample(c("a", "b", "c"), 400L, replace = TRUE),
+                rep(seq_len(20L), each = 20L))
+  noloop <- lsa(seqs, loops = FALSE)
+  mat    <- lsa(seqs, structural_zeros = 1 - diag(3))
+  expect_equal(noloop$exp, mat$exp)
+  expect_true(all(diag(noloop$exp) == 0))        # self-transitions forbidden
+  expect_true(all(is.na(diag(noloop$adj_res))))  # and not tested
+  # loops = TRUE (default) keeps the diagonal estimable.
+  expect_false(any(is.na(diag(lsa(seqs)$adj_res))))
+  # loops = FALSE also zeros the diagonal of an explicit matrix.
+  combo <- lsa(seqs, loops = FALSE, structural_zeros = matrix(1, 3, 3))
+  expect_true(all(diag(combo$exp) == 0))
 })

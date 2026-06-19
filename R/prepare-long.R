@@ -12,7 +12,7 @@
 
 # Build a list of action sequences from a long-format data.frame.
 .prepare_long <- function(data, actor, action, time = NULL, order = NULL,
-                          session = NULL, time_threshold = 900,
+                          session = NULL, group = NULL, time_threshold = 900,
                           custom_format = NULL, is_unix_time = FALSE,
                           unix_time_unit = "seconds") {
   if (!is.data.frame(data)) {
@@ -24,6 +24,12 @@
   if (!is.null(time))    .check_col(data, time, "time")
   if (!is.null(order))   .check_col(data, order, "order")
   if (!is.null(session)) .check_col(data, session, "session")
+  if (!is.null(group))   .check_col(data, group, "group")
+  if (!is.numeric(time_threshold) || length(time_threshold) != 1L ||
+      !is.finite(time_threshold) || time_threshold <= 0) {
+    stop("`time_threshold` must be a single finite number > 0.",
+         call. = FALSE)
+  }
 
   ev <- as.character(data[[action]])
 
@@ -66,10 +72,34 @@
       list(evs)
     }
   })
-  # Flatten the one-actor-many-sessions nesting into a flat sequence
-  # list and drop any empty sequences.
+  # Per-sequence-unit group label: the grouping column must be constant
+  # within each actor (or actor x session), so a recovered sequence maps
+  # unambiguously to one group. Computed before flattening, then expanded
+  # to the (possibly gap-split) output sequences and filtered alongside.
+  lab_by_grp <- if (!is.null(group)) {
+    vapply(idx_by_grp, function(ix) {
+      gv <- unique(as.character(data[[group]][ix]))
+      if (length(gv) != 1L) {
+        stop(sprintf(
+          paste0("Group column '%s' is not constant within a sequence ",
+                 "(actor/session): a recovered sequence would span groups ",
+                 "%s. Group by a column that is fixed per actor."),
+          group, paste(sQuote(gv), collapse = ", ")), call. = FALSE)
+      }
+      gv
+    }, character(1))
+  } else NULL
+
+  # Flatten the one-actor-many-sessions nesting into a flat sequence list
+  # and drop any empty sequences (filtering labels in lockstep).
   out <- unlist(seqs, recursive = FALSE, use.names = FALSE)
-  out[vapply(out, length, integer(1L)) > 0L]
+  keep <- vapply(out, length, integer(1L)) > 0L
+  out <- out[keep]
+  if (!is.null(group)) {
+    attr(out, "group") <- rep(lab_by_grp, vapply(seqs, length,
+                                                 integer(1L)))[keep]
+  }
+  out
 }
 
 # Coerce a time column to numeric seconds so gaps are comparable to

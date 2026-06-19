@@ -42,7 +42,7 @@
 #' \donttest{
 #' fit <- lsa(engagement, engine = "classical")
 #' st <- stability_lsa(fit, R = 100)
-#' head(st$edges[order(-st$edges$stability), ])
+#' head(as.data.frame(st))
 #' }
 #'
 #' @seealso [bootstrap_lsa()], [permute_lsa()]
@@ -57,9 +57,12 @@ stability_lsa <- function(fit,
                           verbose = FALSE,
                           ...) {
   stopifnot(inherits(fit, "lsa"))
-  stopifnot(is.numeric(R), R >= 1L)
-  stopifnot(is.numeric(proportion), proportion > 0, proportion < 1)
-  stopifnot(is.numeric(min_stable), min_stable > 0, min_stable <= 1)
+  stopifnot(is.numeric(R), length(R) == 1L, is.finite(R),
+            R >= 1L, R == floor(R))
+  stopifnot(is.numeric(proportion), length(proportion) == 1L,
+            is.finite(proportion), proportion > 0, proportion < 1)
+  stopifnot(is.numeric(min_stable), length(min_stable) == 1L,
+            is.finite(min_stable), min_stable > 0, min_stable <= 1)
   R <- as.integer(R)
 
   recipe <- fit$params

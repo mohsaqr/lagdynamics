@@ -75,9 +75,10 @@ test_that("long-format validation errors are actionable", {
                "needs both `actor` and `action`")
   expect_error(lsa(log, actor = "user", action = "missing"),
                "column 'missing' not found")
+  # In long-format mode `group` is a single column name, not a vector.
   expect_error(lsa(log, actor = "user", action = "act",
                    group = c("a", "b")),
-               "cannot be combined with long-format")
+               "name of a grouping column")
 })
 
 test_that("unparseable time without a format errors clearly", {
@@ -112,4 +113,48 @@ test_that("every time-parse branch errors on NA instead of dropping events", {
   expect_error(
     lsa(mk(c(1, NA, 3)), actor = "u", action = "act", time = "t"),
     "could not be parsed")
+})
+
+test_that("time_threshold must be a positive scalar", {
+  log <- make_log()
+  expect_error(lsa(log, actor = "user", action = "act", time = "ts",
+                   time_threshold = -1),
+               "time_threshold")
+  expect_error(lsa(log, actor = "user", action = "act", time = "ts",
+                   time_threshold = c(900, 1800)),
+               "time_threshold")
+})
+
+test_that("group as a column name works with long-format input", {
+  log <- data.frame(
+    student = rep(c("a", "b", "c", "d"), each = 4L),
+    t       = rep(1:4, times = 4L),
+    act     = c("x","y","x","z", "y","y","x","z", "z","x","y","x", "x","z","y","y"),
+    cohort  = rep(c("g1", "g2"), each = 8L),
+    stringsAsFactors = FALSE)
+
+  g <- lsa(log, actor = "student", action = "act", time = "t",
+           group = "cohort")
+  expect_s3_class(g, "lsa_group")
+  expect_identical(names(g), c("g1", "g2"))
+  expect_identical(attr(g, "group_sizes"), c(2L, 2L))   # 2 students each
+
+  # Equivalent to sequencing then grouping by hand.
+  seqs <- split(log$act, log$student)
+  grp  <- vapply(split(log$cohort, log$student), `[`, character(1), 1L)
+  manual <- lsa(seqs, group = grp)
+  expect_equal(g[["g1"]]$obs, manual[["g1"]]$obs)
+
+  # A grouping column that varies within an actor is rejected.
+  bad <- log; bad$cohort[1] <- "g2"
+  expect_error(
+    lsa(bad, actor = "student", action = "act", time = "t",
+        group = "cohort"),
+    "not constant within a sequence")
+
+  # group must be a single column name in long-format mode.
+  expect_error(
+    lsa(log, actor = "student", action = "act", time = "t",
+        group = c("g1", "g2")),
+    "name of a grouping column")
 })

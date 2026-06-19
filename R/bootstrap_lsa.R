@@ -115,8 +115,10 @@ bootstrap_lsa <- function(fit,
                           verbose = FALSE,
                           ...) {
   stopifnot(inherits(fit, "lsa"))
-  stopifnot(is.numeric(R), length(R) == 1L, R >= 1L)
-  stopifnot(is.numeric(level_alpha), level_alpha > 0, level_alpha < 1)
+  stopifnot(is.numeric(R), length(R) == 1L, is.finite(R),
+            R >= 1L, R == floor(R))
+  stopifnot(is.numeric(level_alpha), length(level_alpha) == 1L,
+            is.finite(level_alpha), level_alpha > 0, level_alpha < 1)
   level <- match.arg(level)
   R <- as.integer(R)
 
@@ -314,6 +316,10 @@ bootstrap_lsa <- function(fit,
   }
   cl <- parallel::makeCluster(n_cores)
   on.exit(parallel::stopCluster(cl), add = TRUE)
+  # Seed the PSOCK workers from the caller's RNG state so that
+  # set.seed(); <resample>(parallel = TRUE) is reproducible on Windows
+  # (mclapply already inherits the seed on Unix).
+  parallel::clusterSetRNGStream(cl)
   parallel::parLapply(cl, seq_len(R), worker)
 }
 

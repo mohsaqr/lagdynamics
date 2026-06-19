@@ -49,8 +49,7 @@ test suite cross-validates lagseq's classical engine against
 fit <- lsa(imdb_genres$sequence, engine = "classical")
 fit
 # Top over-represented genre transitions
-edges <- fit$edges[order(fit$edges$adj_res, decreasing = TRUE), ]
-head(edges[, c("from", "to", "count", "adj_res")], 5)
+head(transitions(fit, significant = TRUE, direction = "over"))
 
 }
 \keyword{datasets}

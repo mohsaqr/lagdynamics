@@ -30,10 +30,8 @@ profile}). Each element is an ordinary \code{lsa} fit.
 \examples{
 prof <- lsa_lags(engagement, lags = 1:3)
 prof
-# Track one transition across lags:
-d <- as.data.frame(prof)
-d[d$from == "Active" & d$to == "Average",
-  c("lag", "count", "adj_res", "p")]
+# Track one transition across lags with the dedicated verb:
+lag_profile(engagement, from = "Active", to = "Average", lags = 1:3)
 
 }
 \seealso{

@@ -1,0 +1,395 @@
+---
+title: "A complete workflow: from sequences to a group comparison"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A complete workflow: from sequences to a group comparison}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 150, fig.width = 7,
+                      fig.height = 5.6, out.width = "100%",
+                      fig.align = "center")
+set.seed(2026)
+library(lagseq)
+options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
+```
+
+Lag-sequential analysis (LSA) asks whether, given a state at one moment,
+another state follows it more or less often than chance. The method has a
+long history in the behavioural sciences, but applied work has often
+stopped at description -- reading off observed transition rates -- without
+the inferential machinery needed to establish that a pattern reflects the
+process rather than the particular sample.
+
+`lagseq` implements LSA as a member of the Dynalytics framework (Saqr,
+Lopez-Pernas, and Misiejuk, 2026), whose central tenet is a *scientific
+contract*: every analytical claim must be matched by evidence appropriate
+to its structure, scope, and complexity, and estimation, validation, and
+interpretation are treated as one inferential system rather than separate
+steps. Accordingly, in `lagseq` each edge is a *tested departure from
+independence* -- the adjusted residual is a test statistic, not a
+descriptive weight.
+
+The package is built around a small set of design commitments:
+
+- **Tidy.** Every result is produced by a verb (`transitions()`,
+  `nodes()`, `tests()`, `initial()`, ...) that returns a
+  one-row-per-observation data frame; the user never indexes into an
+  object.
+- **Interoperable with the tna family.** `lsa()` ingests sequence-bearing
+  objects from `tna`, Nestimate, and `TraMineR` and shares their
+  `actor` / `action` / `time` grammar, while a fitted model converts back
+  to a `tna` network or an `igraph` in one call.
+- **Rigorous, following Dynalytics.** The confirmatory testing battery is
+  built in: analytic certainty and the bootstrap for edge-level
+  uncertainty, split-half reliability for the whole network, case-dropping
+  for stability, and permutation under exchangeability for group
+  comparison.
+- **Expanded.** Beyond the classical engine the package offers several
+  model variants, multi-lag analysis, structural-zero constraints, and an
+  analytic Bayesian certainty estimator.
+- **Visual.** A single `plot()` verb renders the model as a residual
+  heatmap, a residual network, a probability-weighted TNA transition
+  network, a chord diagram, or a polar sunburst, alongside dedicated plots
+  for uncertainty and for group differences.
+- **Group-aware.** A grouping column yields one model per group, and
+  `compare_lsa()` tests whether the groups differ by permutation.
+
+The remainder of this vignette walks one analysis end to end on real
+bundled data, treating each step as one tier of the claim-to-evidence
+map: descriptive views support claims about which transitions exist;
+certainty intervals and bootstraps support claims about particular edges;
+split-half reliability supports claims about the reproducibility of the
+whole network; and permutation tests support claims that two groups
+differ.
+
+# The data: engagement trajectories
+
+`engagement` is 138 students observed over 15 weekly time points; each
+cell is that week's engagement state - `Active`, `Average`, or
+`Disengaged`. It is a wide matrix: **one sequence per row**. This section
+anchors the scope of every later claim: the units are students, the
+events are weekly engagement states, and the possible states are known
+before the model is fitted. In Dynalytics terms, this is the descriptive
+foundation on which the evidential contract rests. Before asking whether
+an edge is surprising or a group differs, we first make clear what
+process the model is allowed to represent.
+
+```{r data}
+dim(engagement)
+head(engagement)
+```
+
+# Fit
+
+`lsa()` estimates the model in a single call. It tabulates every
+state-to-state transition, derives the frequencies expected under the
+independence (no-memory) model, and computes an **adjusted residual** for
+each cell: a standardised measure of how far the observed frequency
+departs from its expectation. The fitted object is therefore a *residual
+network* -- each edge is a tested deviation from independence rather than a
+raw rate. This is the named-model discipline of Dynalytics: the same
+sequences could be re-expressed as a probability-weighted transition (TNA)
+network, but that is a distinct model answering a distinct question -- the
+typical next state rather than the surprising one.
+
+```{r fit}
+fit <- lsa(engagement)
+fit
+```
+
+# Read the fit
+
+Every result is produced by a verb that returns a tidy data frame; the
+object is never indexed directly. `transitions()` is the primary
+accessor, and its arguments select the transitions of interest. This step
+supports the most modest claim in the workflow -- which departures from
+chance are present in the fitted model. The evidence is descriptive and
+edge-level, appropriate for reading the model but not yet for claims about
+stability, replication, or group differences.
+
+```{r read}
+transitions(fit, significant = TRUE)   # transitions beyond chance
+```
+
+A positive residual means the transition happens **more** than chance
+(over-represented); a negative one means it is **avoided**. The other
+results follow the same one-verb pattern. The companion tables provide
+the base rates, node volumes, starting states, and tablewise tests that
+keep interpretation grounded in the observed process. They help prevent
+an edge from being read in isolation, which is part of the Dynalytics
+idea that estimation and interpretation must stay connected.
+
+```{r read2}
+nodes(fit)      # per-state incoming / outgoing volume
+tests(fit)      # tablewise independence tests
+initial(fit)    # where sequences start
+```
+
+# Plot - the full gallery
+
+Every view is produced by `plot(fit, type = )`, and each answers a
+different descriptive question. Visualisation is the first evidence tier:
+it can support claims about pattern, concentration, and direction, but it
+is not confirmatory evidence about uncertainty or group differences.
+
+## Residual heatmap
+
+This is the default view. Rows are the current state, columns the next,
+and colour is the adjusted residual, so the heatmap displays the
+departure-from-chance model directly. Strong colours mark transitions
+whose observed counts sit far from the independence expectation, which
+makes the view well matched to descriptive claims about where the process
+departs from chance.
+
+```{r heatmap, eval = has("ggplot2")}
+plot(fit)                                   # type = "heatmap"
+```
+
+## Residual network
+
+The same residuals as a directed graph. The convention matches TNA and
+Nestimate: **blue = more than chance** (solid edges), **red = less**
+(dashed, with a soft halo). It shows *which* transitions are surprising.
+The graph keeps the residual scale but makes direction and connectedness
+easier to read. It is still the RESIDUAL model: blue and red edges are
+not simply popular or unpopular transitions, but tested deviations from
+what independence would predict.
+
+```{r net-residual, eval = has("cograph")}
+plot(fit, type = "network")
+```
+
+## Transition network (a TNA model)
+
+Weighting the edges by probability instead yields the familiar transition
+network. `lagseq` constructs a `tna` object on the fly and renders it with
+tna's styling: coloured nodes, initial-probability arcs, and weighted
+directed edges. The named model changes even though the underlying
+sequences do not. A transition (TNA) network is a first-order Markov model
+whose edge weights are conditional probabilities; it is the appropriate
+display when the claim concerns the typical next state, whereas the
+residual network is appropriate when the claim concerns a tested departure
+from chance.
+
+```{r net-transition, eval = has("tna")}
+plot(fit, type = "network", weights = "prob")
+```
+
+## Chord and sunburst
+
+Two further views connect local edges to the overall movement of the
+process: a chord diagram of the transition flow, and a polar sunburst of
+each state's outgoing distribution. Both are descriptive - for example,
+they make clear when one state distributes its outgoing transitions
+broadly while another concentrates them in a single destination. They do
+not replace the uncertainty checks that follow; they make the fitted
+structure easier to inspect before stronger claims are made.
+
+```{r chord, eval = has("cograph")}
+plot(fit, type = "chord")
+```
+
+```{r sunburst, eval = has("ggplot2")}
+plot(fit, type = "sunburst")
+```
+
+# Verify and validate
+
+To validate the trustworthiness of an estimated edge, its uncertainty
+must be quantified. This is where the Dynalytics contract becomes
+explicit: a claim about a specific edge requires edge-level evidence,
+because a single observed value is weaker support than a measure of how
+much that value could vary. `lagseq` provides two complementary
+procedures, both returning a tidy object.
+
+`certainty_lsa()` is the analytic procedure. It places a
+Dirichlet-Multinomial posterior on each state's outgoing transitions,
+which gives an exact credible interval for every transition probability in
+closed form, without resampling. The interval states directly how
+precisely the data pin down each edge, and so provides the evidence
+appropriate to a claim about a specific transition.
+
+```{r certainty}
+certainty_lsa(fit)
+as.data.frame(certainty_lsa(fit)) |> head(4)
+```
+
+`bootstrap_lsa()` is the resampling counterpart. It resamples whole
+sequences with replacement, re-estimates the model on each resample, and
+summarises how much each edge varies. The two procedures agree when the
+population is homogeneous; the bootstrap is preferred when it is a
+mixture, because resampling whole sequences preserves the within-sequence
+dependence that the analytic model treats as independent. The forest plot
+below shows each edge's interval. Both procedures supply the edge-level
+evidence a claim about a single transition requires: a narrow, stable
+interval indicates the transition is not an artefact of the particular
+sample.
+
+```{r bootstrap}
+as.data.frame(bootstrap_lsa(fit, R = 200)) |> head(4)
+```
+
+```{r forest, eval = has("ggplot2")}
+plot(bootstrap_lsa(fit, R = 200))           # circular forest of edge CIs
+```
+
+`reliability_lsa()` raises the claim from a single edge to the whole
+network. It repeatedly splits the sequences into two halves, estimates a
+model on each half, and correlates the two edge-weight vectors. A high
+average correlation indicates that the network is reproducible within the
+sample; a low one indicates that the structure is sample-dependent and
+should be interpreted with caution. This evidence matches a claim about
+the network as a whole rather than about any single edge.
+
+```{r reliability}
+reliability_lsa(fit, R = 30)
+```
+
+# Starting from a raw event log
+
+`engagement` arrived as ready-made sequences. Real data is often a **long
+event log** instead - one row per event. `lsa()` sequences it on the fly
+with the same `actor` / `action` / `time` grammar that `tna` uses.
+This step shows that the same inferential chain can begin from raw
+process traces rather than from an already assembled sequence matrix.
+The data format changes, but the contract does not: define the actors,
+events, and ordering rule before estimating a model from them.
+
+`tna::group_regulation_long` is exactly that: 2,000 students, each a
+stream of timestamped regulation actions, with a recorded achievement
+group. The grouping variable will matter later, but it is first treated
+as metadata attached to recovered sequences. Keeping sequencing and
+grouping explicit helps preserve the units that later resampling and
+permutation procedures require.
+
+```{r log, eval = has("tna")}
+log <- tna::group_regulation_long
+head(log)
+```
+
+A single call converts the log into a fitted model: `lsa()` groups events
+by actor, orders them by time, splits sessions on long gaps, and fits.
+Those operations are not clerical details; they define the empirical
+process to which the residual test is applied. Once the log has been
+converted to ordered transitions, the fitted edges again represent
+departures from independence in that recovered sequence process.
+
+```{r log-fit, eval = has("tna")}
+fit_log <- lsa(log, actor = "Actor", action = "Action", time = "Time")
+fit_log
+```
+
+That grammar is shared deliberately, so the objects interoperate. The
+data can be prepared with tna and passed directly to `lsa()`, or a fit can
+be converted the other way for tna or igraph tooling.
+Interoperability is useful because Dynalytics separates the model from
+the rendering and analysis layers. The same empirical object can be read
+as a residual lag-sequential model when testing departures from chance,
+or passed into transition-network tooling when the question is about
+probability-weighted flow.
+
+```{r interop, eval = has("tna")}
+lsa(tna::tna(tna::prepare_data(log, actor = "Actor",
+                               action = "Action", time = "Time")))
+lsa_to_tna(fit_log, weights = "prob")       # fit -> a tna network object
+```
+
+# Group
+
+To compare achievement groups, name the grouping **column** in the same
+call - `group = "Achiever"`. `lsa()` derives one label per recovered
+sequence (the column must be fixed within each actor), so there is no
+manual splitting or relabelling. Grouped fitting estimates one
+lag-sequential model per group under the same data grammar, which makes
+the models comparable. At this point the claim is still descriptive:
+each group has its own fitted residual structure.
+
+```{r group, eval = has("tna")}
+gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
+            group = "Achiever")
+gfit
+```
+
+Every verb now returns grouped, tidy results with a leading `group`
+column. This makes it easy to inspect apparent differences without
+turning visual contrast into inference. Side-by-side networks almost
+always differ somewhere, so the next step asks whether those differences
+are larger than expected under a valid null.
+
+```{r group-read, eval = has("tna")}
+transitions(gfit, significant = TRUE) |> head(4)
+```
+
+# Compare the groups
+
+`compare_lsa()` tests whether the two groups have a different transition
+structure. It permutes the group labels and compares an N-invariant
+effect size (the log-odds ratio), returning a per-edge table together with
+a single omnibus test of whether the groups differ at all.
+This is the evidence tier appropriate to a comparative claim. Under the
+null hypothesis of no group difference, group labels are exchangeable, so
+shuffling them builds a reference distribution for any chosen difference
+function. The observed edge differences and the omnibus statistic are
+then judged against that permutation distribution rather than against
+the visual fact that two separately estimated networks are not identical.
+
+```{r compare, eval = has("tna")}
+cmp <- compare_lsa(gfit, R = 500, adjust = "BH")
+cmp
+```
+
+The back-to-back **barrel** displays the result: each group's bar runs to
+one side, the higher group's bar is bordered (darker for a larger
+difference), and the centre chip carries the difference p-value. The plot
+is a compact rendering of the permutation result, not a substitute for it:
+the bars show direction and magnitude, while the centre chip records
+whether the observed difference is large relative to the differences
+produced by label shuffling under exchangeability.
+
+```{r barrel, eval = has("tna") && has("ggplot2")}
+plot(cmp)
+```
+
+The same comparison as a full-grid difference heatmap. Use it when the
+claim is easier to assess as a matrix of source-by-target contrasts than
+as paired bars. The underlying evidence remains the same permutation
+comparison; only the visual summary changes.
+
+```{r diff-heatmap, eval = has("tna") && has("ggplot2")}
+plot(cmp, style = "heatmap")
+```
+
+# In short
+
+The compact recipe below is the same workflow expressed as a checklist:
+estimate the named model, read and visualise its descriptive structure,
+validate edge-level uncertainty, move to logs when needed, preserve group
+labels at the sequence level, and use permutation for group comparisons.
+Each step escalates the evidence only when the claim being made also
+escalates.
+
+```r
+fit <- lsa(engagement)                          # 1. fit ready sequences
+transitions(fit, significant = TRUE)            # 2. read (one verb per result)
+plot(fit)                                       # 3. plot: heatmap / network /
+plot(fit, type = "network", weights = "prob")   #    chord / sunburst, TNA network
+certainty_lsa(fit); bootstrap_lsa(fit)          # 4. validate (analytic + resampling)
+
+log  <- tna::group_regulation_long              # 5. or start from a raw log
+fit  <- lsa(log, actor =, action =, time =)     #    TNA grammar, one call
+gfit <- lsa(log, actor =, action =, time =, group = "Achiever")  # 6. group by a column
+compare_lsa(gfit)                               # 7. compare + plot(cmp)
+```
+
+Taken together, the workflow is a complete inferential chain. Descriptive
+claims receive descriptive support, edge claims receive edge-level
+uncertainty, whole-network claims receive reproducibility evidence, and
+group-difference claims receive permutation evidence under
+exchangeability. That is the Dynalytics scientific contract in practice:
+every interpretation is tied to the evidence tier that can actually
+support it.

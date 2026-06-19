@@ -52,7 +52,9 @@ A \code{data.frame}, one row per transition, with columns \code{from},
 \code{to} (the source and target \strong{state names}), \code{lag}, \code{count},
 \code{expected}, \code{prob} (row-conditional), \code{prob_col} (column-
 conditional), \code{adj_res}, \code{p}, \code{yules_q}, \code{kappa}, \code{kappa_z},
-\code{kappa_p}, \code{lift}, \code{sign}, \code{significant}. A grouped fit gains a
+\code{kappa_p}, \code{lift}, \code{sign}, \code{significant}. Engines that compute extra
+per-cell statistics append them as further columns (e.g. the two-cell
+engine adds \code{odds_ratio}, \code{log_or}, \code{log_or_se}). A grouped fit gains a
 leading \code{group} column. Row names are reset.
 }
 \description{

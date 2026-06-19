@@ -35,20 +35,23 @@
 #'   (default), `"greater"`, or `"less"`.
 #' @param alpha Numeric. Significance threshold used to mark edges as
 #'   significant in `fit$edges$significant`. Default `0.05`.
-#' @param structural_zeros Optional `K x K` 0/1 matrix. **Default
-#'   `NULL`: every cell, including the diagonal, is part of the model
-#'   -- self-transitions and every observed transition are kept**.
-#'   Supply this only when you want to explicitly *opt out* of certain
-#'   cells (e.g. because the coding scheme makes them impossible by
-#'   construction). A `0` marks a cell as a structural zero (forbidden
-#'   transition); a `1` marks an estimable cell. When supplied, the
-#'   engine switches to iterative proportional fitting and
-#'   Christensen's design-matrix residuals (see `inst/REFERENCES.md`
-#'   §2.2, §4.2). Pass `1 - diag(K)` to opt out of self-transitions.
+#' @param loops Logical. Keep self-transitions (the diagonal)? **Default
+#'   `TRUE`.** Set `loops = FALSE` to forbid every self-transition -- the
+#'   common reason to exclude cells -- without building a matrix by hand.
+#' @param structural_zeros Optional `K x K` 0/1 matrix for an *arbitrary*
+#'   forbidden-cell pattern, where `0` marks a forbidden (structural-zero)
+#'   cell and `1` an estimable one. **Default `NULL`: every cell is part
+#'   of the model.** Combines with `loops`: `loops = FALSE` also zeros the
+#'   diagonal of a supplied matrix. When any cell is forbidden the engine
+#'   switches to iterative proportional fitting and Christensen's
+#'   design-matrix residuals (see `inst/REFERENCES.md` §2.2, §4.2).
 #' @param labels Optional character vector of state labels.
-#' @param group Optional grouping for a multi-group fit. A vector with
-#'   one entry per input sequence (length `n_sequences`); sequences are
-#'   partitioned by group and a separate `lsa` fit is built for each.
+#' @param group Optional grouping for a multi-group fit. Either a vector
+#'   with one entry per input sequence (length `n_sequences`), or --- for
+#'   **long-format** input (see `actor`/`action`) --- the **name of a
+#'   grouping column** in the log, which must be constant within each
+#'   actor/session so each recovered sequence maps to one group. Sequences
+#'   are partitioned by group and a separate `lsa` fit is built for each.
 #'   All group fits share one global label set (derived from the full
 #'   data) so their `K x K` matrices are directly comparable, even when
 #'   a group never visits some state. Returns an `lsa_group` object (a
@@ -139,6 +142,7 @@ lsa <- function(data,
                 engine = "classical",
                 alternative = c("two.sided", "greater", "less"),
                 alpha = 0.05,
+                loops = TRUE,
                 structural_zeros = NULL,
                 labels = NULL,
                 group = NULL,
@@ -166,29 +170,43 @@ lsa <- function(data,
       stop("Long-format sequencing needs both `actor` and `action` ",
            "column names.", call. = FALSE)
     }
+    # With long-format input, `group` (if given) is the NAME of a grouping
+    # column in the log; .prepare_long() derives one label per recovered
+    # sequence and returns them as an attribute, which then drives the
+    # grouped fit below -- no manual split-then-relabel ritual.
+    long_group <- NULL
     if (!is.null(group)) {
-      stop("`group` cannot be combined with long-format sequencing. ",
-           "Sequence first (lsa(log, actor=, action=)), then re-group ",
-           "the recovered sequences in a second call.", call. = FALSE)
+      if (!is.character(group) || length(group) != 1L) {
+        stop("With long-format input, `group` must be the name of a ",
+             "grouping column in the log (a single string).",
+             call. = FALSE)
+      }
+      long_group <- group
     }
     data <- .prepare_long(
       data, actor = actor, action = action, time = time, order = order,
-      session = session, time_threshold = time_threshold,
+      session = session, group = long_group, time_threshold = time_threshold,
       custom_format = custom_format, is_unix_time = is_unix_time,
       unix_time_unit = unix_time_unit
     )
+    if (!is.null(long_group)) {
+      group <- attr(data, "group")
+      attr(data, "group") <- NULL
+    }
   }
 
   if (!is.null(group)) {
     return(.lsa_grouped(
       data = data, group = group, lag = lag, engine = engine,
-      alternative = alternative, alpha = alpha,
+      alternative = alternative, alpha = alpha, loops = loops,
       structural_zeros = structural_zeros, labels = labels,
       params = params, call = call, ...
     ))
   }
 
   d  <- lsa_data(data, labels = labels)
+  structural_zeros <- .resolve_structural_zeros(
+    structural_zeros, loops = loops, K = d$n_states, labels = d$labels)
   tx <- lsa_transitions(d, lag = lag)
 
   # Attach event-level totals for engines that need them (kappa).
@@ -225,6 +243,23 @@ lsa <- function(data,
   )
 }
 
+# Resolve the structural-zeros spec to a K x K 0/1 matrix (or NULL when
+# nothing is forbidden). `loops = FALSE` forbids every self-transition
+# (the diagonal), so callers never hand-build `1 - diag(K)`; an explicit
+# 0/1 matrix forbids an arbitrary set of cells. The two combine: with
+# loops = FALSE the diagonal of a supplied matrix is also zeroed.
+.resolve_structural_zeros <- function(structural_zeros, loops, K, labels) {
+  if (is.null(structural_zeros) && isTRUE(loops)) return(NULL)
+  m <- if (is.null(structural_zeros)) matrix(1, K, K) else structural_zeros
+  if (!is.matrix(m) || nrow(m) != K || ncol(m) != K) {
+    stop(sprintf("`structural_zeros` must be a %d x %d 0/1 matrix.", K, K),
+         call. = FALSE)
+  }
+  if (!isTRUE(loops)) diag(m) <- 0
+  dimnames(m) <- list(labels, labels)
+  m
+}
+
 # Multi-group fit. Partition the input sequences by `group`, then fit
 # the engine once per group on a SHARED global label set so every
 # group's K x K matrices index the same states (a group that never
@@ -232,7 +267,8 @@ lsa <- function(data,
 # named list of `lsa` fits with class "lsa_group" (a named list of
 # single-group fits) so the same downstream verbs can dispatch on it.
 .lsa_grouped <- function(data, group, lag, engine, alternative, alpha,
-                         structural_zeros, labels, params, call, ...) {
+                         loops = TRUE, structural_zeros, labels, params,
+                         call, ...) {
   d <- lsa_data(data, labels = labels)
   if (!identical(d$source, "events")) {
     stop("Grouped lsa() requires event-level sequence data; a ",
@@ -255,7 +291,7 @@ lsa <- function(data,
     # labels = global_labels makes lsa() read those integers as indices
     # into the shared label set rather than re-deriving labels per group.
     lsa(data = per_seq[idx], lag = lag, engine = engine,
-        alternative = alternative, alpha = alpha,
+        alternative = alternative, alpha = alpha, loops = loops,
         structural_zeros = structural_zeros, labels = global_labels,
         params = params, ...)
   })
@@ -340,10 +376,21 @@ print.lsa_group <- function(x, ...) {
   # (so it shares lrx2's df). NULL when the engine has no expected table.
   x2 <- .pearson_x2(obs, exp_mat, lrx2 = result$lrx2)
 
+  # Engine-specific extra matrices (anything the engine returned beyond the
+  # standard slots, e.g. the two-cell engine's odds_ratio / log_or /
+  # log_or_se) -- surfaced both as tidy edge columns and in meta$extra.
+  engine_extra <- result[setdiff(
+    names(result),
+    c("obs", "exp", "prob", "adj_res", "p", "yules_q", "kappa",
+      "kappa_z", "kappa_p", "lrx2", "ipf", "structural_zeros",
+      "alternative", "n_events_used")
+  )]
+
   edges <- .build_edges(
     obs = obs, exp_mat = exp_mat, prob = prob, prob_col = prob_col,
     z = z, p = p, yulesq = yulesq, kappa = kappa,
-    k_z = k_z, k_p = k_p, labels = labels, lag = lag, alpha = alpha
+    k_z = k_z, k_p = k_p, labels = labels, lag = lag, alpha = alpha,
+    extra = engine_extra
   )
 
   nodes <- .build_nodes(obs = obs, labels = labels)
@@ -398,12 +445,7 @@ print.lsa_group <- function(x, ...) {
       n_events_used = result$n_events_used,
       package_version = utils::packageVersion("lagseq"),
       call = call,
-      extra = result[setdiff(
-        names(result),
-        c("obs", "exp", "prob", "adj_res", "p", "yules_q", "kappa",
-          "kappa_z", "kappa_p", "lrx2", "ipf", "structural_zeros",
-          "alternative", "n_events_used")
-      )]
+      extra = engine_extra
     )
   )
   class(fit) <- c("lsa", "cograph_network")
@@ -411,7 +453,8 @@ print.lsa_group <- function(x, ...) {
 }
 
 .build_edges <- function(obs, exp_mat, prob, prob_col, z, p, yulesq,
-                          kappa, k_z, k_p, labels, lag, alpha) {
+                          kappa, k_z, k_p, labels, lag, alpha,
+                          extra = NULL) {
   K <- length(labels)
   # `from`/`to` are INTEGER node ids (matching `nodes$id`) to satisfy
   # the cograph_network protocol; human-readable state names live on
@@ -443,6 +486,16 @@ print.lsa_group <- function(x, ...) {
     stringsAsFactors = FALSE,
     row.names  = NULL
   )
+  # Engine-specific statistics (e.g. odds_ratio / log_or / log_or_se from the
+  # two-cell engine): surface every K x K matrix the engine returned as its
+  # own tidy column, so transitions() reports what the engine actually
+  # computed instead of hiding it in the fit object.
+  for (nm in names(extra)) {
+    m <- extra[[nm]]
+    if (is.matrix(m) && nrow(m) == K && ncol(m) == K && is.null(edges[[nm]])) {
+      edges[[nm]] <- as.vector(m)
+    }
+  }
   # Derived columns
   edges$lift <- ifelse(is.finite(exp_v) & exp_v > 0, count / exp_v,
                       NA_real_)

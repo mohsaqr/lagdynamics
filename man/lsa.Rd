@@ -25,6 +25,7 @@ lsa(
   engine = "classical",
   alternative = c("two.sided", "greater", "less"),
   alpha = 0.05,
+  loops = TRUE,
   structural_zeros = NULL,
   labels = NULL,
   group = NULL,
@@ -76,22 +77,26 @@ adjusted-residual and kappa p-values: one of \code{"two.sided"}
 \item{alpha}{Numeric. Significance threshold used to mark edges as
 significant in \code{fit$edges$significant}. Default \code{0.05}.}
 
-\item{structural_zeros}{Optional \verb{K x K} 0/1 matrix. \strong{Default
-\code{NULL}: every cell, including the diagonal, is part of the model
--- self-transitions and every observed transition are kept}.
-Supply this only when you want to explicitly \emph{opt out} of certain
-cells (e.g. because the coding scheme makes them impossible by
-construction). A \code{0} marks a cell as a structural zero (forbidden
-transition); a \code{1} marks an estimable cell. When supplied, the
-engine switches to iterative proportional fitting and
-Christensen's design-matrix residuals (see \code{inst/REFERENCES.md}
-§2.2, §4.2). Pass \code{1 - diag(K)} to opt out of self-transitions.}
+\item{loops}{Logical. Keep self-transitions (the diagonal)? \strong{Default
+\code{TRUE}.} Set \code{loops = FALSE} to forbid every self-transition -- the
+common reason to exclude cells -- without building a matrix by hand.}
+
+\item{structural_zeros}{Optional \verb{K x K} 0/1 matrix for an \emph{arbitrary}
+forbidden-cell pattern, where \code{0} marks a forbidden (structural-zero)
+cell and \code{1} an estimable one. \strong{Default \code{NULL}: every cell is part
+of the model.} Combines with \code{loops}: \code{loops = FALSE} also zeros the
+diagonal of a supplied matrix. When any cell is forbidden the engine
+switches to iterative proportional fitting and Christensen's
+design-matrix residuals (see \code{inst/REFERENCES.md} §2.2, §4.2).}
 
 \item{labels}{Optional character vector of state labels.}
 
-\item{group}{Optional grouping for a multi-group fit. A vector with
-one entry per input sequence (length \code{n_sequences}); sequences are
-partitioned by group and a separate \code{lsa} fit is built for each.
+\item{group}{Optional grouping for a multi-group fit. Either a vector
+with one entry per input sequence (length \code{n_sequences}), or --- for
+\strong{long-format} input (see \code{actor}/\code{action}) --- the \strong{name of a
+grouping column} in the log, which must be constant within each
+actor/session so each recovered sequence maps to one group. Sequences
+are partitioned by group and a separate \code{lsa} fit is built for each.
 All group fits share one global label set (derived from the full
 data) so their \verb{K x K} matrices are directly comparable, even when
 a group never visits some state. Returns an \code{lsa_group} object (a

@@ -78,7 +78,8 @@ permute_lsa <- function(fit,
                         verbose = FALSE,
                         ...) {
   stopifnot(inherits(fit, "lsa"))
-  stopifnot(is.numeric(R), length(R) == 1L, R >= 1L)
+  stopifnot(is.numeric(R), length(R) == 1L, is.finite(R),
+            R >= 1L, R == floor(R))
   R <- as.integer(R)
 
   recipe <- fit$params

@@ -50,7 +50,9 @@
 #'   `to` (the source and target **state names**), `lag`, `count`,
 #'   `expected`, `prob` (row-conditional), `prob_col` (column-
 #'   conditional), `adj_res`, `p`, `yules_q`, `kappa`, `kappa_z`,
-#'   `kappa_p`, `lift`, `sign`, `significant`. A grouped fit gains a
+#'   `kappa_p`, `lift`, `sign`, `significant`. Engines that compute extra
+#'   per-cell statistics append them as further columns (e.g. the two-cell
+#'   engine adds `odds_ratio`, `log_or`, `log_or_se`). A grouped fit gains a
 #'   leading `group` column. Row names are reset.
 #'
 #' @examples
@@ -97,6 +99,11 @@ transitions.lsa <- function(fit, significant = FALSE,
   keep <- c("from_label", "to_label", "lag", "count", "expected", "prob",
             "prob_col", "adj_res", "p", "yules_q", "kappa", "kappa_z",
             "kappa_p", "lift", "sign", "significant")
+  # Engine-specific statistic columns (e.g. odds_ratio / log_or / log_or_se
+  # from the two-cell engine) are surfaced too: anything in the edge table
+  # beyond the standard schema and the cograph-protocol id/duplicate fields.
+  extra_cols <- setdiff(names(e), c(keep, "from", "to", "edge", "weight"))
+  keep <- c(keep, extra_cols)
   e <- e[, keep, drop = FALSE]
   names(e)[1:2] <- c("from", "to")
   rownames(e) <- NULL

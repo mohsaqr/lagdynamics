@@ -16,13 +16,21 @@ plot_transitions(
 \arguments{
 \item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
 
-\item{weights}{Which matrix becomes the edge weight: \code{"residuals"}
-(default, adjusted residuals -- edges coloured warm = over-
-represented, cool = avoided, matching the heatmap), \code{"count"}
-(observed counts), \code{"prob"} (row-conditional probabilities), or
-\code{"lift"} (observed / expected). The non-residual weights are all
-non-negative, so they are drawn in a single neutral colour with the
-magnitude carried by edge width (rather than by sign).}
+\item{weights}{Which matrix becomes the edge weight, and how it is
+drawn:
+\itemize{
+\item \code{"residuals"} (default) -- a \strong{residual network} (not a transition
+one): adjusted residuals coloured by sign on the TNA / Nestimate
+convention, \strong{blue = more} (over-represented) solid and
+\strong{red = less} (avoided) dashed with a soft halo.
+\item \code{"prob"} / \code{"count"} -- the familiar \strong{transition network}. This is
+a TNA model: the fit is converted to a \code{tna} object on the fly with
+\code{\link[=lsa_to_tna]{lsa_to_tna()}} and rendered by tna's own plot method (coloured
+nodes, initial-probability arcs, weighted directed edges). Needs the
+\code{tna} package; \code{...} is forwarded to tna's plot.
+\item \code{"lift"} -- observed / expected, drawn in a single neutral colour
+with magnitude carried by edge width.
+}}
 
 \item{significant}{Logical. Keep only edges whose adjusted-residual
 p-value is below the fit's alpha; weaker cells are set to 0 (no

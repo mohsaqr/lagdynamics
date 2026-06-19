@@ -135,6 +135,16 @@ reliability_lsa(fit, R = 30)                            # split-half reliability
 as.data.frame(reliability_lsa(fit, R = 30)) |> head(3)  # per-replicate draws (tidy)
 ```
 
+`certainty_lsa()` is the analytic Bayesian sibling of `bootstrap_lsa()`:
+a Dirichlet-Multinomial posterior gives each transition probability an
+exact credible interval in closed form — same answer on homogeneous data,
+no resampling.
+
+```{r certainty}
+certainty_lsa(fit)                            # Dirichlet certainty (summary)
+as.data.frame(certainty_lsa(fit)) |> head(3)  # analytic edge CIs (tidy)
+```
+
 ```{r inference-more, eval = FALSE}
 permute_lsa(fit, R = 100)     # permutation p-values
 stability_lsa(fit, R = 100)   # case-drop stability
@@ -157,12 +167,12 @@ Convenience wrappers call each engine directly: `lsa_classical()`,
 
 ## Structural zeros
 
-Forbid impossible cells with a 0/1 matrix; forbidden cells become `NA`,
-never a false "expected".
+Forbid impossible cells; they become `NA`, never a false "expected". Use
+`loops = FALSE` for the common case (no self-transitions), or pass a 0/1
+matrix to `structural_zeros` for an arbitrary forbidden pattern.
 
 ```{r structural-zeros}
-K <- nrow(fit$obs)
-fz <- lsa(group_regulation, structural_zeros = 1 - diag(K))
+fz <- lsa(group_regulation, loops = FALSE)   # forbid self-transitions
 transitions(fz, significant = TRUE) |>
   subset(from == to)    # self-transitions: none, they are NA
 ```
@@ -191,7 +201,8 @@ summary(fit)                          # one-row overview
 plot(fit)                             # residual heatmap
 lag_profile(group_regulation, "plan", "consensus")  # lag profile
 lsa(group_regulation, group = g)      # grouped
-bootstrap_lsa(fit)                    # uncertainty
+bootstrap_lsa(fit)                    # uncertainty (resampling)
+certainty_lsa(fit)                    # uncertainty (analytic, instant)
 ```
 
 See `?lsa` for every input form and `?lsa_to_tna` for the network bridge.
