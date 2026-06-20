@@ -49,7 +49,7 @@ through a single `plot()` verb and interoperate with the `tna` and
   from that single snapshot to prevent config drift.
 - **Minimal-dependency policy.** Runtime imports are base packages only
   (`grid`, `stats`, `utils`). The plotting and interop packages
-  (`ggplot2`, `cograph`, `tna`, `Nestimate`, `igraph`, `TraMineR`) are
+  (`ggplot2`, `cograph`, `tna`, `Nestimate`, `TraMineR`) are
   soft `Suggests`, used only when present.
 
 ## Installation
@@ -70,8 +70,7 @@ remotes::install_github("mohsaqr/lagseq")
 
 `lagseq` needs only base R at runtime (`grid`, `stats`, `utils`). The
 plotting and interop packages (`ggplot2`, `cograph`, `tna`, `Nestimate`,
-`igraph`, `TraMineR`) are optional `Suggests` — install only the ones
-you need.
+`TraMineR`) are optional `Suggests` — install only the ones you need.
 
 ## Quick start
 
@@ -118,11 +117,10 @@ plot(fit, type = "sunburst")              # polar sunburst
 plot(bootstrap_lsa(fit))                  # circular bootstrap CI forest
 plot(cmp)                                 # back-to-back group-comparison barrel
 
-# Interop — convert a fit to another toolkit's native object
-# (lagseq converts; the downstream package does the analysis).
+# Interop — convert a fit to the tna ecosystem's native object
+# (lagseq converts; tna does the analysis).
 net   <- lsa_to_tna(fit, weights = "prob")  # -> tna object
 cents <- tna::centralities(net)
-g     <- igraph::as.igraph(fit)             # -> igraph object
 ```
 
 ## Compatibility with `tna` and `Nestimate`
@@ -142,15 +140,14 @@ lsa(long_log, actor = , action = , time = )   # or a raw long event log
 ```
 
 **Output** — a fit is a directed weighted network, so it converts in one
-call to the native object those toolkits analyse (centralities, pruning,
+call to the `tna` object those toolkits analyse (centralities, pruning,
 communities, …):
 
 ```r
 lsa_to_tna(fit, weights = "prob")    # -> `tna` object (also works on a grouped fit)
-igraph::as.igraph(fit)               # -> `igraph` object
 ```
 
-`tna`, `Nestimate`, `igraph`, and `TraMineR` stay optional (`Suggests`);
+`tna`, `Nestimate`, and `TraMineR` stay optional (`Suggests`);
 the converters and ingestors error informatively only if the relevant
 package is missing.
 
@@ -196,7 +193,7 @@ Plotting via one `plot(fit, type = )` verb — heatmap, residual network,
 TNA transition network, chord, sunburst, bootstrap/certainty forests, and
 group-comparison barrels — with grouped fits drawn one panel per group.
 Interoperability: ingests `tna` / `Nestimate` / `TraMineR` objects and
-converts out via `lsa_to_tna()` / `as.igraph()`. Multi-group fits
+converts out via `lsa_to_tna()`. Multi-group fits
 (`lsa(group = )` → `lsa_group`) are supported across every reading,
 plotting, inference, and bridge layer.
 

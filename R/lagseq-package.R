@@ -38,8 +38,8 @@
 #' Reading a fit (tidy data frames): [transitions()], [nodes()],
 #' [tests()], [initial()], and [summary()].
 #'
-#' TNA / igraph bridge: [lsa_to_tna()], [as.igraph.lsa()]. These
-#' convert an `lsa` fit into the native object of a downstream network
+#' TNA bridge: [lsa_to_tna()]. This converts an `lsa` fit into the
+#' native object of a downstream network
 #' package; the analysis itself (centralities via `tna::centralities()`,
 #' centrality stability via `tna::estimate_cs()`, pruning via
 #' `tna::prune()`, communities via `tna::communities()`) is performed by

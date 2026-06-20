@@ -210,7 +210,7 @@ fit_log
 Interoperability also works at the object level. Sequence-bearing
 objects from `tna`, Nestimate, and `TraMineR` can be passed to `lsa()`;
 fitted LSA models can be converted back to a TNA object with
-`lsa_to_tna()` or to an igraph object with `as.igraph()`.
+`lsa_to_tna()`.
 
 ```{r ingest-tna, eval = requireNamespace("tna", quietly = TRUE)}
 log <- tna::group_regulation_long
@@ -360,17 +360,13 @@ transitions(fz) |> subset(from == to)
 ## Network Toolkits
 
 An LSA fit is also a directed weighted network. `lsa_to_tna()` exposes it
-to the TNA ecosystem, while `as.igraph()` exposes it to igraph. The
-choice of weight carries the model meaning: `prob` is a transition
-network, `count` is observed transition volume, `adj_res` is the residual
-LSA network, and `lift` is observed over expected association strength.
+to the TNA ecosystem. The choice of weight carries the model meaning:
+`prob` is a transition network, `count` is observed transition volume,
+`adj_res` is the residual LSA network, and `lift` is observed over
+expected association strength.
 
 ```{r tna, eval = requireNamespace("tna", quietly = TRUE)}
 tna::centralities(lsa_to_tna(fit, weights = "prob")) |> head()
-```
-
-```{r igraph, eval = requireNamespace("igraph", quietly = TRUE)}
-igraph::betweenness(igraph::as.igraph(fit, weights = "prob"))
 ```
 
 # Ecosystem

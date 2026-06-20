@@ -1,8 +1,7 @@
 # Adapter layer that converts an lsa fit into objects consumed by
-# downstream network packages. Soft dependencies: `tna` and `igraph`
-# are declared in Suggests so the adapter functions error informatively
-# when the target package is not installed but lagseq itself loads
-# without them.
+# downstream network packages. The `tna` soft dependency is declared in
+# Suggests so the adapter functions error informatively when tna is not
+# installed but lagseq itself loads without it.
 #
 # Weight semantics. A probability-weighted network and a count-weighted
 # network answer different questions: a probability-weighted network
@@ -40,8 +39,8 @@
 #'   strength).
 #'   `tna` requires non-negative weights, so the `"adj_res"` choice
 #'   always clips negative residuals to `0` (returning the
-#'   over-representation network). To work with signed residuals, use
-#'   [as.igraph.lsa()] or read `fit$adj_res` directly.
+#'   over-representation network). To work with signed residuals, read
+#'   `fit$adj_res` directly.
 #' @param ... Method-specific arguments.
 #'
 #' @return For an `lsa` fit, a `tna` object with `weights`, `inits`,
@@ -138,81 +137,6 @@ lsa_to_tna.lsa_group <- function(x,
   # (tna::centralities(), tna::cliques(), tna::communities(), ...).
   nets <- lapply(x, function(f) lsa_to_tna(f, weights = weights, ...))
   structure(nets, levels = names(x), class = "group_tna")
-}
-
-#' Convert an lsa Fit to an igraph Graph
-#'
-#' Wraps the fit's chosen weight matrix in an `igraph` graph. Requires
-#' the `igraph` package (declared in Suggests).
-#'
-#' @param x An `lsa` object returned by [lsa()].
-#' @param weights Character. As in [lsa_to_tna()].
-#' @param positive_residuals_only Logical. As in [lsa_to_tna()].
-#' @param mode Character. Passed to [igraph::graph_from_adjacency_matrix()].
-#'   Default `"directed"`; use `"undirected"` for bidirectional fits.
-#' @param ... Unused.
-#'
-#' @return An `igraph` graph with `weight` edge attribute.
-#'
-#' @examples
-#' \dontrun{
-#' fit <- lsa(engagement, engine = "classical")
-#' g <- as.igraph(fit, weights = "prob")
-#' igraph::betweenness(g)
-#' }
-#'
-#' @exportS3Method igraph::as.igraph
-as.igraph.lsa <- function(x,
-                          weights = c("prob", "count", "adj_res", "lift"),
-                          positive_residuals_only = TRUE,
-                          mode = "directed",
-                          ...) {
-  stopifnot(inherits(x, "lsa"))
-  weights <- match.arg(weights)
-  if (!requireNamespace("igraph", quietly = TRUE)) {
-    stop("Package 'igraph' is required for as.igraph.lsa(). ",
-         "Install with install.packages('igraph').", call. = FALSE)
-  }
-  W <- .lsa_weight_matrix(x, weights, positive_residuals_only)
-  igraph::graph_from_adjacency_matrix(W, mode = mode, weighted = TRUE,
-                                       diag = TRUE)
-}
-
-#' Convert a Grouped lsa Fit to a List of igraph Graphs
-#'
-#' Applies [as.igraph.lsa()] to each per-group fit. Unlike the `tna`
-#' container, `igraph` has no native multi-graph object, so the result
-#' is a plain named list of graphs (one per group), which composes with
-#' `lapply()` for batched igraph analysis.
-#'
-#' @param x An `lsa_group` object returned by `lsa(..., group = )`.
-#' @param weights Character. As in [as.igraph.lsa()].
-#' @param positive_residuals_only Logical. As in [as.igraph.lsa()].
-#' @param mode Character. As in [as.igraph.lsa()].
-#' @param ... Passed to [as.igraph.lsa()].
-#'
-#' @return A named list of `igraph` graphs, one per group.
-#'
-#' @seealso [as.igraph.lsa()]
-#' @exportS3Method igraph::as.igraph
-as.igraph.lsa_group <- function(x,
-                                weights = c("prob", "count", "adj_res",
-                                             "lift"),
-                                positive_residuals_only = TRUE,
-                                mode = "directed",
-                                ...) {
-  weights <- match.arg(weights)
-  if (!requireNamespace("igraph", quietly = TRUE)) {
-    stop("Package 'igraph' is required for as.igraph.lsa_group(). ",
-         "Install with install.packages('igraph').", call. = FALSE)
-  }
-  graphs <- lapply(x, function(f) {
-    igraph::as.igraph(f, weights = weights,
-                      positive_residuals_only = positive_residuals_only,
-                      mode = mode, ...)
-  })
-  names(graphs) <- names(x)
-  graphs
 }
 
 # --- internal -----------------------------------------------------------

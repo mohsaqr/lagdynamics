@@ -80,16 +80,6 @@ tn <- lsa_to_tna(fit, weights = "prob")
 tna::centralities(tn) |> head()
 ```
 
-## To an igraph
-
-`as.igraph()` returns an `igraph`, so the full igraph toolbox is
-available.
-
-```{r to-igraph, eval = has("igraph")}
-ig <- igraph::as.igraph(fit, weights = "prob")
-igraph::betweenness(ig)
-```
-
 # Shared rendering: the transition network is a tna model
 
 Because estimation and rendering are separate layers, the transition

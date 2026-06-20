@@ -61,16 +61,6 @@ test_that("lsa_to_tna.lsa errors with helpful message when tna is absent", {
   expect_error(lsa_to_tna(fit), "Package 'tna' is required")
 })
 
-test_that("as.igraph.lsa builds a directed weighted igraph", {
-  skip_if_not_installed("igraph")
-  fit <- lsa(engagement, engine = "classical")
-  g <- igraph::as.igraph(fit)
-  expect_true(inherits(g, "igraph"))
-  expect_true(igraph::is_directed(g))
-  expect_true(igraph::is_weighted(g))
-  expect_equal(as.integer(igraph::vcount(g)), nrow(fit$obs))
-})
-
 test_that("lsa_to_tna output is consumable by tna::centralities", {
   skip_if_not_installed("tna")
   # lagseq's contract is conversion, not centrality computation: the

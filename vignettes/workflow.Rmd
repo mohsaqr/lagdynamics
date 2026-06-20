@@ -43,7 +43,7 @@ The package is built around a small set of design commitments:
 - **Interoperable with the tna family.** `lsa()` ingests sequence-bearing
   objects from `tna`, Nestimate, and `TraMineR` and shares their
   `actor` / `action` / `time` grammar, while a fitted model converts back
-  to a `tna` network or an `igraph` in one call.
+  to a `tna` network in one call.
 - **Rigorous, following Dynalytics.** The confirmatory testing battery is
   built in: analytic certainty and the bootstrap for edge-level
   uncertainty, split-half reliability for the whole network, case-dropping
@@ -286,7 +286,7 @@ fit_log
 
 That grammar is shared deliberately, so the objects interoperate. The
 data can be prepared with tna and passed directly to `lsa()`, or a fit can
-be converted the other way for tna or igraph tooling.
+be converted the other way for tna tooling.
 Interoperability is useful because Dynalytics separates the model from
 the rendering and analysis layers. The same empirical object can be read
 as a residual lag-sequential model when testing departures from chance,

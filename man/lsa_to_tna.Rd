@@ -25,8 +25,8 @@ residual network), or \code{"lift"} (observed / expected, association
 strength).
 \code{tna} requires non-negative weights, so the \code{"adj_res"} choice
 always clips negative residuals to \code{0} (returning the
-over-representation network). To work with signed residuals, use
-\code{\link[=as.igraph.lsa]{as.igraph.lsa()}} or read \code{fit$adj_res} directly.}
+over-representation network). To work with signed residuals, read
+\code{fit$adj_res} directly.}
 }
 \value{
 For an \code{lsa} fit, a \code{tna} object with \code{weights}, \code{inits},

@@ -115,7 +115,7 @@ test_that("grouped reading verbs bind tidy group-prefixed frames", {
   }
 })
 
-# --- grouped tna / igraph bridge ---------------------------------------
+# --- grouped tna bridge ------------------------------------------------
 
 test_that("lsa_to_tna.lsa_group builds a group_tna with named groups", {
   skip_if_not_installed("tna")
@@ -124,15 +124,6 @@ test_that("lsa_to_tna.lsa_group builds a group_tna with named groups", {
   expect_s3_class(gt, "group_tna")
   expect_setequal(names(gt), c("high", "low"))
   expect_true(all(vapply(gt, inherits, logical(1L), "tna")))
-})
-
-test_that("as.igraph.lsa_group returns a named list of igraph graphs", {
-  skip_if_not_installed("igraph")
-  fit <- lsa(engagement, group = make_group())
-  gl <- igraph::as.igraph(fit)
-  expect_type(gl, "list")
-  expect_setequal(names(gl), c("high", "low"))
-  expect_true(all(vapply(gl, igraph::is_igraph, logical(1L))))
 })
 
 # --- grouped reliability ------------------------------------------------

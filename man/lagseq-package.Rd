@@ -47,8 +47,8 @@ Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_l
 Reading a fit (tidy data frames): \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}},
 \code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{\link[=summary]{summary()}}.
 
-TNA / igraph bridge: \code{\link[=lsa_to_tna]{lsa_to_tna()}}, \code{\link[=as.igraph.lsa]{as.igraph.lsa()}}. These
-convert an \code{lsa} fit into the native object of a downstream network
+TNA bridge: \code{\link[=lsa_to_tna]{lsa_to_tna()}}. This converts an \code{lsa} fit into the
+native object of a downstream network
 package; the analysis itself (centralities via \code{tna::centralities()},
 centrality stability via \code{tna::estimate_cs()}, pruning via
 \code{tna::prune()}, communities via \code{tna::communities()}) is performed by
