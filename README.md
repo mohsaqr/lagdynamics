@@ -8,12 +8,20 @@
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-`lagseq` provides a unified, pipe-friendly interface for lag sequential
-analysis (LSA). A single `lsa()`
-constructor with a pluggable engine registry exposes the classical and
-extended LSA family — classical, two-cell, bidirectional,
-parallel-dominance, and non-parallel-dominance — and returns a tidy edge
-table ready for transition-network visualization.
+`lagseq` provides a modern, tidy, pipe-friendly interface for lag
+sequential analysis (LSA). A single `lsa()` constructor with a pluggable
+engine registry exposes the classical and extended LSA family — classical,
+two-cell, bidirectional, parallel-dominance, and non-parallel-dominance —
+and every result is read through a verb that returns a tidy
+one-row-per-observation `data.frame`.
+
+It is the lag-sequential member of the **Dynalytics** framework: every
+edge is a *tested departure from independence*, backed by a confirmatory
+testing battery — bootstrap and analytic certainty for edges, split-half
+reliability for the whole network, case-drop stability, permutation tests,
+and permutation- or Bayesian-based group comparison. Fits visualize
+through a single `plot()` verb and interoperate with the `tna` and
+`Nestimate` ecosystems at both ends.
 
 ## Design principles
 
@@ -86,18 +94,29 @@ nodes(fit)                                # one row per state
 tests(fit)                                # tablewise independence tests
 initial(fit)                              # initial-state distribution
 
-# Inference
-boot <- bootstrap_lsa(fit, R = 1000)
-perm <- permute_lsa(fit, R = 1000)
-stab <- stability_lsa(fit, R = 500)
-rel  <- reliability_lsa(fit, R = 100)
+# Confirmatory testing — quantify the evidence behind each claim
+boot <- bootstrap_lsa(fit, R = 1000)      # edge uncertainty (resampling)
+cert <- certainty_lsa(fit)                # edge uncertainty (analytic, Bayesian)
+perm <- permute_lsa(fit, R = 1000)        # more than chance
+stab <- stability_lsa(fit, R = 500)       # significant edges under case-dropping
+rel  <- reliability_lsa(fit, R = 100)     # whole-network split-half reliability
+
+# Groups and comparison
+g   <- lsa(sequences, group = group_labels)  # one fit per group -> lsa_group
+cmp <- compare_lsa(g)                         # permutation test of the difference
+bc  <- bayes_compare_lsa(g)                   # Bayesian group comparison
+
+# Every result is tidy: as.data.frame() returns a one-row-per-edge frame
+as.data.frame(cmp)
 
 # Plotting — one verb, pick the view with `type`
 plot(fit)                                 # residual heatmap (default)
-plot(fit, type = "network")               # transition network
+plot(fit, type = "network")               # residual network (blue = more than chance)
+plot(fit, type = "network", weights = "prob")  # transition network (a TNA model)
 plot(fit, type = "chord")                 # chord diagram
 plot(fit, type = "sunburst")              # polar sunburst
 plot(bootstrap_lsa(fit))                  # circular bootstrap CI forest
+plot(cmp)                                 # back-to-back group-comparison barrel
 
 # Interop — convert a fit to another toolkit's native object
 # (lagseq converts; the downstream package does the analysis).
@@ -147,25 +166,41 @@ package is missing.
 
 Users can register custom engines via `register_lsa_engine()`.
 
+## Vignettes
+
+| Vignette | Topic |
+|---|---|
+| `vignette("lagseq")` | Get started: the method, why lagseq, and a hands-on tour |
+| `vignette("workflow")` | A complete analysis from sequences to a group comparison |
+| `vignette("confirmatory")` | The confirmatory testing battery: matching claims to evidence |
+| `vignette("interop")` | Interoperability with `tna` and `Nestimate` objects |
+| `vignette("plotting")` | The full plotting gallery |
+
 ## Status
 
 v0.1.0.
 
 **Implemented:** classical / two-cell / bidirectional / parallel-
-and non-parallel-dominance engines; structural-zero handling via IPF
-with rank-based quasi-independence df (classical engine); bootstrap
-(sequence-level + stationary block), permutation, case-drop stability,
-and split-half reliability inference; a single tidy `transitions()` verb
-(with `significant` / `direction` / `min_count` selectors) plus
-`nodes()`, `tests()`, and `initial()`; plotting via one `plot(fit, type = )`
-verb — heatmap, network, chord, sunburst, and a circular bootstrap
-forest, with grouped fits drawn one panel per group; and the `tna` /
-`igraph` bridge (`lsa_to_tna()`, `as.igraph()`). Multi-group fits
+and non-parallel-dominance engines; multi-lag analysis (`lsa_lags()`,
+`lag_profile()`) and structural-zero handling (`loops = FALSE` or an
+explicit 0/1 matrix, IPF with rank-based quasi-independence df).
+Confirmatory battery: bootstrap (sequence-level + stationary block) and
+analytic Dirichlet-Multinomial certainty (`certainty_lsa()`) for edges,
+permutation (`permute_lsa()`), case-drop stability, split-half
+reliability, and group comparison by permutation (`compare_lsa()`, two-
+group and all-pairwise) or Bayesian Dirichlet-Multinomial
+(`bayes_compare_lsa()`). Tidy reading: `transitions()` (with
+`significant` / `direction` / `min_count` selectors), `nodes()`,
+`tests()`, `initial()`, and `as.data.frame()` on every result object.
+Plotting via one `plot(fit, type = )` verb — heatmap, residual network,
+TNA transition network, chord, sunburst, bootstrap/certainty forests, and
+group-comparison barrels — with grouped fits drawn one panel per group.
+Interoperability: ingests `tna` / `Nestimate` / `TraMineR` objects and
+converts out via `lsa_to_tna()` / `as.igraph()`. Multi-group fits
 (`lsa(group = )` → `lsa_group`) are supported across every reading,
 plotting, inference, and bridge layer.
 
-**Roadmap:** between-group comparison (`compare_lsa()`) and
-stationarity tests (`stationarity_lsa()`).
+**Roadmap:** stationarity tests (`stationarity_lsa()`).
 
 ## License
 
