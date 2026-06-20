@@ -65,13 +65,9 @@ test_that("two_cell: zero-cell continuity correction kicks in", {
   expect_true(is.finite(fit$meta$extra$log_or["a", "a"]))
 })
 
-test_that("two_cell: p-values agree with pnorm() of log_or_z", {
-  fit <- lsa(THREE, engine = "two_cell")
-  z <- fit$adj_res
-  expect_equal(unname(fit$p),
-               unname(2 * stats::pnorm(-abs(z))),
-               tolerance = 1e-12)
-})
+# Base-R equivalence checks (pnorm / chisq.test / binom.test agreement)
+# and the oconnor_couple oracle live in
+# equivalence_testing/test-base-r-engines.R, out of the shipped suite.
 
 # --- bidirectional ----------------------------------------------------
 
@@ -89,20 +85,6 @@ test_that("bidirectional: symmetric_obs = O + t(O)", {
   fit <- lsa(THREE, engine = "bidirectional")
   W <- fit$meta$extra$symmetric_obs
   expect_equal(unname(W), unname(THREE + t(THREE)))
-})
-
-test_that("bidirectional: residual matches Haberman on the symmetric table", {
-  fit <- lsa(THREE, engine = "bidirectional")
-  W <- fit$meta$extra$symmetric_obs
-  # Independent computation: chisq.test()$stdres on the symmetric table
-  # should match our adj_res (since both apply the Haberman formula).
-  suppressWarnings({
-    ct <- stats::chisq.test(W, correct = FALSE)
-  })
-  ok <- !is.na(fit$adj_res) & !is.na(ct$stdres)
-  expect_equal(unname(fit$adj_res[ok]),
-               unname(ct$stdres[ok]),
-               tolerance = 1e-10)
 })
 
 # --- parallel_dominance ----------------------------------------------
@@ -149,24 +131,5 @@ test_that("nonparallel_dominance: hand-computed z[1, 2] on THREE", {
                tolerance = 1e-12)
 })
 
-test_that("nonparallel_dominance: binomial_p agrees with binom.test()", {
-  fit <- lsa(THREE, engine = "nonparallel_dominance")
-  bp <- fit$meta$extra$binomial_p
-  # Hand check cell [x, y]: a=8, n=8+4=12
-  ref <- stats::binom.test(8, 12, p = 0.5)$p.value
-  expect_equal(unname(bp["x", "y"]), ref, tolerance = 1e-12)
-})
-
-# --- Cross-engine consistency on O'Connor data -----------------------
-
-test_that("oconnor_couple: all engines fit and report consistent counts", {
-  data(oconnor_couple)
-  for (engine in c("classical", "two_cell", "bidirectional",
-                   "parallel_dominance", "nonparallel_dominance")) {
-    fit <- lsa(oconnor_couple$sequence, engine = engine)
-    expect_equal(sum(fit$obs), 392L,
-                 label = sprintf("engine = %s: sum(obs)", engine))
-    expect_s3_class(fit, "lsa")
-    expect_s3_class(fit, "cograph_network")
-  }
-})
+# nonparallel_dominance binom.test agreement and the oconnor_couple
+# cross-engine oracle live in equivalence_testing/test-base-r-engines.R.

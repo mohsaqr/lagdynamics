@@ -48,23 +48,8 @@ test_that("permute_lsa: observed_adj_res equals fit$adj_res", {
                tolerance = 1e-12)
 })
 
-test_that("O'Connor 1999 permutation oracle: large-residual cells get small p_perm", {
-  # The paper publishes p_mean from 10 blocks * 1000 = 10,000
-  # permutations. For cells with |Z| >> 1.96, our permute_lsa() at
-  # R = 1000 should also yield very small p_perm. We test this in
-  # a softer way: every cell with |adj_res| >= 4 in lagseq's classical
-  # output must have p_perm <= 0.05 in our 1000-permutation
-  # replication.
-  skip_on_cran()
-  data(oconnor_couple)
-  set.seed(16L)
-  fit <- lsa(oconnor_couple$sequence, engine = "classical")
-  pm <- permute_lsa(fit, R = 500)
-  large <- which(abs(as.vector(fit$adj_res)) >= 4)
-  if (length(large) > 0) {
-    expect_true(all(pm$edges$p_perm[large] <= 0.05))
-  }
-})
+# The O'Connor 1999 permutation oracle lives in
+# equivalence_testing/test-base-r-engines.R (out of the shipped suite).
 
 test_that("permute_lsa: as.data.frame returns the edges frame", {
   set.seed(17L)
