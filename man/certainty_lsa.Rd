@@ -31,7 +31,7 @@ above \code{edge_threshold}.}
 inference. Default \code{c(0.75, 1.25)}.}
 
 \item{edge_threshold}{Numeric or \code{NULL}. Fixed threshold for
-\code{inference = "threshold"}; \code{NULL} uses the 10th percentile of
+\code{inference = "threshold"}; \code{NULL} uses the 0.10 quantile of
 non-zero edge probabilities.}
 }
 \value{

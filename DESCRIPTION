@@ -4,17 +4,23 @@ Version: 0.1.0
 Authors@R:
     person("Mohammed", "Saqr", email = "saqr@saqr.me",
            role = c("aut", "cre", "cph"))
-Description: A unified, pipe-friendly interface for lag sequential analysis
-    of categorical event sequences. Provides classical, two-cell,
-    bidirectional, parallel-dominance, and non-parallel-dominance engines
-    via a single 'lsa()' constructor with a pluggable engine registry,
-    sequence-level bootstrap and permutation inference, case-drop
-    stability diagnostics, and tidy edge tables ready for
-    transition-network visualization. All numerical methods are
-    implemented from primary literature and cross-validated against
-    published worked examples and base-R primitives. Fits carry the
-    'cograph_network' S3 class so the 'cograph' package can render them
-    when installed.
+Description: A modern, tidy, pipe-friendly toolkit for lag sequential
+    analysis of categorical event sequences. A single 'lsa()' constructor
+    fits classical, two-cell, bidirectional, and dominance engines through
+    a pluggable registry, with multi-lag analysis and structural-zero
+    constraints, and every result is read through a verb that returns a
+    tidy one-row-per-observation data frame. A confirmatory testing
+    battery quantifies the evidence behind each claim: sequence-level
+    bootstrap and analytic Dirichlet-Multinomial certainty for edge
+    uncertainty, split-half reliability for the whole network, case-drop
+    stability, permutation tests, and permutation- and Bayesian-based
+    group comparison. Fits visualize through a single 'plot()' verb
+    (residual heatmap, transition network, chord, sunburst, and forest
+    views) and interoperate with the 'tna', 'Nestimate', and 'TraMineR'
+    ecosystems, both ingesting their sequence objects and converting to
+    network objects. All numerical methods are implemented from primary
+    literature and cross-validated against published worked examples and
+    base-R primitives.
 License: MIT + file LICENSE
 URL: https://github.com/mohsaqr/lagseq
 BugReports: https://github.com/mohsaqr/lagseq/issues

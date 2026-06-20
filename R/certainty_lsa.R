@@ -45,7 +45,7 @@
 #' @param consistency_range Length-2 multiplicative bounds for stability
 #'   inference. Default `c(0.75, 1.25)`.
 #' @param edge_threshold Numeric or `NULL`. Fixed threshold for
-#'   `inference = "threshold"`; `NULL` uses the 10th percentile of
+#'   `inference = "threshold"`; `NULL` uses the 0.10 quantile of
 #'   non-zero edge probabilities.
 #'
 #' @return An object of class `c("lsa_certainty", "lsa_bootstrap", "list")`
@@ -206,6 +206,12 @@ print.lsa_certainty <- function(x, ...) {
 #' @export
 plot.lsa_certainty <- function(x, metric = "prob", ...) {
   plot_forest(x, metric = metric, ...)
+}
+
+#' @export
+as.data.frame.lsa_certainty_group <- function(x, row.names = NULL,
+                                              optional = FALSE, ...) {
+  .grouped_df(x)
 }
 
 #' @export

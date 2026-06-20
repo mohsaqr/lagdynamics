@@ -123,6 +123,31 @@ as.data.frame.lsa <- function(x, row.names = NULL, optional = FALSE,
   out
 }
 
+#' @export
+as.data.frame.lsa_transitions <- function(x, row.names = NULL,
+                                          optional = FALSE, ...) {
+  x$edges
+}
+
+#' @export
+as.data.frame.lsa_group <- function(x, row.names = NULL, optional = FALSE,
+                                    ...) {
+  .grouped_df(x)
+}
+
+# Stack a named list of result objects into one tidy data frame, prefixing
+# a `group` column carrying each element's name. Each element is coerced
+# with its own as.data.frame() method, so the same helper tidies a list of
+# fits, certainty results, reliability results, etc.
+.grouped_df <- function(x) {
+  pieces <- Map(function(df, g) {
+    cbind(group = rep(g, nrow(df)), df, stringsAsFactors = FALSE)
+  }, lapply(x, as.data.frame), names(x))
+  out <- do.call(rbind, pieces)
+  rownames(out) <- NULL
+  out
+}
+
 # One-row tidy overview of a fit (engine, sizes, significance counts,
 # tablewise tests). Returned invisibly by summary.lsa(); also the body
 # of the public fit_summary() accessor.

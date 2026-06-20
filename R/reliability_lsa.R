@@ -205,13 +205,7 @@ as.data.frame.lsa_reliability <- function(x, row.names = NULL,
 #' @export
 as.data.frame.lsa_reliability_group <- function(x, row.names = NULL,
                                                 optional = FALSE, ...) {
-  parts <- lapply(x, as.data.frame)
-  pieces <- Map(function(df, g) cbind(group = rep(g, nrow(df)), df,
-                                      stringsAsFactors = FALSE),
-                parts, names(x))
-  out <- do.call(rbind, pieces)
-  rownames(out) <- NULL
-  out
+  .grouped_df(x)
 }
 
 #' @export

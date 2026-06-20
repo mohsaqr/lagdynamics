@@ -8,50 +8,127 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", dpi = 150,
-                      fig.width = 7, fig.height = 5.6, out.width = "100%",
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 150, fig.width = 7,
+                      fig.height = 5.6, out.width = "100%",
                       fig.align = "center")
 set.seed(1)
 library(lagseq)
 options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
 ```
 
-`lagseq` answers one question about a stream of categorical events:
-**given that one state just happened, does another follow more — or
-less — often than chance?**
+# The Method
 
-Reading a fit is predictable: each result is `verb(fit)`, and each
-returns a tidy one-row-per-observation `data.frame`. We use the built-in
-`group_regulation` data — 2,000 collaborative-learning sessions coded
-into nine regulation actions.
+Lag-sequential analysis (LSA) studies ordered categorical processes. It
+asks whether, given that one state has just occurred, another state
+follows more often or less often than chance. The unit of analysis is the
+transition from a source state to a target state, written as `from -> to`.
+
+The reference model is independence. Under independence, the current
+state has no sequential memory: the next state is expected only from the
+overall marginal distribution of states, not from the state that preceded
+it. LSA compares each observed transition count with the count expected
+under that no-memory model. The adjusted residual is the standardized
+departure from that expectation. A positive residual means that the
+transition is over-represented. A negative residual means that the
+transition is avoided. Values near zero indicate that the transition is
+close to what independence would predict.
+
+The residual is therefore the test statistic for a local sequential
+claim. A transition with a large residual is not merely common. It is a
+transition whose observed frequency departs from the chance baseline
+defined by the row and column margins of the transition table.
+
+# Why lagseq
+
+LSA has a long history in behavioral, educational, and interaction
+research, but applied studies often stop at description. Observed
+transition rates are reported, plotted, and interpreted, while the
+inferential question is left implicit: whether the apparent pattern is
+larger than expected under chance sequential pairing.
+
+Existing tooling has also tended to be dated, object-centric, or
+difficult to combine with modern data workflows. `lagseq` modernizes this
+practice. It implements lag-sequential analysis as a tidy, visual,
+interoperable, and confirmatory workflow. Each result is returned by a
+verb as a one-row-per-observation data frame. The fitted model can be
+read, plotted, resampled, compared across groups, and converted to
+network objects without indexing into internal slots.
+
+The design follows the Dynalytics framework of Saqr, Lopez-Pernas, and
+Misiejuk (2026). Dynalytics treats analysis as a scientific contract:
+every analytical claim must be matched by evidence appropriate to the
+structure, scope, and complexity of the claim. In `lagseq`, an edge is a
+tested departure from independence. Descriptive claims use descriptive
+evidence, edge claims use edge-level uncertainty, whole-network claims
+use reproducibility evidence, and group-difference claims use comparison
+procedures that preserve the empirical unit of the sequence.
+
+# Hands-On Tour
+
+The main example is `group_regulation`, a bundled wide-format data set of
+2,000 collaborative-learning sessions. Each row is one sequence, each
+column is an ordered time point, and each cell is a coded regulation
+action. The smaller `engagement` data set is also bundled and is used
+below to show the same input grammar on weekly engagement trajectories.
+
+```{r data}
+dim(group_regulation)
+head(group_regulation)
+
+dim(engagement)
+head(engagement)
+```
 
 ## Fit
+
+`lsa()` fits the model in one call. It tabulates the transition matrix,
+derives expected counts under independence, computes adjusted residuals,
+and records the recipe used to estimate the model. The printed object is
+a compact summary. The fitted object itself is read through verbs.
 
 ```{r fit}
 fit <- lsa(group_regulation)
 fit
 ```
 
-## Reading a fit — one verb per result
+## Read a Fit
+
+The public surface is tidy. Every result is produced by a verb, and each
+verb returns a data frame with one row per observation. `transitions()`
+returns one row per `from -> to` cell. The columns contain observed
+counts, expected counts, transition probabilities, adjusted residuals,
+p-values, and related association statistics.
 
 ```{r transitions}
 transitions(fit) |> head()   # one row per from -> to transition
 ```
 
+The companion verbs read the other parts of the same fitted model.
+`nodes()` reports incoming and outgoing volume by state. `tests()`
+reports tablewise independence tests. `initial()` reports the
+initial-state distribution when the input contains sequences rather than
+a precomputed transition matrix.
+
 ```{r nodes-tests-initial}
 nodes(fit)                  # one row per state, with in/out totals
-tests(fit)                  # tablewise independence tests (G^2, chi^2)
+tests(fit)                  # tablewise independence tests (G^2, chi-square)
 initial(fit)                # initial-state distribution
 ```
 
+`summary()` returns the same tidy discipline at the model level: one row
+per fitted model. For a grouped model, the same verb returns one row per
+group.
+
 ```{r summary}
-summary(fit)                # one-row overview (prints rich view, returns tidy)
+summary(fit)                # one-row overview
 ```
 
-### Picking transitions
-
-The transitions you want are arguments to `transitions()`, not separate
-functions:
+Focused transition tables are requested through arguments to
+`transitions()`. The call states the scientific filter directly:
+significant transitions, over-represented transitions, avoided
+transitions, or transitions with a minimum observed count.
 
 ```{r filters}
 transitions(fit, significant = TRUE) |> head()    # significant only
@@ -60,51 +137,101 @@ transitions(fit, direction = "under") |> head(4)  # avoided
 transitions(fit, min_count = 500)     |> head(4)  # frequently observed
 ```
 
-## Plotting
+## Visualise
 
-Every view comes from one verb, `plot(fit, type = )`: `"heatmap"`
-(default), `"network"`, `"chord"`, `"sunburst"`, and `plot()` on a
-`bootstrap_lsa()` result for the bootstrap forest. Grouped fits plot one
-panel per group. The default is the residual heatmap.
+One plotting verb covers the main views: `plot(fit, type = )`. The
+default heatmap displays adjusted residuals, which makes it the direct
+visual form of the LSA model. The residual network displays the same
+departures as directed edges. A probability-weighted network switches the
+representation to a TNA transition network. Chord and sunburst views
+summarize transition flow and outgoing distributions. Uncertainty
+forests and group barrels are produced by `plot()` on validation and
+comparison results.
 
 ```{r plot-residuals, eval = requireNamespace("ggplot2", quietly = TRUE)}
 plot(fit)                     # residual heatmap (default)
 ```
 
-See `vignette("plotting", package = "lagseq")` for the full gallery.
-
-## Getting data in
-
-`lsa()` takes many shapes; supply `actor`/`action`/`time` to sequence a
-raw long event log on the fly.
-
-```{r input}
-lsa(c("a", "b", "a", "c", "b"))               # one sequence (vector)
-lsa(list(c("a", "b", "a"), c("b", "c", "a")))  # several sequences
-
-log <- data.frame(
-  user = c("u1", "u1", "u1", "u2", "u2"),
-  act  = c("login", "read", "quiz", "login", "read"),
-  ts   = as.POSIXct(c("2025-01-01 10:00", "2025-01-01 10:01",
-                      "2025-01-01 10:02", "2025-01-02 09:00",
-                      "2025-01-02 09:01"), tz = "UTC"),
-  stringsAsFactors = FALSE)
-lsa(log, actor = "user", action = "act", time = "ts")
+```{r plot-network, eval = requireNamespace("cograph", quietly = TRUE)}
+plot(fit, type = "network")   # residual network
 ```
 
-The canonical input form and the raw transition table are also
-available on their own:
+```{r plot-tna-network, eval = requireNamespace("tna", quietly = TRUE)}
+plot(fit, type = "network", weights = "prob")   # TNA transition network
+```
+
+```{r plot-chord, eval = requireNamespace("cograph", quietly = TRUE)}
+plot(fit, type = "chord")
+```
+
+```{r plot-sunburst, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(fit, type = "sunburst")
+```
+
+See `vignette("plotting", package = "lagseq")` for the full plotting
+gallery.
+
+## Get Data In
+
+The canonical input is a sequence object: one or more categorical
+sequences with missing cells dropped as missingness rather than modeled
+as a state. Wide data frames and matrices use rows as sequences and
+columns as ordered positions. This is the shape of both bundled data
+sets.
+
+```{r input}
+lsa(engagement)
+lsa(group_regulation)
+```
+
+The canonical sequence representation and the raw transition table can
+also be inspected directly. These helpers are useful when the sequencing
+contract needs to be made explicit before a model is fitted.
 
 ```{r data-helpers}
-lsa_data(c("a", "b", "a", "c"))               # canonical sequence object
-lsa_transitions(c("a", "b", "a", "c"))        # raw transition counts
+as.data.frame(lsa_data(group_regulation)) |> head(6)
+as.data.frame(lsa_transitions(group_regulation)) |> head(6)
+```
+
+Raw event logs are handled with the same `actor` / `action` / `time`
+grammar used by `tna`. The chunk below uses the real
+`tna::group_regulation_long` log when `tna` is installed. The call
+groups events by actor, orders them by time, constructs sequences, and
+then fits the LSA model.
+
+```{r long-log, eval = requireNamespace("tna", quietly = TRUE)}
+log <- tna::group_regulation_long
+head(log)
+
+fit_log <- lsa(log, actor = "Actor", action = "Action", time = "Time")
+fit_log
+```
+
+Interoperability also works at the object level. Sequence-bearing
+objects from `tna`, Nestimate, and `TraMineR` can be passed to `lsa()`;
+fitted LSA models can be converted back to a TNA object with
+`lsa_to_tna()` or to an igraph object with `as.igraph()`.
+
+```{r ingest-tna, eval = requireNamespace("tna", quietly = TRUE)}
+log <- tna::group_regulation_long
+prepared <- tna::prepare_data(log, actor = "Actor",
+                              action = "Action", time = "Time")
+lsa(tna::tna(prepared))
+```
+
+```{r ingest-traminer, eval = requireNamespace("TraMineR", quietly = TRUE)}
+seq_obj <- TraMineR::seqdef(engagement)
+lsa(seq_obj)
 ```
 
 ## Lags
 
-`lsa()` takes any integer lag (negative = predecessors, `0` = self).
-`lag_profile()` tracks one transition across lags; `lsa_lags()` fits a
-whole profile.
+The lag controls the temporal distance between the source and target
+states. Positive lags count successors, negative lags count
+predecessors, and lag zero pairs each event with itself. `lag_profile()`
+tracks one transition across several lags. `lsa_lags()` fits a full
+multi-lag profile and returns a tidy long table through
+`as.data.frame()`.
 
 ```{r lags}
 lag_profile(group_regulation, "plan", "consensus", lags = 1:3)
@@ -113,74 +240,130 @@ as.data.frame(lsa_lags(group_regulation, lags = 1:2)) |> head(3)
 
 ## Groups
 
-Give `lsa()` one label per sequence; every verb then returns grouped,
-tidy results with a leading `group` column.
+A grouped model estimates one LSA fit per group under one shared label
+set. For raw long logs, `group` names a grouping column that is constant
+within each recovered sequence. The same reading verbs then return a
+leading `group` column.
 
-```{r groups}
-g <- rep(c("A", "B"), length.out = nrow(group_regulation))
-gfit <- lsa(group_regulation, group = g)
+```{r groups, eval = requireNamespace("tna", quietly = TRUE)}
+log <- tna::group_regulation_long
+gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
+            group = "Achiever")
+gfit
 transitions(gfit, significant = TRUE) |> head(4)
-nodes(gfit) |> head(4)      # every verb works grouped: leading `group` column
-summary(gfit)               # one tidy row per group
+nodes(gfit) |> head(4)
+summary(gfit)
 ```
 
-## Inference
+## Validate and Confirm
 
-Resampling quantifies uncertainty. Each returns an object whose
-`as.data.frame()` is tidy.
+The adjusted residual tests whether an edge departs from independence in
+the fitted table. Stronger claims require further evidence. `lagseq`
+therefore includes a confirmatory battery that follows the Dynalytics
+contract.
 
-```{r inference}
-as.data.frame(bootstrap_lsa(fit, R = 100)) |> head(3)   # edge CIs
-reliability_lsa(fit, R = 30)                            # split-half reliability (summary)
-as.data.frame(reliability_lsa(fit, R = 30)) |> head(3)  # per-replicate draws (tidy)
-```
-
-`certainty_lsa()` is the analytic Bayesian sibling of `bootstrap_lsa()`:
-a Dirichlet-Multinomial posterior gives each transition probability an
-exact credible interval in closed form — same answer on homogeneous data,
-no resampling.
+`certainty_lsa()` gives analytic Bayesian uncertainty for transition
+probabilities. It uses a Dirichlet-Multinomial posterior for each source
+state's outgoing transitions and returns credible intervals without
+resampling.
 
 ```{r certainty}
-certainty_lsa(fit)                            # Dirichlet certainty (summary)
-as.data.frame(certainty_lsa(fit)) |> head(3)  # analytic edge CIs (tidy)
+cert <- certainty_lsa(fit)
+cert
+as.data.frame(cert) |> head(3)
 ```
 
-```{r inference-more, eval = FALSE}
-permute_lsa(fit, R = 100)     # permutation p-values
-stability_lsa(fit, R = 100)   # case-drop stability
+`bootstrap_lsa()` is the resampling counterpart. It resamples whole
+sequences, refits the model, and summarizes edge-level variability. A
+forest plot displays the interval evidence for the selected edge metric.
+
+```{r bootstrap}
+boot <- bootstrap_lsa(fit, R = 50)
+as.data.frame(boot) |> head(3)
+```
+
+```{r forest, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(boot)
+```
+
+`reliability_lsa()` estimates whole-network reproducibility by repeated
+split-half refitting. `stability_lsa()` drops cases and records whether
+edges remain significant. `permute_lsa()` constructs an empirical null
+by shuffling events within sequences and recomputing the residuals.
+
+```{r validation}
+rel <- reliability_lsa(fit, R = 20)
+rel
+as.data.frame(rel) |> head(3)
+
+stab <- stability_lsa(fit, R = 30)
+stab
+as.data.frame(stab) |> head(3)
+
+pm <- permute_lsa(fit, R = 50)
+pm
+as.data.frame(pm) |> head(3)
+```
+
+Group comparison is confirmatory rather than visual. `compare_lsa()`
+permutes group labels at the sequence level and tests whether transition
+structures differ. `bayes_compare_lsa()` is the analytic Bayesian
+comparison: it reports the plausible range of group differences in
+transition probabilities.
+
+```{r compare, eval = requireNamespace("tna", quietly = TRUE)}
+log <- tna::group_regulation_long
+gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
+            group = "Achiever")
+
+cmp <- compare_lsa(gfit, R = 50, adjust = "BH")
+cmp
+as.data.frame(cmp) |> head(4)
+
+bcmp <- bayes_compare_lsa(gfit, draws = 1000, adjust = "BH", seed = 1)
+bcmp
+as.data.frame(bcmp) |> head(4)
+```
+
+```{r barrel, eval = requireNamespace("tna", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)}
+plot(cmp)
+plot(cmp, style = "heatmap")
 ```
 
 ## Engines
 
-The classical engine is the default; others target specific designs,
-and you can register your own.
+The classical LSA engine is the default, but the package also includes
+two-cell, bidirectional, parallel-dominance, and nonparallel-dominance
+engines. The registry is open, so custom engines can be registered with
+`register_lsa_engine()` and removed with `unregister_lsa_engine()`.
+Convenience wrappers call the built-in engines directly.
 
 ```{r engines}
 list_lsa_engines()
-lsa(group_regulation, engine = "classical")$method
+lsa_two_cell(group_regulation)
+lsa_bidirectional(group_regulation)
 ```
 
-Convenience wrappers call each engine directly: `lsa_classical()`,
-`lsa_two_cell()`, `lsa_bidirectional()`, `lsa_parallel_dominance()`,
-`lsa_nonparallel_dominance()`. Register a custom one with
-`register_lsa_engine()` (and remove it with `unregister_lsa_engine()`).
+## Structural Zeros
 
-## Structural zeros
-
-Forbid impossible cells; they become `NA`, never a false "expected". Use
-`loops = FALSE` for the common case (no self-transitions), or pass a 0/1
-matrix to `structural_zeros` for an arbitrary forbidden pattern.
+Some transitions are impossible by design. `loops = FALSE` is the common
+constraint when self-transitions are not part of the model. A full
+0/1 matrix can be supplied through `structural_zeros` for arbitrary
+forbidden patterns. Structural-zero cells are not treated as expected
+transitions; they are non-estimable cells in the model.
 
 ```{r structural-zeros}
 fz <- lsa(group_regulation, loops = FALSE)   # forbid self-transitions
-transitions(fz, significant = TRUE) |>
-  subset(from == to)    # self-transitions: none, they are NA
+transitions(fz) |> subset(from == to)
 ```
 
-## To a network toolkit
+## Network Toolkits
 
-A fit is a directed weighted network, so it converts in one call to the
-native object of a network package (these need the package installed).
+An LSA fit is also a directed weighted network. `lsa_to_tna()` exposes it
+to the TNA ecosystem, while `as.igraph()` exposes it to igraph. The
+choice of weight carries the model meaning: `prob` is a transition
+network, `count` is observed transition volume, `adj_res` is the residual
+LSA network, and `lift` is observed over expected association strength.
 
 ```{r tna, eval = requireNamespace("tna", quietly = TRUE)}
 tna::centralities(lsa_to_tna(fit, weights = "prob")) |> head()
@@ -190,19 +373,46 @@ tna::centralities(lsa_to_tna(fit, weights = "prob")) |> head()
 igraph::betweenness(igraph::as.igraph(fit, weights = "prob"))
 ```
 
-## In short
+# Ecosystem
+
+`lagseq` sits beside several established approaches to process data.
+Process mining discovers and checks event-log workflows. Social network
+analysis models relations among actors. Sequence analysis models whole
+trajectories and distances between them. Transition network analysis
+models conditional movement from one state to the next.
+
+LSA is closest to transition network analysis, but it answers a different
+question. A TNA edge is a transition tendency, usually a conditional
+probability. An LSA edge is a tested departure from independence. The
+same empirical process can therefore produce both models, but the
+scientific claims are different. TNA asks where the process tends to go
+next. LSA asks which transitions are more or less frequent than expected
+under a no-memory baseline.
+
+Within the Dynalytics open-source ecosystem, `tna`, Nestimate, and
+`cograph` provide related representations, estimation tools, and
+visualization layers for dynamical systems. `lagseq` contributes the
+lag-sequential and confirmatory member of that ecosystem. It keeps the
+methodological contract explicit: each edge is tested against
+independence, each uncertainty claim is matched to uncertainty evidence,
+each whole-network claim is matched to reliability or stability
+evidence, and each group claim is matched to a comparison procedure.
+
+In short, the package turns a familiar descriptive practice into a
+complete inferential workflow:
 
 ```r
-fit <- lsa(group_regulation)          # fit
-transitions(fit)                      # tidy edge table
-transitions(fit, significant = TRUE)  # the transitions that matter
-nodes(fit); tests(fit); initial(fit)  # other results, same shape
-summary(fit)                          # one-row overview
-plot(fit)                             # residual heatmap
-lag_profile(group_regulation, "plan", "consensus")  # lag profile
-lsa(group_regulation, group = g)      # grouped
-bootstrap_lsa(fit)                    # uncertainty (resampling)
-certainty_lsa(fit)                    # uncertainty (analytic, instant)
+fit <- lsa(group_regulation)                  # fit
+transitions(fit)                              # tidy edge table
+transitions(fit, significant = TRUE)          # tested departures
+nodes(fit); tests(fit); initial(fit)          # other tidy results
+summary(fit)                                  # one-row overview
+plot(fit)                                     # residual heatmap
+lag_profile(group_regulation, "plan", "consensus")  # multi-lag profile
+certainty_lsa(fit); bootstrap_lsa(fit)        # edge uncertainty
+reliability_lsa(fit); stability_lsa(fit)      # network evidence
+permute_lsa(fit)                              # empirical null
 ```
 
-See `?lsa` for every input form and `?lsa_to_tna` for the network bridge.
+See `vignette("workflow", package = "lagseq")` for a fuller
+claim-to-evidence workflow and `?lsa` for the complete input grammar.

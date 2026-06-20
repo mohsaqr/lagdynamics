@@ -286,6 +286,35 @@ lsa_data <- function(x, labels = NULL) {
                paste(class(flat), collapse = "/")), call. = FALSE)
 }
 
+#' Tidy the Canonical Sequence Object
+#'
+#' Returns the canonical `lsa_data` as a tidy data frame: one row per
+#' event (`seq_id`, within-sequence `index`, `state`) for event-level
+#' input, or one row per `from`/`to`/`count` cell for transition-matrix
+#' input.
+#'
+#' @param x An `lsa_data` object from [lsa_data()].
+#' @param row.names,optional,... Standard [as.data.frame()] arguments
+#'   (unused; present for method consistency).
+#' @return A tidy data frame.
+#' @export
+as.data.frame.lsa_data <- function(x, row.names = NULL, optional = FALSE,
+                                   ...) {
+  if (identical(x$source, "events")) {
+    index <- stats::ave(seq_along(x$events), x$seq_id,
+                        FUN = seq_along)
+    data.frame(seq_id = x$seq_id, index = index,
+               state = x$labels[x$events],
+               stringsAsFactors = FALSE, row.names = NULL)
+  } else {
+    m <- x$obs_input
+    grid <- expand.grid(from = rownames(m), to = colnames(m),
+                        KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+    data.frame(from = grid$from, to = grid$to, count = as.vector(m),
+               stringsAsFactors = FALSE, row.names = NULL)
+  }
+}
+
 #' @export
 print.lsa_data <- function(x, ...) {
   cat("<lsa_data>\n")

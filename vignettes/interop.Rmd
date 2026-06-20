@@ -1,0 +1,120 @@
+---
+title: "Interoperability with tna and Nestimate"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interoperability with tna and Nestimate}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 150, fig.width = 7,
+                      fig.height = 5.6, out.width = "100%",
+                      fig.align = "center")
+set.seed(2026)
+library(lagseq)
+options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
+```
+
+`lagseq` belongs to the Dynalytics ecosystem alongside `tna` (transition
+network analysis), Nestimate (network estimation), `cograph` (rendering),
+and `TraMineR`. The ecosystem separates estimation from rendering and
+analysis, and the packages share a common data grammar and object
+schemas. In practice this means two things: `lsa()` can read sequences
+straight out of those packages' objects, and a fitted `lsa` model
+converts back into them in one call.
+
+# Into lagseq: fit from another package's object
+
+`lsa()` recognises sequence-bearing objects from `tna`
+(`tna`, `tna_data`, `tna_seq_data`), Nestimate, and `TraMineR`
+(`stslist`). It pulls the sequences out and fits, so no manual extraction
+is needed.
+
+## A tna object
+
+`tna` and `lsa()` share the same long-format grammar
+(`actor` / `action` / `time` / `order` / `session`). Prepare the data with
+`tna`, build a model, and hand either object to `lsa()`.
+
+```{r tna-in, eval = has("tna")}
+log <- tna::group_regulation_long
+prepared  <- tna::prepare_data(log, actor = "Actor",
+                               action = "Action", time = "Time")
+tna_model <- tna::tna(prepared)
+
+lsa(prepared)     # fit from the prepared sequence object
+lsa(tna_model)    # or from a built tna model -- same sequences, same fit
+```
+
+## A TraMineR state sequence object
+
+A `TraMineR` `stslist` (the standard state-sequence object) is read
+directly.
+
+```{r tramineR-in, eval = has("TraMineR")}
+sts <- TraMineR::seqdef(engagement)
+lsa(sts)
+```
+
+# Out of lagseq: hand a fit to another toolkit
+
+A fitted model is a directed weighted network, so it converts to the
+native object of either network package. Estimation stays in `lagseq`;
+the downstream analysis runs in the toolkit built for it.
+
+```{r fit}
+fit <- lsa(engagement)
+```
+
+## To a tna network
+
+`lsa_to_tna()` returns a `tna` object. Choose the edge weight with
+`weights` (`"prob"` for a transition-probability network, `"count"` for a
+frequency one). From there, tna's analysis verbs apply.
+
+```{r to-tna, eval = has("tna")}
+tn <- lsa_to_tna(fit, weights = "prob")
+tna::centralities(tn) |> head()
+```
+
+## To an igraph
+
+`as.igraph()` returns an `igraph`, so the full igraph toolbox is
+available.
+
+```{r to-igraph, eval = has("igraph")}
+ig <- igraph::as.igraph(fit, weights = "prob")
+igraph::betweenness(ig)
+```
+
+# Shared rendering: the transition network is a tna model
+
+Because estimation and rendering are separate layers, the transition
+network view of an `lsa` fit *is* a `tna` model: `lsa_to_tna()` builds it
+on the fly and tna's own plot method renders it (coloured nodes,
+initial-probability arcs, weighted directed edges).
+
+```{r render, eval = has("tna")}
+plot(fit, type = "network", weights = "prob")
+```
+
+The residual network, by contrast, is rendered by `cograph` and keeps the
+lag-sequential meaning (each edge a tested departure from independence).
+One fit, two rendering layers, one shared object model.
+
+# One grammar across the ecosystem
+
+The practical payoff is a single mental model. The arguments that sequence
+a raw log are the same in `lsa()` and in `tna::prepare_data()`:
+
+```r
+tna::prepare_data(log, actor =, action =, time =, order =, session =)
+lsa(log,               actor =, action =, time =, order =, session =)
+```
+
+So an analysis can move between transition-network tooling and
+lag-sequential testing without reshaping the data, and an object built in
+one package is valid input to the other.

@@ -1,0 +1,159 @@
+---
+title: "Confirmatory testing: matching claims to evidence"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Confirmatory testing: matching claims to evidence}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 150, fig.width = 7,
+                      fig.height = 5.6, out.width = "100%",
+                      fig.align = "center")
+set.seed(2026)
+library(lagseq)
+options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
+```
+
+A fitted model is an estimate, not a finding. The Dynalytics framework
+(Saqr, Lopez-Pernas, and Misiejuk, 2026) formalises this as a *scientific
+contract*: every analytical claim must be matched by evidence appropriate
+to its structure, scope, and complexity. `lagseq` provides the
+confirmatory testing battery that discharges that contract for
+lag-sequential models, where each edge is a tested departure from
+independence.
+
+The battery pairs a kind of claim with a kind of evidence:
+
+| Claim | Evidence | Function |
+|---|---|---|
+| a *specific transition* is real / how precise it is | edge-level uncertainty | `certainty_lsa()`, `bootstrap_lsa()` |
+| a *significant transition* is not fragile | robustness to information loss | `stability_lsa()` |
+| the *whole network* is reproducible | structural reliability | `reliability_lsa()` |
+| the structure is *more than chance* | an assumption-free null | `permute_lsa()` |
+| two *groups* differ | inference under exchangeability | `compare_lsa()`, `bayes_compare_lsa()` |
+
+We use the bundled `engagement` data (138 students, weekly engagement
+states) for the single-network tests, and a long event log with a real
+group for the comparison.
+
+```{r fit}
+fit <- lsa(engagement)
+transitions(fit, significant = TRUE)
+```
+
+The adjusted residual already tests each transition against the
+independence model, but that test rests on large-sample assumptions that
+sequential data can violate. The battery supplies evidence that does not
+rely on them.
+
+# A specific transition: edge-level uncertainty
+
+A claim about one edge requires an estimate of how much that edge could
+vary. `bootstrap_lsa()` resamples whole sequences and re-fits;
+`certainty_lsa()` derives the same uncertainty analytically from a
+Dirichlet-Multinomial posterior. The two agree when the population is
+homogeneous; the bootstrap is preferred for a mixture, because resampling
+sequences preserves within-sequence dependence that the analytic model
+treats as independent.
+
+```{r edge}
+as.data.frame(bootstrap_lsa(fit, R = 200)) |> head(4)   # resampling CIs
+as.data.frame(certainty_lsa(fit)) |> head(4)            # analytic CIs
+```
+
+The bootstrap forest shows every edge's interval at once; tightly pinned
+edges support stronger claims.
+
+```{r forest, eval = has("ggplot2"), fig.height = 6.5}
+plot(bootstrap_lsa(fit, R = 200))
+```
+
+# A significant transition: robustness to information loss
+
+`stability_lsa()` repeatedly drops a fraction of the cases and re-fits,
+recording how often each significant edge stays significant. A high
+stability supports reading the edge as a property of the process; a low
+one marks it as sample-dependent.
+
+```{r stability}
+as.data.frame(stability_lsa(fit, R = 200)) |> head(4)
+```
+
+# The whole network: structural reliability
+
+`reliability_lsa()` raises the claim from a single edge to the entire
+network. It repeatedly splits the sequences into two halves, fits a model
+on each, and correlates the edge-weight vectors. A high average
+correlation indicates the network is reproducible within the sample.
+
+```{r reliability}
+reliability_lsa(fit, R = 50)
+```
+
+# More than chance: an assumption-free null
+
+`permute_lsa()` shuffles the event order to build the null of no
+sequential structure, giving a p-value that does not depend on the
+adjusted residual's large-sample approximation.
+
+```{r permute}
+as.data.frame(permute_lsa(fit, R = 200)) |> head(4)
+```
+
+# Two groups: inference under exchangeability
+
+Comparing groups is the claim that most invites over-interpretation:
+two networks estimated separately almost always look different. The
+question is whether the difference exceeds what arises by chance when the
+group labels carry no information.
+
+`tna::group_regulation_long` is a long event log with a recorded
+achievement group; the same `actor` / `action` / `time` grammar fits it in
+one call.
+
+```{r group, eval = has("tna")}
+log <- tna::group_regulation_long
+gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
+            group = "Achiever")
+```
+
+`compare_lsa()` answers it by permutation under exchangeability: it
+shuffles the labels to build a reference distribution for the per-edge
+difference and a single omnibus statistic.
+
+```{r compare, eval = has("tna")}
+cmp <- compare_lsa(gfit, R = 500, adjust = "BH")
+cmp
+as.data.frame(cmp) |> subset(significant) |> head(4)
+```
+
+```{r barrel, eval = has("tna") && has("ggplot2"), fig.height = 6.5}
+plot(cmp)
+```
+
+`bayes_compare_lsa()` is the Bayesian counterpart: instead of a
+significance decision it reports, for each edge, the posterior mean
+difference and a credible interval, so the evidence is a plausible range
+rather than a verdict.
+
+```{r bayes, eval = has("tna")}
+bayes_compare_lsa(gfit, seed = 1)
+```
+
+# In short
+
+The contract is one rule applied at every scope: match the claim to the
+evidence. A descriptive reading of an edge needs only the fit; a stronger
+claim needs the test that targets exactly its structure.
+
+```r
+certainty_lsa(fit); bootstrap_lsa(fit)   # a specific edge
+stability_lsa(fit)                       # a significant edge under case-dropping
+reliability_lsa(fit)                     # the whole network
+permute_lsa(fit)                         # more than chance
+compare_lsa(gfit); bayes_compare_lsa(gfit)  # a group difference
+```
