@@ -148,8 +148,8 @@
          call. = FALSE)
   }
   if (!col %in% names(data)) {
-    stop(sprintf("`%s` column %s not found in the data.",
-                 role, shQuote(col)), call. = FALSE)
+    stop(sprintf("`%s` column '%s' not found in the data.",
+                 role, col), call. = FALSE)
   }
   invisible(TRUE)
 }

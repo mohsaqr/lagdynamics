@@ -11,7 +11,8 @@
 #' Learners are labeled by 10-digit numeric IDs (used as `names()`).
 #' The attribute `"group"` is a named character vector classifying
 #' each learner into the post-test performance group used by the
-#' source paper: `"低"` (low), `"中"` (medium), or `"高"` (high).
+#' source paper: low, medium, or high (stored under the source's
+#' original ordinal labels).
 #'
 #' This data set is intended as a real-world third-party validation
 #' input for [lsa()] and is shipped alongside [kg_lsa_oracle], which
@@ -47,11 +48,11 @@
 #' independent third-party validation oracle for [lsa()].
 #'
 #' The published values were extracted verbatim from the spreadsheet
-#' deposited at \doi{10.17632/bdwcj7vw94.1} (sheets
-#' `"整体分析"`, `"低结果"`, `"中结果"`, `"高结果"`). The author used
-#' the published output (matrices labeled JNTF for joint transition
+#' deposited at \doi{10.17632/bdwcj7vw94.1} (the overall-analysis sheet
+#' and the low-, medium-, and high-result sheets). The author used the
+#' published output (matrices labeled JNTF for joint transition
 #' frequencies and ADJR for adjusted residuals) computed from the
-#' wide-format sequence sheet `"整体数据"`.
+#' overall wide-format sequence sheet.
 #'
 #' Note that the published total `sum(obs)` is 870 transitions; running
 #' lagseq on the same wide-format sheet yields 871, an

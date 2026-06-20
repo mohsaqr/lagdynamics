@@ -25,3 +25,4 @@
 ^MEMORY\.md$
 ^AGENTS?\.md$
 ^notes$
+^\.claude$

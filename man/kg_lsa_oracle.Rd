@@ -31,11 +31,11 @@ independent third-party validation oracle for \code{\link[=lsa]{lsa()}}.
 }
 \details{
 The published values were extracted verbatim from the spreadsheet
-deposited at \doi{10.17632/bdwcj7vw94.1} (sheets
-\code{"整体分析"}, \code{"低结果"}, \code{"中结果"}, \code{"高结果"}). The author used
-the published output (matrices labeled JNTF for joint transition
+deposited at \doi{10.17632/bdwcj7vw94.1} (the overall-analysis sheet
+and the low-, medium-, and high-result sheets). The author used the
+published output (matrices labeled JNTF for joint transition
 frequencies and ADJR for adjusted residuals) computed from the
-wide-format sequence sheet \code{"整体数据"}.
+overall wide-format sequence sheet.
 
 Note that the published total \code{sum(obs)} is 870 transitions; running
 lagseq on the same wide-format sheet yields 871, an

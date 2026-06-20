@@ -265,7 +265,7 @@ lsa_data <- function(x, labels = NULL) {
     if (anyNA(ints)) {
       bad <- unique(as.character(flat)[is.na(ints)])
       stop(sprintf("Some events do not match supplied labels: %s",
-                   paste(shQuote(bad), collapse = ", ")),
+                   paste(sprintf("'%s'", bad), collapse = ", ")),
            call. = FALSE)
     }
     return(list(labels = labels, events_int = ints))

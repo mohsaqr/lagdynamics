@@ -31,7 +31,8 @@ nodes the learner visited (\code{L01} = "Civil disputes", \code{L02} =
 Learners are labeled by 10-digit numeric IDs (used as \code{names()}).
 The attribute \code{"group"} is a named character vector classifying
 each learner into the post-test performance group used by the
-source paper: \code{"低"} (low), \code{"中"} (medium), or \code{"高"} (high).
+source paper: low, medium, or high (stored under the source's
+original ordinal labels).
 
 This data set is intended as a real-world third-party validation
 input for \code{\link[=lsa]{lsa()}} and is shipped alongside \link{kg_lsa_oracle}, which

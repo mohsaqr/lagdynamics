@@ -73,7 +73,7 @@ get_lsa_engine <- function(name) {
     available <- ls(envir = .lsa_engine_registry)
     stop(sprintf(
       "Engine '%s' is not registered. Available engines: %s",
-      name, paste(shQuote(available), collapse = ", ")
+      name, paste(sprintf("'%s'", available), collapse = ", ")
     ), call. = FALSE)
   }
   entry <- get(name, envir = .lsa_engine_registry, inherits = FALSE)
