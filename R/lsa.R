@@ -443,7 +443,7 @@ print.lsa_group <- function(x, ...) {
       source = data$source,
       ipf = result$ipf,
       n_events_used = result$n_events_used,
-      package_version = utils::packageVersion("lagseq"),
+      package_version = utils::packageVersion("lagdynamics"),
       call = call,
       extra = engine_extra
     )

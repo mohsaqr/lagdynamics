@@ -35,7 +35,7 @@ count matrix. Otherwise \code{NULL}.}
 }
 \description{
 Coerces a wide variety of user input shapes into a single canonical
-representation used by every downstream lagseq function (engines,
+representation used by every downstream lagdynamics function (engines,
 bootstrap, permutation, grouping, plotting).
 }
 \details{

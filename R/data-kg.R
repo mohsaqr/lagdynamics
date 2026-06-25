@@ -55,7 +55,7 @@
 #' overall wide-format sequence sheet.
 #'
 #' Note that the published total `sum(obs)` is 870 transitions; running
-#' lagseq on the same wide-format sheet yields 871, an
+#' lagdynamics on the same wide-format sheet yields 871, an
 #' off-by-one difference attributable to a minor undocumented
 #' preprocessing step in the source paper. Cell-level agreement is
 #' typically within 1-5 events out of 870, and adjusted-residual

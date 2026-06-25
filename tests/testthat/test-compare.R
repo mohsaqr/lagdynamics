@@ -238,7 +238,7 @@ test_that("adj_res measure warns when group sizes are unequal", {
 test_that("log_or matrix is finite on zero cells (Haldane correction)", {
   d <- .compare_make_groups(20, 20, c(0, 6, 0), c(0, 0, 6), seed = 75L)
   fit <- lsa(d$seqs, group = d$group, engine = "classical")
-  lor <- lagseq:::.lsa_log_or(fit[[1L]])
+  lor <- lagdynamics:::.lsa_log_or(fit[[1L]])
   # Some transitions are unobserved (zero cells); Haldane keeps log_or
   # finite there rather than -Inf, except engine-NA cells.
   obs <- fit[[1L]]$obs
@@ -309,7 +309,7 @@ test_that("barrel borders the higher group's bar, darker with |diff|", {
   fa <- fit[[1]]; fb <- fit[[2]]
   e <- cmp$edges
   n <- nrow(e)
-  one <- lagseq:::.barrel_one(fa, fb, e, rev(seq_len(n)), "prob")
+  one <- lagdynamics:::.barrel_one(fa, fb, e, rev(seq_len(n)), "prob")
   rect <- one$rect
   left <- rect[rect$side == "left", ]    # group a bars, edge order
   right <- rect[rect$side == "right", ]  # group b bars, edge order
@@ -342,8 +342,8 @@ test_that("barrel rank = 'effect' surfaces avoided (negative log OR) cells", {
   # The effect ranking must put the strongest-|log OR| tested cell first.
   fa <- fit[[1]]; fb <- fit[[2]]; labs <- rownames(fa$obs)
   e <- cmp$edges; ix <- cbind(match(e$from, labs), match(e$to, labs))
-  eff <- pmax(abs(lagseq:::.lsa_log_or(fa)[ix]),
-              abs(lagseq:::.lsa_log_or(fb)[ix]))
+  eff <- pmax(abs(lagdynamics:::.lsa_log_or(fa)[ix]),
+              abs(lagdynamics:::.lsa_log_or(fb)[ix]))
   eff[!is.finite(e$p_perm)] <- -Inf
   top <- e[which.max(eff), ]
   # That top cell's per-group log OR is the most extreme among tested cells.

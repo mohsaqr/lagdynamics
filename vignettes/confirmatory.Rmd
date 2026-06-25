@@ -13,7 +13,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.height = 5.6, out.width = "100%",
                       fig.align = "center")
 set.seed(2026)
-library(lagseq)
+library(lagdynamics)
 options(digits = 3)
 has <- function(p) requireNamespace(p, quietly = TRUE)
 ```
@@ -21,7 +21,7 @@ has <- function(p) requireNamespace(p, quietly = TRUE)
 A fitted model is an estimate, not a finding. The Dynalytics framework
 (Saqr, Lopez-Pernas, and Misiejuk, 2026) formalises this as a *scientific
 contract*: every analytical claim must be matched by evidence appropriate
-to its structure, scope, and complexity. `lagseq` provides the
+to its structure, scope, and complexity. `lagdynamics` provides the
 confirmatory testing battery that discharges that contract for
 lag-sequential models, where each edge is a tested departure from
 independence.

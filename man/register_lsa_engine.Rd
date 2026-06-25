@@ -27,7 +27,7 @@ depends on. Empty by default.}
 Invisibly returns \code{name}.
 }
 \description{
-Adds a new engine to the lagseq registry so it can be referenced by
+Adds a new engine to the lagdynamics registry so it can be referenced by
 name via \code{lsa(..., engine = "<name>")}. Built-in engines
 (\code{"classical"}, \code{"two_cell"}, \code{"bidirectional"},
 \code{"parallel_dominance"}, \code{"nonparallel_dominance"}) are registered

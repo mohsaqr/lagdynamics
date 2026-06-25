@@ -57,7 +57,7 @@ numerical output of the SEQUENTIAL program for that exact input
 (Appendix B). Six behavior codes; 392 transitions at lag 1.
 
 This is the gold-standard validation oracle for any lag-sequential
-analysis implementation. lagseq's classical engine reproduces every
+analysis implementation. lagdynamics's classical engine reproduces every
 cell of every output matrix to better than the paper's own printed
 precision (3-4 decimal places); see
 \code{tests/testthat/test-published-oconnor.R}.

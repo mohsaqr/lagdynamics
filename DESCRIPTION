@@ -1,4 +1,4 @@
-Package: lagseq
+Package: lagdynamics
 Title: Modern Lag Sequential Analysis with Tidy Transition Networks
 Version: 0.1.0
 Authors@R:
@@ -22,8 +22,8 @@ Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     literature and cross-validated against published worked examples and
     base-R primitives.
 License: MIT + file LICENSE
-URL: https://github.com/mohsaqr/lagseq
-BugReports: https://github.com/mohsaqr/lagseq/issues
+URL: https://github.com/mohsaqr/lagdynamics
+BugReports: https://github.com/mohsaqr/lagdynamics/issues
 Language: en-US
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

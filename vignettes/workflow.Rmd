@@ -13,7 +13,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.height = 5.6, out.width = "100%",
                       fig.align = "center")
 set.seed(2026)
-library(lagseq)
+library(lagdynamics)
 options(digits = 3)
 has <- function(p) requireNamespace(p, quietly = TRUE)
 ```
@@ -25,12 +25,12 @@ stopped at description -- reading off observed transition rates -- without
 the inferential machinery needed to establish that a pattern reflects the
 process rather than the particular sample.
 
-`lagseq` implements LSA as a member of the Dynalytics framework (Saqr,
+`lagdynamics` implements LSA as a member of the Dynalytics framework (Saqr,
 Lopez-Pernas, and Misiejuk, 2026), whose central tenet is a *scientific
 contract*: every analytical claim must be matched by evidence appropriate
 to its structure, scope, and complexity, and estimation, validation, and
 interpretation are treated as one inferential system rather than separate
-steps. Accordingly, in `lagseq` each edge is a *tested departure from
+steps. Accordingly, in `lagdynamics` each edge is a *tested departure from
 independence* -- the adjusted residual is a test statistic, not a
 descriptive weight.
 
@@ -167,7 +167,7 @@ plot(fit, type = "network")
 ## Transition network (a TNA model)
 
 Weighting the edges by probability instead yields the familiar transition
-network. `lagseq` constructs a `tna` object on the fly and renders it with
+network. `lagdynamics` constructs a `tna` object on the fly and renders it with
 tna's styling: coloured nodes, initial-probability arcs, and weighted
 directed edges. The named model changes even though the underlying
 sequences do not. A transition (TNA) network is a first-order Markov model
@@ -204,7 +204,7 @@ To validate the trustworthiness of an estimated edge, its uncertainty
 must be quantified. This is where the Dynalytics contract becomes
 explicit: a claim about a specific edge requires edge-level evidence,
 because a single observed value is weaker support than a measure of how
-much that value could vary. `lagseq` provides two complementary
+much that value could vary. `lagdynamics` provides two complementary
 procedures, both returning a tidy object.
 
 `certainty_lsa()` is the analytic procedure. It places a

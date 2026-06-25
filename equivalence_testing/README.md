@@ -1,7 +1,7 @@
 # Equivalence testing (does NOT ship with the package)
 
 This folder holds the cross-validation / published-oracle test battery:
-it checks lagseq's numbers against independently published worked
+it checks lagdynamics's numbers against independently published worked
 examples and base-R primitives. It is intentionally kept **out of the
 package's own test suite** (`tests/testthat/`) and excluded from the
 build (see `.Rbuildignore`), so the shipped package does not depend on

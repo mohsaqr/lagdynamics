@@ -1,4 +1,4 @@
-# Build the imdb_genres sequence dataset for lagseq from the 1,000-movie
+# Build the imdb_genres sequence dataset for lagdynamics from the 1,000-movie
 # IMDB subset shipped in the MIT-licensed cooccure package.
 #
 # The original cooccure::movies is tabular (one row per movie, with a
@@ -44,8 +44,8 @@ imdb_genres <- list(
   description = paste(
     "Chronological sequence of primary genres for 1,000 highly-rated",
     "IMDB movies (rating >= 7.0, votes >= 1000, 1970-2024), used as a",
-    "medium-K medium-N validation input for lagseq. No published LSA",
-    "exists for this slice; the test suite cross-validates lagseq's",
+    "medium-K medium-N validation input for lagdynamics. No published LSA",
+    "exists for this slice; the test suite cross-validates lagdynamics's",
     "classical engine on it against stats::chisq.test()$stdres."
   )
 )

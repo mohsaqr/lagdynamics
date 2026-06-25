@@ -1,5 +1,5 @@
 # Equivalence with base-R statistical primitives. These tests demonstrate
-# that lagseq's classical engine produces the same numerical values as
+# that lagdynamics's classical engine produces the same numerical values as
 # long-established R primitives (stats::chisq.test, stats::loglin,
 # stats::pchisq), with no dependence on any prior LSA package.
 
@@ -42,7 +42,7 @@ test_that("LR p-value matches pchisq()", {
 
 test_that("IPF matches stats::loglin() with structural zeros", {
   # Hand-built observed counts on 4 codes with a forbidden-diagonal
-  # pattern. We compare lagseq's IPF against base-R's loglin() which
+  # pattern. We compare lagdynamics's IPF against base-R's loglin() which
   # implements the same iterative-proportional-fitting algorithm via a
   # different code path.
   set.seed(99)
@@ -50,10 +50,10 @@ test_that("IPF matches stats::loglin() with structural zeros", {
   diag(obs) <- 0L
 
   S <- 1 - diag(4)
-  lagseq_ipf <- lsa_ipf(obs, structure = S)
+  lagdynamics_ipf <- lsa_ipf(obs, structure = S)
 
   # loglin() with `start` initialized at the structural-zero pattern and
-  # the same tight tolerance lagseq_ipf used (default loglin eps = 0.1
+  # the same tight tolerance lagdynamics_ipf used (default loglin eps = 0.1
   # is far too loose for a numerical-equivalence test).
   base_fit <- suppressWarnings(
     stats::loglin(obs, margin = list(1, 2), start = S,
@@ -62,13 +62,13 @@ test_that("IPF matches stats::loglin() with structural zeros", {
 
   # Both algorithms converge to the same MLE under the same model. With
   # matched tolerances they agree to the convergence precision.
-  expect_equal(lagseq_ipf$fit, base_fit$fit, tolerance = 1e-6)
+  expect_equal(lagdynamics_ipf$fit, base_fit$fit, tolerance = 1e-6)
 
   # Marginals match observed exactly.
-  expect_equal(rowSums(lagseq_ipf$fit), rowSums(obs), tolerance = 1e-6)
-  expect_equal(colSums(lagseq_ipf$fit), colSums(obs), tolerance = 1e-6)
+  expect_equal(rowSums(lagdynamics_ipf$fit), rowSums(obs), tolerance = 1e-6)
+  expect_equal(colSums(lagdynamics_ipf$fit), colSums(obs), tolerance = 1e-6)
   # Structural zeros stay zero.
-  expect_true(all(lagseq_ipf$fit[S == 0] == 0))
+  expect_true(all(lagdynamics_ipf$fit[S == 0] == 0))
 })
 
 test_that("Yule's Q matches hand 2x2 collapse for every cell", {

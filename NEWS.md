@@ -1,8 +1,8 @@
-# lagseq 0.1.0 (in development)
+# lagdynamics 0.1.0 (in development)
 
 ## First public release
 
-`lagseq` is a from-scratch, clean-room implementation of lag sequential
+`lagdynamics` is a from-scratch, clean-room implementation of lag sequential
 analysis for categorical event sequences. The package is independent
 of any prior R or non-R LSA implementation; every numerical method is
 implemented from primary literature (Bakeman & Quera 1995; Sackett
@@ -29,7 +29,7 @@ implemented from primary literature (Bakeman & Quera 1995; Sackett
   `c("lsa", "cograph_network")` for seamless integration with the
   `cograph` plotting layer.
 - Network interop: `lsa_to_tna()` converts a fit to a `tna` object and
-  `as.igraph()` to an `igraph` graph (lagseq converts; the downstream
+  `as.igraph()` to an `igraph` graph (lagdynamics converts; the downstream
   package does the analysis).
 - Reproducibility hooks (`indices=`, `shuffles=`) for bit-identical
   cross-language verification.

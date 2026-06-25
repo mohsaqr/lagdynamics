@@ -1,4 +1,4 @@
-# Build lagseq's `kg_logs` and `kg_lsa_oracle` data objects from the
+# Build lagdynamics's `kg_logs` and `kg_lsa_oracle` data objects from the
 # Du Jun (2026) Mendeley dataset
 # "Sequential Behavioral Mechanisms Linking Learning Paths to Academic
 # Performance in Knowledge Graph Environments"

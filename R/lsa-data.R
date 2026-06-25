@@ -1,4 +1,4 @@
-# Canonical input form. Every entry point in lagseq accepts diverse
+# Canonical input form. Every entry point in lagdynamics accepts diverse
 # user input shapes, but everything downstream reads only an `lsa_data`
 # object. Centralizing input handling here means engines, bootstrap,
 # permutation, and plotting all see the same simple structure.
@@ -6,7 +6,7 @@
 #' Canonicalize Sequence Input for Lag Sequential Analysis
 #'
 #' Coerces a wide variety of user input shapes into a single canonical
-#' representation used by every downstream lagseq function (engines,
+#' representation used by every downstream lagdynamics function (engines,
 #' bootstrap, permutation, grouping, plotting).
 #'
 #' Accepted input forms:

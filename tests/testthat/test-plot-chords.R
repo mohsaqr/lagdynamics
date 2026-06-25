@@ -41,9 +41,9 @@ test_that("plot_chords compares two fits and validates inputs", {
 })
 
 test_that(".lsa_chord_colors centres diverging metrics and greys NA", {
-  cols <- lagseq:::.lsa_chord_colors(c(-2, 0, 2), diverging = TRUE)
+  cols <- lagdynamics:::.lsa_chord_colors(c(-2, 0, 2), diverging = TRUE)
   expect_length(cols, 3L)
   expect_equal(toupper(cols[2L]), "#F7F7F7")        # zero -> mid (white)
   expect_false(cols[1L] == cols[3L])                # opposite signs differ
-  expect_identical(lagseq:::.lsa_chord_colors(NA_real_, TRUE), "grey85")
+  expect_identical(lagdynamics:::.lsa_chord_colors(NA_real_, TRUE), "grey85")
 })

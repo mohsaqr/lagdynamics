@@ -1,6 +1,6 @@
 # Validation on the IMDB primary-genre sequence dataset
 # (1,000 highly-rated films, 1970-2024, K = 16). No published LSA
-# result exists for this slice; the test cross-validates lagseq's
+# result exists for this slice; the test cross-validates lagdynamics's
 # classical engine against stats::chisq.test()$stdres (the
 # authoritative Haberman residual oracle) on the same input.
 
@@ -13,7 +13,7 @@ test_that("imdb_genres data object is well-formed", {
   expect_true(all(imdb_genres$sequence %in% imdb_genres$alphabet))
 })
 
-test_that("imdb: lagseq classical engine fits without error", {
+test_that("imdb: lagdynamics classical engine fits without error", {
   fit <- lsa(imdb_genres$sequence, engine = "classical")
   expect_s3_class(fit, "lsa")
   expect_equal(nrow(fit$obs), 16L)

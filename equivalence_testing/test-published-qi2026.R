@@ -2,13 +2,13 @@
 # "Behavioural Trajectories and Spatial Responses", Sustainability,
 # 18(5), 2326. doi:10.3390/su18052326.
 #
-# This test runs lagseq's classical engine on the EXACT published
+# This test runs lagdynamics's classical engine on the EXACT published
 # input matrix (Table 4) and compares its outputs to the EXACT
 # published Z-scores and Yule's Q (Table 5), via the shipped
 # `qi2026_grandmother` data object.
 #
-# Result: lagseq agrees with `stats::chisq.test()$stdres` on the
-# same input at floating-point precision (< 1e-12). lagseq agrees
+# Result: lagdynamics agrees with `stats::chisq.test()$stdres` on the
+# same input at floating-point precision (< 1e-12). lagdynamics agrees
 # with the paper on 86.7% of cells within 0.05; the 4 cells where it
 # disagrees are documented paper typos catalogued in
 # `qi2026_grandmother$known_typos`.
@@ -28,8 +28,8 @@ test_that("qi2026_grandmother data object is well-formed", {
   expect_equal(qi2026_grandmother$k_states, 10L)
 })
 
-test_that("qi2026: lagseq adjusted residuals == chisq.test()$stdres at 1e-12", {
-  # The actual oracle. lagseq's math must equal the standardized
+test_that("qi2026: lagdynamics adjusted residuals == chisq.test()$stdres at 1e-12", {
+  # The actual oracle. lagdynamics's math must equal the standardized
   # Pearson residual formula in stats::chisq.test() on this input.
   fit <- lsa(qi2026_grandmother$obs, engine = "classical")
   suppressWarnings({
@@ -41,7 +41,7 @@ test_that("qi2026: lagseq adjusted residuals == chisq.test()$stdres at 1e-12", {
                tolerance = 1e-12)
 })
 
-test_that("qi2026: lagseq agrees with paper Z-scores on >85% of cells within 0.05", {
+test_that("qi2026: lagdynamics agrees with paper Z-scores on >85% of cells within 0.05", {
   fit <- lsa(qi2026_grandmother$obs, engine = "classical")
   ours <- fit$adj_res[LABS, LABS]
   pap  <- qi2026_grandmother$adj_res[LABS, LABS]
@@ -58,12 +58,12 @@ test_that("qi2026: known paper typos diverge from paper but match the math", {
     expect_equal(unname(fit$adj_res[rr, cc]),
                  typos$math_computed[i],
                  tolerance = 0.005,
-                 label = sprintf("typo cell %s -> %s: lagseq vs math",
+                 label = sprintf("typo cell %s -> %s: lagdynamics vs math",
                                  rr, cc))
     expect_gt(abs(unname(fit$adj_res[rr, cc]) -
                   typos$paper_printed[i]),
               0.1,
-              label = sprintf("typo cell %s -> %s: lagseq diverges from paper",
+              label = sprintf("typo cell %s -> %s: lagdynamics diverges from paper",
                               rr, cc))
   }
 })

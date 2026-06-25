@@ -63,7 +63,7 @@ plot_transitions <- function(fit,
   # A probability- or count-weighted network IS a transition (TNA) model,
   # so build the `tna` object on the fly and let tna render it with its
   # own styling (coloured nodes, initial-probability arcs, weighted
-  # directed edges) -- rather than lagseq's residual-network styling.
+  # directed edges) -- rather than lagdynamics's residual-network styling.
   if (weights %in% c("prob", "count")) {
     if (!requireNamespace("tna", quietly = TRUE)) {
       stop("Package 'tna' is required for the transition network ",

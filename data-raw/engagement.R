@@ -1,4 +1,4 @@
-# Build lagseq's `engagement` data set from the published Nestimate
+# Build lagdynamics's `engagement` data set from the published Nestimate
 # `trajectories` matrix. This script regenerates `data/engagement.rda`.
 # Run with: Rscript data-raw/engagement.R
 #

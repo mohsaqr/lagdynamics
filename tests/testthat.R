@@ -1,4 +1,4 @@
 library(testthat)
-library(lagseq)
+library(lagdynamics)
 
-test_check("lagseq")
+test_check("lagdynamics")

@@ -1,7 +1,7 @@
 # Adapter layer that converts an lsa fit into objects consumed by
 # downstream network packages. The `tna` soft dependency is declared in
 # Suggests so the adapter functions error informatively when tna is not
-# installed but lagseq itself loads without it.
+# installed but lagdynamics itself loads without it.
 #
 # Weight semantics. A probability-weighted network and a count-weighted
 # network answer different questions: a probability-weighted network
@@ -27,7 +27,7 @@
 #'
 #' The function is deliberately **not** named `as_tna`, to avoid
 #' overlapping export names with other packages so they can be loaded
-#' together without masking each other. `lsa_to_tna()` is lagseq's own,
+#' together without masking each other. `lsa_to_tna()` is lagdynamics's own,
 #' collision-free converter.
 #'
 #' @param x An `lsa` fit from [lsa()], or an `lsa_group` from
@@ -109,7 +109,7 @@ lsa_to_tna.lsa <- function(x,
             "permutation_test, estimate_cs) would re-estimate a ",
             "probability network, not the '", weights, "' scale in ",
             "$weights. Use weights = 'prob'/'count' for resampling, or ",
-            "resample with lagseq (permute_lsa/bootstrap_lsa) instead.",
+            "resample with lagdynamics (permute_lsa/bootstrap_lsa) instead.",
             call. = FALSE)
   }
   structure(

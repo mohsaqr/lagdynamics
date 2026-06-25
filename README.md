@@ -1,14 +1,14 @@
-# lagseq
+# lagdynamics
 
 > Modern, tidy lag sequential analysis for categorical event sequences.
 
 <!-- badges: start -->
-[![r-universe status](https://mohsaqr.r-universe.dev/badges/lagseq)](https://mohsaqr.r-universe.dev/lagseq)
+[![r-universe status](https://mohsaqr.r-universe.dev/badges/lagdynamics)](https://mohsaqr.r-universe.dev/lagdynamics)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
-`lagseq` provides a modern, tidy, pipe-friendly interface for lag
+`lagdynamics` provides a modern, tidy, pipe-friendly interface for lag
 sequential analysis (LSA). A single `lsa()` constructor with a pluggable
 engine registry exposes the classical and extended LSA family — classical,
 two-cell, bidirectional, parallel-dominance, and non-parallel-dominance —
@@ -54,28 +54,28 @@ through a single `plot()` verb and interoperate with the `tna` and
 
 ## Installation
 
-Install the latest build from [r-universe](https://mohsaqr.r-universe.dev/lagseq)
+Install the latest build from [r-universe](https://mohsaqr.r-universe.dev/lagdynamics)
 (recommended — pre-built, no compiler required):
 
 ```r
-install.packages("lagseq", repos = "https://mohsaqr.r-universe.dev")
+install.packages("lagdynamics", repos = "https://mohsaqr.r-universe.dev")
 ```
 
 Or install the development version from GitHub:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("mohsaqr/lagseq")
+remotes::install_github("mohsaqr/lagdynamics")
 ```
 
-`lagseq` needs only base R at runtime (`grid`, `stats`, `utils`). The
+`lagdynamics` needs only base R at runtime (`grid`, `stats`, `utils`). The
 plotting and interop packages (`ggplot2`, `cograph`, `tna`, `Nestimate`,
 `TraMineR`) are optional `Suggests` — install only the ones you need.
 
 ## Quick start
 
 ```r
-library(lagseq)
+library(lagdynamics)
 
 seq <- c("Question", "Explain", "Agree",
          "Question", "Explain", "Elaborate",
@@ -118,14 +118,14 @@ plot(bootstrap_lsa(fit))                  # circular bootstrap CI forest
 plot(cmp)                                 # back-to-back group-comparison barrel
 
 # Interop — convert a fit to the tna ecosystem's native object
-# (lagseq converts; tna does the analysis).
+# (lagdynamics converts; tna does the analysis).
 net   <- lsa_to_tna(fit, weights = "prob")  # -> tna object
 cents <- tna::centralities(net)
 ```
 
 ## Compatibility with `tna` and `Nestimate`
 
-`lagseq` is a converter, not a competing analyser: it interoperates with
+`lagdynamics` is a converter, not a competing analyser: it interoperates with
 the `tna` and `Nestimate` ecosystems at both ends, and keeps **zero
 exported-name overlap** with either.
 
@@ -167,7 +167,7 @@ Users can register custom engines via `register_lsa_engine()`.
 
 | Vignette | Topic |
 |---|---|
-| `vignette("lagseq")` | Get started: the method, why lagseq, and a hands-on tour |
+| `vignette("lagdynamics")` | Get started: the method, why lagdynamics, and a hands-on tour |
 | `vignette("workflow")` | A complete analysis from sequences to a group comparison |
 | `vignette("confirmatory")` | The confirmatory testing battery: matching claims to evidence |
 | `vignette("interop")` | Interoperability with `tna` and `Nestimate` objects |

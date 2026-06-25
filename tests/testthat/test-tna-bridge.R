@@ -63,7 +63,7 @@ test_that("lsa_to_tna.lsa errors with helpful message when tna is absent", {
 
 test_that("lsa_to_tna output is consumable by tna::centralities", {
   skip_if_not_installed("tna")
-  # lagseq's contract is conversion, not centrality computation: the
+  # lagdynamics's contract is conversion, not centrality computation: the
   # object from lsa_to_tna() must be accepted by tna's own verbs. Computing
   # centralities is tna's job, so we only check the bridge is fit for it.
   fit <- lsa(engagement, engine = "classical")

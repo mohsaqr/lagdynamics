@@ -1,13 +1,13 @@
 # Third-party validation against the Du Jun (2026) Mendeley dataset,
 # DOI 10.17632/bdwcj7vw94.1, CC BY 4.0.
 #
-# This test demonstrates *scientific agreement* between lagseq's
+# This test demonstrates *scientific agreement* between lagdynamics's
 # classical LSA and the source paper's own published JNTF (joint
 # transition frequencies) and ADJR (adjusted residuals) matrices,
 # computed independently by the paper authors using GSEQ-style
 # software.
 #
-# This is the third class of oracle in lagseq's validation strategy:
+# This is the third class of oracle in lagdynamics's validation strategy:
 #   (1) Hand-formula identities (test-references.R, test-engine-classical.R)
 #       — tolerance ~1e-12
 #   (2) Base-R primitive equivalence (chisq.test, loglin, pchisq,
@@ -22,7 +22,7 @@
 # the inherent variability of LSA preprocessing decisions across
 # tools.
 
-test_that("kg overall: lagseq total transitions agree with published JNTF (1%)", {
+test_that("kg overall: lagdynamics total transitions agree with published JNTF (1%)", {
   fit <- lsa(kg_logs, engine = "classical",
              labels = rownames(kg_lsa_oracle$overall$obs))
   ours_total <- sum(fit$obs)

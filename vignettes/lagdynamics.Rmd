@@ -1,8 +1,8 @@
 ---
-title: "Get started with lagseq"
+title: "Get started with lagdynamics"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get started with lagseq}
+  %\VignetteIndexEntry{Get started with lagdynamics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.height = 5.6, out.width = "100%",
                       fig.align = "center")
 set.seed(1)
-library(lagseq)
+library(lagdynamics)
 options(digits = 3)
 has <- function(p) requireNamespace(p, quietly = TRUE)
 ```
@@ -40,7 +40,7 @@ claim. A transition with a large residual is not merely common. It is a
 transition whose observed frequency departs from the chance baseline
 defined by the row and column margins of the transition table.
 
-# Why lagseq
+# Why lagdynamics
 
 LSA has a long history in behavioral, educational, and interaction
 research, but applied studies often stop at description. Observed
@@ -49,7 +49,7 @@ inferential question is left implicit: whether the apparent pattern is
 larger than expected under chance sequential pairing.
 
 Existing tooling has also tended to be dated, object-centric, or
-difficult to combine with modern data workflows. `lagseq` modernizes this
+difficult to combine with modern data workflows. `lagdynamics` modernizes this
 practice. It implements lag-sequential analysis as a tidy, visual,
 interoperable, and confirmatory workflow. Each result is returned by a
 verb as a one-row-per-observation data frame. The fitted model can be
@@ -59,7 +59,7 @@ network objects without indexing into internal slots.
 The design follows the Dynalytics framework of Saqr, Lopez-Pernas, and
 Misiejuk (2026). Dynalytics treats analysis as a scientific contract:
 every analytical claim must be matched by evidence appropriate to the
-structure, scope, and complexity of the claim. In `lagseq`, an edge is a
+structure, scope, and complexity of the claim. In `lagdynamics`, an edge is a
 tested departure from independence. Descriptive claims use descriptive
 evidence, edge claims use edge-level uncertainty, whole-network claims
 use reproducibility evidence, and group-difference claims use comparison
@@ -168,7 +168,7 @@ plot(fit, type = "chord")
 plot(fit, type = "sunburst")
 ```
 
-See `vignette("plotting", package = "lagseq")` for the full plotting
+See `vignette("plotting", package = "lagdynamics")` for the full plotting
 gallery.
 
 ## Get Data In
@@ -258,7 +258,7 @@ summary(gfit)
 ## Validate and Confirm
 
 The adjusted residual tests whether an edge departs from independence in
-the fitted table. Stronger claims require further evidence. `lagseq`
+the fitted table. Stronger claims require further evidence. `lagdynamics`
 therefore includes a confirmatory battery that follows the Dynalytics
 contract.
 
@@ -371,7 +371,7 @@ tna::centralities(lsa_to_tna(fit, weights = "prob")) |> head()
 
 # Ecosystem
 
-`lagseq` sits beside several established approaches to process data.
+`lagdynamics` sits beside several established approaches to process data.
 Process mining discovers and checks event-log workflows. Social network
 analysis models relations among actors. Sequence analysis models whole
 trajectories and distances between them. Transition network analysis
@@ -387,7 +387,7 @@ under a no-memory baseline.
 
 Within the Dynalytics open-source ecosystem, `tna`, Nestimate, and
 `cograph` provide related representations, estimation tools, and
-visualization layers for dynamical systems. `lagseq` contributes the
+visualization layers for dynamical systems. `lagdynamics` contributes the
 lag-sequential and confirmatory member of that ecosystem. It keeps the
 methodological contract explicit: each edge is tested against
 independence, each uncertainty claim is matched to uncertainty evidence,
@@ -410,5 +410,5 @@ reliability_lsa(fit); stability_lsa(fit)      # network evidence
 permute_lsa(fit)                              # empirical null
 ```
 
-See `vignette("workflow", package = "lagseq")` for a fuller
+See `vignette("workflow", package = "lagdynamics")` for a fuller
 claim-to-evidence workflow and `?lsa` for the complete input grammar.

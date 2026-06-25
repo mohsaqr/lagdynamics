@@ -1,8 +1,8 @@
-# Sequence recovery from external objects. lagseq is the sequence
+# Sequence recovery from external objects. lagdynamics is the sequence
 # *analyser*; whenever an object that already carries event sequences is
 # passed in, we extract those sequences and feed them through the normal
 # lsa_data() pipeline. This is an input convenience and does not couple
-# lagseq to the source package: every extractor reads plain
+# lagdynamics to the source package: every extractor reads plain
 # list/matrix/attribute structure, never the source package's functions.
 #
 # Supported sources:
@@ -84,7 +84,7 @@
 
 # Decode an stslist into a list of label sequences. Cells are
 # factor-coded states; the void/NA sentinels mark gaps, which we drop
-# (consistent with lagseq's NA-as-missingness convention).
+# (consistent with lagdynamics's NA-as-missingness convention).
 .seqs_from_stslist <- function(x) {
   void <- attr(x, "void")
   m <- as.matrix(as.data.frame(x, stringsAsFactors = FALSE))

@@ -1,6 +1,6 @@
 # Long-format event-log sequencing. Raw interaction logs arrive with
 # one row per event and columns identifying who acted (actor), what
-# they did (action), and when (time / order). lagseq's analysis works
+# they did (action), and when (time / order). lagdynamics's analysis works
 # on already-grouped sequences, so this base-R helper turns a long log
 # into a list of event sequences: group by actor (and optionally an
 # explicit session column), order within each group by time/order, and
@@ -133,7 +133,7 @@
     stop(sprintf(
       paste0("`time` could not be parsed for %d row(s) (e.g. row %s). ",
              "Fix the values, supply `custom_format`, or set ",
-             "`is_unix_time = TRUE`; lagseq will not silently drop ",
+             "`is_unix_time = TRUE`; lagdynamics will not silently drop ",
              "events with unparseable times."),
       length(bad), paste(utils::head(bad, 5L), collapse = ", ")),
       call. = FALSE)

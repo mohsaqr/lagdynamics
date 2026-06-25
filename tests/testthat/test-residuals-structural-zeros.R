@@ -132,7 +132,7 @@ test_that(".lrx2 returns NA p when no cells are estimable", {
   # and the engine errors before reaching .lrx2. Instead exercise
   # .lrx2 directly.
   S <- matrix(0L, 3L, 3L)
-  res <- lagseq:::.lrx2(obs = matrix(1, 3, 3), exp_mat = matrix(1, 3, 3),
+  res <- lagdynamics:::.lrx2(obs = matrix(1, 3, 3), exp_mat = matrix(1, 3, 3),
                        K = 3L, structural_zeros = S)
   expect_true(is.na(res$p))
 })

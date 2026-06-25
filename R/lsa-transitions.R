@@ -73,7 +73,7 @@ lsa_transitions <- function(x, lag = 1) {
 # integer: positive counts successors (from at t, to at t + lag),
 # negative counts predecessors (to at t + lag, i.e. |lag| steps before
 # from), and 0 pairs each event with itself (the degenerate diagonal --
-# meaningful only for concurrent-code data, which lagseq does not model).
+# meaningful only for concurrent-code data, which lagdynamics does not model).
 .count_transitions <- function(events, seq_id, K, lag) {
   n <- length(events)
   if (n < abs(lag) + 1L) {

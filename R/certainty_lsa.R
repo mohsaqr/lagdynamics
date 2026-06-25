@@ -7,7 +7,7 @@
 # stability decision all have exact formulas -- no resampling.
 #
 # Ported from Nestimate::certainty() (Johnston & Jendoubi 2026), adapted
-# to lagseq's lsa fit (works off the fit's `obs` count matrix). Returns an
+# to lagdynamics's lsa fit (works off the fit's `obs` count matrix). Returns an
 # lsa_bootstrap-compatible object (class c("lsa_certainty",
 # "lsa_bootstrap")) so plot_forest(), as.data.frame() and the tidy
 # workflow apply unchanged.

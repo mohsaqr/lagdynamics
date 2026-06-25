@@ -50,7 +50,7 @@ The 10 behaviour codes are:
 \code{UO} (Using object).
 
 This object is the cleanest mathematical oracle shipped with
-lagseq: the published input is a complete transition matrix and
+lagdynamics: the published input is a complete transition matrix and
 the published output is a complete residual matrix, so feeding
 \verb{$obs} into \code{\link[=lsa]{lsa()}} and comparing the result to \verb{$adj_res} is a
 direct correctness check. Cross-validation against
@@ -60,7 +60,7 @@ precision (< 1e-12).
 Four cells in the paper's published Table 5 print values that do
 not match the math computed from the paper's own Table 4 input.
 These are documented in \verb{$known_typos} together with the values
-the math actually yields, so that lagseq's tests can distinguish
+the math actually yields, so that lagdynamics's tests can distinguish
 the paper's transcription errors from any genuine engine
 regression.
 }

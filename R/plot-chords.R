@@ -1,7 +1,7 @@
 # Circular chord diagram for an lsa fit. The transition NETWORK is
 # delegated to cograph::splot() (plot_transitions()); the CHORD diagram
 # is delegated to cograph::plot_chord() here, exactly the same way -- so
-# the heavy circular-ribbon drawing lives in cograph, and lagseq only
+# the heavy circular-ribbon drawing lives in cograph, and lagdynamics only
 # decides what the ribbons mean.
 #
 # A chord ribbon's WIDTH is the transition frequency (or probability) and

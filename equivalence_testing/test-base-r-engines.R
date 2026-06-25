@@ -1,5 +1,5 @@
 # Base-R-primitive equivalence for the engines and the permutation test.
-# These check lagseq's numbers against independent base-R computations
+# These check lagdynamics's numbers against independent base-R computations
 # (pnorm, chisq.test$stdres, binom.test) and the O'Connor oracle dataset.
 # They live here, out of tests/testthat/, so the shipped suite does not
 # validate against external references (see README in this folder).
@@ -57,7 +57,7 @@ test_that("O'Connor 1999 permutation oracle: large-residual cells get small p_pe
   # The paper publishes p_mean from 10 blocks * 1000 = 10,000
   # permutations. For cells with |Z| >> 1.96, our permute_lsa() at
   # R = 1000 should also yield very small p_perm. We test this in
-  # a softer way: every cell with |adj_res| >= 4 in lagseq's classical
+  # a softer way: every cell with |adj_res| >= 4 in lagdynamics's classical
   # output must have p_perm <= 0.05 in our 1000-permutation
   # replication.
   data(oconnor_couple)

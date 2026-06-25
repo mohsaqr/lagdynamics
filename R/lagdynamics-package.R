@@ -1,4 +1,4 @@
-#' lagseq: Modern Lag Sequential Analysis with Tidy Transition Networks
+#' lagdynamics: Modern Lag Sequential Analysis with Tidy Transition Networks
 #'
 #' A unified, pipe-friendly interface for lag sequential analysis (LSA) of
 #' categorical event sequences. Provides classical, two-cell,
@@ -43,7 +43,7 @@
 #' package; the analysis itself (centralities via `tna::centralities()`,
 #' centrality stability via `tna::estimate_cs()`, pruning via
 #' `tna::prune()`, communities via `tna::communities()`) is performed by
-#' that package. lagseq stays the *converter*, not the analyser, and is
+#' that package. lagdynamics stays the *converter*, not the analyser, and is
 #' not coupled to `tna` at install time.
 #'
 #' @section Roadmap (not yet implemented):

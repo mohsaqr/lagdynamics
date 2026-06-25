@@ -13,13 +13,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.height = 5.4, out.width = "100%",
                       fig.align = "center")
 set.seed(2026)
-library(lagseq)
+library(lagdynamics)
 options(digits = 3)
 has <- function(p) requireNamespace(p, quietly = TRUE)
 fit <- lsa(engagement)
 ```
 
-`lagseq` has one plotting verb, `plot(fit, type = )`, plus dedicated
+`lagdynamics` has one plotting verb, `plot(fit, type = )`, plus dedicated
 plots for the resampling and comparison results. Every view of a fit
 displays the same quantity -- the adjusted residual, the departure of a
 transition from chance -- and differs only in geometry. The single fit
@@ -65,7 +65,7 @@ plot(fit, type = "network")
 # Transition network (a TNA model)
 
 Weight the edges by probability and the view becomes the familiar
-transition network: `lagseq` builds a `tna` object on the fly and renders
+transition network: `lagdynamics` builds a `tna` object on the fly and renders
 it with tna's styling. This shows what happens, where the residual network
 shows what is surprising.
 

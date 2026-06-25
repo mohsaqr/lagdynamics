@@ -44,7 +44,7 @@ test_that("plot_forest honours show_nonsig and validates input", {
 })
 
 test_that(".lsa_true coerces NA logicals to FALSE", {
-  expect_identical(lagseq:::.lsa_true(c(TRUE, FALSE, NA)),
+  expect_identical(lagdynamics:::.lsa_true(c(TRUE, FALSE, NA)),
                    c(TRUE, FALSE, FALSE))
 })
 

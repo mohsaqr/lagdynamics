@@ -1,7 +1,7 @@
-# lagseq: Formula Reference Map
+# lagdynamics: Formula Reference Map
 
 This document is the **clean-room source of truth** for every numerical
-method implemented in `lagseq`. Each formula below is transcribed
+method implemented in `lagdynamics`. Each formula below is transcribed
 directly from the cited primary source with the page number recorded.
 Implementation in `R/` works from this document only; no prior R
 implementation of lag sequential analysis is consulted, examined, or
@@ -237,7 +237,7 @@ var[i, j] = n_i * n_j * (n - n_j) * (n - n_i) / ( n^2 * (n - 1) )
 diagonal correction `et[i,i] = n_i * (n_i - 1) / n`. However, the
 canonical LSA software implementations (O'Connor's SEQUENTIAL,
 Bakeman & Quera's GSEQ) apply the off-diagonal formula uniformly,
-including on the diagonal. lagseq adopts the SEQUENTIAL/GSEQ
+including on the diagonal. lagdynamics adopts the SEQUENTIAL/GSEQ
 convention so its outputs match the canonical published worked
 example in O'Connor (1999) cell-for-cell.
 
@@ -486,7 +486,7 @@ question; the math is identical.
 The following base-R primitives are independent oracles against which
 each engine is cross-validated. None of them implements lag sequential
 analysis; they implement the underlying statistical primitives. A
-passing oracle test demonstrates that lagseq's engine has the same
+passing oracle test demonstrates that lagdynamics's engine has the same
 numerical behavior as long-established R primitives, with zero
 dependence on any prior LSA package.
 

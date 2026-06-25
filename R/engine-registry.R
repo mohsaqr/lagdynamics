@@ -7,7 +7,7 @@
 
 #' Register a Lag Sequential Analysis Engine
 #'
-#' Adds a new engine to the lagseq registry so it can be referenced by
+#' Adds a new engine to the lagdynamics registry so it can be referenced by
 #' name via `lsa(..., engine = "<name>")`. Built-in engines
 #' (`"classical"`, `"two_cell"`, `"bidirectional"`,
 #' `"parallel_dominance"`, `"nonparallel_dominance"`) are registered

@@ -1,6 +1,6 @@
 # Multi-oracle validation on published, real-world categorical sequence
 # datasets. The strategy:
-#   1. Use lagseq::engagement (shipped) — 138 students x 15 weeks, K = 3.
+#   1. Use lagdynamics::engagement (shipped) — 138 students x 15 weeks, K = 3.
 #   2. If Nestimate is installed, also validate against
 #      group_regulation_long (K = 9, ~27,500 events). This sweeps the
 #      multi-K / long-format / long-sequence path.

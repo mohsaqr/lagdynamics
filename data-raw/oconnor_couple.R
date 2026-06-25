@@ -7,7 +7,7 @@
 # Appendix A publishes a 393-event input sequence (couple-interaction
 # data from Gottman & Roy 1990, p. 78). Appendix B publishes the full
 # numerical output of the SEQUENTIAL program for this exact input.
-# We ship both, so lagseq's clean-room reimplementation can be tested
+# We ship both, so lagdynamics's clean-room reimplementation can be tested
 # against the canonical published outputs cell by cell.
 #
 # Run with: Rscript data-raw/oconnor_couple.R

@@ -1,4 +1,4 @@
-# lagseq Equivalence Report
+# lagdynamics Equivalence Report
 
 > **Status:** the five core engines are implemented and validated; the
 > achieved pass rates below cover the classical engine against base-R
@@ -8,7 +8,7 @@
 
 ## Methodology
 
-Each numerical method in `lagseq` is independently cross-validated
+Each numerical method in `lagdynamics` is independently cross-validated
 against two classes of oracle:
 
 1. **Published worked examples** — textbook and journal tables whose
@@ -20,7 +20,7 @@ against two classes of oracle:
    implement the underlying statistics (log-linear models, Pearson
    residuals, chi-square distribution, etc.) but do **not** implement
    lag sequential analysis as a package. Agreement with these
-   primitives demonstrates that lagseq's engines compose correctly
+   primitives demonstrates that lagdynamics's engines compose correctly
    from well-established R math.
 
 No prior R implementation of lag sequential analysis is used as an
@@ -97,12 +97,12 @@ reference during implementation or validation.
 | Qi An et al. (2026), Table 5 oracle | adj_res within 0.005 of paper printed Z | 67.8% of cells |
 | Qi An et al. (2026), Table 5 oracle | adj_res within 0.05 of paper printed Z | 86.7% of cells |
 | Qi An et al. (2026), Table 5 oracle | yules_q vs hand 2x2 collapse (all 100 cells) | **1e-12** ✓ |
-| Qi An et al. (2026) | Documented paper typos where lagseq matches math, not paper | 4 cells (catalogued in `test-published-qi2026.R`) |
+| Qi An et al. (2026) | Documented paper typos where lagdynamics matches math, not paper | 4 cells (catalogued in `test-published-qi2026.R`) |
 
-**Interpretive note for Class 3.** The lagseq classical engine has been
+**Interpretive note for Class 3.** The lagdynamics classical engine has been
 shown to be mathematically equivalent to `stats::chisq.test()$stdres`
 at floating-point precision on every input it has been tested with.
-Where lagseq disagrees with a third-party published LSA result, the
+Where lagdynamics disagrees with a third-party published LSA result, the
 disagreement traces to one of:
 1. *Undocumented preprocessing* in the third-party tool (Du Jun: the
    wide- and long-format sheets of the source data are themselves
@@ -112,18 +112,18 @@ disagreement traces to one of:
    cells in Table 5 print values that do not match the math computed
    from the paper's own Table 4 input — catalogued with corrected
    values).
-Neither case represents an error in lagseq.
+Neither case represents an error in lagdynamics.
 
 ### Class 3 — O'Connor (1999) canonical worked example
 
 The most consequential validation in the battery. O'Connor's paper is
-the methods reference behind the `LagSequential` R package that lagseq
+the methods reference behind the `LagSequential` R package that lagdynamics
 clean-room-replaced. Appendix A gives the input sequence (393 events,
-K=6). Appendix B publishes the full SEQUENTIAL output. lagseq is
+K=6). Appendix B publishes the full SEQUENTIAL output. lagdynamics is
 independently fed the input and its output compared to the paper's
 output cell-by-cell.
 
-| Quantity | Paper precision | lagseq vs paper |
+| Quantity | Paper precision | lagdynamics vs paper |
 |---|---|---|
 | Transition counts | exact | **0** (exact) |
 | Expected frequencies | 4 dp | 4.3e-04 |

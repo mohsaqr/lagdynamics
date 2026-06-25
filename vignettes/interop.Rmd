@@ -13,12 +13,12 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.height = 5.6, out.width = "100%",
                       fig.align = "center")
 set.seed(2026)
-library(lagseq)
+library(lagdynamics)
 options(digits = 3)
 has <- function(p) requireNamespace(p, quietly = TRUE)
 ```
 
-`lagseq` belongs to the Dynalytics ecosystem alongside `tna` (transition
+`lagdynamics` belongs to the Dynalytics ecosystem alongside `tna` (transition
 network analysis), Nestimate (network estimation), `cograph` (rendering),
 and `TraMineR`. The ecosystem separates estimation from rendering and
 analysis, and the packages share a common data grammar and object
@@ -26,7 +26,7 @@ schemas. In practice this means two things: `lsa()` can read sequences
 straight out of those packages' objects, and a fitted `lsa` model
 converts back into them in one call.
 
-# Into lagseq: fit from another package's object
+# Into lagdynamics: fit from another package's object
 
 `lsa()` recognises sequence-bearing objects from `tna`
 (`tna`, `tna_data`, `tna_seq_data`), Nestimate, and `TraMineR`
@@ -59,10 +59,10 @@ sts <- TraMineR::seqdef(engagement)
 lsa(sts)
 ```
 
-# Out of lagseq: hand a fit to another toolkit
+# Out of lagdynamics: hand a fit to another toolkit
 
 A fitted model is a directed weighted network, so it converts to the
-native object of either network package. Estimation stays in `lagseq`;
+native object of either network package. Estimation stays in `lagdynamics`;
 the downstream analysis runs in the toolkit built for it.
 
 ```{r fit}

@@ -40,9 +40,9 @@ descending rating.
 \details{
 This dataset serves as a medium-K, medium-N validation input
 outside the learning-analytics domain that dominates the rest of
-the lagseq battery. It exercises K = 16 with N = 1,000 events and
+the lagdynamics battery. It exercises K = 16 with N = 1,000 events and
 has no published LSA result to validate against; instead, the
-test suite cross-validates lagseq's classical engine against
+test suite cross-validates lagdynamics's classical engine against
 \code{\link[stats:chisq.test]{stats::chisq.test()}} on this exact sequence.
 }
 \examples{

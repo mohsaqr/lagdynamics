@@ -50,7 +50,7 @@ routines. Requires the \code{tna} package (declared in Suggests).
 \details{
 The function is deliberately \strong{not} named \code{as_tna}, to avoid
 overlapping export names with other packages so they can be loaded
-together without masking each other. \code{lsa_to_tna()} is lagseq's own,
+together without masking each other. \code{lsa_to_tna()} is lagdynamics's own,
 collision-free converter.
 }
 \examples{

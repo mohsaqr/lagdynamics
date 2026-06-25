@@ -72,7 +72,7 @@ test_that(".shuffle_within_sequences preserves each sequence's multiset", {
   events <- c(seq1, seq2)
   seq_positions <- list(seq_len(10L), 10L + seq_len(10L))
   for (rep in seq_len(200L)) {
-    out <- lagseq:::.shuffle_within_sequences(events, seq_positions)
+    out <- lagdynamics:::.shuffle_within_sequences(events, seq_positions)
     expect_identical(sort(out[seq_positions[[1L]]]), sort(seq1))
     expect_identical(sort(out[seq_positions[[2L]]]), sort(seq2))
   }
@@ -87,7 +87,7 @@ test_that(".shuffle_within_sequences is safe on singleton and integer events", {
   events <- c(3L, 1L, 4L, 7L)
   seq_positions <- list(seq_len(3L), 4L)
   for (rep in seq_len(50L)) {
-    out <- lagseq:::.shuffle_within_sequences(events, seq_positions)
+    out <- lagdynamics:::.shuffle_within_sequences(events, seq_positions)
     expect_identical(out[4L], 7L)
     expect_identical(sort(out[seq_len(3L)]), c(1L, 3L, 4L))
   }

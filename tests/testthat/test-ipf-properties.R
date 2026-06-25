@@ -4,7 +4,7 @@
 
 set.seed(20260512)
 
-# Small random table with diagonal zeros — the canonical lagseq IPF case.
+# Small random table with diagonal zeros — the canonical lagdynamics IPF case.
 make_random_obs <- function(K = 4L, max_count = 25L) {
   m <- matrix(sample.int(max_count, K * K, replace = TRUE), K, K)
   diag(m) <- 0L
