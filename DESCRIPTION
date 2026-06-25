@@ -18,7 +18,9 @@ Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     (residual heatmap, transition network, chord, sunburst, and forest
     views) and interoperate with the 'tna', 'Nestimate', and 'TraMineR'
     ecosystems, both ingesting their sequence objects and converting to
-    network objects. All numerical methods are implemented from primary
+    network objects. An experimental directed transfer-entropy measure
+    (Schreiber, 2000) <doi:10.1103/PhysRevLett.85.461> quantifies information
+    flow between states. All numerical methods are implemented from primary
     literature and cross-validated against published worked examples and
     base-R primitives.
 License: MIT + file LICENSE

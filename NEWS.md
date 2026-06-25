@@ -28,17 +28,25 @@ implemented from primary literature (Bakeman & Quera 1995; Sackett
 - Tidy edge tables and S3 objects of class
   `c("lsa", "cograph_network")` for seamless integration with the
   `cograph` plotting layer.
-- Network interop: `lsa_to_tna()` converts a fit to a `tna` object and
-  `as.igraph()` to an `igraph` graph (lagdynamics converts; the downstream
-  package does the analysis).
+- Network interop: `lsa_to_tna()` converts a fit to a `tna` object
+  (lagdynamics converts; the downstream package does the analysis).
+- Between-group comparison via `compare_lsa()` and `bayes_compare_lsa()`.
 - Reproducibility hooks (`indices=`, `shuffles=`) for bit-identical
   cross-language verification.
 
-Planned for a future release: between-group comparison
-(`compare_lsa()`) and stationarity testing (`stationarity_lsa()`).
+### Experimental
+
+- `transfer_entropy()`: directed Schreiber transfer entropy for
+  categorical sequences. Two modes (a directed state-flow network, and
+  bivariate full-alphabet between two series), with effective
+  (surrogate-debiased) and 0-1 normalised variants, and boundary-safe
+  pooling that never lags across sequences. Sign-blind by design; pair
+  with `transitions()` Yule's Q for direction of effect. Validated in
+  `equivalence_testing/` against `infotheo::condinformation`, an
+  independent direct double-sum oracle, and exact analytic cases.
 
 ### Dependencies
 
 Lean runtime: base R plus `grid` (`Imports: grid, stats, utils`). The
 plotting and interop packages (`ggplot2`, `cograph`, `tna`, `Nestimate`,
-`igraph`, `TraMineR`) are soft `Suggests`, used only when present.
+`TraMineR`) are soft `Suggests`, used only when present.
