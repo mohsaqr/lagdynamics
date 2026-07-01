@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![r-universe](https://mohsaqr.r-universe.dev/badges/lagdynamics)](https://mohsaqr.r-universe.dev/lagdynamics)
-[![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://mohsaqr.github.io/lagdynamics/)
+[![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://saqr.me/lagdynamics/)
 <!-- badges: end -->
 
 `lagdynamics` provides a modern, tidy, pipe-friendly interface for lag

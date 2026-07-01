@@ -21,7 +21,7 @@ Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     primitives and hand-formula identities.
 License: MIT + file LICENSE
 URL: https://github.com/mohsaqr/lagdynamics,
-    https://mohsaqr.github.io/lagdynamics/
+    https://saqr.me/lagdynamics/
 BugReports: https://github.com/mohsaqr/lagdynamics/issues
 Language: en-US
 Encoding: UTF-8
