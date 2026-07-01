@@ -33,9 +33,9 @@ reliability_lsa(fit, ...)
 - fit:
 
   An `lsa` object returned by
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md). Must be built
-  from event-level data (sequences), not from a pre-computed transition
-  matrix.
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  Must be built from event-level data (sequences), not from a
+  pre-computed transition matrix.
 
 - ...:
 
@@ -104,9 +104,9 @@ method.
 
 ## See also
 
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md),
-[`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md),
-[`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md),
+[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md),
+[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md)
 
 ## Examples
 

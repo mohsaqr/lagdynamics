@@ -12,11 +12,11 @@ The battery pairs a kind of claim with a kind of evidence:
 
 | Claim | Evidence | Function |
 |----|----|----|
-| a *specific transition* is real / how precise it is | edge-level uncertainty | [`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md), [`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md) |
-| a *significant transition* is not fragile | robustness to information loss | [`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md) |
-| the *whole network* is reproducible | structural reliability | [`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md) |
-| the structure is *more than chance* | an assumption-free null | [`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md) |
-| two *groups* differ | inference under exchangeability | [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md), [`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md) |
+| a *specific transition* is real / how precise it is | edge-level uncertainty | [`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md), [`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md) |
+| a *significant transition* is not fragile | robustness to information loss | [`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md) |
+| the *whole network* is reproducible | structural reliability | [`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md) |
+| the structure is *more than chance* | an assumption-free null | [`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md) |
+| two *groups* differ | inference under exchangeability | [`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md), [`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md) |
 
 We use the bundled `engagement` data (138 students, weekly engagement
 states) for the single-network tests, and a long event log with a real
@@ -53,9 +53,9 @@ rely on them.
 
 A claim about one edge requires an estimate of how much that edge could
 vary.
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
 resamples whole sequences and re-fits;
-[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md)
 derives the same uncertainty analytically from a Dirichlet-Multinomial
 posterior. The two agree when the population is homogeneous; the
 bootstrap is preferred for a mixture, because resampling sequences
@@ -110,7 +110,7 @@ plot(bootstrap_lsa(fit, R = 200))
 
 ## A significant transition: robustness to information loss
 
-[`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md)
+[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md)
 repeatedly drops a fraction of the cases and re-fits, recording how
 often each significant edge stays significant. A high stability supports
 reading the edge as a property of the process; a low one marks it as
@@ -128,7 +128,7 @@ as.data.frame(stability_lsa(fit, R = 200)) |> head(4)
 
 ## The whole network: structural reliability
 
-[`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)
+[`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md)
 raises the claim from a single edge to the entire network. It repeatedly
 splits the sequences into two halves, fits a model on each, and
 correlates the edge-weight vectors. A high average correlation indicates
@@ -149,7 +149,7 @@ reliability_lsa(fit, R = 50)
 
 ## More than chance: an assumption-free null
 
-[`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)
+[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md)
 shuffles the event order to build the null of no sequential structure,
 giving a p-value that does not depend on the adjusted residual’s
 large-sample approximation.
@@ -181,7 +181,7 @@ gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
             time = "Time", group = "Achiever")
 ```
 
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
 answers it by permutation under exchangeability: it shuffles the labels
 to build a reference distribution for the per-edge difference and a
 single omnibus statistic.
@@ -211,7 +211,7 @@ plot(cmp)
 
 ![](confirmatory_files/figure-html/barrel-1.png)
 
-[`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md)
+[`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md)
 is the Bayesian counterpart: instead of a significance decision it
 reports, for each edge, the posterior mean difference and a credible
 interval, so the evidence is a plausible range rather than a verdict.

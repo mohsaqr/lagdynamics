@@ -20,4 +20,4 @@ Invisibly `NULL`.
 
 ## See also
 
-[`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md)
+[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md)

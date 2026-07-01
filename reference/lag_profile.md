@@ -15,9 +15,9 @@ lag_profile(x, from, to, lags = 1:3, ...)
 - x:
 
   Sequence input (any form accepted by
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)) or an
-  existing
-  [`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md)
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)) or
+  an existing
+  [`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md)
   object.
 
 - from, to:
@@ -32,8 +32,8 @@ lag_profile(x, from, to, lags = 1:3, ...)
 - ...:
 
   Passed to
-  [`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md) when
-  `x` is raw data.
+  [`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md)
+  when `x` is raw data.
 
 ## Value
 
@@ -42,7 +42,7 @@ A tidy `data.frame`, one row per lag, with columns `lag`, `from`, `to`,
 
 ## See also
 
-[`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md)
+[`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md)
 
 ## Examples
 

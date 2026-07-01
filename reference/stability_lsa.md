@@ -27,7 +27,7 @@ stability_lsa(
 - fit:
 
   An `lsa` object returned by
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
 
 - R:
 
@@ -85,8 +85,8 @@ An object of class `c("lsa_stability", "list")` with:
 
 ## See also
 
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md),
-[`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md),
+[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md)
 
 ## Examples
 

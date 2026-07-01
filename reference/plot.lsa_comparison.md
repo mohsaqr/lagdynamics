@@ -1,7 +1,7 @@
 # Plot a Group Comparison
 
 Two views of a
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
 result. The default `"barrel"` is a back-to-back pyramid (one row per
 transition): the first group's bar runs left and the second's right, bar
 length is each group's transition probability, bar colour is each
@@ -78,8 +78,8 @@ A `ggplot` object (drawn when printed). Needs `ggplot2`.
 
 ## See also
 
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md),
-[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md),
+[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
 
 ## Examples
 

@@ -28,7 +28,7 @@ plot_chords(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
 
 - compare:
 
@@ -76,19 +76,19 @@ Invisibly, the list returned by
 ## Details
 
 This is the circular companion to the
-[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
 heatmap and the
-[`plot_transitions()`](https://saqr.me/lagdynamics/reference/plot_transitions.md)
+[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md)
 network. Like them it delegates the drawing to `cograph`; it needs the
 `cograph` package installed.
 
 ## See also
 
-[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
 (heatmap),
-[`plot_transitions()`](https://saqr.me/lagdynamics/reference/plot_transitions.md)
+[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md)
 (network),
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
 
 ## Examples
 

@@ -26,7 +26,7 @@ plot_transitions(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
 
 - weights:
 
@@ -100,10 +100,10 @@ The `cograph_network` object, invisibly (drawn as a side effect).
 
 ## See also
 
-[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
 (heatmap),
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
-[`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md)
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
+[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md)
 
 ## Examples
 

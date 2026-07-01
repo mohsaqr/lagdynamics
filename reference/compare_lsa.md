@@ -92,7 +92,7 @@ compare_lsa(
   are never coerced to zero. Such cells get `p_perm = NA` rather than a
   spurious significant flag, and the exceedance tally and omnibus
   statistic are computed with `na.rm = TRUE`, matching
-  [`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md).
+  [`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md).
 
   **Interpretation caveats.** The odds ratio is non-collapsible: the
   per-group log odds ratios are group-specific departure-from-
@@ -173,8 +173,8 @@ aspects: A permutation test. *Psychological Methods*.
 
 ## See also
 
-[`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md),
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
+[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md),
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
 
 ## Examples
 

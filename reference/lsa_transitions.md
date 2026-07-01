@@ -15,9 +15,9 @@ lsa_transitions(x, lag = 1)
 - x:
 
   Either an
-  [lsa_data](https://saqr.me/lagdynamics/reference/lsa_data.md) object
-  or any input accepted by
-  [`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md)
+  [lsa_data](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md)
+  object or any input accepted by
+  [`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md)
   (which will be coerced).
 
 - lag:
@@ -72,8 +72,8 @@ other lag.
 
 ## See also
 
-[`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md),
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
+[`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md),
+[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
 
 ## Examples
 

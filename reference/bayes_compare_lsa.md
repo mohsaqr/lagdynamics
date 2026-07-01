@@ -1,7 +1,7 @@
 # Bayesian Comparison of Group Transition Structures (Dirichlet-Multinomial)
 
 Closed-form Bayesian alternative to
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
 for comparing the transition structures of two (or, pairwise, more)
 groups. Each state's outgoing transitions are modelled as
 Dirichlet-Multinomial with a Jeffreys prior, so each transition
@@ -83,7 +83,7 @@ all-pairwise
 ## Details
 
 This complements
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md):
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md):
 the permutation test asks whether a difference is more extreme than
 chance; the Bayesian comparison asks for the plausible range of the true
 difference and how precisely it is estimated. An edge whose source state
@@ -93,7 +93,7 @@ row-normalised probability looks decisive.
 The result carries class `c("lsa_bayes", "lsa_comparison")` (and the
 pairwise object `c("lsa_bayes_pairwise", "lsa_comparison_pairwise")`),
 so
-[plot()](https://saqr.me/lagdynamics/reference/plot.lsa_comparison.md)
+[plot()](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa_comparison.md)
 (barrel / heatmap) and
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) work as
 for a permutation comparison.
@@ -105,8 +105,8 @@ Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
 
 ## See also
 
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md),
-[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md),
+[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md)
 
 ## Examples
 

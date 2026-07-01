@@ -5,8 +5,8 @@ The row-stochastic transition-probability matrix \\P(\text{to} \mid
 a state, so the entries in a row sum to 1 (up to structural zeros). This
 is the transition-probability matrix a Transition Network Analysis
 reads; pair it with
-[`initial()`](https://saqr.me/lagdynamics/reference/initial.md) for the
-initial-state probabilities.
+[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
+for the initial-state probabilities.
 
 ## Usage
 
@@ -25,7 +25,7 @@ transition_probabilities(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
 
 ## Value
 
@@ -35,11 +35,11 @@ group.
 
 ## See also
 
-[`initial()`](https://saqr.me/lagdynamics/reference/initial.md)
+[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
 (initial-state probabilities),
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
 (the tidy per-edge view),
-[`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md)
+[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md)
 
 ## Examples
 

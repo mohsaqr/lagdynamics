@@ -1,7 +1,7 @@
 # Analytic Certainty of Transition Edges (Dirichlet-Multinomial)
 
 Closed-form Bayesian alternative to
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
 for the transition-probability edges of an `lsa` fit. Each state's
 outgoing transitions are modelled as Dirichlet-Multinomial: with a
 Jeffreys prior the posterior for a row is `Dirichlet(count + prior)`, so
@@ -27,8 +27,8 @@ certainty_lsa(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md), or an
-  `lsa_group`.
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md), or
+  an `lsa_group`.
 
 - prior:
 
@@ -39,7 +39,7 @@ certainty_lsa(
 
   Numeric in (0, 1). Credible-interval level. Default `0.95` (a 95%
   interval), matching
-  [`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md).
+  [`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md).
 
 - inference:
 
@@ -72,7 +72,7 @@ list of these (class `lsa_certainty_group`).
 
 The result carries class `c("lsa_certainty", "lsa_bootstrap")` and an
 `edges` table with the columns
-[`plot_forest()`](https://saqr.me/lagdynamics/reference/plot_forest.md)
+[`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md)
 and [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
 expect, so it is a drop-in for a bootstrap result (use
 `metric = "prob"`).
@@ -82,7 +82,7 @@ pinned down?". They agree on homogeneous data. The Dirichlet posterior
 treats transitions as independent, so on strongly heterogeneous data (a
 mixture of latent classes with long sequences) it reports *more*
 certainty than the sequence bootstrap – prefer
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
 then.
 
 ## References
@@ -92,9 +92,9 @@ Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
 
 ## See also
 
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md),
-[`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md),
-[`plot_forest()`](https://saqr.me/lagdynamics/reference/plot_forest.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md),
+[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md),
+[`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md)
 
 ## Examples
 

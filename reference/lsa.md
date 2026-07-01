@@ -47,7 +47,7 @@ lsa(
 - data:
 
   Sequence input (any form accepted by
-  [`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md)),
+  [`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md)),
   *or* a raw long-format event-log `data.frame` when the `actor` /
   `action` arguments are supplied (see below). Accepted already-
   sequenced forms include vectors, lists of sequences, wide
@@ -70,12 +70,12 @@ lsa(
   (degenerate for single-stream event data – genuine co-occurrence needs
   concurrent codes, not yet supported). Pre-computed transition-matrix
   input supports `lag = 1` only. To analyse several lags at once, see
-  [`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md).
+  [`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md).
 
 - engine:
 
   Character scalar. The engine name, registered via
-  [`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md).
+  [`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md).
   Built-in engines: `"classical"`, `"two_cell"`, `"bidirectional"`,
   `"parallel_dominance"`, `"nonparallel_dominance"`. Default
   `"classical"`.
@@ -167,26 +167,26 @@ lsa(
 
 An object of class `c("lsa", "cograph_network")`. Read it with the verbs
 rather than by reaching into slots:
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
 for the tidy edge table,
-[`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
-[`tests()`](https://saqr.me/lagdynamics/reference/tests.md),
-[`initial()`](https://saqr.me/lagdynamics/reference/initial.md), and
-[`summary()`](https://rdrr.io/r/base/summary.html) for the other
+[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
+[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md),
+[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md),
+and [`summary()`](https://rdrr.io/r/base/summary.html) for the other
 results, and
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`plot_transitions()`](https://saqr.me/lagdynamics/reference/plot_transitions.md)
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md)
 to draw it. Every number a verb returns is backed by these slots:
 
 - edges:
 
   The tidy one-row-per-transition frame that backs
-  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+  [`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
   (with extra `cograph_network` protocol columns).
 
 - nodes:
 
   Data frame backing
-  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md):
+  [`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md):
   `id, label, name, outgoing, incoming`.
 
 - obs, exp, prob, prob_col, adj_res, p, yules_q, kappa, kappa_z,
@@ -200,14 +200,14 @@ to draw it. Every number a verb returns is backed by these slots:
 - lrx2, x2:
 
   Lists `(statistic, df, p)` backing
-  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md): the
-  tablewise likelihood-ratio (G^2) and Pearson chi-square tests of
+  [`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md):
+  the tablewise likelihood-ratio (G^2) and Pearson chi-square tests of
   independence; `NULL` for engines without an expected table.
 
 - inits:
 
   Named numeric vector backing
-  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md)
+  [`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
   (proportion of sequences starting in each state, sums to 1); `NULL`
   for transition-matrix input.
 
@@ -243,17 +243,17 @@ When `group` is supplied, returns an object of class
 `c("lsa_group", "list")`: a named list of `lsa` fits (one per group
 level) carrying `levels`, `group_sizes`, `labels`, and `engine`
 attributes. Downstream verbs
-([`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
-[`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md),
-[`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md),
+([`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
+[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md),
+[`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md),
 etc.) dispatch on it and return grouped results.
 
 ## See also
 
-[`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md),
-[`lsa_transitions()`](https://saqr.me/lagdynamics/reference/lsa_transitions.md),
-[`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md),
-[`list_lsa_engines()`](https://saqr.me/lagdynamics/reference/list_lsa_engines.md)
+[`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md),
+[`lsa_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_transitions.md),
+[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md),
+[`list_lsa_engines()`](https://mohsaqr.github.io/lagdynamics/reference/list_lsa_engines.md)
 
 ## Examples
 

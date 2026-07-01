@@ -19,17 +19,17 @@ adjusted residual is a test statistic, not a descriptive weight.
 The package is built around a small set of design commitments:
 
 - **Tidy.** Every result is produced by a verb
-  ([`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
-  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
-  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md),
-  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md), …)
-  that returns a one-row-per-observation data frame; the user never
+  ([`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
+  [`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
+  [`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md),
+  [`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md),
+  …) that returns a one-row-per-observation data frame; the user never
   indexes into an object.
 - **Interoperable.**
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) reads long
-  event logs and common sequence objects with an `actor` / `action` /
-  `time` grammar, and exposes the fitted transition and initial
-  probabilities for downstream network tooling.
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+  reads long event logs and common sequence objects with an `actor` /
+  `action` / `time` grammar, and exposes the fitted transition and
+  initial probabilities for downstream network tooling.
 - **Rigorous, following Dynalytics.** The confirmatory testing battery
   is built in: analytic certainty and the bootstrap for edge-level
   uncertainty, split-half reliability for the whole network,
@@ -45,7 +45,7 @@ The package is built around a small set of design commitments:
   polar sunburst, alongside dedicated plots for uncertainty and for
   group differences.
 - **Group-aware.** A grouping column yields one model per group, and
-  [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
+  [`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
   tests whether the groups differ by permutation.
 
 The remainder of this vignette walks one analysis end to end on real
@@ -98,17 +98,17 @@ head(engagement)
 
 ## Fit
 
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) estimates the
-model in a single call. It tabulates every state-to-state transition,
-derives the frequencies expected under the independence (no-memory)
-model, and computes an **adjusted residual** for each cell: a
-standardised measure of how far the observed frequency departs from its
-expectation. The fitted object is therefore a *residual network* – each
-edge is a tested deviation from independence rather than a raw rate.
-This is the named-model discipline of Dynalytics: the same sequences
-could be re-expressed as a probability-weighted transition (TNA)
-network, but that is a distinct model answering a distinct question –
-the typical next state rather than the surprising one.
+[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+estimates the model in a single call. It tabulates every state-to-state
+transition, derives the frequencies expected under the independence
+(no-memory) model, and computes an **adjusted residual** for each cell:
+a standardised measure of how far the observed frequency departs from
+its expectation. The fitted object is therefore a *residual network* –
+each edge is a tested deviation from independence rather than a raw
+rate. This is the named-model discipline of Dynalytics: the same
+sequences could be re-expressed as a probability-weighted transition
+(TNA) network, but that is a distinct model answering a distinct
+question – the typical next state rather than the surprising one.
 
 ``` r
 
@@ -135,7 +135,7 @@ fit
 
 Every result is produced by a verb that returns a tidy data frame; the
 object is never indexed directly.
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
 is the primary accessor, and its arguments select the transitions of
 interest. This step supports the most modest claim in the workflow –
 which departures from chance are present in the fitted model. The
@@ -285,7 +285,7 @@ because a single observed value is weaker support than a measure of how
 much that value could vary. `lagdynamics` provides two complementary
 procedures, both returning a tidy object.
 
-[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md)
 is the analytic procedure. It places a Dirichlet-Multinomial posterior
 on each state’s outgoing transitions, which gives an exact credible
 interval for every transition probability in closed form, without
@@ -314,7 +314,7 @@ as.data.frame(certainty_lsa(fit)) |> head(4)
 #> 4        0.302 1.21e-04   TRUE            -11.3           TRUE
 ```
 
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
 is the resampling counterpart. It resamples whole sequences with
 replacement, re-estimates the model on each resample, and summarises how
 much each edge varies. The two procedures agree when the population is
@@ -357,7 +357,7 @@ plot(bootstrap_lsa(fit, R = 200))           # circular forest of edge CIs
 
 ![](workflow_files/figure-html/forest-1.png)
 
-[`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)
+[`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md)
 raises the claim from a single edge to the whole network. It repeatedly
 splits the sequences into two halves, estimates a model on each half,
 and correlates the two edge-weight vectors. A high average correlation
@@ -383,12 +383,12 @@ reliability_lsa(fit, R = 30)
 
 `engagement` arrived as ready-made sequences. Real data is often a
 **long event log** instead - one row per event.
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) sequences it on
-the fly with an `actor` / `action` / `time` grammar. This step shows
-that the same inferential chain can begin from raw process traces rather
-than from an already assembled sequence matrix. The data format changes,
-but the contract does not: define the actors, events, and ordering rule
-before estimating a model from them.
+[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+sequences it on the fly with an `actor` / `action` / `time` grammar.
+This step shows that the same inferential chain can begin from raw
+process traces rather than from an already assembled sequence matrix.
+The data format changes, but the contract does not: define the actors,
+events, and ordering rule before estimating a model from them.
 
 The bundled `group_regulation_long` is exactly that: 2,000 students,
 each a stream of timestamped regulation actions, with a recorded
@@ -410,12 +410,13 @@ head(group_regulation_long)
 ```
 
 A single call converts the log into a fitted model:
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) groups events by
-actor, orders them by time, splits sessions on long gaps, and fits.
-Those operations are not clerical details; they define the empirical
-process to which the residual test is applied. Once the log has been
-converted to ordered transitions, the fitted edges again represent
-departures from independence in that recovered sequence process.
+[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md) groups
+events by actor, orders them by time, splits sessions on long gaps, and
+fits. Those operations are not clerical details; they define the
+empirical process to which the residual test is applied. Once the log
+has been converted to ordered transitions, the fitted edges again
+represent departures from independence in that recovered sequence
+process.
 
 ``` r
 
@@ -495,12 +496,13 @@ initial(fit_log)                            # initial-state probabilities
 
 To compare achievement groups, name the grouping **column** in the same
 call - `group = "Achiever"`.
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) derives one
-label per recovered sequence (the column must be fixed within each
-actor), so there is no manual splitting or relabelling. Grouped fitting
-estimates one lag-sequential model per group under the same data
-grammar, which makes the models comparable. At this point the claim is
-still descriptive: each group has its own fitted residual structure.
+[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+derives one label per recovered sequence (the column must be fixed
+within each actor), so there is no manual splitting or relabelling.
+Grouped fitting estimates one lag-sequential model per group under the
+same data grammar, which makes the models comparable. At this point the
+claim is still descriptive: each group has its own fitted residual
+structure.
 
 ``` r
 
@@ -538,7 +540,7 @@ transitions(gfit, significant = TRUE) |> head(4)
 
 ## Compare the groups
 
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
 tests whether the two groups have a different transition structure. It
 permutes the group labels and compares an N-invariant effect size (the
 log-odds ratio), returning a per-edge table together with a single

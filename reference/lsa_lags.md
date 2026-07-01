@@ -1,9 +1,9 @@
 # Lag Sequential Analysis Across Several Lags
 
-Fits [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) at each
-requested lag and returns the fits together, so you can compare a
-transition's strength across lags (a *lag profile*). Each element is an
-ordinary `lsa` fit.
+Fits [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+at each requested lag and returns the fits together, so you can compare
+a transition's strength across lags (a *lag profile*). Each element is
+an ordinary `lsa` fit.
 
 ## Usage
 
@@ -16,7 +16,7 @@ lsa_lags(data, lags = 1:3, ...)
 - data:
 
   Sequence input (any form accepted by
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)).
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)).
 
 - lags:
 
@@ -25,7 +25,8 @@ lsa_lags(data, lags = 1:3, ...)
 
 - ...:
 
-  Passed to [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
+  Passed to
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
   (e.g. `engine`, `alpha`, `structural_zeros`).
 
 ## Value
@@ -34,14 +35,14 @@ An object of class `c("lsa_lags", "list")`: a named list of `lsa` fits
 (names `"lag1"`, `"lag2"`, ...), with a `lags` attribute.
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on it
 row-binds
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
 of every fit (each already carries its `lag` column) into one tidy long
 frame with the same columns as
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md).
+[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md).
 
 ## See also
 
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
+[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
 
 ## Examples
 

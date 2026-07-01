@@ -26,7 +26,7 @@ permute_lsa(
 - fit:
 
   An `lsa` object returned by
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
 
 - R:
 
@@ -100,8 +100,8 @@ Article 39.
 
 ## See also
 
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md),
-[`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md)
+[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md),
+[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md)
 
 ## Examples
 

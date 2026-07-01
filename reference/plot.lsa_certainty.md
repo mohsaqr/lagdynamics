@@ -2,9 +2,9 @@
 
 Circular forest of the per-edge transition-probability credible
 intervals from
-[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md)
 (delegates to
-[`plot_forest()`](https://saqr.me/lagdynamics/reference/plot_forest.md)
+[`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md)
 with `metric = "prob"`).
 
 ## Usage
@@ -27,7 +27,7 @@ plot(x, metric = "prob", ...)
 - ...:
 
   Passed to
-  [`plot_forest()`](https://saqr.me/lagdynamics/reference/plot_forest.md).
+  [`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md).
 
 ## Value
 

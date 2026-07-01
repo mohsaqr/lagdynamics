@@ -2,7 +2,7 @@
 
 A long-format event log of collaborative-learning regulation actions,
 one row per coded event. It is the long companion to the wide
-[group_regulation](https://saqr.me/lagdynamics/reference/group_regulation.md)
+[group_regulation](https://mohsaqr.github.io/lagdynamics/reference/group_regulation.md)
 sequence matrix: the same nine regulation actions, recorded here with
 actor, session, timing, and grouping columns so the package's
 long-format import, grouping, and between-group comparison paths can be
@@ -56,7 +56,7 @@ between-group analysis.
 
 ## See also
 
-[group_regulation](https://saqr.me/lagdynamics/reference/group_regulation.md)
+[group_regulation](https://mohsaqr.github.io/lagdynamics/reference/group_regulation.md)
 (the wide sequence matrix of the same actions)
 
 ## Examples
