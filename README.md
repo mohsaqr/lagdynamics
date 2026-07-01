@@ -153,7 +153,7 @@ Users can register custom engines via `register_lsa_engine()`.
 | `vignette("lagdynamics")` | Get started: the method, why lagdynamics, and a hands-on tour |
 | `vignette("workflow")` | A complete analysis from sequences to a group comparison |
 | `vignette("confirmatory")` | The confirmatory testing battery: matching claims to evidence |
-| `vignette("lag-transition-networks")` | Lag transition networks: a primer and tutorial |
+| `vignette("lag-transition-networks")` | Lag transition networks |
 | `vignette("plotting")` | The full plotting gallery |
 
 ## Status

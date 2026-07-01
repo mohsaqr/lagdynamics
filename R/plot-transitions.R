@@ -19,11 +19,12 @@
 #'     convention, **blue = more** (over-represented) solid and
 #'     **red = less** (avoided) dashed with a soft halo.
 #'   * `"prob"` / `"count"` -- the familiar **transition network** of
-#'     Transition Network Analysis (TNA), drawn with `cograph::splot()` in
-#'     the TNA style: coloured nodes, a donut ring per node carrying its
-#'     initial-state probability, and weighted directed edges labelled with
-#'     the transition probability (`"prob"`) or observed count (`"count"`).
-#'     For `"prob"`, edges below `0.05` are dropped by default so weak
+#'     Transition Network Analysis (TNA), drawn with
+#'     `cograph::splot(tna_styling = TRUE)`: cograph's own TNA styling
+#'     (coloured nodes, weighted directed edges) plus a donut ring per node
+#'     carrying its initial-state probability, and edges labelled with the
+#'     transition probability (`"prob"`) or observed count (`"count"`). For
+#'     `"prob"`, edges below `0.05` are dropped by default so weak
 #'     transitions do not clutter the plot (override with `edge_cutoff`).
 #'   * `"lift"` -- observed / expected, drawn in a single neutral colour
 #'     with magnitude carried by edge width.
@@ -125,30 +126,24 @@ plot_transitions <- function(fit,
   # non-negative -- sign colouring would paint every edge one colour -- so
   # it is drawn in a single neutral blue with width carrying the magnitude.
   # Probabilities / counts branch off first, into the TNA-styled draw.
-  K <- nrow(m)
-
   # Probability / count networks are drawn in the Transition Network
-  # Analysis (TNA) style: coloured nodes, a donut ring per node carrying
-  # its initial-state probability, and neutral weighted directed edges
-  # labelled with the transition probability / count. tna itself renders
-  # through cograph, so this reproduces that look without the dependency.
+  # Analysis (TNA) style using cograph's own `tna_styling` preset -- the
+  # same styling tna applies, since tna renders through cograph. The
+  # per-node donut ring carries each state's initial-state probability, and
+  # edges are labelled with the transition probability / count.
   if (weights %in% c("prob", "count")) {
-    pal <- grDevices::palette.colors(K, palette = "Okabe-Ito", recycle = TRUE)
-    nf  <- if (identical(node_fill, "white")) unname(pal) else node_fill
     defaults <- list(
-      x = m, directed = TRUE, node_fill = nf,
-      edge_labels = edge_labels, weight_digits = decimals,
-      edge_color = "#6C6C6C",
-      node_border_color = "grey30", node_border_width = 1
+      x = m, tna_styling = TRUE, directed = TRUE,
+      edge_labels = edge_labels, weight_digits = decimals
     )
+    # Respect an explicit node_fill; otherwise let tna_styling colour nodes.
+    if (!identical(node_fill, "white")) defaults$node_fill <- node_fill
     # Initial-state probabilities become the node donut ring, matching the
-    # tna plot's initial-probability arcs. Omitted when the fit came from a
-    # bare transition matrix (no initial states).
+    # tna plot. Omitted when the fit came from a bare transition matrix.
     if (!is.null(fit$inits)) {
       iv <- as.numeric(fit$inits[rownames(m)])
       iv[!is.finite(iv)] <- 0
       defaults$donut_values <- iv
-      defaults$donut_color  <- "#2C3E50"
     }
     # For probabilities, drop weak edges (< 0.05) by default so the network
     # stays legible, as tna does; the caller can override via edge_cutoff.

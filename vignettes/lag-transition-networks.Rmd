@@ -1,8 +1,8 @@
 ---
-title: "Lag transition networks: a primer and tutorial"
+title: "Lag transition networks"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Lag transition networks: a primer and tutorial}
+  %\VignetteIndexEntry{Lag transition networks}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -26,11 +26,12 @@ one): adjusted residuals coloured by sign on the TNA / Nestimate
 convention, \strong{blue = more} (over-represented) solid and
 \strong{red = less} (avoided) dashed with a soft halo.
 \item \code{"prob"} / \code{"count"} -- the familiar \strong{transition network} of
-Transition Network Analysis (TNA), drawn with \code{cograph::splot()} in
-the TNA style: coloured nodes, a donut ring per node carrying its
-initial-state probability, and weighted directed edges labelled with
-the transition probability (\code{"prob"}) or observed count (\code{"count"}).
-For \code{"prob"}, edges below \code{0.05} are dropped by default so weak
+Transition Network Analysis (TNA), drawn with
+\code{cograph::splot(tna_styling = TRUE)}: cograph's own TNA styling
+(coloured nodes, weighted directed edges) plus a donut ring per node
+carrying its initial-state probability, and edges labelled with the
+transition probability (\code{"prob"}) or observed count (\code{"count"}). For
+\code{"prob"}, edges below \code{0.05} are dropped by default so weak
 transitions do not clutter the plot (override with \code{edge_cutoff}).
 \item \code{"lift"} -- observed / expected, drawn in a single neutral colour
 with magnitude carried by edge width.
