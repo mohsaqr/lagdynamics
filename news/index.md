@@ -13,56 +13,54 @@ Sackett 1979; Wickens 1989; Christensen 1997; Haberman 1979). See
 
 #### Design
 
-- Unified
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+- Unified [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
   constructor with a pluggable engine registry.
 - Five built-in engines: `classical`, `two_cell`, `bidirectional`,
   `parallel_dominance`, `nonparallel_dominance`.
 - Convenience wrappers:
-  [`lsa_classical()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-  [`lsa_two_cell()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-  [`lsa_bidirectional()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-  [`lsa_parallel_dominance()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-  [`lsa_nonparallel_dominance()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa_classical()`](https://saqr.me/lagdynamics/reference/lsa.md),
+  [`lsa_two_cell()`](https://saqr.me/lagdynamics/reference/lsa.md),
+  [`lsa_bidirectional()`](https://saqr.me/lagdynamics/reference/lsa.md),
+  [`lsa_parallel_dominance()`](https://saqr.me/lagdynamics/reference/lsa.md),
+  [`lsa_nonparallel_dominance()`](https://saqr.me/lagdynamics/reference/lsa.md).
 - Sequence-level bootstrap
-  ([`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)),
+  ([`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)),
   permutation
-  ([`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md)),
+  ([`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)),
   case-drop stability
-  ([`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md)),
+  ([`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md)),
   and split-half reliability
-  ([`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md)).
+  ([`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)).
 - Multi-group fits via `lsa(data, group = ...)`, returning an
   `lsa_group` object with grouped
-  [`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-  [`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
-  [`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md),
-  and
-  [`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
+  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
+  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
+  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md), and
+  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md)
   methods.
 - Tidy edge tables and S3 objects of class `c("lsa", "cograph_network")`
   for seamless integration with the `cograph` plotting layer.
 - Native transition and initial probabilities:
-  [`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md)
+  [`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md)
   returns the row-stochastic P(to \| from) matrix and
-  [`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
-  the initial-state probabilities.
+  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md) the
+  initial-state probabilities.
 - Between-group comparison via
-  [`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
+  [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
   and
-  [`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md).
+  [`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md).
 - Reproducibility hooks (`indices=`, `shuffles=`) for bit-identical
   cross-language verification.
 
 #### Experimental
 
-- [`transfer_entropy()`](https://mohsaqr.github.io/lagdynamics/reference/transfer_entropy.md):
+- [`transfer_entropy()`](https://saqr.me/lagdynamics/reference/transfer_entropy.md):
   directed Schreiber transfer entropy for categorical sequences. Two
   modes (a directed state-flow network, and bivariate full-alphabet
   between two series), with effective (surrogate-debiased) and 0-1
   normalised variants, and boundary-safe pooling that never lags across
   sequences. Sign-blind by design; pair with
-  [`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
   Yule’s Q for direction of effect. Validated in `equivonly/` against
   `infotheo::condinformation`, an independent direct double-sum oracle,
   and exact analytic cases.

@@ -3,7 +3,7 @@
 The proportion of sequences starting in each state, as a tidy
 `data.frame`. These are the initial-state probabilities (init P) that
 complement the transition-probability matrix from
-[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md).
+[`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md).
 
 ## Usage
 
@@ -22,7 +22,7 @@ initial(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
 
 ## Value
 
@@ -31,8 +31,8 @@ came from a transition matrix (no initial states).
 
 ## See also
 
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
+[`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md)
 
 ## Examples
 

@@ -83,7 +83,7 @@ Accepted input forms:
   row and the surrounding events close up, so no transition is counted
   into or out of a gap. To model missingness as its own state, recode it
   (e.g. `NA -> "missing"`) before calling
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
 
 - A square numeric matrix of pre-computed transition counts. Row `i`,
   column `j` is the count of `i -> j` transitions. In this case `events`
@@ -99,8 +99,8 @@ Accepted input forms:
 
 ## See also
 
-[`lsa_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_transitions.md),
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+[`lsa_transitions()`](https://saqr.me/lagdynamics/reference/lsa_transitions.md),
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
 
 ## Examples
 

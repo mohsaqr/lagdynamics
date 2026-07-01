@@ -119,11 +119,11 @@ head(engagement)
 
 ### Fit
 
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md) fits
-the model in one call. It tabulates the transition matrix, derives
-expected counts under independence, computes adjusted residuals, and
-records the recipe used to estimate the model. The printed object is a
-compact summary. The fitted object itself is read through verbs.
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) fits the model
+in one call. It tabulates the transition matrix, derives expected counts
+under independence, computes adjusted residuals, and records the recipe
+used to estimate the model. The printed object is a compact summary. The
+fitted object itself is read through verbs.
 
 ``` r
 
@@ -159,7 +159,7 @@ fit
 
 The public surface is tidy. Every result is produced by a verb, and each
 verb returns a data frame with one row per observation.
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
 returns one row per `from -> to` cell. The columns contain observed
 counts, expected counts, transition probabilities, adjusted residuals,
 p-values, and related association statistics.
@@ -184,13 +184,13 @@ transitions(fit) |> head()   # one row per from -> to transition
 ```
 
 The companion verbs read the other parts of the same fitted model.
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md)
-reports incoming and outgoing volume by state.
-[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md)
-reports tablewise independence tests.
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
-reports the initial-state distribution when the input contains sequences
-rather than a precomputed transition matrix.
+[`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md) reports
+incoming and outgoing volume by state.
+[`tests()`](https://saqr.me/lagdynamics/reference/tests.md) reports
+tablewise independence tests.
+[`initial()`](https://saqr.me/lagdynamics/reference/initial.md) reports
+the initial-state distribution when the input contains sequences rather
+than a precomputed transition matrix.
 
 ``` r
 
@@ -357,7 +357,7 @@ summary(fit)                # one-row overview
 ```
 
 Focused transition tables are requested through arguments to
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md).
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md).
 The call states the scientific filter directly: significant transitions,
 over-represented transitions, avoided transitions, or transitions with a
 minimum observed count.
@@ -462,7 +462,7 @@ plot(fit, type = "sunburst")
 ![](lagdynamics_files/figure-html/plot-sunburst-1.png)
 
 See
-[`vignette("plotting", package = "lagdynamics")`](https://mohsaqr.github.io/lagdynamics/articles/plotting.md)
+[`vignette("plotting", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/plotting.md)
 for the full plotting gallery.
 
 ### Get Data In
@@ -587,19 +587,19 @@ fit_log
 #>     adapt      0.011  █
 ```
 
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md) reads
-long event logs and common sequence objects, and exposes the fitted
-transition and initial probabilities for downstream network tooling.
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) reads long event
+logs and common sequence objects, and exposes the fitted transition and
+initial probabilities for downstream network tooling.
 
 ### Lags
 
 The lag controls the temporal distance between the source and target
 states. Positive lags count successors, negative lags count
 predecessors, and lag zero pairs each event with itself.
-[`lag_profile()`](https://mohsaqr.github.io/lagdynamics/reference/lag_profile.md)
+[`lag_profile()`](https://saqr.me/lagdynamics/reference/lag_profile.md)
 tracks one transition across several lags.
-[`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md)
-fits a full multi-lag profile and returns a tidy long table through
+[`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md) fits a
+full multi-lag profile and returns a tidy long table through
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html).
 
 ``` r
@@ -671,7 +671,7 @@ the fitted table. Stronger claims require further evidence.
 `lagdynamics` therefore includes a confirmatory battery that follows the
 Dynalytics contract.
 
-[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
 gives analytic Bayesian uncertainty for transition probabilities. It
 uses a Dirichlet-Multinomial posterior for each source state’s outgoing
 transitions and returns credible intervals without resampling.
@@ -696,7 +696,7 @@ as.data.frame(cert) |> head(3)
 #> 3      0.00666   0.168  FALSE           -10.32          FALSE
 ```
 
-[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
 is the resampling counterpart. It resamples whole sequences, refits the
 model, and summarizes edge-level variability. A forest plot displays the
 interval evidence for the selected edge metric.
@@ -730,12 +730,12 @@ plot(boot)
 
 ![](lagdynamics_files/figure-html/forest-1.png)
 
-[`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md)
+[`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)
 estimates whole-network reproducibility by repeated split-half
 refitting.
-[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md)
+[`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md)
 drops cases and records whether edges remain significant.
-[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md)
+[`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)
 constructs an empirical null by shuffling events within sequences and
 recomputing the residuals.
 
@@ -786,10 +786,10 @@ as.data.frame(pm) |> head(3)
 ```
 
 Group comparison is confirmatory rather than visual.
-[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
 permutes group labels at the sequence level and tests whether transition
 structures differ.
-[`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md)
+[`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md)
 is the analytic Bayesian comparison: it reports the plausible range of
 group differences in transition probabilities.
 
@@ -851,9 +851,9 @@ plot(cmp, style = "heatmap")
 The classical LSA engine is the default, but the package also includes
 two-cell, bidirectional, parallel-dominance, and nonparallel-dominance
 engines. The registry is open, so custom engines can be registered with
-[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md)
+[`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md)
 and removed with
-[`unregister_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/unregister_lsa_engine.md).
+[`unregister_lsa_engine()`](https://saqr.me/lagdynamics/reference/unregister_lsa_engine.md).
 Convenience wrappers call the built-in engines directly.
 
 ``` r
@@ -959,11 +959,11 @@ transitions(fz) |> subset(from == to)
 
 An LSA fit is also a directed weighted network. The fitted quantities
 are exposed directly for downstream network tooling.
-[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md)
+[`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md)
 returns the row-stochastic transition matrix P(to\|from), and
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
-returns the initial-state probabilities. The choice of weight in
-[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md)
+[`initial()`](https://saqr.me/lagdynamics/reference/initial.md) returns
+the initial-state probabilities. The choice of weight in
+[`plot_transitions()`](https://saqr.me/lagdynamics/reference/plot_transitions.md)
 carries the model meaning: `prob` is a transition network, `count` is
 observed transition volume, `adj_res` is the residual LSA network, and
 `lift` is observed over expected association strength.
@@ -1036,7 +1036,7 @@ permute_lsa(fit)                              # empirical null
 ```
 
 See
-[`vignette("workflow", package = "lagdynamics")`](https://mohsaqr.github.io/lagdynamics/articles/workflow.md)
+[`vignette("workflow", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/workflow.md)
 for a fuller claim-to-evidence workflow and
-[`?lsa`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md) for the
-complete input grammar.
+[`?lsa`](https://saqr.me/lagdynamics/reference/lsa.md) for the complete
+input grammar.

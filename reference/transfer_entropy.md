@@ -7,13 +7,12 @@ past already explains**. Because it conditions on the target's own
 history, transfer entropy is immune to the autocorrelation confound that
 inflates plain lagged association when a process has strong momentum.
 
-Unlike
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)'s
-Yule's Q / adjusted residuals, transfer entropy is **sign-blind**: a
-large value means "strong directed predictive structure", which may be
+Unlike [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)'s Yule's
+Q / adjusted residuals, transfer entropy is **sign-blind**: a large
+value means "strong directed predictive structure", which may be
 *facilitating* or *suppressing*. Read it alongside the signed measures
 from
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
 to interpret direction of effect.
 
 Two modes:
@@ -49,8 +48,7 @@ transfer_entropy(
   Categorical sequence data: a vector (one sequence), or a matrix /
   data.frame with one sequence per row and one time-step per column
   (`NA`-padded), exactly the shape
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
-  consumes.
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) consumes.
 
 - y:
 

@@ -1,7 +1,7 @@
 # Circular Bootstrap Forest of an LSA Fit
 
 Draws a radial forest of an
-[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
 result: each transition is a spoke around a ring, spanning its bootstrap
 confidence interval, with a square at the observed estimate and a dashed
 reference ring at the null. Spokes whose adjusted residual is
@@ -29,7 +29,7 @@ plot(x, ...)
 - boot:
 
   An `lsa_bootstrap` object from
-  [`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md).
+  [`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md).
 
 - metric:
 
@@ -65,10 +65,10 @@ A `ggplot` object (drawn when printed).
 
 ## See also
 
-[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md),
-[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
+[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md),
+[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
 (heatmap),
-[`plot_polar()`](https://mohsaqr.github.io/lagdynamics/reference/plot_polar.md)
+[`plot_polar()`](https://saqr.me/lagdynamics/reference/plot_polar.md)
 (sunburst)
 
 ## Examples

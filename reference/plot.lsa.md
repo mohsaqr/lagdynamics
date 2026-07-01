@@ -8,9 +8,9 @@ One entry point for every view of a fit; pick it with `type`:
 [`cograph::plot_chord()`](https://sonsoles.me/cograph/reference/plot_chord.html)),
 or `"sunburst"` (polar rose). Extra arguments are forwarded to the
 chosen view's worker
-([`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md),
-[`plot_chords()`](https://mohsaqr.github.io/lagdynamics/reference/plot_chords.md),
-[`plot_polar()`](https://mohsaqr.github.io/lagdynamics/reference/plot_polar.md));
+([`plot_transitions()`](https://saqr.me/lagdynamics/reference/plot_transitions.md),
+[`plot_chords()`](https://saqr.me/lagdynamics/reference/plot_chords.md),
+[`plot_polar()`](https://saqr.me/lagdynamics/reference/plot_polar.md));
 see those for view-specific options.
 
 ## Usage
@@ -33,7 +33,7 @@ plot(
 - x:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
 
 - type:
 
@@ -59,11 +59,11 @@ A `ggplot` object for `"heatmap"` and `"sunburst"`; the (invisible)
 
 ## See also
 
-[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md),
-[`plot_chords()`](https://mohsaqr.github.io/lagdynamics/reference/plot_chords.md),
-[`plot_polar()`](https://mohsaqr.github.io/lagdynamics/reference/plot_polar.md),
-[`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md),
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`plot_transitions()`](https://saqr.me/lagdynamics/reference/plot_transitions.md),
+[`plot_chords()`](https://saqr.me/lagdynamics/reference/plot_chords.md),
+[`plot_polar()`](https://saqr.me/lagdynamics/reference/plot_polar.md),
+[`plot_forest()`](https://saqr.me/lagdynamics/reference/plot_forest.md),
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
 
 ## Examples
 

@@ -7,7 +7,7 @@ radial **bar height** (so nothing crams); `"wedge"` sizes each
 transition's angular **width** by its frequency share (the classic
 look), omitting tiny wedges. Both fill by the adjusted residual (warm =
 over-represented, cool = avoided), sharing the
-[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
 heatmap colour scale. Needs `ggplot2`.
 
 ## Usage
@@ -31,7 +31,7 @@ plot_polar(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
 
 - style:
 
@@ -81,11 +81,11 @@ A `ggplot` object (drawn when printed).
 
 ## See also
 
-[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
 (heatmap),
-[`plot_chords()`](https://mohsaqr.github.io/lagdynamics/reference/plot_chords.md)
+[`plot_chords()`](https://saqr.me/lagdynamics/reference/plot_chords.md)
 (chord),
-[`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md)
+[`plot_forest()`](https://saqr.me/lagdynamics/reference/plot_forest.md)
 (bootstrap forest)
 
 ## Examples

@@ -42,8 +42,8 @@ transitions(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md), or
-  a grouped `lsa_group`.
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md), or a grouped
+  `lsa_group`.
 
 - significant:
 
@@ -87,9 +87,9 @@ are reset.
 
 ## See also
 
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
-[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md)
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md),
+[`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
+[`tests()`](https://saqr.me/lagdynamics/reference/tests.md)
 
 ## Examples
 
