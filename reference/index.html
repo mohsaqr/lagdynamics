@@ -40,44 +40,7 @@
     </div>
 
     <div class="section level2">
-      <h2 id="fit-a-model">Fit a model<a class="anchor" aria-label="anchor" href="#fit-a-model"></a></h2>
-
-      <div class="section-desc"><p>Construct a lag-sequential model from sequences, an event log, or a transition matrix. <code><a href="../reference/lsa.html">lsa()</a></code> also documents the convenience wrappers (<code><a href="../reference/lsa.html">lsa_classical()</a></code>, <code><a href="../reference/lsa.html">lsa_two_cell()</a></code>, …).</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="lsa.html">lsa_classical()</a></code> <code><a href="lsa.html">lsa_two_cell()</a></code> <code><a href="lsa.html">lsa_bidirectional()</a></code> <code><a href="lsa.html">lsa_parallel_dominance()</a></code> <code><a href="lsa.html">lsa_nonparallel_dominance()</a></code> <code><a href="lsa.html">lsa()</a></code>
-
-        </dt>
-        <dd>Lag Sequential Analysis</dd>
-
-        <dt>
-
-          <code><a href="lsa_data.html">lsa_data()</a></code>
-
-        </dt>
-        <dd>Canonicalize Sequence Input for Lag Sequential Analysis</dd>
-
-        <dt>
-
-          <code><a href="lsa_transitions.html">lsa_transitions()</a></code>
-
-        </dt>
-        <dd>Tidy Transition Counts at a Given Lag</dd>
-
-        <dt>
-
-          <code><a href="lsa_ipf.html">lsa_ipf()</a></code>
-
-        </dt>
-        <dd>Iterative Proportional Fitting for Two-Way Tables with Structural Zeros</dd>
-      </dl></div><div class="section level2">
-      <h2 id="multi-lag-analysis">Multi-lag analysis<a class="anchor" aria-label="anchor" href="#multi-lag-analysis"></a></h2>
+      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
 
 
 
@@ -88,72 +51,40 @@
 
       <dl><dt>
 
-          <code><a href="lsa_lags.html">lsa_lags()</a></code>
+          <code><a href="ai_long.html">ai_long</a></code>
 
         </dt>
-        <dd>Lag Sequential Analysis Across Several Lags</dd>
+        <dd>Human-AI Vibe Coding Interaction Events</dd>
 
         <dt>
 
-          <code><a href="lag_profile.html">lag_profile()</a></code>
+          <code><a href="as.data.frame.lsa_comparison.html">as.data.frame(<i>&lt;lsa_comparison&gt;</i>)</a></code> <code><a href="as.data.frame.lsa_comparison.html">as.data.frame(<i>&lt;lsa_comparison_pairwise&gt;</i>)</a></code>
 
         </dt>
-        <dd>Lag Profile of a Single Transition</dd>
-      </dl></div><div class="section level2">
-      <h2 id="read-a-fit">Read a fit<a class="anchor" aria-label="anchor" href="#read-a-fit"></a></h2>
-
-      <div class="section-desc"><p>Tidy verbs that return one-row-per-observation data frames.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="transitions.html">transitions()</a></code>
-
-        </dt>
-        <dd>Transitions of an LSA Fit (Tidy)</dd>
+        <dd>Tidy a Group Comparison</dd>
 
         <dt>
 
-          <code><a href="nodes.html">nodes()</a></code>
+          <code><a href="as.data.frame.lsa_data.html">as.data.frame(<i>&lt;lsa_data&gt;</i>)</a></code>
 
         </dt>
-        <dd>Nodes of an LSA Fit (Tidy)</dd>
+        <dd>Tidy the Canonical Sequence Object</dd>
 
         <dt>
 
-          <code><a href="tests.html">tests()</a></code>
+          <code><a href="as.data.frame.lsa_reliability.html">as.data.frame(<i>&lt;lsa_reliability&gt;</i>)</a></code> <code><a href="as.data.frame.lsa_reliability.html">as.data.frame(<i>&lt;lsa_reliability_group&gt;</i>)</a></code>
 
         </dt>
-        <dd>Tablewise Independence Tests of an LSA Fit (Tidy)</dd>
+        <dd>Tidy the per-replicate split-half correlations</dd>
 
         <dt>
 
-          <code><a href="initial.html">initial()</a></code>
+          <code><a href="bayes_compare_lsa.html">bayes_compare_lsa()</a></code>
 
         </dt>
-        <dd>Initial-State Distribution of an LSA Fit (Tidy)</dd>
+        <dd>Bayesian Comparison of Group Transition Structures (Dirichlet-Multinomial)</dd>
 
         <dt>
-
-          <code><a href="transition_probabilities.html">transition_probabilities()</a></code>
-
-        </dt>
-        <dd>Transition-Probability Matrix of an LSA Fit</dd>
-      </dl></div><div class="section level2">
-      <h2 id="inference">Inference<a class="anchor" aria-label="anchor" href="#inference"></a></h2>
-
-      <div class="section-desc"><p>Uncertainty, robustness, and reliability of a fit.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
 
           <code><a href="bootstrap_lsa.html">bootstrap_lsa()</a></code>
 
@@ -169,36 +100,6 @@
 
         <dt>
 
-          <code><a href="permute_lsa.html">permute_lsa()</a></code>
-
-        </dt>
-        <dd>Permutation Test for an LSA Fit</dd>
-
-        <dt>
-
-          <code><a href="stability_lsa.html">stability_lsa()</a></code>
-
-        </dt>
-        <dd>Case-Drop Stability for an LSA Fit</dd>
-
-        <dt>
-
-          <code><a href="reliability_lsa.html">reliability_lsa()</a></code>
-
-        </dt>
-        <dd>Split-Half Reliability for an LSA Fit</dd>
-      </dl></div><div class="section level2">
-      <h2 id="group-comparison">Group comparison<a class="anchor" aria-label="anchor" href="#group-comparison"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
           <code><a href="compare_lsa.html">compare_lsa()</a></code>
 
         </dt>
@@ -206,26 +107,101 @@
 
         <dt>
 
-          <code><a href="bayes_compare_lsa.html">bayes_compare_lsa()</a></code>
+          <code><a href="engagement.html">engagement</a></code>
 
         </dt>
-        <dd>Bayesian Comparison of Group Transition Structures (Dirichlet-Multinomial)</dd>
-      </dl></div><div class="section level2">
-      <h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a></h2>
+        <dd>Student Engagement Trajectories</dd>
 
+        <dt>
 
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="plot_transitions.html">plot_transitions()</a></code>
+          <code><a href="get_lsa_engine.html">get_lsa_engine()</a></code>
 
         </dt>
-        <dd>Plot the Transition Network</dd>
+        <dd>Retrieve a Registered LSA Engine</dd>
+
+        <dt>
+
+          <code><a href="group_regulation.html">group_regulation</a></code>
+
+        </dt>
+        <dd>Collaborative Learning Self-Regulation Sequences</dd>
+
+        <dt>
+
+          <code><a href="group_regulation_long.html">group_regulation_long</a></code>
+
+        </dt>
+        <dd>Group Regulation Long Event Log</dd>
+
+        <dt>
+
+          <code><a href="initial.html">initial()</a></code>
+
+        </dt>
+        <dd>Initial-State Distribution of an LSA Fit (Tidy)</dd>
+
+        <dt>
+
+          <code><a href="lag_profile.html">lag_profile()</a></code>
+
+        </dt>
+        <dd>Lag Profile of a Single Transition</dd>
+
+        <dt>
+
+          <code><a href="list_lsa_engines.html">list_lsa_engines()</a></code>
+
+        </dt>
+        <dd>List All Registered LSA Engines</dd>
+
+        <dt>
+
+          <code><a href="lsa.html">lsa_classical()</a></code> <code><a href="lsa.html">lsa_two_cell()</a></code> <code><a href="lsa.html">lsa_bidirectional()</a></code> <code><a href="lsa.html">lsa_parallel_dominance()</a></code> <code><a href="lsa.html">lsa_nonparallel_dominance()</a></code> <code><a href="lsa.html">lsa()</a></code>
+
+        </dt>
+        <dd>Lag Sequential Analysis</dd>
+
+        <dt>
+
+          <code><a href="lsa_data.html">lsa_data()</a></code>
+
+        </dt>
+        <dd>Canonicalize Sequence Input for Lag Sequential Analysis</dd>
+
+        <dt>
+
+          <code><a href="lsa_ipf.html">lsa_ipf()</a></code>
+
+        </dt>
+        <dd>Iterative Proportional Fitting for Two-Way Tables with Structural Zeros</dd>
+
+        <dt>
+
+          <code><a href="lsa_lags.html">lsa_lags()</a></code>
+
+        </dt>
+        <dd>Lag Sequential Analysis Across Several Lags</dd>
+
+        <dt>
+
+          <code><a href="lsa_transitions.html">lsa_transitions()</a></code>
+
+        </dt>
+        <dd>Tidy Transition Counts at a Given Lag</dd>
+
+        <dt>
+
+          <code><a href="nodes.html">nodes()</a></code>
+
+        </dt>
+        <dd>Nodes of an LSA Fit (Tidy)</dd>
+
+        <dt>
+
+          <code><a href="permute_lsa.html">permute_lsa()</a></code>
+
+        </dt>
+        <dd>Permutation Test for an LSA Fit</dd>
 
         <dt>
 
@@ -233,6 +209,20 @@
 
         </dt>
         <dd>Plot an LSA Fit</dd>
+
+        <dt>
+
+          <code><a href="plot.lsa_certainty.html">plot(<i>&lt;lsa_certainty&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot an Analytic-Certainty Result</dd>
+
+        <dt>
+
+          <code><a href="plot.lsa_comparison.html">plot(<i>&lt;lsa_comparison&gt;</i>)</a></code> <code><a href="plot.lsa_comparison.html">plot(<i>&lt;lsa_comparison_pairwise&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot a Group Comparison</dd>
 
         <dt>
 
@@ -257,44 +247,12 @@
 
         <dt>
 
-          <code><a href="plot.lsa_certainty.html">plot(<i>&lt;lsa_certainty&gt;</i>)</a></code>
+          <code><a href="plot_transitions.html">plot_transitions()</a></code>
 
         </dt>
-        <dd>Plot an Analytic-Certainty Result</dd>
+        <dd>Plot the Transition Network</dd>
 
         <dt>
-
-          <code><a href="plot.lsa_comparison.html">plot(<i>&lt;lsa_comparison&gt;</i>)</a></code> <code><a href="plot.lsa_comparison.html">plot(<i>&lt;lsa_comparison_pairwise&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Plot a Group Comparison</dd>
-      </dl></div><div class="section level2">
-      <h2 id="transfer-entropy-experimental-">Transfer entropy (experimental)<a class="anchor" aria-label="anchor" href="#transfer-entropy-experimental-"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="transfer_entropy.html">transfer_entropy()</a></code>
-
-        </dt>
-        <dd>Directed transfer entropy for categorical sequences (experimental)</dd>
-      </dl></div><div class="section level2">
-      <h2 id="engine-registry">Engine registry<a class="anchor" aria-label="anchor" href="#engine-registry"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
 
           <code><a href="register_lsa_engine.html">register_lsa_engine()</a></code>
 
@@ -303,110 +261,54 @@
 
         <dt>
 
+          <code><a href="reliability_lsa.html">reliability_lsa()</a></code>
+
+        </dt>
+        <dd>Split-Half Reliability for an LSA Fit</dd>
+
+        <dt>
+
+          <code><a href="stability_lsa.html">stability_lsa()</a></code>
+
+        </dt>
+        <dd>Case-Drop Stability for an LSA Fit</dd>
+
+        <dt>
+
+          <code><a href="tests.html">tests()</a></code>
+
+        </dt>
+        <dd>Tablewise Independence Tests of an LSA Fit (Tidy)</dd>
+
+        <dt>
+
+          <code><a href="transfer_entropy.html">transfer_entropy()</a></code>
+
+        </dt>
+        <dd>Directed transfer entropy for categorical sequences (experimental)</dd>
+
+        <dt>
+
+          <code><a href="transition_probabilities.html">transition_probabilities()</a></code>
+
+        </dt>
+        <dd>Transition-Probability Matrix of an LSA Fit</dd>
+
+        <dt>
+
+          <code><a href="transitions.html">transitions()</a></code>
+
+        </dt>
+        <dd>Transitions of an LSA Fit (Tidy)</dd>
+
+        <dt>
+
           <code><a href="unregister_lsa_engine.html">unregister_lsa_engine()</a></code>
 
         </dt>
         <dd>Remove a Registered LSA Engine</dd>
-
-        <dt>
-
-          <code><a href="get_lsa_engine.html">get_lsa_engine()</a></code>
-
-        </dt>
-        <dd>Retrieve a Registered LSA Engine</dd>
-
-        <dt>
-
-          <code><a href="list_lsa_engines.html">list_lsa_engines()</a></code>
-
-        </dt>
-        <dd>List All Registered LSA Engines</dd>
-      </dl></div><div class="section level2">
-      <h2 id="tidy-result-objects">Tidy result objects<a class="anchor" aria-label="anchor" href="#tidy-result-objects"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="as.data.frame.lsa_data.html">as.data.frame(<i>&lt;lsa_data&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tidy the Canonical Sequence Object</dd>
-
-        <dt>
-
-          <code><a href="as.data.frame.lsa_comparison.html">as.data.frame(<i>&lt;lsa_comparison&gt;</i>)</a></code> <code><a href="as.data.frame.lsa_comparison.html">as.data.frame(<i>&lt;lsa_comparison_pairwise&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tidy a Group Comparison</dd>
-
-        <dt>
-
-          <code><a href="as.data.frame.lsa_reliability.html">as.data.frame(<i>&lt;lsa_reliability&gt;</i>)</a></code> <code><a href="as.data.frame.lsa_reliability.html">as.data.frame(<i>&lt;lsa_reliability_group&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Tidy the per-replicate split-half correlations</dd>
-      </dl></div><div class="section level2">
-      <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="ai_long.html">ai_long</a></code>
-
-        </dt>
-        <dd>Human-AI Vibe Coding Interaction Events</dd>
-
-        <dt>
-
-          <code><a href="engagement.html">engagement</a></code>
-
-        </dt>
-        <dd>Student Engagement Trajectories</dd>
-
-        <dt>
-
-          <code><a href="group_regulation.html">group_regulation</a></code>
-
-        </dt>
-        <dd>Collaborative Learning Self-Regulation Sequences</dd>
-
-        <dt>
-
-          <code><a href="group_regulation_long.html">group_regulation_long</a></code>
-
-        </dt>
-        <dd>Group Regulation Long Event Log</dd>
-      </dl></div><div class="section level2">
-      <h2 id="package">Package<a class="anchor" aria-label="anchor" href="#package"></a></h2>
-
-
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="lagdynamics-package.html">lagdynamics</a></code> <code><a href="lagdynamics-package.html">lagdynamics-package</a></code>
-
-        </dt>
-        <dd>lagdynamics: Lag Sequential Analysis, Dynamics, and Lag Transition Networks</dd>
       </dl></div>
-  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
-    </nav></aside></div>
+  </main></div>
 
 
     <footer><div class="pkgdown-footer-left">
