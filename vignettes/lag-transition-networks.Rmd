@@ -18,8 +18,6 @@ options(digits = 3)
 has <- function(p) requireNamespace(p, quietly = TRUE)
 ```
 
-# Lag-sequential analysis
-
 Lag-sequential analysis studies the order in which categorical events occur.
 Given a series of events, the method examines pairs that follow one another
 and tests whether a given event is followed by another event more or less

@@ -34,7 +34,7 @@ Imports:
     utils
 Suggests:
     testthat (>= 3.0.0),
-    cograph,
+    cograph (>= 2.3.6),
     knitr,
     rmarkdown,
     ggplot2
