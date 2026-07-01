@@ -61,8 +61,9 @@ transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
                              test = c("surrogate", "none"), R = 199L,
                              normalize = TRUE, seed = NULL) {
   test <- match.arg(test)
-  stopifnot(is.numeric(lag), lag >= 1, is.numeric(history), history >= 1,
-            is.numeric(R), R >= 1)
+  .te_check_integer(lag, "lag")
+  .te_check_integer(history, "history")
+  .te_check_integer(R, "R")
   if (!is.null(seed)) set.seed(seed)
   lag <- as.integer(lag); history <- as.integer(history); R <- as.integer(R)
 
@@ -102,6 +103,29 @@ transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
 .te_label <- function(sym, fallback) {
   lab <- tryCatch(deparse(sym), error = function(e) fallback)
   if (length(lab) != 1L || nchar(lab) == 0L || nchar(lab) > 20L) fallback else lab
+}
+
+.te_check_integer <- function(x, name) {
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
+      x < 1 || x != floor(x)) {
+    stop(sprintf("`%s` must be a single finite integer >= 1.", name),
+         call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+.te_validate_aligned <- function(x_list, y_list) {
+  if (length(x_list) != length(y_list)) {
+    stop("`x` and `y` must contain the same number of aligned sequences.",
+         call. = FALSE)
+  }
+  lx <- lengths(x_list)
+  ly <- lengths(y_list)
+  if (!identical(lx, ly)) {
+    stop("`x` and `y` must have the same length within every aligned sequence.",
+         call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 # Aligned (target future, target history, source past) triples for ONE
@@ -179,7 +203,7 @@ transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
 
 # Bivariate TE in both directions between two aligned series.
 .te_bivariate <- function(x_list, y_list, labels, lag, history, test, R) {
-  stopifnot(length(x_list) == length(y_list))
+  .te_validate_aligned(x_list, y_list)
   rbind(
     data.frame(from = labels[1], to = labels[2],
                t(.te_one(x_list, y_list, lag, history, test, R)),

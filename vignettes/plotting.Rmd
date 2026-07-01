@@ -30,7 +30,7 @@ engagement states).
 |---|---|---|
 | residual heatmap | `plot(fit)` | ggplot2 |
 | residual network | `plot(fit, type = "network")` | cograph |
-| transition (TNA) network | `plot(fit, type = "network", weights = "prob")` | tna |
+| transition (TNA) network | `plot(fit, type = "network", weights = "prob")` | cograph |
 | chord diagram | `plot(fit, type = "chord")` | cograph |
 | polar sunburst | `plot(fit, type = "sunburst")` | ggplot2 |
 | uncertainty forest | `plot(bootstrap_lsa(fit))`, `plot(certainty_lsa(fit))` | ggplot2 |
@@ -39,9 +39,9 @@ engagement states).
 **Colour.** Two conventions are used, by purpose. The residual *heatmap*,
 *chord*, and *sunburst* use the residual diverging scale (warm = over-
 represented, cool = avoided). The *network* and *group comparison* plots
-follow the wider TNA / Nestimate convention -- **blue = more than chance**,
-**red = less** (avoided edges dashed) -- so an `lsa` network reads like any
-other transition network in that ecosystem.
+follow the wider Transition Network Analysis (TNA) convention -- **blue =
+more than chance**, **red = less** (avoided edges dashed) -- so an `lsa`
+network reads like any other transition network.
 
 # Residual heatmap
 
@@ -65,11 +65,12 @@ plot(fit, type = "network")
 # Transition network (a TNA model)
 
 Weight the edges by probability and the view becomes the familiar
-transition network: `lagdynamics` builds a `tna` object on the fly and renders
-it with tna's styling. This shows what happens, where the residual network
+transition network, drawn in the Transition Network Analysis (TNA) style by
+`cograph::splot()`: coloured nodes, a per-node initial-probability ring, and
+weighted directed edges. This shows what happens, where the residual network
 shows what is surprising.
 
-```{r net-transition, eval = has("tna")}
+```{r net-transition, eval = has("cograph")}
 plot(fit, type = "network", weights = "prob")
 ```
 
@@ -100,11 +101,11 @@ plot(certainty_lsa(fit))                     # analytic credible intervals
 
 # Group comparison
 
-For a real grouping we use a long event log, `tna::group_regulation_long`,
-and fit one model per achievement group.
+For a real grouping we use the bundled long event log
+`group_regulation_long`, and fit one model per achievement group.
 
-```{r gfit, eval = has("tna")}
-gfit <- lsa(tna::group_regulation_long, actor = "Actor",
+```{r gfit}
+gfit <- lsa(group_regulation_long, actor = "Actor",
             action = "Action", time = "Time", group = "Achiever")
 ```
 
@@ -112,7 +113,7 @@ gfit <- lsa(tna::group_regulation_long, actor = "Actor",
 runs to one side, the higher group's bar is bordered (darker for a larger
 difference), and the centre chip carries the difference p-value.
 
-```{r barrel, eval = has("tna") && has("ggplot2"), fig.height = 7}
+```{r barrel, eval = has("ggplot2"), fig.height = 7}
 cmp <- compare_lsa(gfit, R = 500)
 plot(cmp)                                    # frequency-ranked rows
 plot(cmp, rank = "effect")                   # surface avoided (red) edges
@@ -122,7 +123,7 @@ plot(cmp, style = "heatmap")                 # full-grid difference
 The Bayesian comparison reuses the same barrel, with the credible
 posterior in place of the permutation p-value.
 
-```{r bayes-barrel, eval = has("tna") && has("ggplot2"), fig.height = 7}
+```{r bayes-barrel, eval = has("ggplot2"), fig.height = 7}
 plot(bayes_compare_lsa(gfit, seed = 1))
 ```
 
@@ -132,7 +133,7 @@ Every `type` works on a grouped fit, drawing one panel per group
 (`combined = FALSE`, the default) or a single tiled figure
 (`combined = TRUE`).
 
-```{r grouped, eval = has("tna") && has("ggplot2")}
+```{r grouped, eval = has("ggplot2")}
 plot(gfit)                                   # one heatmap per group
 ```
 

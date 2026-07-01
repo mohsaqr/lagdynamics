@@ -121,8 +121,8 @@
 #' When `group` is supplied, returns an object of class
 #' `c("lsa_group", "list")`: a named list of `lsa` fits (one per group
 #' level) carrying `levels`, `group_sizes`, `labels`, and `engine`
-#' attributes. Downstream verbs ([lsa_to_tna()],
-#' [transitions()], [reliability_lsa()], etc.) dispatch on
+#' attributes. Downstream verbs ([transitions()],
+#' [transition_probabilities()], [reliability_lsa()], etc.) dispatch on
 #' it and return grouped results.
 #'
 #' @examples

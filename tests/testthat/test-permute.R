@@ -48,8 +48,8 @@ test_that("permute_lsa: observed_adj_res equals fit$adj_res", {
                tolerance = 1e-12)
 })
 
-# The O'Connor 1999 permutation oracle lives in
-# equivalence_testing/test-base-r-engines.R (out of the shipped suite).
+# Additional permutation checks live in equivalence_testing/test-base-r-engines.R
+# (out of the shipped suite).
 
 test_that("permute_lsa: as.data.frame returns the edges frame", {
   set.seed(17L)

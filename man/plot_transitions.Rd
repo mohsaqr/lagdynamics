@@ -6,8 +6,10 @@
 \usage{
 plot_transitions(
   fit,
-  weights = c("residuals", "count", "prob", "lift"),
+  weights = c("residuals", "count", "prob", "lift", "yules_q"),
   significant = FALSE,
+  top = NULL,
+  decimals = 1,
   node_fill = "white",
   edge_labels = TRUE,
   ...
@@ -23,20 +25,42 @@ drawn:
 one): adjusted residuals coloured by sign on the TNA / Nestimate
 convention, \strong{blue = more} (over-represented) solid and
 \strong{red = less} (avoided) dashed with a soft halo.
-\item \code{"prob"} / \code{"count"} -- the familiar \strong{transition network}. This is
-a TNA model: the fit is converted to a \code{tna} object on the fly with
-\code{\link[=lsa_to_tna]{lsa_to_tna()}} and rendered by tna's own plot method (coloured
-nodes, initial-probability arcs, weighted directed edges). Needs the
-\code{tna} package; \code{...} is forwarded to tna's plot.
+\item \code{"prob"} / \code{"count"} -- the familiar \strong{transition network} of
+Transition Network Analysis (TNA), drawn with \code{cograph::splot()} in
+the TNA style: coloured nodes, a donut ring per node carrying its
+initial-state probability, and weighted directed edges labelled with
+the transition probability (\code{"prob"}) or observed count (\code{"count"}).
+For \code{"prob"}, edges below \code{0.05} are dropped by default so weak
+transitions do not clutter the plot (override with \code{edge_cutoff}).
 \item \code{"lift"} -- observed / expected, drawn in a single neutral colour
 with magnitude carried by edge width.
+\item \code{"yules_q"} -- a \strong{signed association network}: Yule's Q on a fixed
+\verb{[-1, 1]} scale, coloured by sign like the residual network (blue
+over-represented, red avoided) but bounded and not growing with
+sample size.
 }}
 
 \item{significant}{Logical. Keep only edges whose adjusted-residual
 p-value is below the fit's alpha; weaker cells are set to 0 (no
-edge). Default \code{FALSE}.}
+edge). Default \code{FALSE}. Note that at large sample sizes almost every
+cell is significant, so this is a weak visual filter -- prefer \code{top}
+(effect-size pruning) to declutter a dense residual network.}
 
-\item{node_fill}{Node fill colour. Default \code{"white"}.}
+\item{top}{Numeric or \code{NULL}. Keep only the strongest edges by absolute
+weight (applied after \code{significant}); the rest are set to 0. A fraction
+\verb{0 < top < 1} keeps that \strong{proportion} of the present edges
+(\code{top = 0.5} -> the strongest half); a value \code{top >= 1} keeps that many
+edges (\code{top = 12} -> the 12 strongest). The legible way to thin a dense
+residual network: it prunes by effect size (\verb{|adjusted residual|})
+rather than by p-value. \code{NULL} (default) keeps every edge. Applies to
+every view; for the probability network it composes with the default
+\code{edge_cutoff = 0.05}.}
+
+\item{decimals}{Number of decimal places for edge labels. Default \code{1}.}
+
+\item{node_fill}{Node fill colour. Default \code{"white"}; the probability /
+count networks use a per-state palette instead unless \code{node_fill} is
+set explicitly.}
 
 \item{edge_labels}{Logical (or a label vector). Show edge weights as
 labels. Default \code{TRUE}.}
@@ -61,10 +85,14 @@ plot_transitions(fit)                                   # residual network
 plot_transitions(fit, weights = "prob")                 # probabilities
 plot_transitions(fit, weights = "residuals",            # residual network,
                  significant = TRUE)                     #   significant only
+plot_transitions(fit, top = 12)                         # 12 strongest edges
+plot_transitions(fit, top = 0.5)                        # strongest 50\%
+plot_transitions(fit, decimals = 2)                     # 2-dp edge labels
 plot_transitions(fit, node_shape = "square")            # splot passthrough
 }
 
 }
 \seealso{
-\code{\link[=plot.lsa]{plot.lsa()}} (heatmap), \code{\link[=transitions]{transitions()}}, \code{\link[=lsa_to_tna]{lsa_to_tna()}}
+\code{\link[=plot.lsa]{plot.lsa()}} (heatmap), \code{\link[=transitions]{transitions()}},
+\code{\link[=transition_probabilities]{transition_probabilities()}}
 }

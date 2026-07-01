@@ -126,6 +126,18 @@ test_that("bootstrap_lsa() accepts a well-formed index matrix", {
   expect_equal(dim(bs$indices_used), c(2L, S))
 })
 
+test_that("bootstrap_lsa() validates event-level replay width", {
+  fit <- lsa(c("a", "b", "a", "b", "a", "b"), engine = "classical")
+  T <- fit$data$n_events
+  expect_error(
+    bootstrap_lsa(fit, R = 1, level = "event",
+                  indices = matrix(seq_len(T - 1L), nrow = 1)),
+    "event-level replay")
+  idx <- matrix(seq_len(T), nrow = 1)
+  bs <- bootstrap_lsa(fit, R = 1, level = "event", indices = idx)
+  expect_equal(dim(bs$indices_used), c(1L, T))
+})
+
 test_that("bootstrap_lsa() rejects an invalid block_length", {
   fit <- lsa(c("a", "b", "a", "b", "a", "b"), engine = "classical")
   expect_error(bootstrap_lsa(fit, R = 1, block_length = -2), "block_length")
@@ -178,4 +190,16 @@ test_that("loops = FALSE matches 1 - diag(K) and forbids the diagonal", {
   # loops = FALSE also zeros the diagonal of an explicit matrix.
   combo <- lsa(seqs, loops = FALSE, structural_zeros = matrix(1, 3, 3))
   expect_true(all(diag(combo$exp) == 0))
+})
+
+test_that("transfer_entropy() validates scalar integer arguments and alignment", {
+  expect_error(transfer_entropy(c("a", "b"), lag = c(1, 2), test = "none"),
+               "`lag`")
+  expect_error(transfer_entropy(c("a", "b"), history = 1.5, test = "none"),
+               "`history`")
+  expect_error(transfer_entropy(c("a", "b"), R = Inf),
+               "`R`")
+  expect_error(transfer_entropy(c("a", "b", "c"), c("a", "b"),
+                                test = "none"),
+               "same length")
 })

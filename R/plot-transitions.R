@@ -18,17 +18,37 @@
 #'     one): adjusted residuals coloured by sign on the TNA / Nestimate
 #'     convention, **blue = more** (over-represented) solid and
 #'     **red = less** (avoided) dashed with a soft halo.
-#'   * `"prob"` / `"count"` -- the familiar **transition network**. This is
-#'     a TNA model: the fit is converted to a `tna` object on the fly with
-#'     [lsa_to_tna()] and rendered by tna's own plot method (coloured
-#'     nodes, initial-probability arcs, weighted directed edges). Needs the
-#'     `tna` package; `...` is forwarded to tna's plot.
+#'   * `"prob"` / `"count"` -- the familiar **transition network** of
+#'     Transition Network Analysis (TNA), drawn with `cograph::splot()` in
+#'     the TNA style: coloured nodes, a donut ring per node carrying its
+#'     initial-state probability, and weighted directed edges labelled with
+#'     the transition probability (`"prob"`) or observed count (`"count"`).
+#'     For `"prob"`, edges below `0.05` are dropped by default so weak
+#'     transitions do not clutter the plot (override with `edge_cutoff`).
 #'   * `"lift"` -- observed / expected, drawn in a single neutral colour
 #'     with magnitude carried by edge width.
+#'   * `"yules_q"` -- a **signed association network**: Yule's Q on a fixed
+#'     `[-1, 1]` scale, coloured by sign like the residual network (blue
+#'     over-represented, red avoided) but bounded and not growing with
+#'     sample size.
 #' @param significant Logical. Keep only edges whose adjusted-residual
 #'   p-value is below the fit's alpha; weaker cells are set to 0 (no
-#'   edge). Default `FALSE`.
-#' @param node_fill Node fill colour. Default `"white"`.
+#'   edge). Default `FALSE`. Note that at large sample sizes almost every
+#'   cell is significant, so this is a weak visual filter -- prefer `top`
+#'   (effect-size pruning) to declutter a dense residual network.
+#' @param top Numeric or `NULL`. Keep only the strongest edges by absolute
+#'   weight (applied after `significant`); the rest are set to 0. A fraction
+#'   `0 < top < 1` keeps that **proportion** of the present edges
+#'   (`top = 0.5` -> the strongest half); a value `top >= 1` keeps that many
+#'   edges (`top = 12` -> the 12 strongest). The legible way to thin a dense
+#'   residual network: it prunes by effect size (`|adjusted residual|`)
+#'   rather than by p-value. `NULL` (default) keeps every edge. Applies to
+#'   every view; for the probability network it composes with the default
+#'   `edge_cutoff = 0.05`.
+#' @param decimals Number of decimal places for edge labels. Default `1`.
+#' @param node_fill Node fill colour. Default `"white"`; the probability /
+#'   count networks use a per-state palette instead unless `node_fill` is
+#'   set explicitly.
 #' @param edge_labels Logical (or a label vector). Show edge weights as
 #'   labels. Default `TRUE`.
 #' @param ... Passed to [cograph::splot()] (e.g. `node_shape`, `layout`,
@@ -44,35 +64,32 @@
 #' plot_transitions(fit, weights = "prob")                 # probabilities
 #' plot_transitions(fit, weights = "residuals",            # residual network,
 #'                  significant = TRUE)                     #   significant only
+#' plot_transitions(fit, top = 12)                         # 12 strongest edges
+#' plot_transitions(fit, top = 0.5)                        # strongest 50%
+#' plot_transitions(fit, decimals = 2)                     # 2-dp edge labels
 #' plot_transitions(fit, node_shape = "square")            # splot passthrough
 #' }
 #'
-#' @seealso [plot.lsa()] (heatmap), [transitions()], [lsa_to_tna()]
+#' @seealso [plot.lsa()] (heatmap), [transitions()],
+#'   [transition_probabilities()]
 #'
 #' @export
 plot_transitions <- function(fit,
                              weights = c("residuals", "count", "prob",
-                                          "lift"),
+                                          "lift", "yules_q"),
                              significant = FALSE,
+                             top = NULL,
+                             decimals = 1,
                              node_fill = "white",
                              edge_labels = TRUE,
                              ...) {
   stopifnot(inherits(fit, "lsa"))
   weights <- match.arg(weights)
-
-  # A probability- or count-weighted network IS a transition (TNA) model,
-  # so build the `tna` object on the fly and let tna render it with its
-  # own styling (coloured nodes, initial-probability arcs, weighted
-  # directed edges) -- rather than lagdynamics's residual-network styling.
-  if (weights %in% c("prob", "count")) {
-    if (!requireNamespace("tna", quietly = TRUE)) {
-      stop("Package 'tna' is required for the transition network ",
-           "(weights = '", weights, "'). Install with ",
-           "install.packages('tna'), or use weights = 'residuals' for ",
-           "the residual network.", call. = FALSE)
-    }
-    return(plot(lsa_to_tna(fit, weights = weights), ...))
+  if (!is.null(top)) {
+    stopifnot(length(top) == 1L, is.numeric(top), is.finite(top), top > 0)
   }
+  stopifnot(length(decimals) == 1L, is.numeric(decimals),
+            is.finite(decimals), decimals >= 0)
 
   if (!requireNamespace("cograph", quietly = TRUE)) {
     stop("Package 'cograph' is required for plot_transitions(). ",
@@ -80,19 +97,67 @@ plot_transitions <- function(fit,
   }
   # Keep signed residuals (negatives are meaningful) when plotting them.
   wkey <- if (weights == "residuals") "adj_res" else weights
-  m <- .lsa_weight_matrix(fit, wkey, positive_residuals_only = FALSE)
+  m <- .lsa_weight_matrix(fit, wkey)
 
   if (isTRUE(significant)) {
     keep <- is.finite(fit$p) & fit$p < fit$params$alpha
     m[!keep] <- 0
   }
-  # splot() colours edges BY SIGN. Residuals are signed, so map them to
-  # the shared TNA / Nestimate / dynalytics convention: BLUE = more
-  # (over-represented, positive residual), RED = less (avoided, negative).
-  # Counts/probs/lift are all non-negative -- sign colouring would paint
-  # every edge one colour -- so draw them in a single neutral blue and let
-  # width carry the magnitude.
-  signed <- weights == "residuals"
+  # Effect-size pruning: keep the strongest edges by absolute weight, zero
+  # the rest. Unlike `significant`, this stays a real filter at large N
+  # (where every cell is significant) -- it declutters by magnitude. A
+  # fractional `top` (0 < top < 1) keeps that proportion of the present
+  # edges (top = 0.5 -> the strongest half); top >= 1 keeps that many edges.
+  if (!is.null(top)) {
+    mag <- abs(m)
+    mag[!is.finite(mag)] <- 0
+    n_edge <- sum(mag > 0)
+    n_keep <- if (top < 1) ceiling(top * n_edge) else min(as.integer(top), n_edge)
+    if (n_edge > n_keep) {
+      kept <- order(mag, decreasing = TRUE)[seq_len(n_keep)]
+      drop <- setdiff(which(mag > 0), kept)
+      m[drop] <- 0
+    }
+  }
+  # splot() colours edges BY SIGN. Residuals and Yule's Q are signed, so
+  # map them to the shared TNA / dynalytics convention: BLUE = more
+  # (over-represented, positive), RED = less (avoided, negative). Lift is
+  # non-negative -- sign colouring would paint every edge one colour -- so
+  # it is drawn in a single neutral blue with width carrying the magnitude.
+  # Probabilities / counts branch off first, into the TNA-styled draw.
+  K <- nrow(m)
+
+  # Probability / count networks are drawn in the Transition Network
+  # Analysis (TNA) style: coloured nodes, a donut ring per node carrying
+  # its initial-state probability, and neutral weighted directed edges
+  # labelled with the transition probability / count. tna itself renders
+  # through cograph, so this reproduces that look without the dependency.
+  if (weights %in% c("prob", "count")) {
+    pal <- grDevices::palette.colors(K, palette = "Okabe-Ito", recycle = TRUE)
+    nf  <- if (identical(node_fill, "white")) unname(pal) else node_fill
+    defaults <- list(
+      x = m, directed = TRUE, node_fill = nf,
+      edge_labels = edge_labels, weight_digits = decimals,
+      edge_color = "#6C6C6C",
+      node_border_color = "grey30", node_border_width = 1
+    )
+    # Initial-state probabilities become the node donut ring, matching the
+    # tna plot's initial-probability arcs. Omitted when the fit came from a
+    # bare transition matrix (no initial states).
+    if (!is.null(fit$inits)) {
+      iv <- as.numeric(fit$inits[rownames(m)])
+      iv[!is.finite(iv)] <- 0
+      defaults$donut_values <- iv
+      defaults$donut_color  <- "#2C3E50"
+    }
+    # For probabilities, drop weak edges (< 0.05) by default so the network
+    # stays legible, as tna does; the caller can override via edge_cutoff.
+    if (weights == "prob") defaults$edge_cutoff <- 0.05
+    return(do.call(cograph::splot, utils::modifyList(defaults, list(...))))
+  }
+
+  # splot() colours edges BY SIGN for the residual / Yule's Q networks.
+  signed <- weights %in% c("residuals", "yules_q")
   # .cmp_high = blue (over-represented), .cmp_low = red (avoided): the same
   # convention as the comparison plots (see R/plot-comparison.R).
   epos <- if (signed) .cmp_high else "#4A6FA5"    # over-represented (blue)
@@ -100,9 +165,9 @@ plot_transitions <- function(fit,
   # Plain node: filled circle with a single border (no donut ring). Any of
   # these (edge colours, node_*, node_shape, layout, ...) can be overridden
   # via `...`.
-  K <- nrow(m)
   defaults <- list(
     x = m, node_fill = node_fill, edge_labels = edge_labels,
+    weight_digits = decimals,
     edge_positive_color = epos, edge_negative_color = eneg,
     node_border_color = "steelblue", node_border_width = 1.1
   )

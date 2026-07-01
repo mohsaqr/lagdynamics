@@ -1,4 +1,4 @@
-#' lagdynamics: Modern Lag Sequential Analysis with Tidy Transition Networks
+#' lagdynamics: Lag Sequential Analysis, Dynamics, and Lag Transition Networks
 #'
 #' A unified, pipe-friendly interface for lag sequential analysis (LSA) of
 #' categorical event sequences. Provides classical, two-cell,
@@ -10,12 +10,11 @@
 #'
 #' @section Design principles:
 #'
-#' All numerical methods are implemented from primary literature and
-#' cross-validated against published worked examples and base-R primitives
+#' Numerical methods are implemented from primary literature and
+#' cross-validated against base-R primitives and hand-formula identities
 #' ([stats::loglin()], [stats::chisq.test()], [stats::pchisq()]). See the
 #' `inst/REFERENCES.md` file shipped with the package for the
-#' formula-by-formula citation map and `inst/EQUIVALENCE.md` for the
-#' oracle table and pass rates.
+#' formula-by-formula citation map.
 #'
 #' The package returns S3 objects of class `c("lsa", "cograph_network")`,
 #' which means fits inherit compatibility with the `cograph` package's
@@ -33,27 +32,24 @@
 #' `list_lsa_engines()`
 #'
 #' Inference: [bootstrap_lsa()], [permute_lsa()], [stability_lsa()],
-#' [reliability_lsa()]
+#' [reliability_lsa()], and analytic certainty via [certainty_lsa()].
+#'
+#' Group comparison: `compare_lsa()` and `bayes_compare_lsa()` for
+#' between-group differences in transition structure.
 #'
 #' Reading a fit (tidy data frames): [transitions()], [nodes()],
 #' [tests()], [initial()], and [summary()].
 #'
-#' TNA bridge: [lsa_to_tna()]. This converts an `lsa` fit into the
-#' native object of a downstream network
-#' package; the analysis itself (centralities via `tna::centralities()`,
-#' centrality stability via `tna::estimate_cs()`, pruning via
-#' `tna::prune()`, communities via `tna::communities()`) is performed by
-#' that package. lagdynamics stays the *converter*, not the analyser, and is
-#' not coupled to `tna` at install time.
+#' Transition and initial probabilities: [transition_probabilities()]
+#' returns the row-stochastic transition-probability matrix and
+#' [initial()] the initial-state probabilities.
 #'
 #' @section Roadmap (not yet implemented):
 #'
-#' A dedicated between-group network comparison verb (`compare_lsa()`)
-#' and stationarity tests (`stationarity_lsa()`) are planned but not
-#' yet exported. Until then, multi-group fits are built directly with
-#' `lsa(data, group = ...)`, and between-group comparison is possible
-#' by routing each group's fit through [lsa_to_tna()] and using
-#' `tna::compare()`.
+#' Stationarity tests (`stationarity_lsa()`) are planned but not yet
+#' exported. Multi-group fits are built with `lsa(data, group = ...)`;
+#' between-group differences are then tested with `compare_lsa()` or
+#' `bayes_compare_lsa()`.
 #'
 #' @references
 #'

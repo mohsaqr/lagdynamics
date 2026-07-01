@@ -1,0 +1,315 @@
+---
+title: "Lag transition networks: a primer and tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Lag transition networks: a primer and tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 150, fig.width = 7,
+                      fig.height = 5.4, out.width = "100%",
+                      fig.align = "center")
+set.seed(2026)
+library(lagdynamics)
+options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
+```
+
+# Lag-sequential analysis
+
+Lag-sequential analysis studies the order in which categorical events occur.
+Given a series of events, the method examines pairs that follow one another
+and tests whether a given event is followed by another event more or less
+often than the order of events alone would predict. The event types become
+the states of the process, and the transitions between them become the
+object of analysis. A lag transition network is the representation of these
+tested transitions: the states are nodes, a directed edge from one state to
+another represents the transition between them, and the weight on the edge
+measures how far the observed transition departs from what independence would
+predict.
+
+The method rests on a comparison between two quantities for every ordered
+pair of states. The observed count is the number of times the first state is
+immediately followed by the second. The expected count is the number that
+would occur if the next state did not depend on the current one, and it is
+built from the base rates of the two states alone. The adjusted residual
+expresses the difference between the two on a standardised scale. A positive
+residual identifies a transition that occurs more often than expected, which
+marks a behavioural regularity above the base rates of its states. A negative
+residual identifies a transition that occurs less often than expected, which
+marks an avoidance. A residual near zero identifies a transition that occurs
+about as often as chance predicts. This tutorial develops these quantities,
+fits a model to a real data set, and interprets the network that results.
+
+# The data and the fitted model
+
+The `ai_long` data set is a long-format event log of coded AI-side actions in
+human--AI coding sessions, with one row per event.
+
+```{r data}
+data(ai_long)
+head(ai_long)
+```
+
+Four columns enter the analysis. The `code` column holds the action, the
+event type whose transitions are modelled. The `order_in_session` column
+orders events within a session. The `session_id` column identifies one
+uninterrupted sequence, and the `project` column groups the sessions.
+Transitions are counted within a session only, so the last event of one
+session and the first of the next are never treated as a pair; the `session`
+argument enforces this boundary.
+
+The `lsa()` function fits the model, taking the four columns as named
+arguments.
+
+```{r fit}
+fit <- lsa(ai_long,
+           actor   = "project",
+           session = "session_id",
+           action  = "code",
+           order   = "order_in_session")
+fit
+```
+
+The printed model reports the number of states, transitions, and sequences,
+the omnibus test of independence, the strongest over-represented
+transitions, and the initial-state distribution. The `ai_long` process has 8
+states and 8123 within-session transitions drawn from 428 sessions, so the
+model estimates a compact 8-by-8 transition system from a large number of
+observed moves; the residuals it reports are therefore repeated tendencies
+in the process rather than isolated episodes.
+
+# Reading the model
+
+The fitted model exposes its contents through accessor functions, each of
+which returns a table.
+
+The initial-state distribution records the share of sessions that begin in
+each state.
+
+```{r initial}
+initial(fit)
+```
+
+The initial-state distribution places most of its mass on `Investigate`,
+whose value of 0.715 means that about 71% of sessions begin with an
+investigation action. `Delegate` begins 18% of sessions and `Execute` 6%,
+while `Repair` and `Report` never begin a session. The process almost always
+opens by gathering information.
+
+Node activity records how often each state sends and receives transitions.
+
+```{r nodes}
+nodes(fit)
+```
+
+`Execute` sends 3090 transitions and receives 3233, more than any other
+state, which makes it the most frequently visited state in the process.
+`Ask`, `Report`, and `Explain` are visited rarely. The magnitude of these
+totals is exactly what the expected-count calculation controls for, so that a
+busy state is not credited with meaningful transitions merely for being busy.
+
+The omnibus test evaluates the whole table against independence and is the
+first result to consult.
+
+```{r tests}
+tests(fit)
+```
+
+The likelihood-ratio statistic is $G^2 = 2168$ on 49 degrees of freedom,
+with a p-value below machine precision. The order of actions is therefore not
+random: the next action depends on the current one. A non-significant
+omnibus test would remove any basis for interpreting individual transitions,
+so it is checked before them.
+
+The `transitions()` function returns one row per directed edge. Its
+`direction` argument selects over- or under-represented transitions and its
+`sort` argument orders them by strength.
+
+```{r over}
+transitions(fit, direction = "over", sort = "strength")
+```
+
+`Investigate -> Plan` is the strongest over-represented transition. It
+occurred 977 times, its transition probability is 0.44, and its adjusted
+residual is 33.4. The probability means that planning follows investigation
+44% of the time, and the lift of 2.21 means this is 2.2 times more often than
+independence predicts; investigation is regularly converted into planning.
+`Ask -> Explain` carries a lift of 7.51, so asking is followed by explaining
+about seven times more often than chance. `Execute -> Execute` has a
+probability of 0.51, so execution is followed by execution about half the
+time and tends to occur in runs. `Delegate -> Plan` and `Explain -> Report`
+describe related regularities.
+
+```{r under}
+transitions(fit, direction = "under", sort = "strength")
+```
+
+`Plan -> Plan` is the strongest under-represented transition, with an
+adjusted residual of -17.9 and a lift of 0.16. Planning is therefore very
+rarely repeated immediately: a planning action is followed by another
+planning action only about one-sixth as often as expected. The result does
+not mean planning is uncommon; it means planning is normally followed by a
+different action. `Investigate -> Execute` (residual -16.6) is also
+under-represented, so investigation seldom leads straight to execution. Read
+together with the over-represented `Investigate -> Plan`, these avoidances
+show a separation between gathering information and acting on it, with a
+planning step in between.
+
+# The network
+
+The network represents each state as a node and each transition as a
+directed edge, with edge width proportional to the weight and an edge that
+loops to its own node marking a self-transition. Three networks can be drawn
+from the same model, differing in the quantity they place on the edges. The
+two lag-sequential networks come first: the residual network, whose edges are
+signed adjusted residuals (blue over-represented, red avoided), and the
+Yule's Q network, which shows the same signed departures on a fixed $[-1, 1]$
+scale that does not grow with sample size. The probability network, which is
+the Transition Network Analysis view, comes last.
+
+The residual network draws the tested departures from independence. The full
+network draws every edge:
+
+```{r net-residual-full, eval = has("cograph")}
+plot_transitions(fit, weights = "residuals", decimals = 1)
+```
+
+```{r net-residual-full-skip, echo = FALSE, eval = !has("cograph")}
+message("Install 'cograph' to draw the residual network.")
+```
+
+Because a residual grows with sample size and the data set has many
+transitions, most edges are significant and the full network is dense. The
+`top` argument keeps the strongest edges by absolute residual:
+
+```{r net-residual-top, eval = has("cograph")}
+plot_transitions(fit, weights = "residuals", top = 12, decimals = 1)
+```
+
+The pruned residual network has a directed shape that the edge weights make
+explicit. `Investigate -> Plan` is the heaviest edge (residual 33.4), and its
+reverse `Plan -> Investigate` is also over-represented (residual 5.6);
+investigation and planning therefore form a mutual pair. `Plan -> Execute`
+then runs forward (residual 6.3), while its reverse `Execute -> Plan` is red
+(residual -14.5), so the link from planning to execution is one-directional.
+`Execute -> Execute` is a heavy self-loop (residual 16.1), so the process
+remains in execution once it arrives. The red edges `Plan -> Plan` and
+`Investigate -> Execute` confirm that planning does not repeat and that
+investigation does not jump straight to execution.
+
+The Yule's Q network shows the same signed departures on a bounded scale, so
+its edge values are comparable across datasets and across groups of different
+sizes. The full network again draws every edge, and `top` keeps the
+strongest:
+
+```{r net-yulesq-full, eval = has("cograph")}
+plot_transitions(fit, weights = "yules_q", decimals = 2)
+```
+
+```{r net-yulesq-full-skip, echo = FALSE, eval = !has("cograph")}
+message("Install 'cograph' to draw the Yule's Q network.")
+```
+
+```{r net-yulesq-top, eval = has("cograph")}
+plot_transitions(fit, weights = "yules_q", top = 12, decimals = 2)
+```
+
+The Yule's Q network preserves the shape of the residual network, the same
+over-represented and avoided edges, but its weights are bounded association
+values rather than test statistics, which is the form to use when the
+networks of two groups are to be compared.
+
+The probability network draws the same transitions weighted by
+$P(\text{to} \mid \text{from})$, the share of moves out of a state that reach
+each destination. This is the network of Transition Network Analysis (TNA); a
+thin ring around each node shows the initial probability of starting in that
+state.
+
+```{r net-prob, eval = has("cograph")}
+plot_transitions(fit, weights = "prob")
+```
+
+```{r net-prob-skip, echo = FALSE, eval = !has("cograph")}
+message("Install 'cograph' to draw the probability network.")
+```
+
+The probability network foregrounds the most frequent transitions:
+`Delegate -> Plan` (0.62), `Execute -> Execute` (0.51), `Ask -> Explain`
+(0.48), `Plan -> Execute` (0.47), and `Investigate -> Plan` (0.44). It is not
+equivalent to the lag-sequential networks. A transition probability lies
+between 0 and 1, records how often a transition occurs, and reaches its
+smallest value at zero, so it cannot represent a transition that occurs less
+often than expected. A signed residual or Yule's Q can. The under-represented
+edges of the residual network, such as `Execute -> Plan`, have no counterpart
+in the probability network. The probability network describes where the
+process goes; the lag-sequential networks identify which transitions depart
+from chance, and in which direction.
+
+# Inference
+
+The adjusted residual is an analytic test, and its conclusions can be checked
+against the data by resampling. The bootstrap resamples whole sequences with
+replacement, refits the model on each resample, and records a confidence
+interval for every edge together with whether the edge keeps its sign.
+
+```{r bootstrap}
+boot <- bootstrap_lsa(fit, R = 1000)
+boot
+```
+
+The bootstrap finds 43 of the 64 possible edges to be stable, meaning their
+sign is preserved across the resamples. A stable edge can be reported with
+confidence, whereas an unstable edge might not reappear in a new sample even
+when its residual is large.
+
+Analytic certainty offers a closed-form alternative to the bootstrap. The
+`certainty_lsa()` function models each state's outgoing transitions as
+Dirichlet--Multinomial, which yields a posterior distribution, a credible
+interval, and a certainty decision for each transition probability without
+resampling.
+
+```{r certainty}
+cert <- certainty_lsa(fit)
+cert
+```
+
+Analytic certainty classifies 26 of 64 edges as certain, meaning their
+transition probabilities are estimated precisely. The bootstrap and the
+analytic estimate agree on the overall picture: the frequent transitions are
+estimated with confidence, and the rare transitions are not.
+
+# Summary
+
+The analysis of `ai_long` establishes that the order of actions is not random
+($G^2 = 2168$, $p < 0.001$) and that the process has a definite shape.
+Sessions almost always begin in `Investigate` (initial probability 0.71).
+`Investigate` and `Plan` form a mutual pair, feed forward into `Execute`
+through the one-directional `Plan -> Execute`, and terminate in `Execute`,
+which is the busiest state (in-strength 2.30), occurs in runs
+(`Execute -> Execute`, probability 0.51), and rarely returns to planning.
+Planning does not repeat (`Plan -> Plan`, residual -17.9) and investigation
+seldom leads straight to execution (`Investigate -> Execute`, residual
+-16.6), so a planning step separates information gathering from acting on it.
+Of the 64 possible transitions, 40 are significant, 43 are sign-stable under
+the bootstrap, and 26 are certain under the Bayesian estimate, so a
+transition merits reporting when it is significant, sizeable, and
+reproducible. The residual network and the probability network remain
+complementary throughout: the probability network describes where the
+process tends to go, and the residual network identifies which transitions
+occur more or less often than chance.
+
+# References
+
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
+introduction to sequential analysis* (2nd ed.). Cambridge University Press.
+
+Haberman, S. J. (1973). The analysis of residuals in cross-classified
+tables. *Biometrics*, 29(1), 205--220.
+
+Saqr, M., López-Pernas, S., & Tikka, S. (2025). Mapping relational dynamics
+with transition network analysis: A primer and tutorial. In *Advanced
+Learning Analytics Methods and Tutorials*.

@@ -156,7 +156,7 @@ plot(fit)                     # residual heatmap (default)
 plot(fit, type = "network")   # residual network
 ```
 
-```{r plot-tna-network, eval = requireNamespace("tna", quietly = TRUE)}
+```{r plot-transition-network, eval = requireNamespace("cograph", quietly = TRUE)}
 plot(fit, type = "network", weights = "prob")   # TNA transition network
 ```
 
@@ -194,35 +194,20 @@ as.data.frame(lsa_transitions(group_regulation)) |> head(6)
 ```
 
 Raw event logs are handled with the same `actor` / `action` / `time`
-grammar used by `tna`. The chunk below uses the real
-`tna::group_regulation_long` log when `tna` is installed. The call
-groups events by actor, orders them by time, constructs sequences, and
-then fits the LSA model.
+grammar. The bundled `group_regulation_long` log is exactly that: one row
+per timestamped event. The call groups events by actor, orders them by
+time, constructs sequences, and then fits the LSA model.
 
-```{r long-log, eval = requireNamespace("tna", quietly = TRUE)}
-log <- tna::group_regulation_long
-head(log)
+```{r long-log}
+head(group_regulation_long)
 
-fit_log <- lsa(log, actor = "Actor", action = "Action", time = "Time")
+fit_log <- lsa(group_regulation_long, actor = "Actor",
+               action = "Action", time = "Time")
 fit_log
 ```
 
-Interoperability also works at the object level. Sequence-bearing
-objects from `tna`, Nestimate, and `TraMineR` can be passed to `lsa()`;
-fitted LSA models can be converted back to a TNA object with
-`lsa_to_tna()`.
-
-```{r ingest-tna, eval = requireNamespace("tna", quietly = TRUE)}
-log <- tna::group_regulation_long
-prepared <- tna::prepare_data(log, actor = "Actor",
-                              action = "Action", time = "Time")
-lsa(tna::tna(prepared))
-```
-
-```{r ingest-traminer, eval = requireNamespace("TraMineR", quietly = TRUE)}
-seq_obj <- TraMineR::seqdef(engagement)
-lsa(seq_obj)
-```
+`lsa()` reads long event logs and common sequence objects, and exposes the
+fitted transition and initial probabilities for downstream network tooling.
 
 ## Lags
 
@@ -245,10 +230,9 @@ set. For raw long logs, `group` names a grouping column that is constant
 within each recovered sequence. The same reading verbs then return a
 leading `group` column.
 
-```{r groups, eval = requireNamespace("tna", quietly = TRUE)}
-log <- tna::group_regulation_long
-gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
-            group = "Achiever")
+```{r groups}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
 gfit
 transitions(gfit, significant = TRUE) |> head(4)
 nodes(gfit) |> head(4)
@@ -311,10 +295,9 @@ structures differ. `bayes_compare_lsa()` is the analytic Bayesian
 comparison: it reports the plausible range of group differences in
 transition probabilities.
 
-```{r compare, eval = requireNamespace("tna", quietly = TRUE)}
-log <- tna::group_regulation_long
-gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
-            group = "Achiever")
+```{r compare}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
 
 cmp <- compare_lsa(gfit, R = 50, adjust = "BH")
 cmp
@@ -325,7 +308,7 @@ bcmp
 as.data.frame(bcmp) |> head(4)
 ```
 
-```{r barrel, eval = requireNamespace("tna", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)}
+```{r barrel, eval = requireNamespace("ggplot2", quietly = TRUE)}
 plot(cmp)
 plot(cmp, style = "heatmap")
 ```
@@ -357,19 +340,21 @@ fz <- lsa(group_regulation, loops = FALSE)   # forbid self-transitions
 transitions(fz) |> subset(from == to)
 ```
 
-## Network Toolkits
+## Network Views
 
-An LSA fit is also a directed weighted network. `lsa_to_tna()` exposes it
-to the TNA ecosystem. The choice of weight carries the model meaning:
-`prob` is a transition network, `count` is observed transition volume,
-`adj_res` is the residual LSA network, and `lift` is observed over
-expected association strength.
+An LSA fit is also a directed weighted network. The fitted quantities are
+exposed directly for downstream network tooling. `transition_probabilities()`
+returns the row-stochastic transition matrix P(to|from), and `initial()`
+returns the initial-state probabilities. The choice of weight in
+`plot_transitions()` carries the model meaning: `prob` is a transition
+network, `count` is observed transition volume, `adj_res` is the residual
+LSA network, and `lift` is observed over expected association strength.
 
-```{r tna, eval = requireNamespace("tna", quietly = TRUE)}
-tna::centralities(lsa_to_tna(fit, weights = "prob")) |> head()
+```{r transition-matrix}
+transition_probabilities(fit)
 ```
 
-# Ecosystem
+# Related methods
 
 `lagdynamics` sits beside several established approaches to process data.
 Process mining discovers and checks event-log workflows. Social network
@@ -385,11 +370,11 @@ scientific claims are different. TNA asks where the process tends to go
 next. LSA asks which transitions are more or less frequent than expected
 under a no-memory baseline.
 
-Within the Dynalytics open-source ecosystem, `tna`, Nestimate, and
-`cograph` provide related representations, estimation tools, and
-visualization layers for dynamical systems. `lagdynamics` contributes the
-lag-sequential and confirmatory member of that ecosystem. It keeps the
-methodological contract explicit: each edge is tested against
+`lagdynamics` contributes the lag-sequential and confirmatory approach to
+this space, and exposes its fitted transition and initial probabilities so
+results can be passed to general network representation and visualization
+tools. It keeps the methodological contract explicit: each edge is tested
+against
 independence, each uncertainty claim is matched to uncertainty evidence,
 each whole-network claim is matched to reliability or stability
 evidence, and each group claim is matched to a comparison procedure.

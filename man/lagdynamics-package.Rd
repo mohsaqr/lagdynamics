@@ -4,7 +4,7 @@
 \name{lagdynamics-package}
 \alias{lagdynamics}
 \alias{lagdynamics-package}
-\title{lagdynamics: Modern Lag Sequential Analysis with Tidy Transition Networks}
+\title{lagdynamics: Lag Sequential Analysis, Dynamics, and Lag Transition Networks}
 \description{
 A unified, pipe-friendly interface for lag sequential analysis (LSA) of
 categorical event sequences. Provides classical, two-cell,
@@ -17,12 +17,11 @@ visualization.
 \section{Design principles}{
 
 
-All numerical methods are implemented from primary literature and
-cross-validated against published worked examples and base-R primitives
+Numerical methods are implemented from primary literature and
+cross-validated against base-R primitives and hand-formula identities
 (\code{\link[stats:loglin]{stats::loglin()}}, \code{\link[stats:chisq.test]{stats::chisq.test()}}, \code{\link[stats:Chisquare]{stats::pchisq()}}). See the
 \code{inst/REFERENCES.md} file shipped with the package for the
-formula-by-formula citation map and \code{inst/EQUIVALENCE.md} for the
-oracle table and pass rates.
+formula-by-formula citation map.
 
 The package returns S3 objects of class \code{c("lsa", "cograph_network")},
 which means fits inherit compatibility with the \code{cograph} package's
@@ -42,29 +41,26 @@ Engine registry: \code{register_lsa_engine()}, \code{get_lsa_engine()},
 \code{list_lsa_engines()}
 
 Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}},
-\code{\link[=reliability_lsa]{reliability_lsa()}}
+\code{\link[=reliability_lsa]{reliability_lsa()}}, and analytic certainty via \code{\link[=certainty_lsa]{certainty_lsa()}}.
+
+Group comparison: \code{compare_lsa()} and \code{bayes_compare_lsa()} for
+between-group differences in transition structure.
 
 Reading a fit (tidy data frames): \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}},
 \code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{\link[=summary]{summary()}}.
 
-TNA bridge: \code{\link[=lsa_to_tna]{lsa_to_tna()}}. This converts an \code{lsa} fit into the
-native object of a downstream network
-package; the analysis itself (centralities via \code{tna::centralities()},
-centrality stability via \code{tna::estimate_cs()}, pruning via
-\code{tna::prune()}, communities via \code{tna::communities()}) is performed by
-that package. lagdynamics stays the \emph{converter}, not the analyser, and is
-not coupled to \code{tna} at install time.
+Transition and initial probabilities: \code{\link[=transition_probabilities]{transition_probabilities()}}
+returns the row-stochastic transition-probability matrix and
+\code{\link[=initial]{initial()}} the initial-state probabilities.
 }
 
 \section{Roadmap (not yet implemented)}{
 
 
-A dedicated between-group network comparison verb (\code{compare_lsa()})
-and stationarity tests (\code{stationarity_lsa()}) are planned but not
-yet exported. Until then, multi-group fits are built directly with
-\code{lsa(data, group = ...)}, and between-group comparison is possible
-by routing each group's fit through \code{\link[=lsa_to_tna]{lsa_to_tna()}} and using
-\code{tna::compare()}.
+Stationarity tests (\code{stationarity_lsa()}) are planned but not yet
+exported. Multi-group fits are built with \code{lsa(data, group = ...)};
+between-group differences are then tested with \code{compare_lsa()} or
+\code{bayes_compare_lsa()}.
 }
 
 \references{

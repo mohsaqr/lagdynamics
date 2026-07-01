@@ -40,10 +40,10 @@ The package is built around a small set of design commitments:
   `nodes()`, `tests()`, `initial()`, ...) that returns a
   one-row-per-observation data frame; the user never indexes into an
   object.
-- **Interoperable with the tna family.** `lsa()` ingests sequence-bearing
-  objects from `tna`, Nestimate, and `TraMineR` and shares their
-  `actor` / `action` / `time` grammar, while a fitted model converts back
-  to a `tna` network in one call.
+- **Interoperable.** `lsa()` reads long event logs and common sequence
+  objects with an `actor` / `action` / `time` grammar, and exposes the
+  fitted transition and initial probabilities for downstream network
+  tooling.
 - **Rigorous, following Dynalytics.** The confirmatory testing battery is
   built in: analytic certainty and the bootstrap for edge-level
   uncertainty, split-half reliability for the whole network, case-dropping
@@ -152,9 +152,10 @@ plot(fit)                                   # type = "heatmap"
 
 ## Residual network
 
-The same residuals as a directed graph. The convention matches TNA and
-Nestimate: **blue = more than chance** (solid edges), **red = less**
-(dashed, with a soft halo). It shows *which* transitions are surprising.
+The same residuals as a directed graph. The convention matches the wider
+Transition Network Analysis (TNA) style: **blue = more than chance** (solid
+edges), **red = less** (dashed, with a soft halo). It shows *which*
+transitions are surprising.
 The graph keeps the residual scale but makes direction and connectedness
 easier to read. It is still the RESIDUAL model: blue and red edges are
 not simply popular or unpopular transitions, but tested deviations from
@@ -167,16 +168,16 @@ plot(fit, type = "network")
 ## Transition network (a TNA model)
 
 Weighting the edges by probability instead yields the familiar transition
-network. `lagdynamics` constructs a `tna` object on the fly and renders it with
-tna's styling: coloured nodes, initial-probability arcs, and weighted
-directed edges. The named model changes even though the underlying
+network, drawn in the Transition Network Analysis (TNA) style by
+`cograph::splot()`: coloured nodes, a per-node initial-probability ring,
+and weighted directed edges. The named model changes even though the underlying
 sequences do not. A transition (TNA) network is a first-order Markov model
 whose edge weights are conditional probabilities; it is the appropriate
 display when the claim concerns the typical next state, whereas the
 residual network is appropriate when the claim concerns a tested departure
 from chance.
 
-```{r net-transition, eval = has("tna")}
+```{r net-transition, eval = has("cograph")}
 plot(fit, type = "network", weights = "prob")
 ```
 
@@ -254,22 +255,21 @@ reliability_lsa(fit, R = 30)
 
 `engagement` arrived as ready-made sequences. Real data is often a **long
 event log** instead - one row per event. `lsa()` sequences it on the fly
-with the same `actor` / `action` / `time` grammar that `tna` uses.
+with an `actor` / `action` / `time` grammar.
 This step shows that the same inferential chain can begin from raw
 process traces rather than from an already assembled sequence matrix.
 The data format changes, but the contract does not: define the actors,
 events, and ordering rule before estimating a model from them.
 
-`tna::group_regulation_long` is exactly that: 2,000 students, each a
+The bundled `group_regulation_long` is exactly that: 2,000 students, each a
 stream of timestamped regulation actions, with a recorded achievement
 group. The grouping variable will matter later, but it is first treated
 as metadata attached to recovered sequences. Keeping sequencing and
 grouping explicit helps preserve the units that later resampling and
 permutation procedures require.
 
-```{r log, eval = has("tna")}
-log <- tna::group_regulation_long
-head(log)
+```{r log}
+head(group_regulation_long)
 ```
 
 A single call converts the log into a fitted model: `lsa()` groups events
@@ -279,24 +279,21 @@ process to which the residual test is applied. Once the log has been
 converted to ordered transitions, the fitted edges again represent
 departures from independence in that recovered sequence process.
 
-```{r log-fit, eval = has("tna")}
-fit_log <- lsa(log, actor = "Actor", action = "Action", time = "Time")
+```{r log-fit}
+fit_log <- lsa(group_regulation_long, actor = "Actor",
+               action = "Action", time = "Time")
 fit_log
 ```
 
-That grammar is shared deliberately, so the objects interoperate. The
-data can be prepared with tna and passed directly to `lsa()`, or a fit can
-be converted the other way for tna tooling.
-Interoperability is useful because Dynalytics separates the model from
-the rendering and analysis layers. The same empirical object can be read
-as a residual lag-sequential model when testing departures from chance,
-or passed into transition-network tooling when the question is about
-probability-weighted flow.
+The fitted model separates the estimation step from the rendering and
+analysis layers. The same empirical object can be read as a residual
+lag-sequential model when testing departures from chance, or its fitted
+transition and initial probabilities can be passed into transition-network
+tooling when the question is about probability-weighted flow.
 
-```{r interop, eval = has("tna")}
-lsa(tna::tna(tna::prepare_data(log, actor = "Actor",
-                               action = "Action", time = "Time")))
-lsa_to_tna(fit_log, weights = "prob")       # fit -> a tna network object
+```{r interop}
+transition_probabilities(fit_log)           # P(to | from) transition matrix
+initial(fit_log)                            # initial-state probabilities
 ```
 
 # Group
@@ -309,9 +306,9 @@ lag-sequential model per group under the same data grammar, which makes
 the models comparable. At this point the claim is still descriptive:
 each group has its own fitted residual structure.
 
-```{r group, eval = has("tna")}
-gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
-            group = "Achiever")
+```{r group}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
 gfit
 ```
 
@@ -321,7 +318,7 @@ turning visual contrast into inference. Side-by-side networks almost
 always differ somewhere, so the next step asks whether those differences
 are larger than expected under a valid null.
 
-```{r group-read, eval = has("tna")}
+```{r group-read}
 transitions(gfit, significant = TRUE) |> head(4)
 ```
 
@@ -338,7 +335,7 @@ function. The observed edge differences and the omnibus statistic are
 then judged against that permutation distribution rather than against
 the visual fact that two separately estimated networks are not identical.
 
-```{r compare, eval = has("tna")}
+```{r compare}
 cmp <- compare_lsa(gfit, R = 500, adjust = "BH")
 cmp
 ```
@@ -351,7 +348,7 @@ the bars show direction and magnitude, while the centre chip records
 whether the observed difference is large relative to the differences
 produced by label shuffling under exchangeability.
 
-```{r barrel, eval = has("tna") && has("ggplot2")}
+```{r barrel, eval = has("ggplot2")}
 plot(cmp)
 ```
 
@@ -360,7 +357,7 @@ claim is easier to assess as a matrix of source-by-target contrasts than
 as paired bars. The underlying evidence remains the same permutation
 comparison; only the visual summary changes.
 
-```{r diff-heatmap, eval = has("tna") && has("ggplot2")}
+```{r diff-heatmap, eval = has("ggplot2")}
 plot(cmp, style = "heatmap")
 ```
 
@@ -380,8 +377,8 @@ plot(fit)                                       # 3. plot: heatmap / network /
 plot(fit, type = "network", weights = "prob")   #    chord / sunburst, TNA network
 certainty_lsa(fit); bootstrap_lsa(fit)          # 4. validate (analytic + resampling)
 
-log  <- tna::group_regulation_long              # 5. or start from a raw log
-fit  <- lsa(log, actor =, action =, time =)     #    TNA grammar, one call
+log  <- group_regulation_long                   # 5. or start from a raw log
+fit  <- lsa(log, actor =, action =, time =)     #    actor/action/time grammar, one call
 gfit <- lsa(log, actor =, action =, time =, group = "Achiever")  # 6. group by a column
 compare_lsa(gfit)                               # 7. compare + plot(cmp)
 ```

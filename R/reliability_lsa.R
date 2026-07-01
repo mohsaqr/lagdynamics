@@ -186,7 +186,7 @@ print.lsa_reliability_group <- function(x, ...) {
   invisible(x)
 }
 
-#' Tidy the per-replicate split-half correlations.
+#' Tidy the per-replicate split-half correlations
 #'
 #' @param x An `lsa_reliability` (or `lsa_reliability_group`) object.
 #' @param row.names,optional,... Ignored (method signature compatibility).

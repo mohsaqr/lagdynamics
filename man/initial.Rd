@@ -21,7 +21,9 @@ when the fit came from a transition matrix (no initial states).
 }
 \description{
 The proportion of sequences starting in each state, as a tidy
-\code{data.frame}.
+\code{data.frame}. These are the initial-state probabilities (init P) that
+complement the transition-probability matrix from
+\code{\link[=transition_probabilities]{transition_probabilities()}}.
 }
 \examples{
 initial(lsa(group_regulation))

@@ -18,6 +18,20 @@ test_that("transitions(fit) returns the tidy name-keyed edge frame", {
   expect_identical(rownames(tr), as.character(seq_len(nrow(tr))))
 })
 
+test_that("transitions(sort=) orders rows strongest-first, columns intact", {
+  fit <- lsa(engagement, engine = "classical")
+  base <- transitions(fit)
+  strg <- transitions(fit, sort = "strength")
+  cnt  <- transitions(fit, sort = "count")
+  # same rows and columns, only the order changes
+  expect_identical(colnames(strg), colnames(base))
+  expect_setequal(paste(strg$from, strg$to), paste(base$from, base$to))
+  # monotone non-increasing on the sort key
+  expect_false(is.unsorted(rev(abs(strg$adj_res[is.finite(strg$adj_res)]))))
+  expect_false(is.unsorted(rev(cnt$count)))
+  expect_error(transitions(fit, sort = "nonsense"))
+})
+
 test_that("transitions(significant = TRUE) keeps p < alpha", {
   fit <- lsa(engagement, engine = "classical")
   sig <- transitions(fit, significant = TRUE, alpha = 0.05)

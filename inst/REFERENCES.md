@@ -234,12 +234,10 @@ var[i, j] = n_i * n_j * (n - n_j) * (n - n_i) / ( n^2 * (n - 1) )
 ```
 
 **Convention note.** Wampold (1989) derives a "without-replacement"
-diagonal correction `et[i,i] = n_i * (n_i - 1) / n`. However, the
-canonical LSA software implementations (O'Connor's SEQUENTIAL,
-Bakeman & Quera's GSEQ) apply the off-diagonal formula uniformly,
-including on the diagonal. lagdynamics adopts the SEQUENTIAL/GSEQ
-convention so its outputs match the canonical published worked
-example in O'Connor (1999) cell-for-cell.
+diagonal correction `et[i,i] = n_i * (n_i - 1) / n`. However, canonical
+LSA software conventions apply the off-diagonal formula uniformly,
+including on the diagonal. lagdynamics adopts that convention for
+compatibility with common LSA reporting.
 
 Maximum possible count:
 
@@ -501,16 +499,6 @@ dependence on any prior LSA package.
 | Bootstrap percentile CI | `stats::quantile(stat_b, c(.025, .975))` | `test-bootstrap.R` |
 | Permutation p-value with `+1` correction | hand check on small permutation set | `test-permute.R` |
 
-In addition, published worked tables provide a second class of oracle:
-
-| Source | Test file |
-|---|---|
-| Bakeman & Quera (1995), example in ch. 6 | `test-published-bakeman-quera.R` |
-| Wampold (1982), Table 1 | `test-published-wampold-1982.R` |
-| Wampold (1984), Tables 2 & 3 | `test-published-wampold-1984.R` |
-| Sackett (1979), dominance worked numbers | `test-published-sackett-1979.R` |
-| Bakeman & Gottman (1997), ch. 7 two-cell example | `test-published-bakeman-gottman.R` |
-
 ---
 
 ## Closing note on independence from prior LSA software
@@ -520,6 +508,6 @@ of any prior R or non-R lag-sequential-analysis package was consulted
 during the writing of this reference or during the implementation of
 the corresponding R files in `R/`. The package's GPL-licensed
 predecessor was not used as a code reference or as a validation
-oracle. The validation strategy relies exclusively on (a) textbook and
-journal-published worked examples and (b) base-R primitives that
-implement underlying statistical concepts but not LSA itself.
+oracle. The validation strategy relies on base-R primitives and
+hand-formula identities that implement underlying statistical concepts
+but not LSA itself.

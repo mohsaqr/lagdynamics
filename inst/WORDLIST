@@ -3,6 +3,7 @@ Anscombe
 Bakeman
 Behaviour
 Behavioural
+Biometrics
 Borkulo
 Borsboom
 Canonicalize
@@ -21,6 +22,7 @@ Jeffreys
 Jendoubi
 LSA
 Lifecycle
+López
 Mendeley
 Misiejuk
 Multinomial
@@ -28,6 +30,7 @@ Multiway
 Nestimate
 Osofsky
 Pernas
+PhysRevLett
 Phipson
 Politis
 Pre
@@ -40,6 +43,7 @@ Smyth
 Springer
 TNA
 Tablewise
+Tikka
 TraMineR
 Visualisation
 Wampold
@@ -54,6 +58,7 @@ analysed
 analyser
 analytics
 artefact
+avoidances
 behaviour
 behavioural
 centralities
@@ -67,8 +72,11 @@ cooccure
 copyrightable
 cyclicity
 debiased
+declutter
 deterministically
 df
+doi
+donut
 et
 evidential
 exchangeability
@@ -85,6 +93,7 @@ lagdynamics
 lagdynamics's
 lsa
 modelled
+natively
 nd
 normalised
 normalises
@@ -95,6 +104,7 @@ recognises
 relabelling
 roadmap
 schemas
+sizeable
 snapshotted
 standardised
 summarises
@@ -104,3 +114,4 @@ tna's
 toolkits
 vcd
 visualise
+visualising

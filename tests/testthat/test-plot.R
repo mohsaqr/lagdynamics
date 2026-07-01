@@ -36,6 +36,39 @@ test_that("plot_transitions draws the network for each weight", {
   expect_error(plot_transitions(list(), weights = "count"), "lsa")
 })
 
+test_that("plot_transitions top= prunes to the strongest edges", {
+  skip_if_not_installed("cograph")
+  fit <- lsa(engagement, engine = "classical")
+  tmp <- tempfile(fileext = ".png")
+  grDevices::png(tmp, width = 600, height = 500)
+  on.exit({ grDevices::dev.off(); unlink(tmp) }, add = TRUE)
+  n_edges <- function(g) sum(is.finite(g$edges$weight) & g$edges$weight != 0)
+  g_all <- plot_transitions(fit, weights = "residuals")
+  g_top <- plot_transitions(fit, weights = "residuals", top = 3)
+  expect_lte(n_edges(g_top), 3L)
+  expect_lt(n_edges(g_top), n_edges(g_all))
+  # the kept edges are the largest by |adjusted residual|
+  kept <- with(g_top$edges, abs(weight[is.finite(weight) & weight != 0]))
+  expect_true(all(kept >= min(kept)))
+  # a fractional top keeps that proportion of the present edges
+  g_half <- plot_transitions(fit, weights = "residuals", top = 0.5)
+  expect_equal(n_edges(g_half), ceiling(0.5 * n_edges(g_all)))
+  expect_error(plot_transitions(fit, top = 0), "top")
+  expect_error(plot_transitions(fit, top = c(2, 3)), "top")
+})
+
+test_that("plot_transitions decimals controls label rounding", {
+  skip_if_not_installed("cograph")
+  fit <- lsa(engagement, engine = "classical")
+  tmp <- tempfile(fileext = ".png")
+  grDevices::png(tmp, width = 600, height = 500)
+  on.exit({ grDevices::dev.off(); unlink(tmp) }, add = TRUE)
+  expect_no_error(plot_transitions(fit, weights = "residuals", decimals = 1))
+  expect_no_error(plot_transitions(fit, weights = "residuals", decimals = 0))
+  expect_error(plot_transitions(fit, decimals = -1), "decimals")
+  expect_error(plot_transitions(fit, decimals = c(1, 2)), "decimals")
+})
+
 test_that("plot(fit, type=) dispatches to each view", {
   fit <- lsa(engagement, engine = "classical")
   tmp <- tempfile(fileext = ".png")

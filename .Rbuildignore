@@ -18,7 +18,7 @@
 ^tmp$
 ^local_testing_and_equivalence$
 ^Rplots\.pdf$
-^equivalence_testing$
+^equivonly$
 ^CODE_REVIEW_TRANSITION_NETWORKS\.md$
 ^audit\.md$
 ^TODO\.md$

@@ -170,8 +170,8 @@ including \code{params$engine}.}
 When \code{group} is supplied, returns an object of class
 \code{c("lsa_group", "list")}: a named list of \code{lsa} fits (one per group
 level) carrying \code{levels}, \code{group_sizes}, \code{labels}, and \code{engine}
-attributes. Downstream verbs (\code{\link[=lsa_to_tna]{lsa_to_tna()}},
-\code{\link[=transitions]{transitions()}}, \code{\link[=reliability_lsa]{reliability_lsa()}}, etc.) dispatch on
+attributes. Downstream verbs (\code{\link[=transitions]{transitions()}},
+\code{\link[=transition_probabilities]{transition_probabilities()}}, \code{\link[=reliability_lsa]{reliability_lsa()}}, etc.) dispatch on
 it and return grouped results.
 }
 \description{

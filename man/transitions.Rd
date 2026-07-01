@@ -11,7 +11,8 @@ transitions(
   significant = FALSE,
   direction = c("any", "over", "under"),
   min_count = NULL,
-  alpha = NULL
+  alpha = NULL,
+  sort = c("none", "strength", "count", "prob")
 )
 
 \method{transitions}{lsa}(
@@ -19,7 +20,8 @@ transitions(
   significant = FALSE,
   direction = c("any", "over", "under"),
   min_count = NULL,
-  alpha = NULL
+  alpha = NULL,
+  sort = c("none", "strength", "count", "prob")
 )
 
 \method{transitions}{lsa_group}(
@@ -27,7 +29,8 @@ transitions(
   significant = FALSE,
   direction = c("any", "over", "under"),
   min_count = NULL,
-  alpha = NULL
+  alpha = NULL,
+  sort = c("none", "strength", "count", "prob")
 )
 }
 \arguments{
@@ -46,6 +49,11 @@ least this many times. Default \code{NULL} (no count filter).}
 
 \item{alpha}{Significance threshold. Default \code{NULL}, which uses the
 alpha recorded on the fit (\code{fit$params$alpha}).}
+
+\item{sort}{Row ordering. \code{"none"} (default) keeps the matrix
+(column-major) order; \code{"strength"} orders by \verb{|adj_res|}, \code{"count"} by
+observed count, \code{"prob"} by transition probability -- each descending,
+so the table reads strongest-first.}
 }
 \value{
 A \code{data.frame}, one row per transition, with columns \code{from},

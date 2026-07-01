@@ -3,7 +3,7 @@
 \name{as.data.frame.lsa_reliability}
 \alias{as.data.frame.lsa_reliability}
 \alias{as.data.frame.lsa_reliability_group}
-\title{Tidy the per-replicate split-half correlations.}
+\title{Tidy the per-replicate split-half correlations}
 \usage{
 \method{as.data.frame}{lsa_reliability}(x, row.names = NULL, optional = FALSE, ...)
 
@@ -20,5 +20,5 @@ A \code{data.frame}, one row per replicate, with columns
 \code{group} column). \code{NA} correlations from degenerate splits are kept.
 }
 \description{
-Tidy the per-replicate split-half correlations.
+Tidy the per-replicate split-half correlations
 }

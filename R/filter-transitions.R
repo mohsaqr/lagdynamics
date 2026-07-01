@@ -45,6 +45,10 @@
 #'   least this many times. Default `NULL` (no count filter).
 #' @param alpha Significance threshold. Default `NULL`, which uses the
 #'   alpha recorded on the fit (`fit$params$alpha`).
+#' @param sort Row ordering. `"none"` (default) keeps the matrix
+#'   (column-major) order; `"strength"` orders by `|adj_res|`, `"count"` by
+#'   observed count, `"prob"` by transition probability -- each descending,
+#'   so the table reads strongest-first.
 #'
 #' @return A `data.frame`, one row per transition, with columns `from`,
 #'   `to` (the source and target **state names**), `lag`, `count`,
@@ -67,7 +71,8 @@
 #' @export
 transitions <- function(fit, significant = FALSE,
                         direction = c("any", "over", "under"),
-                        min_count = NULL, alpha = NULL) {
+                        min_count = NULL, alpha = NULL,
+                        sort = c("none", "strength", "count", "prob")) {
   UseMethod("transitions")
 }
 
@@ -75,8 +80,10 @@ transitions <- function(fit, significant = FALSE,
 #' @export
 transitions.lsa <- function(fit, significant = FALSE,
                             direction = c("any", "over", "under"),
-                            min_count = NULL, alpha = NULL) {
+                            min_count = NULL, alpha = NULL,
+                            sort = c("none", "strength", "count", "prob")) {
   direction <- match.arg(direction)
+  sort <- match.arg(sort)
   if (is.null(alpha)) alpha <- fit$params$alpha
   stopifnot(is.numeric(alpha), length(alpha) == 1L, alpha > 0, alpha < 1)
   e <- fit$edges
@@ -106,6 +113,16 @@ transitions.lsa <- function(fit, significant = FALSE,
   keep <- c(keep, extra_cols)
   e <- e[, keep, drop = FALSE]
   names(e)[1:2] <- c("from", "to")
+  # Optional ordering, strongest first, so the table reads top-down. Default
+  # "none" preserves the matrix (column-major) order.
+  if (sort != "none" && nrow(e) > 0L) {
+    key <- switch(sort,
+                  strength = abs(e$adj_res),
+                  count    = e$count,
+                  prob     = e$prob)
+    key[!is.finite(key)] <- -Inf
+    e <- e[order(key, decreasing = TRUE), , drop = FALSE]
+  }
   rownames(e) <- NULL
   e
 }
@@ -114,9 +131,12 @@ transitions.lsa <- function(fit, significant = FALSE,
 #' @export
 transitions.lsa_group <- function(fit, significant = FALSE,
                                   direction = c("any", "over", "under"),
-                                  min_count = NULL, alpha = NULL) {
+                                  min_count = NULL, alpha = NULL,
+                                  sort = c("none", "strength", "count",
+                                           "prob")) {
   direction <- match.arg(direction)
+  sort <- match.arg(sort)
   .bind_group_edges(fit, transitions, significant = significant,
                     direction = direction, min_count = min_count,
-                    alpha = alpha)
+                    alpha = alpha, sort = sort)
 }

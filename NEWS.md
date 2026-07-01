@@ -7,13 +7,11 @@ analysis for categorical event sequences. The package is independent
 of any prior R or non-R LSA implementation; every numerical method is
 implemented from primary literature (Bakeman & Quera 1995; Sackett
 1979; Wickens 1989; Christensen 1997; Haberman 1979). See
-`inst/REFERENCES.md` for the formula-by-formula citation map and
-`inst/EQUIVALENCE.md` for the oracle table and pass rates.
+`inst/REFERENCES.md` for the formula-by-formula citation map.
 
 ### Design
 
-- Unified `lsa()` constructor with a pluggable engine registry, in the
-  style of `Nestimate::build_network()`.
+- Unified `lsa()` constructor with a pluggable engine registry.
 - Five built-in engines: `classical`, `two_cell`, `bidirectional`,
   `parallel_dominance`, `nonparallel_dominance`.
 - Convenience wrappers: `lsa_classical()`, `lsa_two_cell()`,
@@ -28,8 +26,9 @@ implemented from primary literature (Bakeman & Quera 1995; Sackett
 - Tidy edge tables and S3 objects of class
   `c("lsa", "cograph_network")` for seamless integration with the
   `cograph` plotting layer.
-- Network interop: `lsa_to_tna()` converts a fit to a `tna` object
-  (lagdynamics converts; the downstream package does the analysis).
+- Native transition and initial probabilities: `transition_probabilities()`
+  returns the row-stochastic P(to | from) matrix and `initial()` the
+  initial-state probabilities.
 - Between-group comparison via `compare_lsa()` and `bayes_compare_lsa()`.
 - Reproducibility hooks (`indices=`, `shuffles=`) for bit-identical
   cross-language verification.
@@ -42,11 +41,18 @@ implemented from primary literature (Bakeman & Quera 1995; Sackett
   (surrogate-debiased) and 0-1 normalised variants, and boundary-safe
   pooling that never lags across sequences. Sign-blind by design; pair
   with `transitions()` Yule's Q for direction of effect. Validated in
-  `equivalence_testing/` against `infotheo::condinformation`, an
+  `equivonly/` against `infotheo::condinformation`, an
   independent direct double-sum oracle, and exact analytic cases.
+
+### Bundled data
+
+`ai_long`, `engagement`, `group_regulation`, and `group_regulation_long`
+(a long-format event log with a recorded achievement grouping) ship with
+the package, so every example, test, and vignette runs without any
+external data source.
 
 ### Dependencies
 
-Lean runtime: base R plus `grid` (`Imports: grid, stats, utils`). The
-plotting and interop packages (`ggplot2`, `cograph`, `tna`, `Nestimate`,
-`TraMineR`) are soft `Suggests`, used only when present.
+Lean runtime: base R only (`Imports: grDevices, grid, stats, utils`). The
+plotting packages (`ggplot2`, `cograph`) are the only soft `Suggests`,
+used when present.

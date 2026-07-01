@@ -111,27 +111,26 @@ two networks estimated separately almost always look different. The
 question is whether the difference exceeds what arises by chance when the
 group labels carry no information.
 
-`tna::group_regulation_long` is a long event log with a recorded
+The bundled `group_regulation_long` is a long event log with a recorded
 achievement group; the same `actor` / `action` / `time` grammar fits it in
 one call.
 
-```{r group, eval = has("tna")}
-log <- tna::group_regulation_long
-gfit <- lsa(log, actor = "Actor", action = "Action", time = "Time",
-            group = "Achiever")
+```{r group}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
 ```
 
 `compare_lsa()` answers it by permutation under exchangeability: it
 shuffles the labels to build a reference distribution for the per-edge
 difference and a single omnibus statistic.
 
-```{r compare, eval = has("tna")}
+```{r compare}
 cmp <- compare_lsa(gfit, R = 500, adjust = "BH")
 cmp
 as.data.frame(cmp) |> subset(significant) |> head(4)
 ```
 
-```{r barrel, eval = has("tna") && has("ggplot2"), fig.height = 6.5}
+```{r barrel, eval = has("ggplot2"), fig.height = 6.5}
 plot(cmp)
 ```
 
@@ -140,7 +139,7 @@ significance decision it reports, for each edge, the posterior mean
 difference and a credible interval, so the evidence is a plausible range
 rather than a verdict.
 
-```{r bayes, eval = has("tna")}
+```{r bayes}
 bayes_compare_lsa(gfit, seed = 1)
 ```
 

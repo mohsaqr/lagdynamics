@@ -66,8 +66,7 @@ test_that("two_cell: zero-cell continuity correction kicks in", {
 })
 
 # Base-R equivalence checks (pnorm / chisq.test / binom.test agreement)
-# and the oconnor_couple oracle live in
-# equivalence_testing/test-base-r-engines.R, out of the shipped suite.
+# live in equivalence_testing/test-base-r-engines.R, out of the shipped suite.
 
 # --- bidirectional ----------------------------------------------------
 
@@ -131,5 +130,5 @@ test_that("nonparallel_dominance: hand-computed z[1, 2] on THREE", {
                tolerance = 1e-12)
 })
 
-# nonparallel_dominance binom.test agreement and the oconnor_couple
-# cross-engine oracle live in equivalence_testing/test-base-r-engines.R.
+# nonparallel_dominance binom.test agreement and the cross-engine audit
+# live in equivalence_testing/test-base-r-engines.R.

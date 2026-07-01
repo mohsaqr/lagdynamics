@@ -77,10 +77,47 @@ tests.lsa <- function(fit) {
 #' @export
 tests.lsa_group <- function(fit) .bind_group_edges(fit, tests)
 
+#' Transition-Probability Matrix of an LSA Fit
+#'
+#' The row-stochastic transition-probability matrix \eqn{P(\text{to} \mid
+#' \text{from})}: each row holds the distribution over next states out of
+#' a state, so the entries in a row sum to 1 (up to structural zeros).
+#' This is the transition-probability matrix a Transition Network Analysis
+#' reads; pair it with [initial()] for the initial-state probabilities.
+#'
+#' @param fit An `lsa` fit from [lsa()].
+#'
+#' @return A square numeric matrix with `from` states in rows and `to`
+#'   states in columns. For an `lsa_group`, a named list of such matrices,
+#'   one per group.
+#'
+#' @examples
+#' transition_probabilities(lsa(group_regulation))
+#'
+#' @seealso [initial()] (initial-state probabilities), [transitions()]
+#'   (the tidy per-edge view), [nodes()]
+#'
+#' @export
+transition_probabilities <- function(fit) UseMethod("transition_probabilities")
+
+#' @rdname transition_probabilities
+#' @export
+transition_probabilities.lsa <- function(fit) {
+  .lsa_weight_matrix(fit, "prob")
+}
+
+#' @rdname transition_probabilities
+#' @export
+transition_probabilities.lsa_group <- function(fit) {
+  stats::setNames(lapply(fit, transition_probabilities), names(fit))
+}
+
 #' Initial-State Distribution of an LSA Fit (Tidy)
 #'
 #' The proportion of sequences starting in each state, as a tidy
-#' `data.frame`.
+#' `data.frame`. These are the initial-state probabilities (init P) that
+#' complement the transition-probability matrix from
+#' [transition_probabilities()].
 #'
 #' @param fit An `lsa` fit from [lsa()].
 #'

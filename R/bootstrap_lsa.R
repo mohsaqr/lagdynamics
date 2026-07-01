@@ -251,6 +251,13 @@ bootstrap_lsa <- function(fit,
       sprintf("S = %d (one column per resampled sequence).", S),
       call. = FALSE)
   }
+  if (level == "event" && ncol(indices) != T) {
+    stop(sprintf(
+      "`indices` has %d columns but event-level replay needs exactly ",
+      ncol(indices)),
+      sprintf("T = %d (one column per resampled event).", T),
+      call. = FALSE)
+  }
   if (min(indices) < 1L || max(indices) > hi) {
     stop(sprintf("`indices` values must be in 1..%d (%s positions).",
                  hi, unit), call. = FALSE)
