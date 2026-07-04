@@ -1,5 +1,8 @@
 ---
 title: "Confirmatory testing: matching claims to evidence"
+author:
+  - "[Mohammed Saqr](https://saqr.me)"
+  - "[Sonsoles López-Pernas](https://sonsoles.me)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Confirmatory testing: matching claims to evidence}
@@ -156,3 +159,7 @@ reliability_lsa(fit)                     # the whole network
 permute_lsa(fit)                         # more than chance
 compare_lsa(gfit); bayes_compare_lsa(gfit)  # a group difference
 ```
+
+---
+
+Part of the [Dynalytics framework](https://dynasite.org/).

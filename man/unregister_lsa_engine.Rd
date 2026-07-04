@@ -15,6 +15,14 @@ Invisibly \code{NULL}.
 \description{
 Remove a Registered LSA Engine
 }
+\examples{
+my_engine <- function(transitions, ...) {
+  get_lsa_engine("classical")$fn(transitions, ...)
+}
+register_lsa_engine("temporary_engine", my_engine, "Temporary alias")
+unregister_lsa_engine("temporary_engine")
+
+}
 \seealso{
 \code{\link[=register_lsa_engine]{register_lsa_engine()}}
 }

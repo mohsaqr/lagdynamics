@@ -60,14 +60,15 @@
 #'   `NULL` (single-group fit).
 #' @param actor,action,time,order,session Column names (each a single
 #'   string) for **long-format** event-log input. Supplying `action`
-#'   (and `actor`) switches `lsa()` into long-format mode: the raw log
-#'   in `data` is sequenced into event sequences by grouping rows per
-#'   `actor` (optionally crossed with an explicit `session` id),
-#'   ordering within each group by `order` if given else by `time`, and
-#'   -- when `time` is given and no `session` column is -- starting a
-#'   new session whenever the gap between consecutive events exceeds
-#'   `time_threshold` seconds. All `NULL` by default (input is taken
-#'   as already-sequenced). Cannot be combined with `group`.
+#'   switches `lsa()` into long-format mode: the raw log in `data` is
+#'   sequenced by grouping rows per `actor`, per `session`, per
+#'   `actor x session`, or as one global sequence when neither boundary
+#'   is supplied. Events are ordered within each sequence by `order` if
+#'   given else by `time`, and -- when `time` is given and no `session`
+#'   column is -- a new sequence starts whenever the gap between
+#'   consecutive events exceeds `time_threshold` seconds. All `NULL` by
+#'   default except `action` in long-format mode (input is otherwise
+#'   taken as already-sequenced).
 #' @param time_threshold Numeric. Maximum gap in seconds between
 #'   consecutive events before a new session is started in long-format
 #'   mode. Default `900` (15 minutes). Ignored unless `time` is given
@@ -166,10 +167,6 @@ lsa <- function(data,
   # Long-format mode: a raw event log is sequenced into a list of event
   # sequences before any analysis. Triggered by supplying `action`.
   if (!is.null(action)) {
-    if (is.null(actor)) {
-      stop("Long-format sequencing needs both `actor` and `action` ",
-           "column names.", call. = FALSE)
-    }
     # With long-format input, `group` (if given) is the NAME of a grouping
     # column in the log; .prepare_long() derives one label per recovered
     # sequence and returns them as an attribute, which then drives the

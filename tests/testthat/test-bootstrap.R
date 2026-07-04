@@ -49,6 +49,11 @@ test_that("bootstrap_lsa falls back to event-level for single sequence", {
   seq1 <- sample(c("a","b","c"), 200, replace = TRUE)
   fit <- lsa(seq1, engine = "classical")
   expect_warning(
+    bs_auto <- bootstrap_lsa(fit, R = 30),
+    "Only one sequence"
+  )
+  expect_equal(bs_auto$level, "event")
+  expect_warning(
     bs <- bootstrap_lsa(fit, R = 30, level = "sequence"),
     "Only one sequence"
   )

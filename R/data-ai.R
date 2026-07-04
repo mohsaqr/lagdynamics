@@ -27,10 +27,9 @@
 #'   (`Nestimate` version 0.7.7, MIT license).
 #'
 #' @examples
-#' fit <- lsa(ai_long, actor = "project", session = "session_id",
+#' fit <- lsa(ai_long, session = "session_id",
 #'            action = "code", order = "order_in_session")
 #' transitions(fit, significant = TRUE)
 #'
 #' @keywords datasets
 "ai_long"
-

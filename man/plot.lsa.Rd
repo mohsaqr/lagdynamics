@@ -22,7 +22,9 @@
 
 \item{...}{Forwarded to the chosen view. For \code{"heatmap"}: \code{which}
 (\code{"residuals"} (default), \code{"prob"}, \code{"count"}, \code{"expected"}). For
-\code{"network"}/\code{"chord"}: \code{weights}. For \code{"sunburst"}: \code{style}, \code{fill}.}
+\code{"network"}: \code{weights} (\code{"tna"} for the probability-weighted TNA
+network). For \code{"chord"}: \code{width}, \code{color}. For \code{"sunburst"}:
+\code{style}, \code{fill}.}
 
 \item{combined}{Logical, for a grouped fit only. \code{FALSE} (default)
 draws each group as its own full-size figure; \code{TRUE} tiles all
@@ -48,6 +50,7 @@ fit <- lsa(group_regulation)
 plot(fit)                     # residual heatmap (default)
 plot(fit, which = "prob")     # heatmap of probabilities
 plot(fit, type = "network")   # transition network
+plot(fit, type = "network", weights = "tna")  # TNA probability network
 plot(fit, type = "chord")     # chord diagram
 plot(fit, type = "sunburst")  # polar sunburst
 }

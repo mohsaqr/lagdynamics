@@ -1,11 +1,12 @@
-# Long-format event-log sequencing. Raw interaction logs arrive with
-# one row per event and columns identifying who acted (actor), what
-# they did (action), and when (time / order). lagdynamics's analysis works
-# on already-grouped sequences, so this base-R helper turns a long log
-# into a list of event sequences: group by actor (and optionally an
-# explicit session column), order within each group by time/order, and
-# -- when a `time` column is given -- start a new session whenever the
-# gap between consecutive events exceeds `time_threshold` seconds.
+# Long-format event-log sequencing. Raw interaction logs arrive with one row
+# per event and a column identifying what happened (action), plus optional
+# sequence boundaries (actor / session) and order keys (time / order).
+# lagdynamics's analysis works on already-grouped sequences, so this base-R
+# helper turns a long log into a list of event sequences: group by actor,
+# session, actor x session, or one global sequence; order within each group
+# by time/order; and -- when a `time` column is given with no explicit session
+# column -- start a new sequence whenever the gap between consecutive events
+# exceeds `time_threshold` seconds.
 #
 # The 900-second default is conventional; the implementation is
 # independent base R with no for-loops.
@@ -19,7 +20,7 @@
     stop("Long-format sequencing needs a data.frame; got ",
          paste(class(data), collapse = "/"), ".", call. = FALSE)
   }
-  .check_col(data, actor, "actor")
+  if (!is.null(actor))   .check_col(data, actor, "actor")
   .check_col(data, action, "action")
   if (!is.null(time))    .check_col(data, time, "time")
   if (!is.null(order))   .check_col(data, order, "order")
@@ -48,13 +49,17 @@
     seq_len(nrow(data))
   }
 
-  # Grouping key: actor, optionally crossed with an explicit session id.
-  grp <- if (!is.null(session)) {
+  # Grouping key: actor, session, actor x session, or one global sequence.
+  grp <- if (!is.null(actor) && !is.null(session)) {
     interaction(as.character(data[[actor]]),
                 as.character(data[[session]]),
                 drop = TRUE, lex.order = TRUE)
-  } else {
+  } else if (!is.null(session)) {
+    factor(as.character(data[[session]]))
+  } else if (!is.null(actor)) {
     factor(as.character(data[[actor]]))
+  } else {
+    factor(rep("sequence", nrow(data)))
   }
 
   split_on_gap <- !is.null(tvec) && is.null(session) &&
@@ -82,8 +87,8 @@
       if (length(gv) != 1L) {
         stop(sprintf(
           paste0("Group column '%s' is not constant within a sequence ",
-                 "(actor/session): a recovered sequence would span groups ",
-                 "%s. Group by a column that is fixed per actor."),
+                 "(actor/session/log): a recovered sequence would span groups ",
+                 "%s. Group by a column that is fixed per recovered sequence."),
           group, paste(sQuote(gv), collapse = ", ")), call. = FALSE)
       }
       gv

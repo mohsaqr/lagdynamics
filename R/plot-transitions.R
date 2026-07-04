@@ -18,14 +18,16 @@
 #'     one): adjusted residuals coloured by sign on the TNA / Nestimate
 #'     convention, **blue = more** (over-represented) solid and
 #'     **red = less** (avoided) dashed with a soft halo.
-#'   * `"prob"` / `"count"` -- the familiar **transition network** of
-#'     Transition Network Analysis (TNA), drawn with
+#'   * `"tna"` / `"relative"` / `"prob"` / `"count"` -- the familiar
+#'     **transition network** of Transition Network Analysis (TNA), drawn with
 #'     `cograph::splot(tna_styling = TRUE)`: cograph's own TNA styling
 #'     (coloured nodes, weighted directed edges) plus a donut ring per node
 #'     carrying its initial-state probability, and edges labelled with the
-#'     transition probability (`"prob"`) or observed count (`"count"`). For
-#'     `"prob"`, edges below `0.05` are dropped by default so weak
-#'     transitions do not clutter the plot (override with `edge_cutoff`).
+#'     transition probability (`"tna"` / `"relative"` / `"prob"`) or
+#'     observed count (`"count"`). `"tna"` and `"relative"` are explicit
+#'     aliases for `"prob"`. For probability/TNA networks, edges below
+#'     `0.05` are dropped by default so weak transitions do not clutter the
+#'     plot (override with `edge_cutoff`).
 #'   * `"lift"` -- observed / expected, drawn in a single neutral colour
 #'     with magnitude carried by edge width.
 #'   * `"yules_q"` -- a **signed association network**: Yule's Q on a fixed
@@ -62,7 +64,9 @@
 #' \dontrun{
 #' fit <- lsa(group_regulation)
 #' plot_transitions(fit)                                   # residual network
-#' plot_transitions(fit, weights = "prob")                 # probabilities
+#' plot_transitions(fit, weights = "tna")                  # TNA probabilities
+#' plot_transitions(fit, weights = "relative")             # same as "tna"
+#' plot_transitions(fit, weights = "prob")                 # same matrix
 #' plot_transitions(fit, weights = "residuals",            # residual network,
 #'                  significant = TRUE)                     #   significant only
 #' plot_transitions(fit, top = 12)                         # 12 strongest edges
@@ -76,8 +80,8 @@
 #'
 #' @export
 plot_transitions <- function(fit,
-                             weights = c("residuals", "count", "prob",
-                                          "lift", "yules_q"),
+                             weights = c("residuals", "tna", "relative",
+                                          "count", "prob", "lift", "yules_q"),
                              significant = FALSE,
                              top = NULL,
                              decimals = 1,
@@ -97,7 +101,8 @@ plot_transitions <- function(fit,
          "Install with install.packages('cograph').", call. = FALSE)
   }
   # Keep signed residuals (negatives are meaningful) when plotting them.
-  wkey <- if (weights == "residuals") "adj_res" else weights
+  weight_key <- if (weights %in% c("tna", "relative")) "prob" else weights
+  wkey <- if (weight_key == "residuals") "adj_res" else weight_key
   m <- .lsa_weight_matrix(fit, wkey)
 
   if (isTRUE(significant)) {
@@ -131,7 +136,7 @@ plot_transitions <- function(fit,
   # same styling tna applies, since tna renders through cograph. The
   # per-node donut ring carries each state's initial-state probability, and
   # edges are labelled with the transition probability / count.
-  if (weights %in% c("prob", "count")) {
+  if (weight_key %in% c("prob", "count")) {
     defaults <- list(
       x = m, tna_styling = TRUE, directed = TRUE,
       edge_labels = edge_labels, weight_digits = decimals
@@ -147,12 +152,12 @@ plot_transitions <- function(fit,
     }
     # For probabilities, drop weak edges (< 0.05) by default so the network
     # stays legible, as tna does; the caller can override via edge_cutoff.
-    if (weights == "prob") defaults$edge_cutoff <- 0.05
+    if (weight_key == "prob") defaults$edge_cutoff <- 0.05
     return(do.call(cograph::splot, utils::modifyList(defaults, list(...))))
   }
 
   # splot() colours edges BY SIGN for the residual / Yule's Q networks.
-  signed <- weights %in% c("residuals", "yules_q")
+  signed <- weight_key %in% c("residuals", "yules_q")
   # .cmp_high = blue (over-represented), .cmp_low = red (avoided): the same
   # convention as the comparison plots (see R/plot-comparison.R).
   epos <- if (signed) .cmp_high else "#4A6FA5"    # over-represented (blue)

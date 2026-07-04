@@ -12,7 +12,6 @@
 ^LEARNINGS\.md$
 ^HANDOFF\.md$
 ^CHANGES\.md$
-^NEWS\.md$
 ^data-raw$
 ^data-raw/kg_logs\.xlsx$
 ^tmp$

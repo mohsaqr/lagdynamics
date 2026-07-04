@@ -1,0 +1,205 @@
+---
+title: "Interoperability: wide data, long logs, tna, and Nestimate"
+author:
+  - "[Mohammed Saqr](https://saqr.me)"
+  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Interoperability: wide data, long logs, tna, and Nestimate}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 150, fig.width = 7,
+                      fig.height = 5.6, out.width = "100%",
+                      fig.align = "center")
+set.seed(2026)
+library(lagdynamics)
+options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
+```
+
+`lagdynamics` is designed to sit inside the same event-sequence workflow
+as Transition Network Analysis (TNA), `Nestimate`, `cograph`, and other
+sequence tools. The important interoperability promise is simple:
+
+- the same `lsa()` front door accepts wide sequence data, raw long event
+  logs, `tna` sequence objects, and `Nestimate` prepared objects;
+- long logs use the same column grammar as TNA-style workflows:
+  `actor`, `action`, `time`, `order`, and `session`;
+- fitted models expose transition probabilities, initial probabilities,
+  tidy transition tables, and a `cograph_network` object for rendering.
+
+# Same grammar as TNA
+
+In a TNA workflow, a raw event log is usually sequenced by naming the
+actor, the event/action code, and either a time or order column. `lsa()`
+uses the same grammar directly.
+
+```r
+prepare_data(log, actor = "Actor", action = "Action", time = "Time")
+lsa(log,         actor = "Actor", action = "Action", time = "Time")
+```
+
+The column names are passed as strings. `action` is the only mandatory
+long-format column. If neither `actor` nor `session` is supplied, the log
+is treated as one long sequence. If `session` is supplied, each session is
+a sequence. If both `actor` and `session` are supplied, each
+actor-session pair is a sequence.
+
+# Wide sequence data
+
+Wide data is the simplest input: rows are sequences and columns are
+ordered time points. This is the form used by `engagement`.
+
+```{r wide}
+head(engagement)
+
+fit_wide <- lsa(engagement)
+fit_wide
+```
+
+The result is read through the same verbs used everywhere else.
+
+```{r wide-read}
+transitions(fit_wide, significant = TRUE)
+nodes(fit_wide)
+initial(fit_wide)
+```
+
+# Long event logs
+
+Long logs have one row per event. The bundled `group_regulation_long`
+data shows the TNA-style grammar directly: actor, action, time, and a
+grouping column.
+
+```{r long-data}
+head(group_regulation_long)
+```
+
+Fit a single model from the raw log by naming the columns.
+
+```{r long-fit}
+fit_long <- lsa(group_regulation_long, actor = "Actor",
+                action = "Action", time = "Time")
+fit_long
+```
+
+If the log already has session identifiers, use `session`. In the
+`Nestimate`-derived `ai_long` data, `project` and `session_id` define the
+sequence boundary and `order_in_session` defines event order.
+
+```{r long-session}
+head(ai_long)
+
+fit_session <- lsa(ai_long, actor = "project", session = "session_id",
+                   action = "code", order = "order_in_session")
+fit_session
+```
+
+Grouping uses the same call. The grouping column must be fixed within
+each recovered sequence.
+
+```{r grouped-long}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+gfit
+transitions(gfit, significant = TRUE) |> head(6)
+```
+
+# tna objects
+
+`lsa()` accepts a real `tna` model when that model carries its source
+sequences. The example below starts from the same included wide sequence
+data, fits a TNA model with `tna`, and then hands that fitted object to
+`lsa()`.
+
+```{r tna-object, eval = has("tna")}
+tna_fit <- tna::tna(engagement)
+tna_fit
+
+fit_from_tna <- lsa(tna_fit)
+fit_from_tna
+```
+
+Fitting the `tna` object and fitting the original wide data give the same
+LSA transition table.
+
+```{r tna-equivalence, eval = has("tna")}
+isTRUE(all.equal(transitions(fit_from_tna), transitions(fit_wide),
+                 check.attributes = FALSE))
+```
+
+# Nestimate objects
+
+`Nestimate::build_network()` uses the same long-log grammar. The object
+it returns carries the prepared sequence data, so `lsa()` can read it
+directly.
+
+```{r nestimate-object, eval = has("Nestimate")}
+nestimate_fit <- Nestimate::build_network(
+  ai_long,
+  method = "tna",
+  actor = "project",
+  session = "session_id",
+  action = "code",
+  order = "order_in_session"
+)
+
+nestimate_fit
+
+fit_nestimate <- lsa(nestimate_fit)
+fit_nestimate
+```
+
+The same raw log can also be fitted directly with the long-format
+grammar. The `Nestimate` object and the direct `lsa()` call
+recover the same transition table.
+
+```{r nestimate-equivalence, eval = has("Nestimate")}
+fit_ai_direct <- lsa(ai_long, actor = "project", session = "session_id",
+                     action = "code", order = "order_in_session")
+
+isTRUE(all.equal(transitions(fit_nestimate), transitions(fit_ai_direct),
+                 check.attributes = FALSE))
+```
+
+# Back to tna
+
+Use `lsa_to_tna()` when the model is estimated with `lagdynamics` and
+then handed to `tna` for TNA-specific tooling.
+
+```{r lsa-to-tna, eval = has("tna")}
+tn <- lsa_to_tna(fit_wide, weights = "prob")
+tn
+
+tna::centralities(tn)
+```
+
+The same quantities are also exposed without conversion: the
+row-stochastic transition matrix and the initial-state distribution.
+
+```{r probabilities}
+transition_probabilities(fit_long)
+initial(fit_long)
+```
+
+It also inherits `cograph_network`, so cograph-compatible renderers can
+read the nodes and edges directly. The probability-weighted network uses
+the TNA interpretation: edge weights are conditional transition
+probabilities.
+
+```{r tna-plot, eval = has("cograph")}
+plot(fit_long, type = "network", weights = "tna")
+```
+
+Use the residual network when the claim is lag-sequential: which
+transitions occur more or less often than expected under independence.
+Use the probability/TNA network when the claim is descriptive: where the
+process tends to go next.
+
+---
+
+Part of the [Dynalytics framework](https://dynasite.org/).

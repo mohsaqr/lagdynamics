@@ -1,0 +1,447 @@
+---
+title: "Introduction"
+author:
+  - "[Mohammed Saqr](https://saqr.me)"
+  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
+                      warning = FALSE, dpi = 130, fig.width = 6.8,
+                      fig.height = 5.4, out.width = "100%",
+                      fig.align = "center")
+set.seed(2026)
+library(lagdynamics)
+options(digits = 3)
+has <- function(p) requireNamespace(p, quietly = TRUE)
+```
+
+# Summary
+
+`lagdynamics` implements lag-sequential analysis (LSA) and its network
+representation, the lag transition network, for categorical event and
+sequence data. LSA is the classical inferential method for temporal
+contingency in observed behaviour: it tests, for every ordered pair of
+states, whether one state follows another more or less often than
+independence predicts (Sackett, 1979; Bakeman & Gottman, 1997). The
+package restates this method as a modern statistical workflow built on
+six commitments:
+
+- **Tidy.** Every result is produced by a verb -- `transitions()`,
+  `nodes()`, `tests()`, `initial()`, `summary()`,
+  `transition_probabilities()`, `as.data.frame()` -- that returns a
+  one-row-per-observation data frame. Filters are arguments
+  (`significant = TRUE`, `direction = "over"`, `min_count = `), never
+  subsetting; the user never indexes into an object.
+- **Confirmatory, following Dynalytics.** The package operationalizes
+  the Dynalytics framework (Saqr, Lopez-Pernas, & Misiejuk, 2026),
+  whose central tenet is a scientific contract: every analytical claim
+  is matched by evidence appropriate to its structure, scope, and
+  complexity. Validation is therefore expanded far beyond the classical
+  residual test into a full battery -- analytic Bayesian certainty,
+  sequence-level bootstrap, split-half reliability, case-drop
+  stability, and a within-sequence permutation null.
+- **Expanded.** Beyond the classical engine the package offers five
+  estimation engines plus an open registry for user-defined ones,
+  multi-lag analysis with positive and negative lags, structural-zero
+  constraints under quasi-independence, initial and transition
+  probabilities, grouped estimation in a shared state space, and an
+  experimental directed transfer-entropy measure.
+- **Group-aware.** A grouping variable yields one model per group, and
+  group differences are tested rather than eyeballed: `compare_lsa()`
+  permutes labels over whole sequences and `bayes_compare_lsa()` gives
+  the analytic Bayesian counterpart, both with multiplicity adjustment
+  and pairwise comparison for more than two groups.
+- **Visual.** A large array of plots covers every level of the
+  analysis: residual heatmaps, residual networks, probability-weighted
+  TNA transition networks, chord diagrams, polar sunbursts,
+  uncertainty forests for the bootstrap and certainty results, and
+  group barrels and difference heatmaps for the comparisons.
+- **Interoperable.** The package plugs into the other dynamics
+  packages on both sides: `lsa()` ingests long event logs, wide data,
+  lists of sequences, `TraMineR` state sequences, `tna` models and
+  sequence data, and `Nestimate` prepared data, while the fitted
+  object is a `cograph` network that cograph renders directly and
+  exposes the transition and initial probabilities that TNA-style
+  tooling consumes.
+
+The numerical core is a clean-room implementation. Every formula was
+transcribed from its primary source -- with page and equation numbers
+recorded in the package's formula reference map (`inst/REFERENCES.md`)
+-- and implemented without consulting any prior LSA software. The
+implementation is cross-validated against base-R primitives
+(`stats::loglin()` for iterative proportional fitting,
+`stats::chisq.test()` standardized residuals, `stats::binom.test()`,
+`stats::pchisq()`) and against hand-derived algebraic identities.
+The package depends only on base R.
+
+# The method
+
+Let a process visit $K$ discrete states. At lag $\ell$, the data reduce
+to a $K \times K$ transition table whose cell $O_{ij}$ counts the
+occasions on which state $i$ was followed, $\ell$ positions later, by
+state $j$. Transitions are counted within a sequence only; pairs never
+span sequence boundaries.
+
+The reference model is sequential independence: the next state carries
+no memory of the current one, so each cell is expected to occur at the
+rate implied by the row and column margins alone,
+
+$$E_{ij} = \frac{R_i \, C_j}{N},$$
+
+where $R_i$ and $C_j$ are the margins of the table and $N$ its total.
+The test statistic for each cell is the adjusted (standardized Pearson)
+residual (Haberman, 1979),
+
+$$z_{ij} = \frac{O_{ij} - E_{ij}}
+  {\sqrt{E_{ij}\,(1 - R_i/N)\,(1 - C_j/N)}},$$
+
+which is asymptotically standard normal under independence. A positive
+residual marks a transition that occurs more often than its states'
+base rates predict -- a sequential regularity. A negative residual
+marks an avoided transition. The residual, not the raw transition
+probability, is the evidential unit of LSA: a transition can be
+frequent yet unremarkable, or rare yet strongly over-represented.
+
+When some transitions are impossible by design -- self-transitions
+under continuous coding are the standard case -- the affected cells are
+structural zeros. Expected counts then come from the quasi-independence
+model, fitted by iterative proportional fitting (Wickens, 1989), and
+the residuals use the design-matrix form of Christensen (1997). The two
+formulations provably coincide when no structural zeros are present,
+and the package pins that identity in its test suite. Structural-zero
+cells are reported as non-estimable (`NA`), never as "expected zero":
+no test is defined there.
+
+A **lag transition network** is the graph form of the fitted model:
+states are nodes, each ordered pair is a directed edge, and the edge
+weight is the tested departure from independence. This places LSA next
+to transition network analysis (TNA), with a precise division of
+labour: a TNA edge is a transition tendency (a conditional
+probability), whereas an LSA edge is a tested departure from a
+no-memory baseline. The same data can support both models; the claims
+differ.
+
+# What the package provides
+
+Beyond the classical model, `lagdynamics` adds the following. Each item
+is exercised in this vignette or in a dedicated companion vignette.
+
+**Estimation**
+
+- Five estimation engines: `classical` (Bakeman & Quera; the default),
+  `two_cell`, `bidirectional` (Sackett's matched-pair test on the
+  symmetrized table), `parallel_dominance`, and
+  `nonparallel_dominance` (Sackett, 1979; Wampold, 1984), each
+  available through `lsa(engine = )` or a direct wrapper such as
+  `lsa_two_cell()`.
+- An open engine registry: `register_lsa_engine()` /
+  `unregister_lsa_engine()` accept user-defined engines, and
+  `list_lsa_engines()` enumerates what is installed.
+- Multi-lag analysis: any positive or negative lag in `lsa(lag = )`,
+  full lag profiles with `lsa_lags()`, and single-edge profiles with
+  `lag_profile()`.
+- Structural-zero support: `loops = FALSE` for the no-self-transition
+  model, or an arbitrary 0/1 constraint matrix via `structural_zeros`,
+  with quasi-independence expectations from the exported `lsa_ipf()`.
+- Grouped estimation: a grouping variable yields one fit per group in a
+  shared state space, so groups remain comparable even when a group
+  never visits a state.
+- An experimental directed transfer-entropy measure,
+  `transfer_entropy()` (Schreiber, 2000).
+
+**Inference and validation**
+
+- Analytic edge uncertainty: `certainty_lsa()` derives credible
+  intervals for transition probabilities from a Dirichlet-Multinomial
+  posterior, without resampling.
+- Resampling edge uncertainty: `bootstrap_lsa()` resamples whole
+  sequences -- preserving within-sequence dependence -- and refits.
+- Whole-network reproducibility: `reliability_lsa()` (repeated
+  split-half refitting) and `stability_lsa()` (case-dropping).
+- An assumption-free null: `permute_lsa()` shuffles events within
+  sequences and recomputes the residuals.
+- Group comparison: `compare_lsa()` permutes group labels at the
+  sequence level, the empirically exchangeable unit;
+  `bayes_compare_lsa()` is its analytic Bayesian counterpart. Both
+  support multiplicity adjustment and, for more than two groups,
+  pairwise comparison.
+
+**Interface**
+
+- Tidy accessors throughout: `transitions()`, `nodes()`, `tests()`,
+  `initial()`, `transition_probabilities()`, `summary()`, and
+  `as.data.frame()` on every result object. No result requires
+  indexing into an object.
+- One plotting verb with several geometries, plus dedicated plots for
+  uncertainty and comparison results (see the gallery below).
+- Ingestion of long event logs, wide sequence data, lists of
+  sequences, and foreign sequence objects (see Interoperability).
+
+# Fitting and reading a model
+
+The examples use the bundled `engagement` data: weekly engagement
+states (`active`, `average`, `disengaged`) for 138 students, one row
+per student.
+
+```{r fit}
+fit <- lsa(engagement)
+fit
+```
+
+Every fitted quantity is read through a verb that returns a tidy data
+frame. `transitions()` gives one row per ordered pair, with observed
+and expected counts, transition probability, adjusted residual,
+p-value, and association measures; filters are arguments, not
+subsetting.
+
+```{r read}
+transitions(fit)
+transitions(fit, significant = TRUE)
+nodes(fit)
+tests(fit)
+initial(fit)
+summary(fit)
+```
+
+The lag is a first-class argument. A lag profile traces one edge across
+temporal distances; `lsa_lags()` fits the full multi-lag model.
+
+```{r lags}
+lag_profile(engagement, "Active", "Disengaged", lags = 1:3)
+as.data.frame(lsa_lags(engagement, lags = 1:2)) |> head(6)
+```
+
+Structural zeros restate the model rather than filter its output:
+forbidden cells are non-estimable.
+
+```{r structural}
+fz <- lsa(engagement, loops = FALSE)
+transitions(fz) |> subset(from == to)
+```
+
+Alternative engines and the open registry:
+
+```{r engines}
+list_lsa_engines()
+lsa_two_cell(engagement)
+```
+
+# Visualisation
+
+One verb, `plot(fit, type = )`, renders the model; dedicated methods
+cover the inference objects. Every view of a fit displays the adjusted
+residual (or, on request, another fitted matrix) and differs only in
+geometry.
+
+| view | call | shows |
+|---|---|---|
+| residual heatmap | `plot(fit)` | the fitted residual matrix |
+| residual network | `plot(fit, type = "network")` | tested departures as directed edges |
+| transition (TNA) network | `plot(fit, type = "network", weights = "tna")` | conditional transition probabilities |
+| chord diagram | `plot(fit, type = "chord")` | transition flow between states |
+| polar sunburst | `plot(fit, type = "sunburst")` | outgoing distribution per state |
+| uncertainty forest | `plot(bootstrap_lsa(fit))`, `plot(certainty_lsa(fit))` | edge-level intervals |
+| group barrel | `plot(compare_lsa(g))` | per-group edge estimates with test results |
+| difference heatmap | `plot(compare_lsa(g), style = "heatmap")` | signed group differences |
+
+Two colour conventions are used, by purpose. The heatmap, chord, and
+sunburst use a diverging residual scale (warm = over-represented,
+cool = avoided). The network and comparison plots follow the TNA
+convention -- blue = more than chance, red = less, avoided edges
+dashed -- so an `lsa` network reads like any other transition network.
+
+```{r heatmap, eval = has("ggplot2")}
+plot(fit)
+```
+
+```{r network, eval = has("cograph")}
+plot(fit, type = "network")
+```
+
+```{r tna-network, eval = has("cograph")}
+plot(fit, type = "network", weights = "tna")
+```
+
+```{r chord, eval = has("cograph")}
+plot(fit, type = "chord")
+```
+
+```{r sunburst, eval = has("ggplot2")}
+plot(fit, type = "sunburst")
+```
+
+The full gallery, including the `which = ` matrix selector and the
+grouped-plot variants, is in
+`vignette("plotting", package = "lagdynamics")`.
+
+# Group comparison
+
+A grouping variable produces one fit per group in a shared state space.
+Here the long-format `group_regulation_long` event log is split by
+achievement level, using the `actor` / `action` / `time` grammar.
+
+```{r groups}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+gfit
+transitions(gfit, significant = TRUE) |> head(4)
+summary(gfit)
+```
+
+`compare_lsa()` tests whether the groups differ, edge by edge, by
+permuting group labels over whole sequences -- the unit that is
+actually exchangeable under the null -- with optional multiplicity
+adjustment. `bayes_compare_lsa()` reaches the same question
+analytically, reporting the credible range of each group difference in
+transition probability. With more than two groups, both return pairwise
+results.
+
+```{r compare}
+cmp <- compare_lsa(gfit, R = 100, adjust = "BH")
+cmp
+as.data.frame(cmp) |> head(4)
+
+bcmp <- bayes_compare_lsa(gfit, draws = 1000, adjust = "BH", seed = 1)
+bcmp
+as.data.frame(bcmp) |> head(4)
+```
+
+```{r compare-plots, eval = has("ggplot2")}
+plot(cmp)
+plot(cmp, style = "heatmap")
+```
+
+# Confirmatory battery
+
+The adjusted residual tests each edge against independence, but that
+test rests on large-sample assumptions that sequential data can
+violate, and stronger claims -- about precision, robustness, or the
+network as a whole -- need their own evidence. The battery pairs each
+kind of claim with a matching procedure:
+
+| claim | evidence | verb |
+|---|---|---|
+| a specific transition is real; how precise | edge-level uncertainty | `certainty_lsa()`, `bootstrap_lsa()` |
+| a significant transition is not fragile | robustness to case loss | `stability_lsa()` |
+| the whole network is reproducible | split-half reliability | `reliability_lsa()` |
+| the structure exceeds chance | assumption-free empirical null | `permute_lsa()` |
+| two groups differ | inference under exchangeability | `compare_lsa()`, `bayes_compare_lsa()` |
+
+```{r battery}
+cert <- certainty_lsa(fit)
+as.data.frame(cert) |> head(3)
+
+boot <- bootstrap_lsa(fit, R = 50)
+as.data.frame(boot) |> head(3)
+
+rel <- reliability_lsa(fit, R = 20)
+rel
+
+stab <- stability_lsa(fit, R = 30)
+stab
+
+pm <- permute_lsa(fit, R = 100)
+pm
+```
+
+```{r forest, eval = has("ggplot2")}
+plot(boot)
+```
+
+Bootstrap replication is reproducible across languages and sessions:
+`bootstrap_lsa(indices = )` accepts a precomputed resampling matrix for
+bit-identical replay. The full treatment of the battery is in
+`vignette("confirmatory", package = "lagdynamics")`.
+
+# Interoperability
+
+`lagdynamics` is designed to sit inside an existing analysis stack
+rather than replace it, on both the input and the output side.
+
+**Input.** `lsa()` accepts, through one front door:
+
+- wide data frames and matrices (rows = sequences, columns = ordered
+  positions), as in the bundled `engagement` and `group_regulation`;
+- lists of categorical vectors, one element per sequence;
+- long event logs via the `actor` / `action` / `time` grammar,
+  including Unix and custom time formats, as in `group_regulation_long`
+  and `ai_long`;
+- foreign sequence objects, duck-typed so that none of their packages
+  becomes a runtime dependency: `TraMineR` state sequences
+  (`stslist`), `tna` models and their grouped and sequence-data forms
+  (`tna`, `group_tna`, `tna_seq_data`, `tna_data`), and `Nestimate`
+  prepared data (`nestimate_data`).
+
+```{r ingest}
+fit_log <- lsa(group_regulation_long, actor = "Actor",
+               action = "Action", time = "Time")
+fit_log
+```
+
+**Output.** The fitted object carries its network identity with it: it
+inherits the `cograph_network` class, so `cograph`'s rendering verbs
+accept it directly, and the plotting gallery above draws its network,
+chord, and comparison views through that seam. The fitted probabilities
+are exposed for any downstream transition-network tooling --
+`transition_probabilities()` returns the row-stochastic matrix
+$P(\text{to} \mid \text{from})$ and `initial()` the initial-state
+distribution, the two ingredients a TNA-style model requires -- and
+every result object flattens to a plain data frame with
+`as.data.frame()`, so results move into any tabular pipeline without
+package-specific code.
+
+```{r output-interop}
+transition_probabilities(fit)
+initial(fit)
+```
+
+# Bundled data
+
+Four data sets ship with the package, spanning the supported input
+shapes: `engagement` (wide; 138 students, weekly engagement states),
+`group_regulation` (wide; 2,000 collaborative-learning sessions),
+`group_regulation_long` (long event log with actor, action, time, and
+an achievement group), and `ai_long` (long event log of coded AI
+actions in human--AI coding sessions).
+
+# References
+
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
+introduction to sequential analysis* (2nd ed.). Cambridge University
+Press.
+
+Bakeman, R., & Quera, V. (1995). *Analyzing interaction: Sequential
+analysis with SDIS and GSEQ*. Cambridge University Press.
+
+Christensen, R. (1997). *Log-linear models and logistic regression*
+(2nd ed.). Springer.
+
+Haberman, S. J. (1979). *Analysis of qualitative data: Volume 2, New
+developments*. Academic Press.
+
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+*Handbook of infant development* (pp. 623--649). Wiley.
+
+Saqr, M., Lopez-Pernas, S., & Misiejuk, K. (2026). *Dynalytics: A
+framework for the analysis of temporal processes*.
+
+Schreiber, T. (2000). Measuring information transfer. *Physical Review
+Letters*, 85(2), 461--464.
+doi:10.1103/PhysRevLett.85.461.
+
+Wampold, B. E. (1984). Tests of dominance in sequential categorical
+data. *Psychological Bulletin*, 96(2), 424--429.
+
+Wickens, T. D. (1989). *Multiway contingency tables analysis for the
+social sciences*. Erlbaum.
+
+---
+
+Part of the [Dynalytics framework](https://dynasite.org/).

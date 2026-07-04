@@ -1,9 +1,10 @@
 Package: lagdynamics
 Title: Lag Sequential Analysis, Dynamics, and Lag Transition Networks
-Version: 0.1.0
+Version: 0.31
 Authors@R:
-    person("Mohammed", "Saqr", email = "saqr@saqr.me",
-           role = c("aut", "cre", "cph"))
+    c(person("Mohammed", "Saqr", email = "saqr@saqr.me",
+             role = c("aut", "cre", "cph")),
+      person("Sonsoles", "López-Pernas", role = "aut"))
 Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     analysis and lag transition networks of categorical event and sequence
     data. It provides an accessible, unified workflow for fitting, inspecting,
@@ -21,7 +22,7 @@ Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     primitives and hand-formula identities.
 License: MIT + file LICENSE
 URL: https://github.com/mohsaqr/lagdynamics,
-    https://saqr.me/lagdynamics/
+    https://pak.dynasite.org/lagdynamics/
 BugReports: https://github.com/mohsaqr/lagdynamics/issues
 Language: en-US
 Encoding: UTF-8
@@ -35,6 +36,8 @@ Imports:
     utils
 Suggests:
     testthat (>= 3.0.0),
+    Nestimate,
+    tna,
     cograph (>= 2.3.6),
     knitr,
     rmarkdown,

@@ -1,3 +1,21 @@
-url: https://mohsaqr.github.io/lagdynamics/
+url: https://pak.dynasite.org/lagdynamics/
 template:
   bootstrap: 5
+
+authors:
+  Mohammed Saqr:
+    href: https://saqr.me
+  Sonsoles López-Pernas:
+    href: https://sonsoles.me
+
+articles:
+- title: Vignettes
+  navbar: ~
+  contents:
+  - intro
+  - lagdynamics
+  - interop
+  - workflow
+  - lag-transition-networks
+  - confirmatory
+  - plotting

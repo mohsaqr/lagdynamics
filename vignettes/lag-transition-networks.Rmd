@@ -1,5 +1,8 @@
 ---
 title: "Lag transition networks"
+author:
+  - "[Mohammed Saqr](https://saqr.me)"
+  - "[Sonsoles López-Pernas](https://sonsoles.me)"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Lag transition networks}
@@ -52,20 +55,20 @@ data(ai_long)
 head(ai_long)
 ```
 
-Four columns enter the analysis. The `code` column holds the action, the
+Three columns define the analysis. The `code` column holds the action, the
 event type whose transitions are modelled. The `order_in_session` column
 orders events within a session. The `session_id` column identifies one
-uninterrupted sequence, and the `project` column groups the sessions.
-Transitions are counted within a session only, so the last event of one
-session and the first of the next are never treated as a pair; the `session`
-argument enforces this boundary.
+uninterrupted sequence. Transitions are counted within a session only, so the
+last event of one session and the first of the next are never treated as a
+pair; the `session` argument enforces this boundary. The `project` column is
+available as contextual metadata, but it is not required for this fit because
+`session_id` already defines the sequence boundary.
 
-The `lsa()` function fits the model, taking the four columns as named
-arguments.
+The `lsa()` function fits the model by naming the action column, the session
+boundary, and the ordering column.
 
 ```{r fit}
 fit <- lsa(ai_long,
-           actor   = "project",
            session = "session_id",
            action  = "code",
            order   = "order_in_session")
@@ -228,7 +231,7 @@ thin ring around each node shows the initial probability of starting in that
 state.
 
 ```{r net-prob, eval = has("cograph")}
-plot_transitions(fit, weights = "prob")
+plot_transitions(fit, weights = "tna")
 ```
 
 ```{r net-prob-skip, echo = FALSE, eval = !has("cograph")}
@@ -311,3 +314,7 @@ tables. *Biometrics*, 29(1), 205--220.
 Saqr, M., López-Pernas, S., & Tikka, S. (2025). Mapping relational dynamics
 with transition network analysis: A primer and tutorial. In *Advanced
 Learning Analytics Methods and Tutorials*.
+
+---
+
+Part of the [Dynalytics framework](https://dynasite.org/).

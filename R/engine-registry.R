@@ -19,8 +19,8 @@
 #'   transition table produced by [lsa_transitions()]) and arbitrary
 #'   named `...` arguments forwarded from `lsa(params = list(...))`.
 #'   Must return a named list with at least the matrix elements `obs`,
-#'   `exp`, `prob`, `adj_res`, and `p` (each `K x K`). See the built-in
-#'   `.engine_classical` for the full contract.
+#'   `exp`, `prob`, `adj_res`, and `p` (each `K x K`). Additional `K x K`
+#'   matrices are preserved as engine-specific edge statistics.
 #' @param description Character scalar. One-line human-readable
 #'   description shown by [list_lsa_engines()].
 #' @param requires Character vector. Names of packages the engine
@@ -29,12 +29,13 @@
 #' @return Invisibly returns `name`.
 #'
 #' @examples
-#' \dontrun{
 #' my_engine <- function(transitions, ...) {
-#'   # ... compute and return a list with obs, exp, prob, adj_res, p
+#'   get_lsa_engine("classical")$fn(transitions, ...)
 #' }
-#' register_lsa_engine("my_engine", my_engine, "Custom LSA variant")
-#' }
+#' register_lsa_engine("my_classical", my_engine, "Classical test alias")
+#' fit <- lsa(engagement, engine = "my_classical")
+#' unregister_lsa_engine("my_classical")
+#' fit
 #'
 #' @seealso [get_lsa_engine()], [list_lsa_engines()],
 #'   [unregister_lsa_engine()], [lsa()]
@@ -64,6 +65,10 @@ register_lsa_engine <- function(name, fn, description, requires = character()) {
 #' @return The registry entry: a list with elements `name`, `fn`,
 #'   `description`, `requires`.
 #'
+#' @examples
+#' classical <- get_lsa_engine("classical")
+#' classical$description
+#'
 #' @seealso [register_lsa_engine()], [list_lsa_engines()]
 #'
 #' @export
@@ -91,6 +96,9 @@ get_lsa_engine <- function(name) {
 #' List All Registered LSA Engines
 #'
 #' @return A data.frame with columns `name`, `description`, `requires`.
+#'
+#' @examples
+#' list_lsa_engines()
 #'
 #' @seealso [register_lsa_engine()], [get_lsa_engine()]
 #'
@@ -122,6 +130,13 @@ list_lsa_engines <- function() {
 #' @param name Character scalar. The engine's identifier.
 #'
 #' @return Invisibly `NULL`.
+#'
+#' @examples
+#' my_engine <- function(transitions, ...) {
+#'   get_lsa_engine("classical")$fn(transitions, ...)
+#' }
+#' register_lsa_engine("temporary_engine", my_engine, "Temporary alias")
+#' unregister_lsa_engine("temporary_engine")
 #'
 #' @seealso [register_lsa_engine()]
 #'

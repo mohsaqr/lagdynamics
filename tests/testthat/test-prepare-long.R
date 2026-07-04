@@ -37,6 +37,22 @@ test_that("no time column yields one session per actor", {
   expect_equal(fit$data$n_sequences, 2L)
 })
 
+test_that("action-only long input is one global sequence", {
+  log <- make_log()
+  fit <- lsa(log, action = "act")
+  expect_equal(fit$data$n_sequences, 1L)
+  expect_equal(fit$data$n_events, nrow(log))
+  expect_equal(sum(fit$obs), nrow(log) - 1L)
+})
+
+test_that("session can define long-input sequences without actor", {
+  log <- make_log()
+  log$sess <- c("s1", "s1", "s1", "s2", "s3", "s3", "s3")
+  fit <- lsa(log, session = "sess", action = "act", order = "ts")
+  expect_equal(fit$data$n_sequences, 3L)
+  expect_setequal(fit$data$transitions_per_seq + 1L, c(3L, 1L, 3L))
+})
+
 test_that("an explicit session column overrides gap splitting", {
   log <- make_log()
   log$sess <- c(1, 1, 1, 1, 1, 1, 1)   # force u1 into a single session
@@ -71,8 +87,7 @@ test_that("order column overrides supplied row order", {
 
 test_that("long-format validation errors are actionable", {
   log <- make_log()
-  expect_error(lsa(log, action = "act"),
-               "needs both `actor` and `action`")
+  expect_s3_class(lsa(log, action = "act"), "lsa")
   expect_error(lsa(log, actor = "user", action = "missing"),
                "column 'missing' not found")
   # In long-format mode `group` is a single column name, not a vector.
@@ -150,6 +165,12 @@ test_that("group as a column name works with long-format input", {
   expect_error(
     lsa(bad, actor = "student", action = "act", time = "t",
         group = "cohort"),
+    "not constant within a sequence")
+
+  global_bad <- log
+  expect_error(
+    lsa(global_bad, action = "act", time = "t", group = "cohort",
+        time_threshold = 1e9),
     "not constant within a sequence")
 
   # group must be a single column name in long-format mode.

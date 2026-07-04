@@ -96,6 +96,12 @@ permute_lsa <- function(fit,
   K <- d$n_states
   T <- d$n_events
 
+  if (isTRUE(within_sequence) && d$n_sequences < 2L) {
+    warning("Only one sequence available; permute_lsa() will shuffle the ",
+            "whole event stream. Within-sequence permutation is identical ",
+            "to global permutation for a single sequence.", call. = FALSE)
+  }
+
   # Per-sequence index lists for within-sequence shuffling.
   seq_positions <- split(seq_len(T), seq_id)
 

@@ -8,18 +8,18 @@
 #'
 #' This is a standard small-K, multi-sequence example for lag
 #' sequential analysis: K = 3 states, S = 138 sequences, mean sequence
-#' length about 15. It exercises the wide-matrix input path of
+#' length about 15. It exercises the wide-data input path of
 #' [lsa_data()] and produces a stable transition pattern with clear
 #' adjusted-residual signals.
 #'
-#' @format A character matrix with 138 rows and 15 columns.
+#' @format A data frame with 138 rows and 15 character columns.
 #'
-#' @source Derived without modification from the `trajectories` matrix
-#'   in the `Nestimate` package
-#'   (\url{https://github.com/mohsaqr/Nestimate}), which is MIT-licensed
-#'   and produced by Saqr and collaborators as a synthetic engagement
-#'   trajectory example. Re-shipped here for convenience and offline
-#'   testing; both attribution and license are preserved.
+#' @source Derived from the `trajectories` matrix in the `Nestimate`
+#'   package (\url{https://github.com/mohsaqr/Nestimate}), which is
+#'   MIT-licensed and produced by Saqr and collaborators as a synthetic
+#'   engagement trajectory example. The state values are preserved and
+#'   stored here as a data frame for compatibility with sequence-data
+#'   tooling.
 #'
 #' @examples
 #' fit <- lsa(engagement, engine = "classical")

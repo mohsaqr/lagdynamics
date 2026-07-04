@@ -12,6 +12,10 @@ A data.frame with columns \code{name}, \code{description}, \code{requires}.
 \description{
 List All Registered LSA Engines
 }
+\examples{
+list_lsa_engines()
+
+}
 \seealso{
 \code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}}
 }

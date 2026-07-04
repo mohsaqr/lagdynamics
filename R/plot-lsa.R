@@ -24,7 +24,9 @@
 #'   `"chord"`, or `"sunburst"`.
 #' @param ... Forwarded to the chosen view. For `"heatmap"`: `which`
 #'   (`"residuals"` (default), `"prob"`, `"count"`, `"expected"`). For
-#'   `"network"`/`"chord"`: `weights`. For `"sunburst"`: `style`, `fill`.
+#'   `"network"`: `weights` (`"tna"` for the probability-weighted TNA
+#'   network). For `"chord"`: `width`, `color`. For `"sunburst"`:
+#'   `style`, `fill`.
 #'
 #' @return A `ggplot` object for `"heatmap"` and `"sunburst"`; the
 #'   (invisible) `cograph` object for `"network"` and `"chord"`. Drawn
@@ -36,6 +38,7 @@
 #' plot(fit)                     # residual heatmap (default)
 #' plot(fit, which = "prob")     # heatmap of probabilities
 #' plot(fit, type = "network")   # transition network
+#' plot(fit, type = "network", weights = "tna")  # TNA probability network
 #' plot(fit, type = "chord")     # chord diagram
 #' plot(fit, type = "sunburst")  # polar sunburst
 #' }

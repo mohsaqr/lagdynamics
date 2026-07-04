@@ -6,7 +6,7 @@
 \usage{
 plot_transitions(
   fit,
-  weights = c("residuals", "count", "prob", "lift", "yules_q"),
+  weights = c("residuals", "tna", "relative", "count", "prob", "lift", "yules_q"),
   significant = FALSE,
   top = NULL,
   decimals = 1,
@@ -25,14 +25,16 @@ drawn:
 one): adjusted residuals coloured by sign on the TNA / Nestimate
 convention, \strong{blue = more} (over-represented) solid and
 \strong{red = less} (avoided) dashed with a soft halo.
-\item \code{"prob"} / \code{"count"} -- the familiar \strong{transition network} of
-Transition Network Analysis (TNA), drawn with
+\item \code{"tna"} / \code{"relative"} / \code{"prob"} / \code{"count"} -- the familiar
+\strong{transition network} of Transition Network Analysis (TNA), drawn with
 \code{cograph::splot(tna_styling = TRUE)}: cograph's own TNA styling
 (coloured nodes, weighted directed edges) plus a donut ring per node
 carrying its initial-state probability, and edges labelled with the
-transition probability (\code{"prob"}) or observed count (\code{"count"}). For
-\code{"prob"}, edges below \code{0.05} are dropped by default so weak
-transitions do not clutter the plot (override with \code{edge_cutoff}).
+transition probability (\code{"tna"} / \code{"relative"} / \code{"prob"}) or
+observed count (\code{"count"}). \code{"tna"} and \code{"relative"} are explicit
+aliases for \code{"prob"}. For probability/TNA networks, edges below
+\code{0.05} are dropped by default so weak transitions do not clutter the
+plot (override with \code{edge_cutoff}).
 \item \code{"lift"} -- observed / expected, drawn in a single neutral colour
 with magnitude carried by edge width.
 \item \code{"yules_q"} -- a \strong{signed association network}: Yule's Q on a fixed
@@ -83,7 +85,9 @@ by default. Returns the \code{cograph} network invisibly.
 \dontrun{
 fit <- lsa(group_regulation)
 plot_transitions(fit)                                   # residual network
-plot_transitions(fit, weights = "prob")                 # probabilities
+plot_transitions(fit, weights = "tna")                  # TNA probabilities
+plot_transitions(fit, weights = "relative")             # same as "tna"
+plot_transitions(fit, weights = "prob")                 # same matrix
 plot_transitions(fit, weights = "residuals",            # residual network,
                  significant = TRUE)                     #   significant only
 plot_transitions(fit, top = 12)                         # 12 strongest edges

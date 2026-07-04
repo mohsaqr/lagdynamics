@@ -134,9 +134,18 @@ bootstrap_lsa <- function(fit,
   level_used <- if (level == "auto") {
     if (d$n_sequences >= 2L) "sequence" else "event"
   } else level
-  if (level_used == "sequence" && d$n_sequences < 2L) {
-    warning("Only one sequence available; falling back to event-level ",
-            "stationary block bootstrap.", call. = FALSE)
+  single_sequence_warning <- NULL
+  if (d$n_sequences < 2L && level == "auto") {
+    single_sequence_warning <- paste0(
+      "Only one sequence available; using event-level stationary ",
+      "block bootstrap. Sequence-level bootstrap needs at least ",
+      "two independent sequences."
+    )
+  } else if (level_used == "sequence" && d$n_sequences < 2L) {
+    single_sequence_warning <- paste0(
+      "Only one sequence available; falling back to event-level ",
+      "stationary block bootstrap."
+    )
     level_used <- "event"
   }
 
@@ -155,6 +164,10 @@ bootstrap_lsa <- function(fit,
     bl <- .validate_block_length(block_length, T = d$n_events)
     indices <- .stationary_indices(R = R, T = d$n_events,
                                    mean_block = bl)
+  }
+
+  if (!is.null(single_sequence_warning)) {
+    warning(single_sequence_warning, call. = FALSE)
   }
 
   # Worker closure: produce a fitted lsa for one replicate.

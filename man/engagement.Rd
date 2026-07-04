@@ -5,15 +5,15 @@
 \alias{engagement}
 \title{Student Engagement Trajectories}
 \format{
-A character matrix with 138 rows and 15 columns.
+A data frame with 138 rows and 15 character columns.
 }
 \source{
-Derived without modification from the \code{trajectories} matrix
-in the \code{Nestimate} package
-(\url{https://github.com/mohsaqr/Nestimate}), which is MIT-licensed
-and produced by Saqr and collaborators as a synthetic engagement
-trajectory example. Re-shipped here for convenience and offline
-testing; both attribution and license are preserved.
+Derived from the \code{trajectories} matrix in the \code{Nestimate}
+package (\url{https://github.com/mohsaqr/Nestimate}), which is
+MIT-licensed and produced by Saqr and collaborators as a synthetic
+engagement trajectory example. The state values are preserved and
+stored here as a data frame for compatibility with sequence-data
+tooling.
 }
 \usage{
 engagement
@@ -28,7 +28,7 @@ weeks.
 \details{
 This is a standard small-K, multi-sequence example for lag
 sequential analysis: K = 3 states, S = 138 sequences, mean sequence
-length about 15. It exercises the wide-matrix input path of
+length about 15. It exercises the wide-data input path of
 \code{\link[=lsa_data]{lsa_data()}} and produces a stable transition pattern with clear
 adjusted-residual signals.
 }

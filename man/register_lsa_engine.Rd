@@ -14,8 +14,8 @@ register_lsa_engine(name, fn, description, requires = character())
 transition table produced by \code{\link[=lsa_transitions]{lsa_transitions()}}) and arbitrary
 named \code{...} arguments forwarded from \code{lsa(params = list(...))}.
 Must return a named list with at least the matrix elements \code{obs},
-\code{exp}, \code{prob}, \code{adj_res}, and \code{p} (each \verb{K x K}). See the built-in
-\code{.engine_classical} for the full contract.}
+\code{exp}, \code{prob}, \code{adj_res}, and \code{p} (each \verb{K x K}). Additional \verb{K x K}
+matrices are preserved as engine-specific edge statistics.}
 
 \item{description}{Character scalar. One-line human-readable
 description shown by \code{\link[=list_lsa_engines]{list_lsa_engines()}}.}
@@ -34,12 +34,13 @@ name via \code{lsa(..., engine = "<name>")}. Built-in engines
 automatically when the package loads.
 }
 \examples{
-\dontrun{
 my_engine <- function(transitions, ...) {
-  # ... compute and return a list with obs, exp, prob, adj_res, p
+  get_lsa_engine("classical")$fn(transitions, ...)
 }
-register_lsa_engine("my_engine", my_engine, "Custom LSA variant")
-}
+register_lsa_engine("my_classical", my_engine, "Classical test alias")
+fit <- lsa(engagement, engine = "my_classical")
+unregister_lsa_engine("my_classical")
+fit
 
 }
 \seealso{

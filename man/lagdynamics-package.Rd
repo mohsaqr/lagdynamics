@@ -95,13 +95,18 @@ the social sciences}. Lawrence Erlbaum.
 Useful links:
 \itemize{
   \item \url{https://github.com/mohsaqr/lagdynamics}
-  \item \url{https://mohsaqr.github.io/lagdynamics/}
+  \item \url{https://pak.dynasite.org/lagdynamics/}
   \item Report bugs at \url{https://github.com/mohsaqr/lagdynamics/issues}
 }
 
 }
 \author{
 \strong{Maintainer}: Mohammed Saqr \email{saqr@saqr.me} [copyright holder]
+
+Authors:
+\itemize{
+  \item Sonsoles López-Pernas
+}
 
 }
 \keyword{internal}

@@ -38,7 +38,7 @@ The eight AI behaviour codes are \code{Ask}, \code{Delegate}, \code{Execute}, \c
 \code{Action}, \code{Communication}, and \code{Repair}.
 }
 \examples{
-fit <- lsa(ai_long, actor = "project", session = "session_id",
+fit <- lsa(ai_long, session = "session_id",
            action = "code", order = "order_in_session")
 transitions(fit, significant = TRUE)
 

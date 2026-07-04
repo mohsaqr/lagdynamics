@@ -58,6 +58,16 @@ test_that("permute_lsa: as.data.frame returns the edges frame", {
   expect_identical(as.data.frame(pm), pm$edges)
 })
 
+test_that("permute_lsa warns when within-sequence shuffling has one sequence", {
+  set.seed(18L)
+  fit <- lsa(sample(c("a", "b", "c"), 100, replace = TRUE))
+  expect_warning(
+    pm <- permute_lsa(fit, R = 20),
+    "Only one sequence"
+  )
+  expect_s3_class(pm, "lsa_permutation")
+})
+
 test_that(".shuffle_within_sequences preserves each sequence's multiset", {
   # Regression for the pre-fix bug at R/permute_lsa.R:109 where the
   # within-sequence shuffle used sample.int(length(sp)) as the source

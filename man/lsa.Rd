@@ -106,14 +106,15 @@ pre-computed transition matrix cannot be split by group. Default
 
 \item{actor, action, time, order, session}{Column names (each a single
 string) for \strong{long-format} event-log input. Supplying \code{action}
-(and \code{actor}) switches \code{lsa()} into long-format mode: the raw log
-in \code{data} is sequenced into event sequences by grouping rows per
-\code{actor} (optionally crossed with an explicit \code{session} id),
-ordering within each group by \code{order} if given else by \code{time}, and
--- when \code{time} is given and no \code{session} column is -- starting a
-new session whenever the gap between consecutive events exceeds
-\code{time_threshold} seconds. All \code{NULL} by default (input is taken
-as already-sequenced). Cannot be combined with \code{group}.}
+switches \code{lsa()} into long-format mode: the raw log in \code{data} is
+sequenced by grouping rows per \code{actor}, per \code{session}, per
+\verb{actor x session}, or as one global sequence when neither boundary
+is supplied. Events are ordered within each sequence by \code{order} if
+given else by \code{time}, and -- when \code{time} is given and no \code{session}
+column is -- a new sequence starts whenever the gap between
+consecutive events exceeds \code{time_threshold} seconds. All \code{NULL} by
+default except \code{action} in long-format mode (input is otherwise
+taken as already-sequenced).}
 
 \item{time_threshold}{Numeric. Maximum gap in seconds between
 consecutive events before a new session is started in long-format

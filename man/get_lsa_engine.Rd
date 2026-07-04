@@ -16,6 +16,11 @@ The registry entry: a list with elements \code{name}, \code{fn},
 \description{
 Retrieve a Registered LSA Engine
 }
+\examples{
+classical <- get_lsa_engine("classical")
+classical$description
+
+}
 \seealso{
 \code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=list_lsa_engines]{list_lsa_engines()}}
 }

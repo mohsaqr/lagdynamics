@@ -10,6 +10,7 @@
 #   tna_seq_data             -> the code matrix directly
 #   tna_data                 -> $sequence_data (wide label df)
 #   nestimate_data           -> $sequence_data (wide label df)
+#   netobject                -> $data (wide label df; e.g. Nestimate output)
 #   stslist                  -> factor state matrix + alphabet
 #
 # A model carrying the `tna` class is handled by the `tna` branch with
@@ -20,7 +21,7 @@
 # Does `x` carry recoverable event sequences from a known source?
 .is_seq_object <- function(x) {
   inherits(x, c("tna", "group_tna", "tna_seq_data",
-                "tna_data", "nestimate_data", "stslist"))
+                "tna_data", "nestimate_data", "netobject", "stslist"))
 }
 
 # Dispatch on the object class and return a list of event sequences
@@ -44,6 +45,14 @@
            call. = FALSE)
     }
     return(.as_sequence_list(sd))
+  }
+  if (inherits(x, "netobject")) {
+    d <- x$data
+    if (is.null(d) || !is.data.frame(d)) {
+      stop("This netobject has no wide sequence data in $data.",
+           call. = FALSE)
+    }
+    return(.as_sequence_list(d))
   }
   if (inherits(x, "stslist"))       return(.seqs_from_stslist(x))
   stop("Unsupported sequence object: ",

@@ -28,7 +28,7 @@ test_that("plot_transitions draws the network for each weight", {
   tmp <- tempfile(fileext = ".png")
   grDevices::png(tmp, width = 600, height = 500)
   on.exit({ grDevices::dev.off(); unlink(tmp) }, add = TRUE)
-  for (w in c("count", "prob", "residuals", "lift")) {
+  for (w in c("count", "prob", "tna", "relative", "residuals", "lift")) {
     expect_no_error(plot_transitions(fit, weights = w))
   }
   expect_no_error(plot_transitions(fit, weights = "residuals",

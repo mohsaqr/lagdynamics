@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![r-universe](https://mohsaqr.r-universe.dev/badges/lagdynamics)](https://mohsaqr.r-universe.dev/lagdynamics)
-[![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://saqr.me/lagdynamics/)
+[![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://pak.dynasite.org/lagdynamics/)
 <!-- badges: end -->
 
 `lagdynamics` provides a modern, tidy, pipe-friendly interface for lag
@@ -52,6 +52,12 @@ initial probabilities as tidy objects for downstream network tooling.
   (`ggplot2`, `cograph`) are soft `Suggests`, used only when present.
 
 ## Installation
+
+From CRAN, after acceptance:
+
+```r
+install.packages("lagdynamics")
+```
 
 From [r-universe](https://mohsaqr.r-universe.dev/lagdynamics) (pre-built
 binaries, no compiler needed):
@@ -112,7 +118,7 @@ as.data.frame(cmp)
 # Plotting — one verb, pick the view with `type`
 plot(fit)                                 # residual heatmap (default)
 plot(fit, type = "network")               # residual network (blue = more than chance)
-plot(fit, type = "network", weights = "prob")  # transition (TNA-style) network
+plot(fit, type = "network", weights = "tna")   # transition (TNA-style) network
 plot(fit, type = "chord")                 # chord diagram
 plot(fit, type = "sunburst")              # polar sunburst
 plot(bootstrap_lsa(fit))                  # circular bootstrap CI forest
@@ -163,6 +169,7 @@ Users can register custom engines via `register_lsa_engine()`.
 | Vignette | Topic |
 |---|---|
 | `vignette("lagdynamics")` | Get started: the method, why lagdynamics, and a hands-on tour |
+| `vignette("interop")` | Interoperability with wide data, long logs, tna, Nestimate, and cograph |
 | `vignette("workflow")` | A complete analysis from sequences to a group comparison |
 | `vignette("confirmatory")` | The confirmatory testing battery: matching claims to evidence |
 | `vignette("lag-transition-networks")` | Lag transition networks |
@@ -170,7 +177,7 @@ Users can register custom engines via `register_lsa_engine()`.
 
 ## Status
 
-v0.1.0.
+v0.31.
 
 **Implemented:** classical / two-cell / bidirectional / parallel-
 and non-parallel-dominance engines; multi-lag analysis (`lsa_lags()`,
