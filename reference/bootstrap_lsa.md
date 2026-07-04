@@ -1,7 +1,7 @@
 # Bootstrap Confidence Intervals for an LSA Fit
 
 Non-parametric bootstrap for any LSA fit produced by
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 Resamples the underlying sequence data (whole sequences when more than
 one is available; geometric-block stationary bootstrap on events
 otherwise), refits the engine on each resample using the immutable
@@ -30,7 +30,7 @@ bootstrap_lsa(
 - fit:
 
   An `lsa` object returned by
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 - R:
 
@@ -146,8 +146,8 @@ Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap.
 
 ## See also
 
-[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md),
-[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md)
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
 
 ## Examples
 

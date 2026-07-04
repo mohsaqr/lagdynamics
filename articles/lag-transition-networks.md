@@ -51,21 +51,23 @@ head(ai_long)
 #> 6          1               14
 ```
 
-Four columns enter the analysis. The `code` column holds the action, the
-event type whose transitions are modelled. The `order_in_session` column
-orders events within a session. The `session_id` column identifies one
-uninterrupted sequence, and the `project` column groups the sessions.
-Transitions are counted within a session only, so the last event of one
-session and the first of the next are never treated as a pair; the
-`session` argument enforces this boundary.
+Three columns define the analysis. The `code` column holds the action,
+the event type whose transitions are modelled. The `order_in_session`
+column orders events within a session. The `session_id` column
+identifies one uninterrupted sequence. Transitions are counted within a
+session only, so the last event of one session and the first of the next
+are never treated as a pair; the `session` argument enforces this
+boundary. The `project` column is available as contextual metadata, but
+it is not required for this fit because `session_id` already defines the
+sequence boundary.
 
-The [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
-function fits the model, taking the four columns as named arguments.
+The [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+function fits the model by naming the action column, the session
+boundary, and the ordering column.
 
 ``` r
 
 fit <- lsa(ai_long,
-           actor   = "project",
            session = "session_id",
            action  = "code",
            order   = "order_in_session")
@@ -174,7 +176,7 @@ non-significant omnibus test would remove any basis for interpreting
 individual transitions, so it is checked before them.
 
 The
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 function returns one row per directed edge. Its `direction` argument
 selects over- or under-represented transitions and its `sort` argument
 orders them by strength.
@@ -374,7 +376,7 @@ probability of starting in that state.
 
 ``` r
 
-plot_transitions(fit, weights = "prob")
+plot_transitions(fit, weights = "tna")
 ```
 
 ![](lag-transition-networks_files/figure-html/net-prob-1.png)
@@ -409,7 +411,7 @@ boot
 #>   level:         sequence
 #>   replicates:    1000
 #>   CI level:      95%
-#>   stable edges:  41 of 64
+#>   stable edges:  42 of 64
 ```
 
 The bootstrap finds 43 of the 64 possible edges to be stable, meaning
@@ -419,7 +421,7 @@ a new sample even when its residual is large.
 
 Analytic certainty offers a closed-form alternative to the bootstrap.
 The
-[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
 function models each state’s outgoing transitions as
 Dirichlet–Multinomial, which yields a posterior distribution, a credible
 interval, and a certainty decision for each transition probability
@@ -474,3 +476,7 @@ tables. *Biometrics*, 29(1), 205–220.
 Saqr, M., López-Pernas, S., & Tikka, S. (2025). Mapping relational
 dynamics with transition network analysis: A primer and tutorial. In
 *Advanced Learning Analytics Methods and Tutorials*.
+
+------------------------------------------------------------------------
+
+Part of the [Dynalytics framework](https://dynasite.org/).

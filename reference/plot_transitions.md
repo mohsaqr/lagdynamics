@@ -11,7 +11,7 @@ edges. Nodes are white and edges are labelled by default. Returns the
 ``` r
 plot_transitions(
   fit,
-  weights = c("residuals", "count", "prob", "lift", "yules_q"),
+  weights = c("residuals", "tna", "relative", "count", "prob", "lift", "yules_q"),
   significant = FALSE,
   top = NULL,
   decimals = 1,
@@ -26,7 +26,7 @@ plot_transitions(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 - weights:
 
@@ -37,14 +37,16 @@ plot_transitions(
     convention, **blue = more** (over-represented) solid and **red =
     less** (avoided) dashed with a soft halo.
 
-  - `"prob"` / `"count"` – the familiar **transition network** of
-    Transition Network Analysis (TNA), drawn with
-    `cograph::splot(tna_styling = TRUE)`: cograph's own TNA styling
+  - `"tna"` / `"relative"` / `"prob"` / `"count"` – the familiar
+    **transition network** of Transition Network Analysis (TNA), drawn
+    with `cograph::splot(tna_styling = TRUE)`: cograph's own TNA styling
     (coloured nodes, weighted directed edges) plus a donut ring per node
     carrying its initial-state probability, and edges labelled with the
-    transition probability (`"prob"`) or observed count (`"count"`). For
-    `"prob"`, edges below `0.05` are dropped by default so weak
-    transitions do not clutter the plot (override with `edge_cutoff`).
+    transition probability (`"tna"` / `"relative"` / `"prob"`) or
+    observed count (`"count"`). `"tna"` and `"relative"` are explicit
+    aliases for `"prob"`. For probability/TNA networks, edges below
+    `0.05` are dropped by default so weak transitions do not clutter the
+    plot (override with `edge_cutoff`).
 
   - `"lift"` – observed / expected, drawn in a single neutral colour
     with magnitude carried by edge width.
@@ -100,10 +102,10 @@ The `cograph_network` object, invisibly (drawn as a side effect).
 
 ## See also
 
-[`plot.lsa()`](https://mohsaqr.github.io/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
 (heatmap),
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
 
 ## Examples
 
@@ -111,7 +113,9 @@ The `cograph_network` object, invisibly (drawn as a side effect).
 if (FALSE) { # \dontrun{
 fit <- lsa(group_regulation)
 plot_transitions(fit)                                   # residual network
-plot_transitions(fit, weights = "prob")                 # probabilities
+plot_transitions(fit, weights = "tna")                  # TNA probabilities
+plot_transitions(fit, weights = "relative")             # same as "tna"
+plot_transitions(fit, weights = "prob")                 # same matrix
 plot_transitions(fit, weights = "residuals",            # residual network,
                  significant = TRUE)                     #   significant only
 plot_transitions(fit, top = 12)                         # 12 strongest edges

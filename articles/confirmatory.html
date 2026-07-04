@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.31</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,10 +34,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
-    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
-    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
+<li><a class="dropdown-item" href="../articles/intro.html">Introduction</a></li>
+    <li><a class="dropdown-item" href="../articles/interop.html">Interoperability: wide data, long logs, tna, and Nestimate</a></li>
     <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow: from sequences to a group comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
+    <li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
+    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -61,6 +63,8 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Confirmatory testing: matching claims to evidence</h1>
+                        <h4 data-toc-skip class="author"><a href="https://saqr.me" class="external-link">Mohammed Saqr</a></h4>
+                        <h4 data-toc-skip class="author"><a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a></h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/confirmatory.Rmd" class="external-link"><code>vignettes/confirmatory.Rmd</code></a></small>
@@ -302,6 +306,9 @@ stronger claim needs the test that targets exactly its structure.</p>
 <span><span class="fu"><a href="../reference/reliability_lsa.html">reliability_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                     <span class="co"># the whole network</span></span>
 <span><span class="fu"><a href="../reference/permute_lsa.html">permute_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                         <span class="co"># more than chance</span></span>
 <span><span class="fu"><a href="../reference/compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span>; <span class="fu"><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span>  <span class="co"># a group difference</span></span></code></pre></div>
+<hr>
+<p>Part of the <a href="https://dynasite.org/" class="external-link">Dynalytics
+framework</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -310,7 +317,7 @@ stronger claim needs the test that targets exactly its structure.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Mohammed Saqr.</p>
+  <p>Developed by <a href="https://saqr.me" class="external-link">Mohammed Saqr</a>, <a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

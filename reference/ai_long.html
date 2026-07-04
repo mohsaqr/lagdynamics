@@ -15,7 +15,7 @@ long-format event-log import path."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.31</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,12 @@ long-format event-log import path."></head><body>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
-    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
-    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/intro.html">Introduction</a></li>
+    <li><a class="dropdown-item" href="../articles/interop.html">Interoperability: wide data, long logs, tna, and Nestimate</a></li>
     <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow: from sequences to a group comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
+    <li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
+    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -95,7 +97,7 @@ long-format event-log import path.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
-    <p>Derived without modification from <code>Nestimate::ai_long</code>
+    <p>Derived without modification from <code><a href="https://saqr.me/Nestimate/reference/long-data.html" class="external-link">Nestimate::ai_long</a></code>
 (<code>Nestimate</code> version 0.7.7, MIT license).</p>
     </div>
     <div class="section level2">
@@ -107,7 +109,7 @@ long-format event-log import path.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="lsa.html">lsa</a></span><span class="op">(</span><span class="va">ai_long</span>, actor <span class="op">=</span> <span class="st">"project"</span>, session <span class="op">=</span> <span class="st">"session_id"</span>,</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="lsa.html">lsa</a></span><span class="op">(</span><span class="va">ai_long</span>, session <span class="op">=</span> <span class="st">"session_id"</span>,</span></span>
 <span class="r-in"><span>           action <span class="op">=</span> <span class="st">"code"</span>, order <span class="op">=</span> <span class="st">"order_in_session"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span>, significant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           from          to lag count    expected        prob    prob_col</span>
@@ -241,7 +243,7 @@ long-format event-log import path.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Mohammed Saqr.</p>
+  <p>Developed by <a href="https://saqr.me" class="external-link">Mohammed Saqr</a>, <a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

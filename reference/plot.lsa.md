@@ -8,9 +8,9 @@ One entry point for every view of a fit; pick it with `type`:
 [`cograph::plot_chord()`](https://sonsoles.me/cograph/reference/plot_chord.html)),
 or `"sunburst"` (polar rose). Extra arguments are forwarded to the
 chosen view's worker
-([`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md),
-[`plot_chords()`](https://mohsaqr.github.io/lagdynamics/reference/plot_chords.md),
-[`plot_polar()`](https://mohsaqr.github.io/lagdynamics/reference/plot_polar.md));
+([`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md),
+[`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md),
+[`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md));
 see those for view-specific options.
 
 ## Usage
@@ -33,7 +33,7 @@ plot(
 - x:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 - type:
 
@@ -43,8 +43,9 @@ plot(
 - ...:
 
   Forwarded to the chosen view. For `"heatmap"`: `which` (`"residuals"`
-  (default), `"prob"`, `"count"`, `"expected"`). For
-  `"network"`/`"chord"`: `weights`. For `"sunburst"`: `style`, `fill`.
+  (default), `"prob"`, `"count"`, `"expected"`). For `"network"`:
+  `weights` (`"tna"` for the probability-weighted TNA network). For
+  `"chord"`: `width`, `color`. For `"sunburst"`: `style`, `fill`.
 
 - combined:
 
@@ -59,11 +60,11 @@ A `ggplot` object for `"heatmap"` and `"sunburst"`; the (invisible)
 
 ## See also
 
-[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md),
-[`plot_chords()`](https://mohsaqr.github.io/lagdynamics/reference/plot_chords.md),
-[`plot_polar()`](https://mohsaqr.github.io/lagdynamics/reference/plot_polar.md),
-[`plot_forest()`](https://mohsaqr.github.io/lagdynamics/reference/plot_forest.md),
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md),
+[`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md),
+[`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md),
+[`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 
 ## Examples
 
@@ -73,6 +74,7 @@ fit <- lsa(group_regulation)
 plot(fit)                     # residual heatmap (default)
 plot(fit, which = "prob")     # heatmap of probabilities
 plot(fit, type = "network")   # transition network
+plot(fit, type = "network", weights = "tna")  # TNA probability network
 plot(fit, type = "chord")     # chord diagram
 plot(fit, type = "sunburst")  # polar sunburst
 } # }

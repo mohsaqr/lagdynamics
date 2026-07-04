@@ -20,4 +20,14 @@ Invisibly `NULL`.
 
 ## See also
 
-[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md)
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
+
+## Examples
+
+``` r
+my_engine <- function(transitions, ...) {
+  get_lsa_engine("classical")$fn(transitions, ...)
+}
+register_lsa_engine("temporary_engine", my_engine, "Temporary alias")
+unregister_lsa_engine("temporary_engine")
+```

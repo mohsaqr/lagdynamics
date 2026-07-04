@@ -47,7 +47,7 @@ lsa(
 - data:
 
   Sequence input (any form accepted by
-  [`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md)),
+  [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md)),
   *or* a raw long-format event-log `data.frame` when the `actor` /
   `action` arguments are supplied (see below). Accepted already-
   sequenced forms include vectors, lists of sequences, wide
@@ -70,12 +70,12 @@ lsa(
   (degenerate for single-stream event data – genuine co-occurrence needs
   concurrent codes, not yet supported). Pre-computed transition-matrix
   input supports `lag = 1` only. To analyse several lags at once, see
-  [`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md).
+  [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md).
 
 - engine:
 
   Character scalar. The engine name, registered via
-  [`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md).
+  [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md).
   Built-in engines: `"classical"`, `"two_cell"`, `"bidirectional"`,
   `"parallel_dominance"`, `"nonparallel_dominance"`. Default
   `"classical"`.
@@ -128,14 +128,15 @@ lsa(
 - actor, action, time, order, session:
 
   Column names (each a single string) for **long-format** event-log
-  input. Supplying `action` (and `actor`) switches `lsa()` into
-  long-format mode: the raw log in `data` is sequenced into event
-  sequences by grouping rows per `actor` (optionally crossed with an
-  explicit `session` id), ordering within each group by `order` if given
-  else by `time`, and – when `time` is given and no `session` column is
-  – starting a new session whenever the gap between consecutive events
-  exceeds `time_threshold` seconds. All `NULL` by default (input is
-  taken as already-sequenced). Cannot be combined with `group`.
+  input. Supplying `action` switches `lsa()` into long-format mode: the
+  raw log in `data` is sequenced by grouping rows per `actor`, per
+  `session`, per `actor x session`, or as one global sequence when
+  neither boundary is supplied. Events are ordered within each sequence
+  by `order` if given else by `time`, and – when `time` is given and no
+  `session` column is – a new sequence starts whenever the gap between
+  consecutive events exceeds `time_threshold` seconds. All `NULL` by
+  default except `action` in long-format mode (input is otherwise taken
+  as already-sequenced).
 
 - time_threshold:
 
@@ -167,26 +168,26 @@ lsa(
 
 An object of class `c("lsa", "cograph_network")`. Read it with the verbs
 rather than by reaching into slots:
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 for the tidy edge table,
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
-[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md),
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
 and [`summary()`](https://rdrr.io/r/base/summary.html) for the other
 results, and
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`plot_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/plot_transitions.md)
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html)/[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
 to draw it. Every number a verb returns is backed by these slots:
 
 - edges:
 
   The tidy one-row-per-transition frame that backs
-  [`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
   (with extra `cograph_network` protocol columns).
 
 - nodes:
 
   Data frame backing
-  [`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md):
+  [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md):
   `id, label, name, outgoing, incoming`.
 
 - obs, exp, prob, prob_col, adj_res, p, yules_q, kappa, kappa_z,
@@ -200,14 +201,14 @@ to draw it. Every number a verb returns is backed by these slots:
 - lrx2, x2:
 
   Lists `(statistic, df, p)` backing
-  [`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md):
+  [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md):
   the tablewise likelihood-ratio (G^2) and Pearson chi-square tests of
   independence; `NULL` for engines without an expected table.
 
 - inits:
 
   Named numeric vector backing
-  [`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
+  [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
   (proportion of sequences starting in each state, sums to 1); `NULL`
   for transition-matrix input.
 
@@ -243,17 +244,17 @@ When `group` is supplied, returns an object of class
 `c("lsa_group", "list")`: a named list of `lsa` fits (one per group
 level) carrying `levels`, `group_sizes`, `labels`, and `engine`
 attributes. Downstream verbs
-([`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md),
-[`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md),
+([`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
+[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md),
 etc.) dispatch on it and return grouped results.
 
 ## See also
 
-[`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md),
-[`lsa_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_transitions.md),
-[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md),
-[`list_lsa_engines()`](https://mohsaqr.github.io/lagdynamics/reference/list_lsa_engines.md)
+[`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md),
+[`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md),
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
+[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
 
 ## Examples
 

@@ -15,7 +15,7 @@ weeks."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.31</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,10 +27,12 @@ weeks."></head><body>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
-    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
-    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/intro.html">Introduction</a></li>
+    <li><a class="dropdown-item" href="../articles/interop.html">Interoperability: wide data, long logs, tna, and Nestimate</a></li>
     <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow: from sequences to a group comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
+    <li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
+    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -64,22 +66,22 @@ weeks.</p>
 
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>A character matrix with 138 rows and 15 columns.</p>
+    <p>A data frame with 138 rows and 15 character columns.</p>
     </div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
-    <p>Derived without modification from the <code>trajectories</code> matrix
-in the <code>Nestimate</code> package
-(<a href="https://github.com/mohsaqr/Nestimate" class="external-link">https://github.com/mohsaqr/Nestimate</a>), which is MIT-licensed
-and produced by Saqr and collaborators as a synthetic engagement
-trajectory example. Re-shipped here for convenience and offline
-testing; both attribution and license are preserved.</p>
+    <p>Derived from the <code>trajectories</code> matrix in the <code>Nestimate</code>
+package (<a href="https://github.com/mohsaqr/Nestimate" class="external-link">https://github.com/mohsaqr/Nestimate</a>), which is
+MIT-licensed and produced by Saqr and collaborators as a synthetic
+engagement trajectory example. The state values are preserved and
+stored here as a data frame for compatibility with sequence-data
+tooling.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This is a standard small-K, multi-sequence example for lag
 sequential analysis: K = 3 states, S = 138 sequences, mean sequence
-length about 15. It exercises the wide-matrix input path of
+length about 15. It exercises the wide-data input path of
 <code><a href="lsa_data.html">lsa_data()</a></code> and produces a stable transition pattern with clear
 adjusted-residual signals.</p>
     </div>
@@ -116,7 +118,7 @@ adjusted-residual signals.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Mohammed Saqr.</p>
+  <p>Developed by <a href="https://saqr.me" class="external-link">Mohammed Saqr</a>, <a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

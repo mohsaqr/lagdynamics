@@ -4,7 +4,7 @@ A long-format event log of coded AI-side behaviours in human-AI vibe
 coding sessions. Each row is one coded AI event, with project/session
 identifiers, ordering variables, a fine-grained AI behaviour code, and a
 broader behaviour cluster. It is useful for demonstrating
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)'s
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)'s
 long-format event-log import path.
 
 ## Usage
@@ -55,8 +55,9 @@ A `data.frame` with 8,551 rows and 9 columns:
 
 ## Source
 
-Derived without modification from `Nestimate::ai_long` (`Nestimate`
-version 0.7.7, MIT license).
+Derived without modification from
+[`Nestimate::ai_long`](https://saqr.me/Nestimate/reference/long-data.html)
+(`Nestimate` version 0.7.7, MIT license).
 
 ## Details
 
@@ -67,7 +68,7 @@ clusters are `Action`, `Communication`, and `Repair`.
 ## Examples
 
 ``` r
-fit <- lsa(ai_long, actor = "project", session = "session_id",
+fit <- lsa(ai_long, session = "session_id",
            action = "code", order = "order_in_session")
 transitions(fit, significant = TRUE)
 #>           from          to lag count    expected        prob    prob_col

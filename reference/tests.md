@@ -20,7 +20,7 @@ tests(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Value
 
@@ -29,8 +29,8 @@ A `data.frame` with columns `test` (`"lrx2"` / `"x2"`), `statistic`,
 
 ## See also
 
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md)
 
 ## Examples
 

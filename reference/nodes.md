@@ -20,19 +20,19 @@ nodes(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Value
 
 A `data.frame` with columns `state` (the state name, matching the
 `from`/`to` endpoints of
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)),
 `outgoing`, and `incoming` (its total out- and in-transition counts).
 
 ## See also
 
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md)
 
 ## Examples
 

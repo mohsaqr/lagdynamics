@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.31</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,10 +19,12 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
-    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
-    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/intro.html">Introduction</a></li>
+    <li><a class="dropdown-item" href="../articles/interop.html">Interoperability: wide data, long logs, tna, and Nestimate</a></li>
     <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow: from sequences to a group comparison</a></li>
+    <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
+    <li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
+    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -41,43 +43,83 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.0" id="lagdynamics-010-in-development">lagdynamics 0.1.0 (in development)<a class="anchor" aria-label="anchor" href="#lagdynamics-010-in-development"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.31" id="lagdynamics-031">lagdynamics 0.31<a class="anchor" aria-label="anchor" href="#lagdynamics-031"></a></h2>
 <div class="section level3">
-<h3 id="first-public-release-0-1-0">First public release<a class="anchor" aria-label="anchor" href="#first-public-release-0-1-0"></a></h3>
-<p><code>lagdynamics</code> is a from-scratch, clean-room implementation of lag sequential analysis for categorical event sequences. The package is independent of any prior R or non-R LSA implementation; every numerical method is implemented from primary literature (Bakeman &amp; Quera 1995; Sackett 1979; Wickens 1989; Christensen 1997; Haberman 1979). See <code>inst/REFERENCES.md</code> for the formula-by-formula citation map.</p>
-<div class="section level4">
-<h4 id="design-0-1-0">Design<a class="anchor" aria-label="anchor" href="#design-0-1-0"></a></h4>
-<ul><li>Unified <code><a href="../reference/lsa.html">lsa()</a></code> constructor with a pluggable engine registry.</li>
-<li>Five built-in engines: <code>classical</code>, <code>two_cell</code>, <code>bidirectional</code>, <code>parallel_dominance</code>, <code>nonparallel_dominance</code>.</li>
-<li>Convenience wrappers: <code><a href="../reference/lsa.html">lsa_classical()</a></code>, <code><a href="../reference/lsa.html">lsa_two_cell()</a></code>, <code><a href="../reference/lsa.html">lsa_bidirectional()</a></code>, <code><a href="../reference/lsa.html">lsa_parallel_dominance()</a></code>, <code><a href="../reference/lsa.html">lsa_nonparallel_dominance()</a></code>.</li>
-<li>Sequence-level bootstrap (<code><a href="../reference/bootstrap_lsa.html">bootstrap_lsa()</a></code>), permutation (<code><a href="../reference/permute_lsa.html">permute_lsa()</a></code>), case-drop stability (<code><a href="../reference/stability_lsa.html">stability_lsa()</a></code>), and split-half reliability (<code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code>).</li>
-<li>Multi-group fits via <code>lsa(data, group = ...)</code>, returning an <code>lsa_group</code> object with grouped <code><a href="../reference/transitions.html">transitions()</a></code>, <code><a href="../reference/nodes.html">nodes()</a></code>, <code><a href="../reference/tests.html">tests()</a></code>, and <code><a href="../reference/initial.html">initial()</a></code> methods.</li>
-<li>Tidy edge tables and S3 objects of class <code>c("lsa", "cograph_network")</code> for seamless integration with the <code>cograph</code> plotting layer.</li>
-<li>Native transition and initial probabilities: <code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code> returns the row-stochastic P(to | from) matrix and <code><a href="../reference/initial.html">initial()</a></code> the initial-state probabilities.</li>
-<li>Between-group comparison via <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code> and <code><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code>.</li>
-<li>Reproducibility hooks (<code>indices=</code>, <code>shuffles=</code>) for bit-identical cross-language verification.</li>
+<h3 id="cran-candidate-0-31">CRAN candidate<a class="anchor" aria-label="anchor" href="#cran-candidate-0-31"></a></h3>
+<ul><li>Prepared the package for first CRAN submission.</li>
+<li>Added a dedicated interoperability vignette covering wide data, long event logs, <code>tna</code>, <code>Nestimate</code>, <code>cograph</code>, and <code><a href="../reference/lsa_to_tna.html">lsa_to_tna()</a></code>.</li>
+<li>Added linked author metadata and Dynalytics framework links to all shipped vignettes.</li>
+<li>Restored <code><a href="../reference/lsa_to_tna.html">lsa_to_tna()</a></code> for handing an <code>lsa</code> fit to <code>tna</code> tooling.</li>
+<li>Added ingestion of <code><a href="https://saqr.me/Nestimate/reference/build_network.html" class="external-link">Nestimate::build_network()</a></code> netobjects through their prepared sequence data.</li>
+<li>Stored the bundled <code>engagement</code> data as a data frame so <code>tna::tna(engagement)</code> works directly.</li>
+<li>Removed dead package-site URLs from CRAN-visible metadata.</li>
+<li>Added future CRAN installation instructions to the README.</li>
+<li>Included <code>NEWS.md</code> in the source package.</li>
 </ul></div>
-<div class="section level4">
-<h4 id="experimental-0-1-0">Experimental<a class="anchor" aria-label="anchor" href="#experimental-0-1-0"></a></h4>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="lagdynamics-030">lagdynamics 0.3.0<a class="anchor" aria-label="anchor" href="#lagdynamics-030"></a></h2>
+<div class="section level3">
+<h3 id="interoperability-and-documentation-0-3-0">Interoperability and documentation<a class="anchor" aria-label="anchor" href="#interoperability-and-documentation-0-3-0"></a></h3>
+<ul><li>Added integration tests for <code>cograph</code>, <code>Nestimate</code>, and the Dynalytics evidence surface.</li>
+<li>Added native TNA-style aliases: <code>weights = "tna"</code> and <code>weights = "relative"</code> now map to transition probabilities.</li>
+<li>Updated plotting documentation and vignettes to use <code>weights = "tna"</code> for probability-weighted transition networks.</li>
+<li>Added and reorganised vignettes:
 <ul><li>
-<code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code>: directed Schreiber transfer entropy for categorical sequences. Two modes (a directed state-flow network, and bivariate full-alphabet between two series), with effective (surrogate-debiased) and 0-1 normalised variants, and boundary-safe pooling that never lags across sequences. Sign-blind by design; pair with <code><a href="../reference/transitions.html">transitions()</a></code> Yule’s Q for direction of effect. Validated in <code>equivonly/</code> against <code>infotheo::condinformation</code>, an independent direct double-sum oracle, and exact analytic cases.</li>
+<code>intro</code>: conceptual overview and package map.</li>
+<li>
+<code>lagdynamics</code>: concise quick start.</li>
+<li>
+<code>workflow</code>: complete applied workflow.</li>
+<li>
+<code>interop</code>: interoperability with sibling packages.</li>
+<li>
+<code>lag-transition-networks</code>: transition-network interpretation.</li>
+<li>
+<code>confirmatory</code>: evidence and uncertainty workflow.</li>
+<li>
+<code>plotting</code>: plot gallery.</li>
+</ul></li>
+<li>Removed public documentation references to unexported internals.</li>
+<li>Made long-format input more flexible: <code>action</code> is the only mandatory long-format column, with optional <code>actor</code>, <code>session</code>, <code>time</code>, and <code>order</code>.</li>
+<li>Added warnings for single-sequence bootstrap and permutation cases where the requested procedure has limited inferential meaning.</li>
 </ul></div>
-<div class="section level4">
-<h4 id="bundled-data-0-1-0">Bundled data<a class="anchor" aria-label="anchor" href="#bundled-data-0-1-0"></a></h4>
-<p><code>ai_long</code>, <code>engagement</code>, <code>group_regulation</code>, and <code>group_regulation_long</code> (a long-format event log with a recorded achievement grouping) ship with the package, so every example, test, and vignette runs without any external data source.</p>
 </div>
-<div class="section level4">
-<h4 id="dependencies-0-1-0">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies-0-1-0"></a></h4>
-<p>Lean runtime: base R only (<code>Imports: grDevices, grid, stats, utils</code>). The plotting packages (<code>ggplot2</code>, <code>cograph</code>) are the only soft <code>Suggests</code>, used when present.</p>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="lagdynamics-020">lagdynamics 0.2.0<a class="anchor" aria-label="anchor" href="#lagdynamics-020"></a></h2>
+<div class="section level3">
+<h3 id="confirmatory-workflow-and-group-comparison-0-2-0">Confirmatory workflow and group comparison<a class="anchor" aria-label="anchor" href="#confirmatory-workflow-and-group-comparison-0-2-0"></a></h3>
+<ul><li>Added the Dynalytics-style confirmatory evidence battery: <code><a href="../reference/certainty_lsa.html">certainty_lsa()</a></code>, <code><a href="../reference/bootstrap_lsa.html">bootstrap_lsa()</a></code>, <code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code>, <code><a href="../reference/stability_lsa.html">stability_lsa()</a></code>, and <code><a href="../reference/permute_lsa.html">permute_lsa()</a></code>.</li>
+<li>Added group comparison with <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code> and Bayesian group comparison with <code><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code>.</li>
+<li>Added grouped <code><a href="../reference/lsa.html">lsa()</a></code> fits through <code>group = ...</code>, with grouped methods for <code><a href="../reference/transitions.html">transitions()</a></code>, <code><a href="../reference/nodes.html">nodes()</a></code>, <code><a href="../reference/tests.html">tests()</a></code>, <code><a href="../reference/initial.html">initial()</a></code>, plotting, reliability, and comparison workflows.</li>
+<li>Added tidy <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> methods for inference and comparison result objects.</li>
+<li>Added the unified plotting surface: residual heatmaps, residual networks, TNA probability networks, chord diagrams, sunbursts, uncertainty forests, and group-comparison plots.</li>
+<li>Added native transition and initial probabilities: <code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code> and <code><a href="../reference/initial.html">initial()</a></code>.</li>
+<li>Added bundled long-format data for examples and tests.</li>
+</ul></div>
 </div>
-</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.0" id="lagdynamics-010">lagdynamics 0.1.0<a class="anchor" aria-label="anchor" href="#lagdynamics-010"></a></h2>
+<div class="section level3">
+<h3 id="initial-implementation-0-1-0">Initial implementation<a class="anchor" aria-label="anchor" href="#initial-implementation-0-1-0"></a></h3>
+<ul><li>Created a from-scratch, clean-room implementation of lag sequential analysis for categorical event sequences.</li>
+<li>Added the unified <code><a href="../reference/lsa.html">lsa()</a></code> constructor and canonical sequence handling through <code><a href="../reference/lsa_data.html">lsa_data()</a></code> and <code><a href="../reference/lsa_transitions.html">lsa_transitions()</a></code>.</li>
+<li>Added five built-in engines: <code>classical</code>, <code>two_cell</code>, <code>bidirectional</code>, <code>parallel_dominance</code>, and <code>nonparallel_dominance</code>.</li>
+<li>Added convenience wrappers: <code><a href="../reference/lsa.html">lsa_classical()</a></code>, <code><a href="../reference/lsa.html">lsa_two_cell()</a></code>, <code><a href="../reference/lsa.html">lsa_bidirectional()</a></code>, <code><a href="../reference/lsa.html">lsa_parallel_dominance()</a></code>, and <code><a href="../reference/lsa.html">lsa_nonparallel_dominance()</a></code>.</li>
+<li>Added the pluggable engine registry: <code><a href="../reference/register_lsa_engine.html">register_lsa_engine()</a></code>, <code><a href="../reference/get_lsa_engine.html">get_lsa_engine()</a></code>, <code><a href="../reference/list_lsa_engines.html">list_lsa_engines()</a></code>, and <code><a href="../reference/unregister_lsa_engine.html">unregister_lsa_engine()</a></code>.</li>
+<li>Added tidy reading verbs: <code><a href="../reference/transitions.html">transitions()</a></code>, <code><a href="../reference/nodes.html">nodes()</a></code>, <code><a href="../reference/tests.html">tests()</a></code>, <code><a href="../reference/initial.html">initial()</a></code>, and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>.</li>
+<li>Added multi-lag helpers with <code><a href="../reference/lsa_lags.html">lsa_lags()</a></code> and <code><a href="../reference/lag_profile.html">lag_profile()</a></code>.</li>
+<li>Added structural-zero handling through <code>loops = FALSE</code> and arbitrary structural-zero matrices.</li>
+<li>Added experimental <code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code> for directed categorical information-flow analysis.</li>
+<li>Kept runtime dependencies minimal: only base R packages are imported (<code>grDevices</code>, <code>grid</code>, <code>stats</code>, and <code>utils</code>).</li>
+</ul></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Mohammed Saqr.</p>
+  <p>Developed by <a href="https://saqr.me" class="external-link">Mohammed Saqr</a>, <a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a>.</p>
 </div>
 
 <div class="pkgdown-footer-right">

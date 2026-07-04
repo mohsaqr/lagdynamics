@@ -4,7 +4,7 @@
 
 `lagdynamics` provides a modern, tidy, pipe-friendly interface for lag
 sequential analysis (LSA). A single
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
 constructor with a pluggable engine registry exposes the classical and
 extended LSA family — classical, two-cell, bidirectional,
 parallel-dominance, and non-parallel-dominance — and every result is
@@ -38,7 +38,7 @@ downstream network tooling.
   [`pnorm()`](https://rdrr.io/r/stats/Normal.html), and
   [`binom.test()`](https://rdrr.io/r/stats/binom.test.html).
 - **Stable S3 class.**
-  [`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
   returns an object of class `c("lsa", "cograph_network")` with named
   slots (`$obs`, `$exp`, `$prob`, `$adj_res`, `$p`, `$yules_q`,
   `$kappa`, `$edges`, `$nodes`, `$weights`, `$params`, `$meta`).
@@ -53,6 +53,13 @@ downstream network tooling.
   (`ggplot2`, `cograph`) are soft `Suggests`, used only when present.
 
 ## Installation
+
+From CRAN, after acceptance:
+
+``` r
+
+install.packages("lagdynamics")
+```
 
 From [r-universe](https://mohsaqr.r-universe.dev/lagdynamics) (pre-built
 binaries, no compiler needed):
@@ -116,7 +123,7 @@ as.data.frame(cmp)
 # Plotting — one verb, pick the view with `type`
 plot(fit)                                 # residual heatmap (default)
 plot(fit, type = "network")               # residual network (blue = more than chance)
-plot(fit, type = "network", weights = "prob")  # transition (TNA-style) network
+plot(fit, type = "network", weights = "tna")   # transition (TNA-style) network
 plot(fit, type = "chord")                 # chord diagram
 plot(fit, type = "sunburst")              # polar sunburst
 plot(bootstrap_lsa(fit))                  # circular bootstrap CI forest
@@ -129,7 +136,7 @@ initial(fit)                              # initial-state probabilities (tidy)
 
 ## Transition and initial probabilities
 
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
 computes the quantities a Transition Network Analysis reads and exposes
 them natively — no other package required:
 
@@ -139,7 +146,7 @@ transition_probabilities(fit)    # row-stochastic P(to | from) matrix
 initial(fit)                     # initial-state probabilities (tidy data.frame)
 ```
 
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md) also
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) also
 reads sequences straight out of common inputs, so a fit drops into an
 existing pipeline without reshaping:
 
@@ -165,53 +172,54 @@ installed; none of them is a dependency of `lagdynamics`.
 | `nonparallel_dominance` | Non-parallel-dominance analysis | Sackett (1979) |
 
 Users can register custom engines via
-[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md).
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md).
 
 ## Vignettes
 
 | Vignette | Topic |
 |----|----|
-| [`vignette("lagdynamics")`](https://mohsaqr.github.io/lagdynamics/articles/lagdynamics.md) | Get started: the method, why lagdynamics, and a hands-on tour |
-| [`vignette("workflow")`](https://mohsaqr.github.io/lagdynamics/articles/workflow.md) | A complete analysis from sequences to a group comparison |
-| [`vignette("confirmatory")`](https://mohsaqr.github.io/lagdynamics/articles/confirmatory.md) | The confirmatory testing battery: matching claims to evidence |
-| [`vignette("lag-transition-networks")`](https://mohsaqr.github.io/lagdynamics/articles/lag-transition-networks.md) | Lag transition networks |
-| [`vignette("plotting")`](https://mohsaqr.github.io/lagdynamics/articles/plotting.md) | The full plotting gallery |
+| [`vignette("lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/lagdynamics.md) | Get started: the method, why lagdynamics, and a hands-on tour |
+| [`vignette("interop")`](https://pak.dynasite.org/lagdynamics/articles/interop.md) | Interoperability with wide data, long logs, tna, Nestimate, and cograph |
+| [`vignette("workflow")`](https://pak.dynasite.org/lagdynamics/articles/workflow.md) | A complete analysis from sequences to a group comparison |
+| [`vignette("confirmatory")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md) | The confirmatory testing battery: matching claims to evidence |
+| [`vignette("lag-transition-networks")`](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.md) | Lag transition networks |
+| [`vignette("plotting")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md) | The full plotting gallery |
 
 ## Status
 
-v0.1.0.
+v0.31.
 
 **Implemented:** classical / two-cell / bidirectional / parallel- and
 non-parallel-dominance engines; multi-lag analysis
-([`lsa_lags()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_lags.md),
-[`lag_profile()`](https://mohsaqr.github.io/lagdynamics/reference/lag_profile.md))
+([`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md),
+[`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md))
 and structural-zero handling (`loops = FALSE` or an explicit 0/1 matrix,
 IPF with rank-based quasi-independence df). Confirmatory battery:
 bootstrap (sequence-level + stationary block) and analytic
 Dirichlet-Multinomial certainty
-([`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md))
+([`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md))
 for edges, permutation
-([`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md)),
+([`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md)),
 case-drop stability, split-half reliability, and group comparison by
 permutation
-([`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md),
+([`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md),
 two- group and all-pairwise) or Bayesian Dirichlet-Multinomial
-([`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md)).
+([`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)).
 Tidy reading:
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 (with `significant` / `direction` / `min_count` selectors),
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
-[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md),
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
 and [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on
 every result object. Plotting via one `plot(fit, type = )` verb —
 heatmap, residual network, TNA-style transition network, chord,
 sunburst, bootstrap/certainty forests, and group-comparison barrels —
 with grouped fits drawn one panel per group. Transition and initial
 probabilities are exposed natively via
-[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md)
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
 and
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md).
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md).
 Multi-group fits (`lsa(group = )` → `lsa_group`) are supported across
 every reading, plotting, and inference layer.
 

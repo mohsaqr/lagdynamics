@@ -11,7 +11,7 @@ three engagement states).
 |----|----|----|
 | residual heatmap | `plot(fit)` | ggplot2 |
 | residual network | `plot(fit, type = "network")` | cograph |
-| transition (TNA) network | `plot(fit, type = "network", weights = "prob")` | cograph |
+| transition (TNA) network | `plot(fit, type = "network", weights = "tna")` | cograph |
 | chord diagram | `plot(fit, type = "chord")` | cograph |
 | polar sunburst | `plot(fit, type = "sunburst")` | ggplot2 |
 | uncertainty forest | `plot(bootstrap_lsa(fit))`, `plot(certainty_lsa(fit))` | ggplot2 |
@@ -67,7 +67,7 @@ shows what is surprising.
 
 ``` r
 
-plot(fit, type = "network", weights = "prob")
+plot(fit, type = "network", weights = "tna")
 ```
 
 ![](plotting_files/figure-html/net-transition-1.png)
@@ -198,9 +198,13 @@ plot_forest(bootstrap_lsa(fit), n_top = 12)                       # forest
 
 plot(fit)                                   # residual heatmap (default)
 plot(fit, type = "network")                 # residual network (blue = more)
-plot(fit, type = "network", weights = "prob")  # transition network (a TNA model)
+plot(fit, type = "network", weights = "tna")   # transition network (a TNA model)
 plot(fit, type = "chord"); plot(fit, type = "sunburst")
 plot(bootstrap_lsa(fit)); plot(certainty_lsa(fit))   # uncertainty forests
 plot(compare_lsa(gfit)); plot(bayes_compare_lsa(gfit))  # group barrels
 plot(gfit)                                  # grouped: one panel per group
 ```
+
+------------------------------------------------------------------------
+
+Part of the [Dynalytics framework](https://dynasite.org/).

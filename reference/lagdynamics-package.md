@@ -4,7 +4,7 @@ A unified, pipe-friendly interface for lag sequential analysis (LSA) of
 categorical event sequences. Provides classical, two-cell,
 bidirectional, parallel-dominance, and non-parallel-dominance engines
 via a single
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
 constructor with a pluggable engine registry, sequence-level bootstrap
 and permutation inference, case-drop stability, and tidy edge tables
 ready for transition-network visualization.
@@ -26,47 +26,47 @@ visualization layer when it is installed.
 ## Main functions
 
 Construction:
-[`lsa()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-[`lsa_data()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_data.md),
-[`lsa_transitions()`](https://mohsaqr.github.io/lagdynamics/reference/lsa_transitions.md)
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+[`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md),
+[`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
 
 Convenience wrappers:
-[`lsa_classical()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-[`lsa_two_cell()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-[`lsa_bidirectional()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-[`lsa_parallel_dominance()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md),
-[`lsa_nonparallel_dominance()`](https://mohsaqr.github.io/lagdynamics/reference/lsa.md)
+[`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+[`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+[`lsa_bidirectional()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+[`lsa_parallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+[`lsa_nonparallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
 
 Engine registry:
-[`register_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/register_lsa_engine.md),
-[`get_lsa_engine()`](https://mohsaqr.github.io/lagdynamics/reference/get_lsa_engine.md),
-[`list_lsa_engines()`](https://mohsaqr.github.io/lagdynamics/reference/list_lsa_engines.md)
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
+[`get_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/get_lsa_engine.md),
+[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
 
 Inference:
-[`bootstrap_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bootstrap_lsa.md),
-[`permute_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/permute_lsa.md),
-[`stability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/stability_lsa.md),
-[`reliability_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/reliability_lsa.md),
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
+[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md),
 and analytic certainty via
-[`certainty_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/certainty_lsa.md).
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md).
 
 Group comparison:
-[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
 and
-[`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md)
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
 for between-group differences in transition structure.
 
 Reading a fit (tidy data frames):
-[`transitions()`](https://mohsaqr.github.io/lagdynamics/reference/transitions.md),
-[`nodes()`](https://mohsaqr.github.io/lagdynamics/reference/nodes.md),
-[`tests()`](https://mohsaqr.github.io/lagdynamics/reference/tests.md),
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
 and [`summary()`](https://rdrr.io/r/base/summary.html).
 
 Transition and initial probabilities:
-[`transition_probabilities()`](https://mohsaqr.github.io/lagdynamics/reference/transition_probabilities.md)
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
 returns the row-stochastic transition-probability matrix and
-[`initial()`](https://mohsaqr.github.io/lagdynamics/reference/initial.md)
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
 the initial-state probabilities.
 
 ## Roadmap (not yet implemented)
@@ -74,9 +74,9 @@ the initial-state probabilities.
 Stationarity tests (`stationarity_lsa()`) are planned but not yet
 exported. Multi-group fits are built with `lsa(data, group = ...)`;
 between-group differences are then tested with
-[`compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
 or
-[`bayes_compare_lsa()`](https://mohsaqr.github.io/lagdynamics/reference/bayes_compare_lsa.md).
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md).
 
 ## References
 
@@ -112,10 +112,14 @@ Useful links:
 
 - <https://github.com/mohsaqr/lagdynamics>
 
-- <https://mohsaqr.github.io/lagdynamics/>
+- <https://pak.dynasite.org/lagdynamics/>
 
 - Report bugs at <https://github.com/mohsaqr/lagdynamics/issues>
 
 ## Author
 
 **Maintainer**: Mohammed Saqr <saqr@saqr.me> \[copyright holder\]
+
+Authors:
+
+- Sonsoles López-Pernas
