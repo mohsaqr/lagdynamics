@@ -280,4 +280,7 @@ Use the focused vignettes according to the claim you need to support:
 
 ------------------------------------------------------------------------
 
+Full documentation and reference:
+<https://pak.dynasite.org/lagdynamics/>
+
 Part of the [Dynalytics framework](https://saqr.me/).

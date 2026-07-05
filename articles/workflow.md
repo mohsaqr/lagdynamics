@@ -472,4 +472,7 @@ stability. Group-difference claims use permutation comparison.
 
 ------------------------------------------------------------------------
 
+Full documentation and reference:
+<https://pak.dynasite.org/lagdynamics/>
+
 Part of the [Dynalytics framework](https://saqr.me/).

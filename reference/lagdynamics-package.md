@@ -112,8 +112,6 @@ Useful links:
 
 - <https://github.com/mohsaqr/lagdynamics>
 
-- <https://pak.dynasite.org/lagdynamics/>
-
 - Report bugs at <https://github.com/mohsaqr/lagdynamics/issues>
 
 ## Author

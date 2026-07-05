@@ -479,4 +479,7 @@ dynamics with transition network analysis: A primer and tutorial. In
 
 ------------------------------------------------------------------------
 
+Full documentation and reference:
+<https://pak.dynasite.org/lagdynamics/>
+
 Part of the [Dynalytics framework](https://saqr.me/).

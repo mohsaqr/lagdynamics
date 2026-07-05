@@ -207,4 +207,7 @@ plot(gfit)                                  # grouped: one panel per group
 
 ------------------------------------------------------------------------
 
+Full documentation and reference:
+<https://pak.dynasite.org/lagdynamics/>
+
 Part of the [Dynalytics framework](https://saqr.me/).
