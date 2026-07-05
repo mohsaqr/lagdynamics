@@ -66,148 +66,103 @@
 </blockquote>
 <!-- badges: start -->
 
-<p><code>lagdynamics</code> provides a modern, tidy, pipe-friendly interface for lag sequential analysis (LSA). A single <code><a href="reference/lsa.html">lsa()</a></code> constructor with a pluggable engine registry exposes the classical and extended LSA family — classical, two-cell, bidirectional, parallel-dominance, and non-parallel-dominance — and every result is read through a verb that returns a tidy one-row-per-observation <code>data.frame</code>.</p>
-<p>It is the lag-sequential member of the <strong>Dynalytics</strong> framework: every edge is a <em>tested departure from independence</em>, backed by a confirmatory testing battery — bootstrap and analytic certainty for edges, split-half reliability for the whole network, case-drop stability, permutation tests, and permutation- or Bayesian-based group comparison. Fits visualize through a single <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> verb and expose their transition and initial probabilities as tidy objects for downstream network tooling.</p>
-<div class="section level2">
-<h2 id="design-principles">Design principles<a class="anchor" aria-label="anchor" href="#design-principles"></a>
-</h2>
-<ul>
-<li>
-<strong>Clean room.</strong> Every numerical method is implemented from primary literature (Bakeman &amp; Quera 1995; Sackett 1979; Wickens 1989; Christensen 1997; Haberman 1979). No code is derived from any prior R implementation. See <code>inst/REFERENCES.md</code> for the formula-by-formula citation map.</li>
-<li>
-<strong>Best-in-class equivalence.</strong> Engines are cross-validated against independent hand-formula identities and base-R primitives: <code><a href="https://rdrr.io/r/stats/loglin.html" class="external-link">stats::loglin()</a></code> (for iterative proportional fitting of expected frequencies with structural zeros), <code>chisq.test()$stdres</code> (for Haberman adjusted residuals when no structural zeros are present), <code><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">pchisq()</a></code>, <code><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">pnorm()</a></code>, and <code><a href="https://rdrr.io/r/stats/binom.test.html" class="external-link">binom.test()</a></code>.</li>
-<li>
-<strong>Stable S3 class.</strong> <code><a href="reference/lsa.html">lsa()</a></code> returns an object of class <code>c("lsa", "cograph_network")</code> with named slots (<code>$obs</code>, <code>$exp</code>, <code>$prob</code>, <code>$adj_res</code>, <code>$p</code>, <code>$yules_q</code>, <code>$kappa</code>, <code>$edges</code>, <code>$nodes</code>, <code>$weights</code>, <code>$params</code>, <code>$meta</code>). Inheriting the <code>cograph_network</code> class means <code><a href="https://sonsoles.me/cograph/reference/splot.html" class="external-link">cograph::splot()</a></code> works on a fit unchanged.</li>
-<li>
-<strong>Recipe pattern.</strong> Configuration is snapshotted on the fit in <code>$params</code>. Bootstrap, permutation, and stability inference all read from that single snapshot to prevent config drift.</li>
-<li>
-<strong>Lean-core policy.</strong> The analytical core imports only base packages (<code>grDevices</code>, <code>grid</code>, <code>stats</code>, <code>utils</code>); the plotting surface imports <code>ggplot2</code> and <code>cograph</code>. Interoperability packages (<code>tna</code>, <code>Nestimate</code>) stay soft <code>Suggests</code>, used only when present.</li>
-</ul>
-</div>
+<p>Lag sequential analysis (LSA) is a statistical method for detecting temporal contingencies in categorical, time-ordered data. For every ordered pair of states, it tests whether one follows another at a given lag more — or less — often than expected under sequential independence, quantifying each contingency with the adjusted (standardized) residual of observed against expected transition frequencies. It is widely used to study how categorical processes unfold over time — in behavioral and dyadic interaction, conversation and group discourse, psychotherapy process research, human–computer interaction, and learning analytics — wherever the order of events, not merely their frequency, carries the meaning.</p>
+<p><code>lagdynamics</code> implements LSA as a modern, tidy workflow. A single <code><a href="reference/lsa.html">lsa()</a></code> constructor fits the classical and extended engine family — classical, two-cell, bidirectional, and parallel / non-parallel dominance — and every result is read through a verb that returns a one-row-per-observation <code>data.frame</code>. Its distinguishing commitment is evidence: each transition is treated as a <em>tested departure from independence</em>, backed by a confirmatory battery of bootstrap intervals, analytic Bayesian certainty, split-half reliability, case-drop stability, and permutation tests.</p>
+<p>Beyond the classical test, the package adds multi-lag analysis, structural-zero constraints under quasi-independence, and grouped fits that estimate one model per group in a shared state space, with formal group comparison by permutation or Bayesian Dirichlet–Multinomial contrast. It is designed to interoperate across the sequence-analysis ecosystem: <code><a href="reference/lsa.html">lsa()</a></code> ingests long event logs, wide matrices, lists of sequences, and objects from <code>tna</code>, <code>Nestimate</code>, and <code>TraMineR</code>, while fitted objects carry a <code>cograph</code> network class and expose transition and initial probabilities for downstream tooling. A single <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> verb renders any fit as a residual heatmap, transition network, chord diagram, polar sunburst, or uncertainty forest.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>From CRAN, after acceptance:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lagdynamics"</span><span class="op">)</span></span></code></pre></div>
-<p>From <a href="https://mohsaqr.r-universe.dev/lagdynamics" class="external-link">r-universe</a> (pre-built binaries, no compiler needed):</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lagdynamics"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># CRAN (after acceptance)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lagdynamics"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># r-universe (pre-built binaries, no compiler needed)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"lagdynamics"</span>,</span>
 <span>                 repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://mohsaqr.r-universe.dev"</span>,</span>
-<span>                           <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Or the development version from GitHub:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span>                           <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># development version</span></span>
+<span><span class="co"># install.packages("remotes")</span></span>
 <span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mohsaqr/lagdynamics"</span><span class="op">)</span></span></code></pre></div>
-<p><code>lagdynamics</code>’s analytical core needs only base R at runtime (<code>grDevices</code>, <code>grid</code>, <code>stats</code>, <code>utils</code>); the plotting surface imports <code>ggplot2</code> and <code>cograph</code>, which install automatically. Interoperability packages (<code>tna</code>, <code>Nestimate</code>) remain optional <code>Suggests</code> — install only the ones you need.</p>
+<p>The analytical core depends only on base R; plotting adds <code>ggplot2</code> and <code>cograph</code>, which install automatically. Interoperability packages (<code>tna</code>, <code>Nestimate</code>) stay optional <code>Suggests</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
+<h2 id="at-a-glance">At a glance<a class="anchor" aria-label="anchor" href="#at-a-glance"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr>
+<th>Task</th>
+<th>Functions</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Fit a model</td>
+<td>
+<code><a href="reference/lsa.html">lsa()</a></code>, <code><a href="reference/lsa_lags.html">lsa_lags()</a></code>, <code><a href="reference/lag_profile.html">lag_profile()</a></code>
+</td>
+</tr>
+<tr>
+<td>Read results (tidy)</td>
+<td>
+<code><a href="reference/transitions.html">transitions()</a></code>, <code><a href="reference/nodes.html">nodes()</a></code>, <code><a href="reference/tests.html">tests()</a></code>, <code><a href="reference/initial.html">initial()</a></code>, <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>
+</td>
+</tr>
+<tr>
+<td>Weigh the evidence</td>
+<td>
+<code><a href="reference/bootstrap_lsa.html">bootstrap_lsa()</a></code>, <code><a href="reference/certainty_lsa.html">certainty_lsa()</a></code>, <code><a href="reference/permute_lsa.html">permute_lsa()</a></code>, <code><a href="reference/stability_lsa.html">stability_lsa()</a></code>, <code><a href="reference/reliability_lsa.html">reliability_lsa()</a></code>
+</td>
+</tr>
+<tr>
+<td>Compare groups</td>
+<td>
+<code><a href="reference/compare_lsa.html">compare_lsa()</a></code>, <code><a href="reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code>
+</td>
+</tr>
+<tr>
+<td>Plot</td>
+<td>
+<code>plot(fit, type = )</code>, <code><a href="reference/plot_transitions.html">plot_transitions()</a></code>, <code><a href="reference/plot_chords.html">plot_chords()</a></code>, <code><a href="reference/plot_polar.html">plot_polar()</a></code>, <code><a href="reference/plot_forest.html">plot_forest()</a></code>
+</td>
+</tr>
+<tr>
+<td>Probabilities</td>
+<td>
+<code><a href="reference/transition_probabilities.html">transition_probabilities()</a></code>, <code><a href="reference/initial.html">initial()</a></code>
+</td>
+</tr>
+<tr>
+<td>Engines</td>
+<td>
+<code>lsa(engine = )</code>, <code><a href="reference/register_lsa_engine.html">register_lsa_engine()</a></code>, <code><a href="reference/list_lsa_engines.html">list_lsa_engines()</a></code>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mohsaqr/lagdynamics" class="external-link">lagdynamics</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Question"</span>, <span class="st">"Explain"</span>, <span class="st">"Agree"</span>,</span>
 <span>         <span class="st">"Question"</span>, <span class="st">"Explain"</span>, <span class="st">"Elaborate"</span>,</span>
 <span>         <span class="st">"Agree"</span>, <span class="st">"Question"</span>, <span class="st">"Explain"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">seq</span>, lag <span class="op">=</span> <span class="fl">1</span>, engine <span class="op">=</span> <span class="st">"classical"</span><span class="op">)</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">seq</span>, engine <span class="op">=</span> <span class="st">"classical"</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
 <span></span>
-<span><span class="co"># Reading the fit — one verb per result, each returns a tidy data.frame</span></span>
-<span><span class="fu"><a href="reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                          <span class="co"># one row per transition</span></span>
-<span><span class="fu"><a href="reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span>, significant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>      <span class="co"># significant only</span></span>
-<span><span class="fu"><a href="reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span>, direction <span class="op">=</span> <span class="st">"over"</span><span class="op">)</span>      <span class="co"># over-represented</span></span>
-<span><span class="fu"><a href="reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span>, min_count <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>           <span class="co"># frequently observed</span></span>
-<span><span class="fu"><a href="reference/nodes.html">nodes</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                                <span class="co"># one row per state</span></span>
-<span><span class="fu"><a href="reference/tests.html">tests</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                                <span class="co"># tablewise independence tests</span></span>
-<span><span class="fu"><a href="reference/initial.html">initial</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                              <span class="co"># initial-state distribution</span></span>
+<span><span class="fu"><a href="reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span>, significant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>   <span class="co"># tidy table of tested transitions</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span><span class="op">)</span>            <span class="co"># residual transition network</span></span>
 <span></span>
-<span><span class="co"># Confirmatory testing — quantify the evidence behind each claim</span></span>
-<span><span class="va">boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>      <span class="co"># edge uncertainty (resampling)</span></span>
-<span><span class="va">cert</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/certainty_lsa.html">certainty_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                <span class="co"># edge uncertainty (analytic, Bayesian)</span></span>
-<span><span class="va">perm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/permute_lsa.html">permute_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span>        <span class="co"># more than chance</span></span>
-<span><span class="va">stab</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/stability_lsa.html">stability_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>       <span class="co"># significant edges under case-dropping</span></span>
-<span><span class="va">rel</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/reliability_lsa.html">reliability_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>     <span class="co"># whole-network split-half reliability</span></span>
-<span></span>
-<span><span class="co"># Groups and comparison</span></span>
-<span><span class="va">g</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">sequences</span>, group <span class="op">=</span> <span class="va">group_labels</span><span class="op">)</span>  <span class="co"># one fit per group -&gt; lsa_group</span></span>
-<span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>                         <span class="co"># permutation test of the difference</span></span>
-<span><span class="va">bc</span>  <span class="op">&lt;-</span> <span class="fu"><a href="reference/bayes_compare_lsa.html">bayes_compare_lsa</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>                   <span class="co"># Bayesian group comparison</span></span>
-<span></span>
-<span><span class="co"># Every result is tidy: as.data.frame() returns a one-row-per-edge frame</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Plotting — one verb, pick the view with `type`</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                                 <span class="co"># residual heatmap (default)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span><span class="op">)</span>               <span class="co"># residual network (blue = more than chance)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span>, weights <span class="op">=</span> <span class="st">"tna"</span><span class="op">)</span>   <span class="co"># transition (TNA-style) network</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"chord"</span><span class="op">)</span>                 <span class="co"># chord diagram</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"sunburst"</span><span class="op">)</span>              <span class="co"># polar sunburst</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span>                  <span class="co"># circular bootstrap CI forest</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span>                                 <span class="co"># back-to-back group-comparison barrel</span></span>
-<span></span>
-<span><span class="co"># Transition and initial probabilities as native objects</span></span>
-<span><span class="fu"><a href="reference/transition_probabilities.html">transition_probabilities</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>             <span class="co"># row-stochastic P(to | from) matrix</span></span>
-<span><span class="fu"><a href="reference/initial.html">initial</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                              <span class="co"># initial-state probabilities (tidy)</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="transition-and-initial-probabilities">Transition and initial probabilities<a class="anchor" aria-label="anchor" href="#transition-and-initial-probabilities"></a>
-</h2>
-<p><code><a href="reference/lsa.html">lsa()</a></code> computes the quantities a Transition Network Analysis reads and exposes them natively — no other package required:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/transition_probabilities.html">transition_probabilities</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>    <span class="co"># row-stochastic P(to | from) matrix</span></span>
-<span><span class="fu"><a href="reference/initial.html">initial</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                     <span class="co"># initial-state probabilities (tidy data.frame)</span></span></code></pre></div>
-<p><code><a href="reference/lsa.html">lsa()</a></code> also reads sequences straight out of common inputs, so a fit drops into an existing pipeline without reshaping:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">long_log</span>, actor <span class="op">=</span> , action <span class="op">=</span> , time <span class="op">=</span> <span class="op">)</span>   <span class="co"># a raw long event log</span></span>
-<span><span class="fu"><a href="reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">wide_matrix</span><span class="op">)</span>                               <span class="co"># rows = sequences, cols = time</span></span>
-<span><span class="fu"><a href="reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">list_of_sequences</span><span class="op">)</span>                         <span class="co"># one vector per sequence</span></span></code></pre></div>
-<p>It additionally recognises sequence-bearing objects from sibling state-sequence and transition-model packages when they happen to be installed; none of them is a dependency of <code>lagdynamics</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="engines">Engines<a class="anchor" aria-label="anchor" href="#engines"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="33%">
-<col width="33%">
-<col width="33%">
-</colgroup>
-<thead><tr>
-<th>Engine</th>
-<th>Method</th>
-<th>Reference</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><code>classical</code></td>
-<td>Lag-1 sequential with adjusted residuals, Yule’s Q, and unidirectional kappa</td>
-<td>Bakeman &amp; Quera (1995)</td>
-</tr>
-<tr>
-<td><code>two_cell</code></td>
-<td>2×2 single-transition test (Yule’s Q + odds ratio)</td>
-<td>Bakeman &amp; Gottman (1997) ch. 7</td>
-</tr>
-<tr>
-<td><code>bidirectional</code></td>
-<td>Matched-pair / mutual-influence test</td>
-<td>Sackett (1979)</td>
-</tr>
-<tr>
-<td><code>parallel_dominance</code></td>
-<td>Parallel-dominance analysis</td>
-<td>Sackett (1979)</td>
-</tr>
-<tr>
-<td><code>nonparallel_dominance</code></td>
-<td>Non-parallel-dominance analysis</td>
-<td>Sackett (1979)</td>
-</tr>
-</tbody>
-</table>
-<p>Users can register custom engines via <code><a href="reference/register_lsa_engine.html">register_lsa_engine()</a></code>.</p>
+<span><span class="co"># quantify the evidence behind each edge</span></span>
+<span><span class="va">boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">boot</span><span class="op">)</span>                             <span class="co"># circular bootstrap CI forest</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
@@ -228,7 +183,8 @@
 </tr>
 <tr>
 <td><code><a href="articles/interop.html">vignette("interop")</a></code></td>
-<td>Interoperability with wide data, long logs, tna, Nestimate, and cograph</td>
+<td>Interoperability with wide data, long logs, <code>tna</code>, <code>Nestimate</code>, and <code>cograph</code>
+</td>
 </tr>
 <tr>
 <td><code><a href="articles/workflow.html">vignette("workflow")</a></code></td>
@@ -248,13 +204,6 @@
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section level2">
-<h2 id="status">Status<a class="anchor" aria-label="anchor" href="#status"></a>
-</h2>
-<p>v0.31.</p>
-<p><strong>Implemented:</strong> classical / two-cell / bidirectional / parallel- and non-parallel-dominance engines; multi-lag analysis (<code><a href="reference/lsa_lags.html">lsa_lags()</a></code>, <code><a href="reference/lag_profile.html">lag_profile()</a></code>) and structural-zero handling (<code>loops = FALSE</code> or an explicit 0/1 matrix, IPF with rank-based quasi-independence df). Confirmatory battery: bootstrap (sequence-level + stationary block) and analytic Dirichlet-Multinomial certainty (<code><a href="reference/certainty_lsa.html">certainty_lsa()</a></code>) for edges, permutation (<code><a href="reference/permute_lsa.html">permute_lsa()</a></code>), case-drop stability, split-half reliability, and group comparison by permutation (<code><a href="reference/compare_lsa.html">compare_lsa()</a></code>, two- group and all-pairwise) or Bayesian Dirichlet-Multinomial (<code><a href="reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code>). Tidy reading: <code><a href="reference/transitions.html">transitions()</a></code> (with <code>significant</code> / <code>direction</code> / <code>min_count</code> selectors), <code><a href="reference/nodes.html">nodes()</a></code>, <code><a href="reference/tests.html">tests()</a></code>, <code><a href="reference/initial.html">initial()</a></code>, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> on every result object. Plotting via one <code>plot(fit, type = )</code> verb — heatmap, residual network, TNA-style transition network, chord, sunburst, bootstrap/certainty forests, and group-comparison barrels — with grouped fits drawn one panel per group. Transition and initial probabilities are exposed natively via <code><a href="reference/transition_probabilities.html">transition_probabilities()</a></code> and <code><a href="reference/initial.html">initial()</a></code>. Multi-group fits (<code>lsa(group = )</code> → <code>lsa_group</code>) are supported across every reading, plotting, and inference layer.</p>
-<p><strong>Roadmap:</strong> stationarity tests (<code>stationarity_lsa()</code>).</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
