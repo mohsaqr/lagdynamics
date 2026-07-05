@@ -5,11 +5,11 @@ fitted lag-sequential analysis (LSA) model, tidy transition tables, two
 plots, and one uncertainty check.
 
 For the method background, see
-[`vignette("intro", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/intro.md).
+[`vignette("intro", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/intro.md).
 For a complete applied analysis, see
-[`vignette("workflow", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/workflow.md).
+[`vignette("workflow", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/workflow.md).
 For all plotting variants, see
-[`vignette("plotting", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/plotting.md).
+[`vignette("plotting", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md).
 
 ## Fit a model
 
@@ -36,10 +36,10 @@ head(engagement)
 #> 6 Average Average Disengaged Average Disengaged Average Average Average
 ```
 
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) fits the model
-in one call. It counts state-to-state transitions, computes expected
-counts under independence, and reports adjusted residuals for every
-`from -> to` transition.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) fits
+the model in one call. It counts state-to-state transitions, computes
+expected counts under independence, and reports adjusted residuals for
+every `from -> to` transition.
 
 ``` r
 
@@ -64,7 +64,7 @@ fit
 
 ## Read the result
 
-[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 is the main table. It returns one row per transition with observed
 counts, expected counts, transition probabilities, adjusted residuals,
 p-values, and significance flags.
@@ -247,35 +247,35 @@ as.data.frame(cert) |> head(4)
 ```
 
 For resampling-based edge uncertainty, use
-[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md).
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md).
 For whole-network reproducibility, use
-[`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)
+[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
 and
-[`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md).
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md).
 For empirical null comparisons, use
-[`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md)
 or
-[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md).
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md).
 These are covered in
-[`vignette("confirmatory", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/confirmatory.md).
+[`vignette("confirmatory", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md).
 
 ## Where next
 
 Use the focused vignettes according to the claim you need to support:
 
-- [`vignette("intro", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/intro.md)
+- [`vignette("intro", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/intro.md)
   for concepts and package map.
-- [`vignette("workflow", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/workflow.md)
+- [`vignette("workflow", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/workflow.md)
   for a full claim-to-evidence analysis.
-- [`vignette("interop", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/interop.md)
+- [`vignette("interop", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/interop.md)
   for wide data, long logs, `tna`, `Nestimate`, `cograph`, and
-  [`lsa_to_tna()`](https://saqr.me/lagdynamics/reference/lsa_to_tna.md).
-- [`vignette("plotting", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/plotting.md)
+  [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md).
+- [`vignette("plotting", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md)
   for heatmaps, networks, chords, sunbursts, and comparison plots.
-- [`vignette("confirmatory", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/confirmatory.md)
+- [`vignette("confirmatory", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md)
   for certainty, bootstrap, reliability, stability, permutation, and
   group comparison.
-- [`vignette("lag-transition-networks", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/lag-transition-networks.md)
+- [`vignette("lag-transition-networks", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.md)
   for TNA-style transition networks.
 
 ------------------------------------------------------------------------

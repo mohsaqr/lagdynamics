@@ -4,7 +4,8 @@
 as Transition Network Analysis (TNA), `Nestimate`, `cograph`, and other
 sequence tools. The important interoperability promise is simple:
 
-- the same [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) front
+- the same
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) front
   door accepts wide sequence data, raw long event logs, `tna` sequence
   objects, and `Nestimate` prepared objects;
 - long logs use the same column grammar as TNA-style workflows: `actor`,
@@ -16,8 +17,8 @@ sequence tools. The important interoperability promise is simple:
 
 In a TNA workflow, a raw event log is usually sequenced by naming the
 actor, the event/action code, and either a time or order column.
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) uses the same
-grammar directly.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) uses
+the same grammar directly.
 
 ``` r
 
@@ -240,11 +241,11 @@ transitions(gfit, significant = TRUE) |> head(6)
 
 ## tna objects
 
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) accepts a real
-`tna` model when that model carries its source sequences. The example
-below starts from the same included wide sequence data, fits a TNA model
-with `tna`, and then hands that fitted object to
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) accepts
+a real `tna` model when that model carries its source sequences. The
+example below starts from the same included wide sequence data, fits a
+TNA model with `tna`, and then hands that fitted object to
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ``` r
 
@@ -300,8 +301,8 @@ isTRUE(all.equal(transitions(fit_from_tna), transitions(fit_wide),
 [`Nestimate::build_network()`](https://saqr.me/Nestimate/reference/build_network.html)
 uses the same long-log grammar. The object it returns carries the
 prepared sequence data, so
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) can read it
-directly.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) can
+read it directly.
 
 ``` r
 
@@ -368,8 +369,8 @@ fit_nestimate
 
 The same raw log can also be fitted directly with the long-format
 grammar. The `Nestimate` object and the direct
-[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) call recover the
-same transition table.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) call
+recover the same transition table.
 
 ``` r
 
@@ -384,7 +385,7 @@ isTRUE(all.equal(transitions(fit_nestimate), transitions(fit_ai_direct),
 ## Back to tna
 
 Use
-[`lsa_to_tna()`](https://saqr.me/lagdynamics/reference/lsa_to_tna.md)
+[`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md)
 when the model is estimated with `lagdynamics` and then handed to `tna`
 for TNA-specific tooling.
 

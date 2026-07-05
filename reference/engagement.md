@@ -28,8 +28,8 @@ for compatibility with sequence-data tooling.
 This is a standard small-K, multi-sequence example for lag sequential
 analysis: K = 3 states, S = 138 sequences, mean sequence length about
 15. It exercises the wide-data input path of
-[`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md) and
-produces a stable transition pattern with clear adjusted-residual
+[`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md)
+and produces a stable transition pattern with clear adjusted-residual
 signals.
 
 ## Examples

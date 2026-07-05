@@ -10,11 +10,11 @@
   The analytical core still depends only on base R.
 - Added a dedicated interoperability vignette covering wide data, long
   event logs, `tna`, `Nestimate`, `cograph`, and
-  [`lsa_to_tna()`](https://saqr.me/lagdynamics/reference/lsa_to_tna.md).
+  [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md).
 - Added linked author metadata and Dynalytics framework links to all
   shipped vignettes.
 - Restored
-  [`lsa_to_tna()`](https://saqr.me/lagdynamics/reference/lsa_to_tna.md)
+  [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md)
   for handing an `lsa` fit to `tna` tooling.
 - Added ingestion of
   [`Nestimate::build_network()`](https://saqr.me/Nestimate/reference/build_network.html)
@@ -55,22 +55,23 @@
 ### Confirmatory workflow and group comparison
 
 - Added the Dynalytics-style confirmatory evidence battery:
-  [`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md),
-  [`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md),
-  [`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md),
-  [`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md),
+  [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
+  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
+  [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md),
+  [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
   and
-  [`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md).
+  [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md).
 - Added group comparison with
-  [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
+  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
   and Bayesian group comparison with
-  [`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md).
-- Added grouped [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
-  fits through `group = ...`, with grouped methods for
-  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
-  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
-  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md),
-  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md),
+  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md).
+- Added grouped
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) fits
+  through `group = ...`, with grouped methods for
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+  [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+  [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+  [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
   plotting, reliability, and comparison workflows.
 - Added tidy
   [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) methods
@@ -79,8 +80,9 @@
   networks, TNA probability networks, chord diagrams, sunbursts,
   uncertainty forests, and group-comparison plots.
 - Added native transition and initial probabilities:
-  [`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md)
-  and [`initial()`](https://saqr.me/lagdynamics/reference/initial.md).
+  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+  and
+  [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md).
 - Added bundled long-format data for examples and tests.
 
 ## lagdynamics 0.1.0
@@ -90,38 +92,40 @@
 - Created a from-scratch, clean-room implementation of lag sequential
   analysis for categorical event sequences.
 - Added the unified
-  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) constructor
-  and canonical sequence handling through
-  [`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md) and
-  [`lsa_transitions()`](https://saqr.me/lagdynamics/reference/lsa_transitions.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  constructor and canonical sequence handling through
+  [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md)
+  and
+  [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md).
 - Added five built-in engines: `classical`, `two_cell`, `bidirectional`,
   `parallel_dominance`, and `nonparallel_dominance`.
 - Added convenience wrappers:
-  [`lsa_classical()`](https://saqr.me/lagdynamics/reference/lsa.md),
-  [`lsa_two_cell()`](https://saqr.me/lagdynamics/reference/lsa.md),
-  [`lsa_bidirectional()`](https://saqr.me/lagdynamics/reference/lsa.md),
-  [`lsa_parallel_dominance()`](https://saqr.me/lagdynamics/reference/lsa.md),
+  [`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+  [`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+  [`lsa_bidirectional()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+  [`lsa_parallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
   and
-  [`lsa_nonparallel_dominance()`](https://saqr.me/lagdynamics/reference/lsa.md).
+  [`lsa_nonparallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 - Added the pluggable engine registry:
-  [`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md),
-  [`get_lsa_engine()`](https://saqr.me/lagdynamics/reference/get_lsa_engine.md),
-  [`list_lsa_engines()`](https://saqr.me/lagdynamics/reference/list_lsa_engines.md),
+  [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
+  [`get_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/get_lsa_engine.md),
+  [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md),
   and
-  [`unregister_lsa_engine()`](https://saqr.me/lagdynamics/reference/unregister_lsa_engine.md).
+  [`unregister_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/unregister_lsa_engine.md).
 - Added tidy reading verbs:
-  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
-  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
-  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md),
-  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md), and
-  [`summary()`](https://rdrr.io/r/base/summary.html).
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+  [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+  [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+  [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
+  and [`summary()`](https://rdrr.io/r/base/summary.html).
 - Added multi-lag helpers with
-  [`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md) and
-  [`lag_profile()`](https://saqr.me/lagdynamics/reference/lag_profile.md).
+  [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
+  and
+  [`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md).
 - Added structural-zero handling through `loops = FALSE` and arbitrary
   structural-zero matrices.
 - Added experimental
-  [`transfer_entropy()`](https://saqr.me/lagdynamics/reference/transfer_entropy.md)
+  [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md)
   for directed categorical information-flow analysis.
 - Kept runtime dependencies minimal: only base R packages are imported
   (`grDevices`, `grid`, `stats`, and `utils`).
