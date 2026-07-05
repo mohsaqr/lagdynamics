@@ -5,6 +5,9 @@
 ### CRAN candidate
 
 - Prepared the package for first CRAN submission.
+- Moved `ggplot2` and `cograph` from Suggests to Imports so the plotting
+  surface works out of the box; plotting examples now run during checks.
+  The analytical core still depends only on base R.
 - Added a dedicated interoperability vignette covering wide data, long
   event logs, `tna`, `Nestimate`, `cograph`, and
   [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md).

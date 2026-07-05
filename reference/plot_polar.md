@@ -91,10 +91,11 @@ A `ggplot` object (drawn when printed).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 fit <- lsa(group_regulation)
 plot_polar(fit)                          # rose: bars filled by residual
+
 plot_polar(fit, style = "wedge")         # classic frequency wedges
+
 plot_polar(fit, significant = TRUE)      # non-significant cells greyed
-} # }
+
 ```

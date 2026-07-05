@@ -32,3 +32,11 @@ plot(x, metric = "prob", ...)
 ## Value
 
 A `ggplot` object (drawn when printed). Needs `ggplot2`.
+
+## Examples
+
+``` r
+fit <- lsa(group_regulation)
+cert <- certainty_lsa(fit)
+plot(cert)
+```

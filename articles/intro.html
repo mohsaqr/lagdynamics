@@ -142,7 +142,9 @@ base-R primitives (<code><a href="https://rdrr.io/r/stats/loglin.html" class="ex
 proportional fitting, <code><a href="https://rdrr.io/r/stats/chisq.test.html" class="external-link">stats::chisq.test()</a></code> standardized
 residuals, <code><a href="https://rdrr.io/r/stats/binom.test.html" class="external-link">stats::binom.test()</a></code>,
 <code><a href="https://rdrr.io/r/stats/Chisquare.html" class="external-link">stats::pchisq()</a></code>) and against hand-derived algebraic
-identities. The package depends only on base R.</p>
+identities. The analytical core depends only on base R; the plotting
+functions additionally use <code>ggplot2</code> and
+<code>cograph</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="the-method">The method<a class="anchor" aria-label="anchor" href="#the-method"></a>
@@ -273,7 +275,7 @@ engagement states (<code>active</code>, <code>average</code>,
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">engagement</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   3 states | 1734 transitions | 1870 events | 136 sequences</span></span>
 <span><span class="co">#&gt;   states: Active, Average, Disengaged</span></span>
 <span><span class="co">#&gt;   independence: G² = 618.3, df = 4, p &lt;2e-16</span></span>
@@ -349,7 +351,7 @@ subsetting.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Lag Sequential Analysis</span></span>
 <span><span class="co">#&gt; =======================</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   3 states | 1734 transitions | 1870 events | 136 sequences</span></span>
 <span><span class="co">#&gt;   states: Active, Average, Disengaged</span></span>
 <span><span class="co">#&gt;   independence: G² = 618.3, df = 4, p &lt;2e-16</span></span>
@@ -446,7 +448,7 @@ forbidden cells are non-estimable.</p>
 <span><span class="co">#&gt; 4                      Sackett's parallel-dominance (expected-SE) test         </span></span>
 <span><span class="co">#&gt; 5                  2x2 cell test (odds ratio, log-OR Wald z, Yule's Q)</span></span>
 <span><span class="fu"><a href="../reference/lsa.html">lsa_two_cell</a></span><span class="op">(</span><span class="va">engagement</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  two_cell  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  two_cell  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   3 states | 1734 transitions | 1870 events | 136 sequences</span></span>
 <span><span class="co">#&gt;   states: Active, Average, Disengaged</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -775,7 +777,7 @@ sequence-data forms (<code>tna</code>, <code>group_tna</code>,
 <code class="sourceCode R"><span><span class="va">fit_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation_long</span>, actor <span class="op">=</span> <span class="st">"Actor"</span>,</span>
 <span>               action <span class="op">=</span> <span class="st">"Action"</span>, time <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span>
 <span><span class="va">fit_log</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   9 states | 25533 transitions | 27533 events | 2000 sequences</span></span>
 <span><span class="co">#&gt;   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis</span></span>
 <span><span class="co">#&gt;   independence: G² = 13203.8, df = 64, p &lt;2e-16</span></span>

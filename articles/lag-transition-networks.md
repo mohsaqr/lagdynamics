@@ -72,7 +72,7 @@ fit <- lsa(ai_long,
            action  = "code",
            order   = "order_in_session")
 fit
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   8 states | 8123 transitions | 8551 events | 428 sequences
 #>   states: Ask, Delegate, Execute, Explain, Investigate, Plan, Repair, Report
 #>   independence: G² = 2168.1, df = 49, p <2e-16

@@ -68,7 +68,8 @@ proportional fitting,
 standardized residuals,
 [`stats::binom.test()`](https://rdrr.io/r/stats/binom.test.html),
 [`stats::pchisq()`](https://rdrr.io/r/stats/Chisquare.html)) and against
-hand-derived algebraic identities. The package depends only on base R.
+hand-derived algebraic identities. The analytical core depends only on
+base R; the plotting functions additionally use `ggplot2` and `cograph`.
 
 ## The method
 
@@ -208,7 +209,7 @@ student.
 
 fit <- lsa(engagement)
 fit
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16
@@ -289,7 +290,7 @@ initial(fit)
 summary(fit)
 #> Lag Sequential Analysis
 #> =======================
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16
@@ -399,7 +400,7 @@ list_lsa_engines()
 #> 4                      Sackett's parallel-dominance (expected-SE) test         
 #> 5                  2x2 cell test (odds ratio, log-OR Wald z, Yule's Q)
 lsa_two_cell(engagement)
-#> Lag Sequential Analysis  —  two_cell  (lag 1, directed)
+#> Lag Sequential Analysis  -  two_cell  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #> 
@@ -689,7 +690,7 @@ accepts, through one front door:
 fit_log <- lsa(group_regulation_long, actor = "Actor",
                action = "Action", time = "Time")
 fit_log
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   9 states | 25533 transitions | 27533 events | 2000 sequences
 #>   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis
 #>   independence: G² = 13203.8, df = 64, p <2e-16

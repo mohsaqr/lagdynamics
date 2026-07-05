@@ -101,6 +101,6 @@ head(as.data.frame(st))
 #> 3 Disengaged  Active         TRUE      1.00   TRUE
 #> 4     Active Average         TRUE      1.00   TRUE
 #> 5    Average Average         TRUE      1.00   TRUE
-#> 6 Disengaged Average        FALSE      0.34  FALSE
+#> 6 Disengaged Average        FALSE      0.27  FALSE
 # }
 ```

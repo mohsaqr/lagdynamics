@@ -84,11 +84,13 @@ A `ggplot` object (drawn when printed). Needs `ggplot2`.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
 g <- lsa(group_regulation, group = grp)
 cmp <- compare_lsa(g, R = 200)
 plot(cmp)                    # back-to-back barrel
+
 plot(cmp, style = "heatmap") # difference heatmap
-} # }
+
+# }
 ```

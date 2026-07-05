@@ -156,19 +156,24 @@ effect).</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                                   <span class="co"># residual network</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, weights <span class="op">=</span> <span class="st">"tna"</span><span class="op">)</span>                  <span class="co"># TNA probabilities</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, weights <span class="op">=</span> <span class="st">"relative"</span><span class="op">)</span>             <span class="co"># same as "tna"</span></span></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, weights <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>                 <span class="co"># same matrix</span></span></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, weights <span class="op">=</span> <span class="st">"residuals"</span>,            <span class="co"># residual network,</span></span></span>
 <span class="r-in"><span>                 significant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>                     <span class="co">#   significant only</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, top <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>                         <span class="co"># 12 strongest edges</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, top <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>                        <span class="co"># strongest 50%</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, decimals <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>                     <span class="co"># 2-dp edge labels</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu">plot_transitions</span><span class="op">(</span><span class="va">fit</span>, node_shape <span class="op">=</span> <span class="st">"square"</span><span class="op">)</span>            <span class="co"># splot passthrough</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-plt img"><img src="plot_transitions-7.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

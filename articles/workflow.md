@@ -53,7 +53,7 @@ transitions and negative values mark avoided transitions.
 
 fit <- lsa(engagement)
 fit
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16
@@ -295,7 +295,7 @@ treated as one long sequence.
 fit_log <- lsa(group_regulation_long, actor = "Actor",
                action = "Action", time = "Time")
 fit_log
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   9 states | 25533 transitions | 27533 events | 2000 sequences
 #>   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis
 #>   independence: G² = 13203.8, df = 64, p <2e-16

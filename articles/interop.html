@@ -129,7 +129,7 @@ ordered time points. This is the form used by
 <span></span>
 <span><span class="va">fit_wide</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">engagement</span><span class="op">)</span></span>
 <span><span class="va">fit_wide</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   3 states | 1734 transitions | 1870 events | 136 sequences</span></span>
 <span><span class="co">#&gt;   states: Active, Average, Disengaged</span></span>
 <span><span class="co">#&gt;   independence: G² = 618.3, df = 4, p &lt;2e-16</span></span>
@@ -194,7 +194,7 @@ directly: actor, action, time, and a grouping column.</p>
 <code class="sourceCode R"><span><span class="va">fit_long</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation_long</span>, actor <span class="op">=</span> <span class="st">"Actor"</span>,</span>
 <span>                action <span class="op">=</span> <span class="st">"Action"</span>, time <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span>
 <span><span class="va">fit_long</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   9 states | 25533 transitions | 27533 events | 2000 sequences</span></span>
 <span><span class="co">#&gt;   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis</span></span>
 <span><span class="co">#&gt;   independence: G² = 13203.8, df = 64, p &lt;2e-16</span></span>
@@ -242,7 +242,7 @@ boundary and <code>order_in_session</code> defines event order.</p>
 <span><span class="va">fit_session</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">ai_long</span>, actor <span class="op">=</span> <span class="st">"project"</span>, session <span class="op">=</span> <span class="st">"session_id"</span>,</span>
 <span>                   action <span class="op">=</span> <span class="st">"code"</span>, order <span class="op">=</span> <span class="st">"order_in_session"</span><span class="op">)</span></span>
 <span><span class="va">fit_session</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   8 states | 8123 transitions | 8551 events | 428 sequences</span></span>
 <span><span class="co">#&gt;   states: Ask, Delegate, Execute, Explain, Investigate, Plan, Repair, Report</span></span>
 <span><span class="co">#&gt;   independence: G² = 2168.1, df = 49, p &lt;2e-16</span></span>
@@ -322,7 +322,7 @@ same included wide sequence data, fits a TNA model with
 <span></span>
 <span><span class="va">fit_from_tna</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">tna_fit</span><span class="op">)</span></span>
 <span><span class="va">fit_from_tna</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   3 states | 1734 transitions | 1870 events | 136 sequences</span></span>
 <span><span class="co">#&gt;   states: Active, Average, Disengaged</span></span>
 <span><span class="co">#&gt;   independence: G² = 618.3, df = 4, p &lt;2e-16</span></span>
@@ -387,7 +387,7 @@ grammar. The object it returns carries the prepared sequence data, so
 <span></span>
 <span><span class="va">fit_nestimate</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">nestimate_fit</span><span class="op">)</span></span>
 <span><span class="va">fit_nestimate</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   8 states | 8123 transitions | 8551 events | 428 sequences</span></span>
 <span><span class="co">#&gt;   states: Ask, Delegate, Execute, Explain, Investigate, Plan, Repair, Report</span></span>
 <span><span class="co">#&gt;   independence: G² = 2168.1, df = 49, p &lt;2e-16</span></span>

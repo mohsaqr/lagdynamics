@@ -69,13 +69,17 @@ A `ggplot` object for `"heatmap"` and `"sunburst"`; the (invisible)
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 fit <- lsa(group_regulation)
 plot(fit)                     # residual heatmap (default)
+
 plot(fit, which = "prob")     # heatmap of probabilities
+
 plot(fit, type = "network")   # transition network
+
 plot(fit, type = "network", weights = "tna")  # TNA probability network
+
 plot(fit, type = "chord")     # chord diagram
+
 plot(fit, type = "sunburst")  # polar sunburst
-} # }
+
 ```

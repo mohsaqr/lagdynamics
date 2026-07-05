@@ -45,7 +45,7 @@ every `from -> to` transition.
 
 fit <- lsa(engagement)
 fit
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16
@@ -138,7 +138,7 @@ initial(fit)
 summary(fit)
 #> Lag Sequential Analysis
 #> =======================
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16

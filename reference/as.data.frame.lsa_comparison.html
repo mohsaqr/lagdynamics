@@ -80,6 +80,30 @@ other result objects, without reaching into the object.</p>
     <p>The tidy per-edge data frame.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">grp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">group_regulation</span><span class="op">$</span><span class="va">T1</span> <span class="op">==</span> <span class="st">"plan"</span>, <span class="st">"plan"</span>, <span class="st">"other"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu"><a href="lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation</span>, group <span class="op">=</span> <span class="va">grp</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">g</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         from    to  log_or_a    log_or_b        diff    p_perm     p_adj</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      adapt adapt -2.934854 -1.22410616 -1.71074827        NA        NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   cohesion adapt -1.878259 -2.41906008  0.54080059 0.5970149 0.5970149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  consensus adapt -1.773051 -1.53109175 -0.24195921 0.6368159 0.6368159</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 coregulate adapt -0.309429 -0.09747994 -0.21194909 0.6766169 0.6766169</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    discuss adapt  1.882091  1.89742114 -0.01533041 0.9353234 0.9353234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    emotion adapt -2.247226 -2.33556543  0.08833958 1.0000000 1.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   significant</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       FALSE</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

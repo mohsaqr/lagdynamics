@@ -121,7 +121,7 @@ avoided transitions.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">engagement</span><span class="op">)</span></span>
 <span><span class="va">fit</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   3 states | 1734 transitions | 1870 events | 136 sequences</span></span>
 <span><span class="co">#&gt;   states: Active, Average, Disengaged</span></span>
 <span><span class="co">#&gt;   independence: G² = 618.3, df = 4, p &lt;2e-16</span></span>
@@ -320,7 +320,7 @@ is treated as one long sequence.</p>
 <code class="sourceCode R"><span><span class="va">fit_log</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation_long</span>, actor <span class="op">=</span> <span class="st">"Actor"</span>,</span>
 <span>               action <span class="op">=</span> <span class="st">"Action"</span>, time <span class="op">=</span> <span class="st">"Time"</span><span class="op">)</span></span>
 <span><span class="va">fit_log</span></span>
-<span><span class="co">#&gt; Lag Sequential Analysis  —  classical  (lag 1, directed)</span></span>
+<span><span class="co">#&gt; Lag Sequential Analysis  -  classical  (lag 1, directed)</span></span>
 <span><span class="co">#&gt;   9 states | 25533 transitions | 27533 events | 2000 sequences</span></span>
 <span><span class="co">#&gt;   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis</span></span>
 <span><span class="co">#&gt;   independence: G² = 13203.8, df = 64, p &lt;2e-16</span></span>

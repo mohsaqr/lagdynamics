@@ -57,7 +57,7 @@ head(engagement)
 
 fit_wide <- lsa(engagement)
 fit_wide
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16
@@ -132,7 +132,7 @@ Fit a single model from the raw log by naming the columns.
 fit_long <- lsa(group_regulation_long, actor = "Actor",
                 action = "Action", time = "Time")
 fit_long
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   9 states | 25533 transitions | 27533 events | 2000 sequences
 #>   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis
 #>   independence: G² = 13203.8, df = 64, p <2e-16
@@ -183,7 +183,7 @@ head(ai_long)
 fit_session <- lsa(ai_long, actor = "project", session = "session_id",
                    action = "code", order = "order_in_session")
 fit_session
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   8 states | 8123 transitions | 8551 events | 428 sequences
 #>   states: Ask, Delegate, Execute, Explain, Investigate, Plan, Repair, Report
 #>   independence: G² = 2168.1, df = 49, p <2e-16
@@ -269,7 +269,7 @@ tna_fit
 
 fit_from_tna <- lsa(tna_fit)
 fit_from_tna
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16
@@ -342,7 +342,7 @@ nestimate_fit
 
 fit_nestimate <- lsa(nestimate_fit)
 fit_nestimate
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   8 states | 8123 transitions | 8551 events | 428 sequences
 #>   states: Ask, Delegate, Execute, Explain, Investigate, Plan, Repair, Report
 #>   independence: G² = 2168.1, df = 49, p <2e-16

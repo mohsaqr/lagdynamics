@@ -121,7 +121,7 @@ rel
 #>   weights:       prob
 #>   method:        pearson
 #>   n sequences:   136
-#>   split-half r:  0.972  (sd = 0.020)
-#>   95% CI:        [0.918, 0.994]
+#>   split-half r:  0.971  (sd = 0.022)
+#>   95% CI:        [0.921, 0.993]
 # }
 ```

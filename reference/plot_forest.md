@@ -74,11 +74,14 @@ A `ggplot` object (drawn when printed).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 fit <- lsa(group_regulation)
 b <- bootstrap_lsa(fit, R = 500)
 plot_forest(b)                       # residual CIs, circular
+
 plot_forest(b, metric = "prob")      # probability CIs
+
 plot_forest(b, show_nonsig = FALSE)  # significant transitions only
-} # }
+
+# }
 ```

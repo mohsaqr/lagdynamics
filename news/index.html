@@ -47,6 +47,7 @@
 <div class="section level3">
 <h3 id="cran-candidate-0-31">CRAN candidate<a class="anchor" aria-label="anchor" href="#cran-candidate-0-31"></a></h3>
 <ul><li>Prepared the package for first CRAN submission.</li>
+<li>Moved <code>ggplot2</code> and <code>cograph</code> from Suggests to Imports so the plotting surface works out of the box; plotting examples now run during checks. The analytical core still depends only on base R.</li>
 <li>Added a dedicated interoperability vignette covering wide data, long event logs, <code>tna</code>, <code>Nestimate</code>, <code>cograph</code>, and <code><a href="../reference/lsa_to_tna.html">lsa_to_tna()</a></code>.</li>
 <li>Added linked author metadata and Dynalytics framework links to all shipped vignettes.</li>
 <li>Restored <code><a href="../reference/lsa_to_tna.html">lsa_to_tna()</a></code> for handing an <code>lsa</code> fit to <code>tna</code> tooling.</li>

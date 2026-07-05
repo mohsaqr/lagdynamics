@@ -264,7 +264,7 @@ seq <- c("Question", "Explain", "Agree",
          "Agree", "Question", "Explain")
 fit <- lsa(seq, engine = "classical")
 fit
-#> Lag Sequential Analysis  —  classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   4 states | 8 transitions | 9 events | 1 sequences
 #>   states: Agree, Elaborate, Explain, Question
 #>   independence: G² = 18.4, df = 9, p 0.0312

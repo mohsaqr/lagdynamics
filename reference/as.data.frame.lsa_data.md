@@ -27,3 +27,16 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 ## Value
 
 A tidy data frame.
+
+## Examples
+
+``` r
+d <- lsa_data(c("a", "b", "a", "c", "b"))
+as.data.frame(d)
+#>   seq_id index state
+#> 1      1     1     a
+#> 2      1     2     b
+#> 3      1     3     a
+#> 4      1     4     c
+#> 5      1     5     b
+```

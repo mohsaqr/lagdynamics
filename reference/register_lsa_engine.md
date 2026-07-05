@@ -61,7 +61,7 @@ register_lsa_engine("my_classical", my_engine, "Classical test alias")
 fit <- lsa(engagement, engine = "my_classical")
 unregister_lsa_engine("my_classical")
 fit
-#> Lag Sequential Analysis  —  my_classical  (lag 1, directed)
+#> Lag Sequential Analysis  -  my_classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
 #>   independence: G² = 618.3, df = 4, p <2e-16

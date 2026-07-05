@@ -110,17 +110,22 @@ The `cograph_network` object, invisibly (drawn as a side effect).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 fit <- lsa(group_regulation)
 plot_transitions(fit)                                   # residual network
+
 plot_transitions(fit, weights = "tna")                  # TNA probabilities
+
 plot_transitions(fit, weights = "relative")             # same as "tna"
 plot_transitions(fit, weights = "prob")                 # same matrix
 plot_transitions(fit, weights = "residuals",            # residual network,
                  significant = TRUE)                     #   significant only
+
 plot_transitions(fit, top = 12)                         # 12 strongest edges
+
 plot_transitions(fit, top = 0.5)                        # strongest 50%
+
 plot_transitions(fit, decimals = 2)                     # 2-dp edge labels
+
 plot_transitions(fit, node_shape = "square")            # splot passthrough
-} # }
+
 ```

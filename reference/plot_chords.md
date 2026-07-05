@@ -93,15 +93,17 @@ network. Like them it delegates the drawing to `cograph`; it needs the
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 fit <- lsa(group_regulation)
 plot_chords(fit)                          # ribbons filled by residual
+
 plot_chords(fit, width = "prob")          # width = probability
+
 plot_chords(fit, significant = TRUE, ticks = TRUE)
+
 
 # Compare two groups: ribbon colour = difference in residuals.
 g <- lsa(group_regulation,
          group = rep(c("A", "B"), length.out = nrow(group_regulation)))
 plot_chords(g$A, compare = g$B)
-} # }
+
 ```
