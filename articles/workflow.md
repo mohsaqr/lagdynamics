@@ -6,11 +6,11 @@ structure, add uncertainty evidence, start from a raw event log, and
 compare groups.
 
 It assumes the method overview in
-[`vignette("intro", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/intro.md).
+[`vignette("intro", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/intro.md).
 It uses only a small plotting subset; the full gallery is in
-[`vignette("plotting", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md).
+[`vignette("plotting", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/plotting.md).
 The full confirmatory battery is in
-[`vignette("confirmatory", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md).
+[`vignette("confirmatory", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/confirmatory.md).
 
 ## Define the sequence data
 
@@ -43,11 +43,11 @@ order.
 
 ## Fit the model
 
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-estimates the transition table, the counts expected under independence,
-and the adjusted residual for each transition. The adjusted residual is
-the local test statistic: positive values mark over-represented
-transitions and negative values mark avoided transitions.
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) estimates the
+transition table, the counts expected under independence, and the
+adjusted residual for each transition. The adjusted residual is the
+local test statistic: positive values mark over-represented transitions
+and negative values mark avoided transitions.
 
 ``` r
 
@@ -73,7 +73,7 @@ fit
 ## Read the fitted transitions
 
 The fitted object is read through verbs.
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
 returns one row per `from -> to` edge.
 
 ``` r
@@ -186,7 +186,7 @@ heatmaps, and uncertainty plots.
 ## Add uncertainty evidence
 
 An edge claim needs more than a fitted residual.
-[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
 gives analytic credible intervals for transition probabilities.
 
 ``` r
@@ -211,7 +211,7 @@ as.data.frame(cert) |> head(4)
 #> 4        0.302 1.21e-04   TRUE            -11.3           TRUE
 ```
 
-[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+[`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
 resamples sequences, refits the model, and reports edge-level
 variability. It is useful when the population may be a mixture of
 different sequence types.
@@ -249,7 +249,7 @@ as.data.frame(boot) |> head(4)
 #> 4        0.324           -0.534       -0.530         -0.633          -0.418
 ```
 
-[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+[`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)
 moves from edge evidence to whole-network evidence by repeated
 split-half refitting.
 
@@ -284,8 +284,8 @@ head(group_regulation_long)
 #> 6     1     High     1      A 2025-01-01 08:57:31 consensus
 ```
 
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) can
-recover sequences and fit the model in one call. `actor` identifies the
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) can recover
+sequences and fit the model in one call. `actor` identifies the
 sequence, `action` identifies the event state, and `time` orders events.
 If there is no actor column, `action` alone is valid and the log is
 treated as one long sequence.
@@ -363,8 +363,8 @@ initial(fit_log)
 ## Fit groups
 
 For group-specific models, name the grouping column.
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-estimates one model per group under the same state labels.
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) estimates one
+model per group under the same state labels.
 
 ``` r
 
@@ -410,7 +410,7 @@ nodes(gfit) |> head(6)
 
 ## Compare groups
 
-[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
 tests whether groups differ by permuting group labels at the sequence
 level. The result includes edge-level differences and an omnibus
 comparison.
@@ -472,4 +472,4 @@ stability. Group-difference claims use permutation comparison.
 
 ------------------------------------------------------------------------
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

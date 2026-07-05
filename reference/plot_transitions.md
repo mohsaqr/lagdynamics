@@ -26,7 +26,7 @@ plot_transitions(
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md).
 
 - weights:
 
@@ -102,10 +102,10 @@ The `cograph_network` object, invisibly (drawn as a side effect).
 
 ## See also
 
-[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
+[`plot.lsa()`](https://saqr.me/lagdynamics/reference/plot.lsa.md)
 (heatmap),
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
+[`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md)
 
 ## Examples
 

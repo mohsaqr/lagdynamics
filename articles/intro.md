@@ -12,12 +12,12 @@ package restates this method as a modern statistical workflow built on
 six commitments:
 
 - **Tidy.** Every result is produced by a verb –
-  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-  [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
-  [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
-  [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
+  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
+  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
+  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md),
+  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md),
   [`summary()`](https://rdrr.io/r/base/summary.html),
-  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
+  [`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md),
   [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) – that
   returns a one-row-per-observation data frame. Filters are arguments
   (`significant = TRUE`, `direction = "over"`, `min_count =`), never
@@ -38,9 +38,9 @@ six commitments:
   experimental directed transfer-entropy measure.
 - **Group-aware.** A grouping variable yields one model per group, and
   group differences are tested rather than eyeballed:
-  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+  [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
   permutes labels over whole sequences and
-  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  [`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md)
   gives the analytic Bayesian counterpart, both with multiplicity
   adjustment and pairwise comparison for more than two groups.
 - **Visual.** A large array of plots covers every level of the analysis:
@@ -49,8 +49,7 @@ six commitments:
   forests for the bootstrap and certainty results, and group barrels and
   difference heatmaps for the comparisons.
 - **Interoperable.** The package plugs into the other dynamics packages
-  on both sides:
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  on both sides: [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
   ingests long event logs, wide data, lists of sequences, `TraMineR`
   state sequences, `tna` models and sequence data, and `Nestimate`
   prepared data, while the fitted object is a `cograph` network that
@@ -133,64 +132,64 @@ is exercised in this vignette or in a dedicated companion vignette.
   symmetrized table), `parallel_dominance`, and `nonparallel_dominance`
   (Sackett, 1979; Wampold, 1984), each available through
   `lsa(engine = )` or a direct wrapper such as
-  [`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa_two_cell()`](https://saqr.me/lagdynamics/reference/lsa.md).
 - An open engine registry:
-  [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
+  [`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md)
   /
-  [`unregister_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/unregister_lsa_engine.md)
+  [`unregister_lsa_engine()`](https://saqr.me/lagdynamics/reference/unregister_lsa_engine.md)
   accept user-defined engines, and
-  [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
+  [`list_lsa_engines()`](https://saqr.me/lagdynamics/reference/list_lsa_engines.md)
   enumerates what is installed.
 - Multi-lag analysis: any positive or negative lag in `lsa(lag = )`,
   full lag profiles with
-  [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md),
-  and single-edge profiles with
-  [`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md).
+  [`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md), and
+  single-edge profiles with
+  [`lag_profile()`](https://saqr.me/lagdynamics/reference/lag_profile.md).
 - Structural-zero support: `loops = FALSE` for the no-self-transition
   model, or an arbitrary 0/1 constraint matrix via `structural_zeros`,
   with quasi-independence expectations from the exported
-  [`lsa_ipf()`](https://pak.dynasite.org/lagdynamics/reference/lsa_ipf.md).
+  [`lsa_ipf()`](https://saqr.me/lagdynamics/reference/lsa_ipf.md).
 - Grouped estimation: a grouping variable yields one fit per group in a
   shared state space, so groups remain comparable even when a group
   never visits a state.
 - An experimental directed transfer-entropy measure,
-  [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md)
+  [`transfer_entropy()`](https://saqr.me/lagdynamics/reference/transfer_entropy.md)
   (Schreiber, 2000).
 
 **Inference and validation**
 
 - Analytic edge uncertainty:
-  [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+  [`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
   derives credible intervals for transition probabilities from a
   Dirichlet-Multinomial posterior, without resampling.
 - Resampling edge uncertainty:
-  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+  [`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md)
   resamples whole sequences – preserving within-sequence dependence –
   and refits.
 - Whole-network reproducibility:
-  [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  [`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md)
   (repeated split-half refitting) and
-  [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
+  [`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md)
   (case-dropping).
 - An assumption-free null:
-  [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md)
+  [`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md)
   shuffles events within sequences and recomputes the residuals.
 - Group comparison:
-  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+  [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
   permutes group labels at the sequence level, the empirically
   exchangeable unit;
-  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  [`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md)
   is its analytic Bayesian counterpart. Both support multiplicity
   adjustment and, for more than two groups, pairwise comparison.
 
 **Interface**
 
 - Tidy accessors throughout:
-  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-  [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
-  [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
-  [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
-  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
+  [`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md),
+  [`nodes()`](https://saqr.me/lagdynamics/reference/nodes.md),
+  [`tests()`](https://saqr.me/lagdynamics/reference/tests.md),
+  [`initial()`](https://saqr.me/lagdynamics/reference/initial.md),
+  [`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md),
   [`summary()`](https://rdrr.io/r/base/summary.html), and
   [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on
   every result object. No result requires indexing into an object.
@@ -228,7 +227,7 @@ fit
 
 Every fitted quantity is read through a verb that returns a tidy data
 frame.
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
 gives one row per ordered pair, with observed and expected counts,
 transition probability, adjusted residual, p-value, and association
 measures; filters are arguments, not subsetting.
@@ -338,8 +337,8 @@ summary(fit)
 
 The lag is a first-class argument. A lag profile traces one edge across
 temporal distances;
-[`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
-fits the full multi-lag model.
+[`lsa_lags()`](https://saqr.me/lagdynamics/reference/lsa_lags.md) fits
+the full multi-lag model.
 
 ``` r
 
@@ -477,7 +476,7 @@ plot(fit, type = "sunburst")
 
 The full gallery, including the `which =` matrix selector and the
 grouped-plot variants, is in
-[`vignette("plotting", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md).
+[`vignette("plotting", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/plotting.md).
 
 ## Group comparison
 
@@ -516,11 +515,11 @@ summary(gfit)
 #> 2  0.05 7715      64      0 9197    64    0
 ```
 
-[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+[`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md)
 tests whether the groups differ, edge by edge, by permuting group labels
 over whole sequences – the unit that is actually exchangeable under the
 null – with optional multiplicity adjustment.
-[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+[`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md)
 reaches the same question analytically, reporting the credible range of
 each group difference in transition probability. With more than two
 groups, both return pairwise results.
@@ -585,11 +584,11 @@ with a matching procedure:
 
 | claim | evidence | verb |
 |----|----|----|
-| a specific transition is real; how precise | edge-level uncertainty | [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md), [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md) |
-| a significant transition is not fragile | robustness to case loss | [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md) |
-| the whole network is reproducible | split-half reliability | [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md) |
-| the structure exceeds chance | assumption-free empirical null | [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md) |
-| two groups differ | inference under exchangeability | [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md), [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md) |
+| a specific transition is real; how precise | edge-level uncertainty | [`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md), [`bootstrap_lsa()`](https://saqr.me/lagdynamics/reference/bootstrap_lsa.md) |
+| a significant transition is not fragile | robustness to case loss | [`stability_lsa()`](https://saqr.me/lagdynamics/reference/stability_lsa.md) |
+| the whole network is reproducible | split-half reliability | [`reliability_lsa()`](https://saqr.me/lagdynamics/reference/reliability_lsa.md) |
+| the structure exceeds chance | assumption-free empirical null | [`permute_lsa()`](https://saqr.me/lagdynamics/reference/permute_lsa.md) |
+| two groups differ | inference under exchangeability | [`compare_lsa()`](https://saqr.me/lagdynamics/reference/compare_lsa.md), [`bayes_compare_lsa()`](https://saqr.me/lagdynamics/reference/bayes_compare_lsa.md) |
 
 ``` r
 
@@ -662,15 +661,14 @@ plot(boot)
 Bootstrap replication is reproducible across languages and sessions:
 `bootstrap_lsa(indices = )` accepts a precomputed resampling matrix for
 bit-identical replay. The full treatment of the battery is in
-[`vignette("confirmatory", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md).
+[`vignette("confirmatory", package = "lagdynamics")`](https://saqr.me/lagdynamics/articles/confirmatory.md).
 
 ## Interoperability
 
 `lagdynamics` is designed to sit inside an existing analysis stack
 rather than replace it, on both the input and the output side.
 
-**Input.**
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+**Input.** [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
 accepts, through one front door:
 
 - wide data frames and matrices (rows = sequences, columns = ordered
@@ -721,10 +719,10 @@ inherits the `cograph_network` class, so `cograph`’s rendering verbs
 accept it directly, and the plotting gallery above draws its network,
 chord, and comparison views through that seam. The fitted probabilities
 are exposed for any downstream transition-network tooling –
-[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+[`transition_probabilities()`](https://saqr.me/lagdynamics/reference/transition_probabilities.md)
 returns the row-stochastic matrix $`P(\text{to} \mid \text{from})`$ and
-[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
-the initial-state distribution, the two ingredients a TNA-style model
+[`initial()`](https://saqr.me/lagdynamics/reference/initial.md) the
+initial-state distribution, the two ingredients a TNA-style model
 requires – and every result object flattens to a plain data frame with
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), so
 results move into any tabular pipeline without package-specific code.
@@ -785,4 +783,4 @@ social sciences*. Erlbaum.
 
 ------------------------------------------------------------------------
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

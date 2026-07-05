@@ -2,16 +2,16 @@
 
 ### Vignettes
 
-- [Introduction](https://pak.dynasite.org/lagdynamics/articles/intro.md):
+- [Introduction](https://saqr.me/lagdynamics/articles/intro.md):
 - [Get started with
-  lagdynamics](https://pak.dynasite.org/lagdynamics/articles/lagdynamics.md):
+  lagdynamics](https://saqr.me/lagdynamics/articles/lagdynamics.md):
 - [Interoperability: wide data, long logs, tna, and
-  Nestimate](https://pak.dynasite.org/lagdynamics/articles/interop.md):
+  Nestimate](https://saqr.me/lagdynamics/articles/interop.md):
 - [A complete workflow: from sequences to a group
-  comparison](https://pak.dynasite.org/lagdynamics/articles/workflow.md):
+  comparison](https://saqr.me/lagdynamics/articles/workflow.md):
 - [Lag transition
-  networks](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.md):
+  networks](https://saqr.me/lagdynamics/articles/lag-transition-networks.md):
 - [Confirmatory testing: matching claims to
-  evidence](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md):
+  evidence](https://saqr.me/lagdynamics/articles/confirmatory.md):
 - [Plotting lag-sequential
-  models](https://pak.dynasite.org/lagdynamics/articles/plotting.md):
+  models](https://saqr.me/lagdynamics/articles/plotting.md):

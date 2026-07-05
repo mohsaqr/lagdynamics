@@ -207,4 +207,4 @@ plot(gfit)                                  # grouped: one panel per group
 
 ------------------------------------------------------------------------
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

@@ -16,7 +16,7 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 - x:
 
   An `lsa_data` object from
-  [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md).
+  [`lsa_data()`](https://saqr.me/lagdynamics/reference/lsa_data.md).
 
 - row.names, optional, ...:
 

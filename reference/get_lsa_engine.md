@@ -21,8 +21,8 @@ The registry entry: a list with elements `name`, `fn`, `description`,
 
 ## See also
 
-[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
-[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
+[`register_lsa_engine()`](https://saqr.me/lagdynamics/reference/register_lsa_engine.md),
+[`list_lsa_engines()`](https://saqr.me/lagdynamics/reference/list_lsa_engines.md)
 
 ## Examples
 

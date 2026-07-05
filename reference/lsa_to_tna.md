@@ -20,8 +20,8 @@ lsa_to_tna(x, weights = c("prob", "count", "adj_res", "lift"), ...)
 - x:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  an `lsa_group` from `lsa(..., group = )`.
+  [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md), or an
+  `lsa_group` from `lsa(..., group = )`.
 
 - ...:
 

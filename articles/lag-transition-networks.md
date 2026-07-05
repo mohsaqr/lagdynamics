@@ -61,9 +61,9 @@ boundary. The `project` column is available as contextual metadata, but
 it is not required for this fit because `session_id` already defines the
 sequence boundary.
 
-The [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-function fits the model by naming the action column, the session
-boundary, and the ordering column.
+The [`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md) function
+fits the model by naming the action column, the session boundary, and
+the ordering column.
 
 ``` r
 
@@ -176,7 +176,7 @@ non-significant omnibus test would remove any basis for interpreting
 individual transitions, so it is checked before them.
 
 The
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+[`transitions()`](https://saqr.me/lagdynamics/reference/transitions.md)
 function returns one row per directed edge. Its `direction` argument
 selects over- or under-represented transitions and its `sort` argument
 orders them by strength.
@@ -421,7 +421,7 @@ a new sample even when its residual is large.
 
 Analytic certainty offers a closed-form alternative to the bootstrap.
 The
-[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+[`certainty_lsa()`](https://saqr.me/lagdynamics/reference/certainty_lsa.md)
 function models each state’s outgoing transitions as
 Dirichlet–Multinomial, which yields a posterior distribution, a credible
 interval, and a certainty decision for each transition probability
@@ -479,4 +479,4 @@ dynamics with transition network analysis: A primer and tutorial. In
 
 ------------------------------------------------------------------------
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

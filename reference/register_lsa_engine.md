@@ -23,7 +23,7 @@ register_lsa_engine(name, fn, description, requires = character())
 
   A function. Must accept a `transitions` argument (a tidy transition
   table produced by
-  [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md))
+  [`lsa_transitions()`](https://saqr.me/lagdynamics/reference/lsa_transitions.md))
   and arbitrary named `...` arguments forwarded from
   `lsa(params = list(...))`. Must return a named list with at least the
   matrix elements `obs`, `exp`, `prob`, `adj_res`, and `p` (each
@@ -33,7 +33,7 @@ register_lsa_engine(name, fn, description, requires = character())
 - description:
 
   Character scalar. One-line human-readable description shown by
-  [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md).
+  [`list_lsa_engines()`](https://saqr.me/lagdynamics/reference/list_lsa_engines.md).
 
 - requires:
 
@@ -46,10 +46,10 @@ Invisibly returns `name`.
 
 ## See also
 
-[`get_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/get_lsa_engine.md),
-[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md),
-[`unregister_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/unregister_lsa_engine.md),
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+[`get_lsa_engine()`](https://saqr.me/lagdynamics/reference/get_lsa_engine.md),
+[`list_lsa_engines()`](https://saqr.me/lagdynamics/reference/list_lsa_engines.md),
+[`unregister_lsa_engine()`](https://saqr.me/lagdynamics/reference/unregister_lsa_engine.md),
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)
 
 ## Examples
 

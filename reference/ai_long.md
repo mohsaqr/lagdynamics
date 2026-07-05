@@ -4,8 +4,8 @@ A long-format event log of coded AI-side behaviours in human-AI vibe
 coding sessions. Each row is one coded AI event, with project/session
 identifiers, ordering variables, a fine-grained AI behaviour code, and a
 broader behaviour cluster. It is useful for demonstrating
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)'s
-long-format event-log import path.
+[`lsa()`](https://saqr.me/lagdynamics/reference/lsa.md)'s long-format
+event-log import path.
 
 ## Usage
 
