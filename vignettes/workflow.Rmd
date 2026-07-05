@@ -231,4 +231,4 @@ stability. Group-difference claims use permutation comparison.
 
 ---
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

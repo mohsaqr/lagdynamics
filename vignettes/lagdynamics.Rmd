@@ -136,4 +136,4 @@ Use the focused vignettes according to the claim you need to support:
 
 ---
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

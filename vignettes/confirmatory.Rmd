@@ -162,4 +162,4 @@ compare_lsa(gfit); bayes_compare_lsa(gfit)  # a group difference
 
 ---
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

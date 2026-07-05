@@ -95,7 +95,7 @@ the social sciences}. Lawrence Erlbaum.
 Useful links:
 \itemize{
   \item \url{https://github.com/mohsaqr/lagdynamics}
-  \item \url{https://pak.dynasite.org/lagdynamics/}
+  \item \url{https://saqr.me/lagdynamics/}
   \item Report bugs at \url{https://github.com/mohsaqr/lagdynamics/issues}
 }
 

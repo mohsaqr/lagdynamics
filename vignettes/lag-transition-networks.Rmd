@@ -317,4 +317,4 @@ Learning Analytics Methods and Tutorials*.
 
 ---
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).

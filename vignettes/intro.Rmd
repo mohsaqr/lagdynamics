@@ -445,4 +445,4 @@ social sciences*. Erlbaum.
 
 ---
 
-Part of the [Dynalytics framework](https://dynasite.org/).
+Part of the [Dynalytics framework](https://saqr.me/).
