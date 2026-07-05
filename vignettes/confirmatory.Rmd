@@ -162,4 +162,6 @@ compare_lsa(gfit); bayes_compare_lsa(gfit)  # a group difference
 
 ---
 
+Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
+
 Part of the [Dynalytics framework](https://saqr.me/).

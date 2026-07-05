@@ -6,9 +6,7 @@
 [![R-CMD-check](https://github.com/mohsaqr/lagdynamics/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mohsaqr/lagdynamics/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![r-universe](https://mohsaqr.r-universe.dev/badges/lagdynamics)](https://mohsaqr.r-universe.dev/lagdynamics)
-[![Docs](https://img.shields.io/badge/docs-pkgdown-blue.svg)](https://pak.dynasite.org/lagdynamics/)
-<!-- badges: end -->
+[![r-universe](https://mohsaqr.r-universe.dev/badges/lagdynamics)](https://mohsaqr.r-universe.dev/lagdynamics)<!-- badges: end -->
 
 `lagdynamics` provides a modern, tidy, pipe-friendly interface for lag
 sequential analysis (LSA). A single `lsa()` constructor with a pluggable
