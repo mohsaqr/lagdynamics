@@ -5,7 +5,7 @@ Authors@R:
     c(person("Mohammed", "Saqr", email = "saqr@saqr.me",
              role = c("aut", "cre", "cph")),
       person("Sonsoles", "López-Pernas", role = "aut"))
-Description: A modern, tidy, pipe-friendly toolkit for lag sequential
+Description: A modern, tidy toolkit for lag sequential
     analysis and lag transition networks of categorical event and sequence
     data. It provides an accessible, unified workflow for fitting, inspecting,
     visualising, and comparing lagged transition patterns, with tidy outputs
@@ -15,11 +15,9 @@ Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     Bayesian group comparisons. Supports long-format event-log import,
     import from common sequence and state-sequence objects, multi-lag
     analysis, structural-zero constraints, transition and initial
-    probabilities, plotting of transition structures, and an experimental
-    directed transfer-entropy measure
-    (Schreiber, 2000) <doi:10.1103/PhysRevLett.85.461>. The lag sequential
-    analysis framework follows Sackett and others (1979)
-    <doi:10.3758/BF03205679>.
+    probabilities, plotting of transition structures, and a directed
+    transfer-entropy measure. The lag sequential analysis framework
+    follows Sackett and others (1979) <doi:10.3758/BF03205679>.
 License: MIT + file LICENSE
 URL: https://github.com/mohsaqr/lagdynamics
 BugReports: https://github.com/mohsaqr/lagdynamics/issues
