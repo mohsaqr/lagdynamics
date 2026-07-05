@@ -18,8 +18,8 @@ Description: A modern, tidy, pipe-friendly toolkit for lag sequential
     probabilities, plotting of transition structures, and an experimental
     directed transfer-entropy measure
     (Schreiber, 2000) <doi:10.1103/PhysRevLett.85.461>. Numerical methods are
-    implemented from primary literature and cross-validated against base-R
-    primitives and hand-formula identities.
+    implemented from primary literature and cross-validated against base
+    'R' primitives and hand-formula identities.
 License: MIT + file LICENSE
 URL: https://github.com/mohsaqr/lagdynamics,
     https://pak.dynasite.org/lagdynamics/
@@ -30,6 +30,8 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends: R (>= 4.1.0)
 Imports:
+    cograph (>= 2.3.6),
+    ggplot2 (>= 3.4.0),
     grDevices,
     grid,
     stats,
@@ -38,10 +40,8 @@ Suggests:
     testthat (>= 3.0.0),
     Nestimate,
     tna,
-    cograph (>= 2.3.6),
     knitr,
-    rmarkdown,
-    ggplot2
+    rmarkdown
 Config/testthat/edition: 3
 LazyData: true
 VignetteBuilder: knitr

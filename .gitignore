@@ -30,8 +30,15 @@ codex_docs/
 tmp/
 sidelined/
 
-# Working notes
+# Working notes / review + agent artifacts (keep local)
 lsa_plan.md
+notes/
+audit.md
+CODE_REVIEW_TRANSITION_NETWORKS.md
+AGENTS.md
+AGENT.md
+AGENT-NOTE-*.md
+MEMORY.md
 
 # Test artefacts
 tests/testthat/Rplots.pdf

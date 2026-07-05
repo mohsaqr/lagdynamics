@@ -84,7 +84,6 @@
 #'   (`segments` and `chords` data frames). Drawn as a side effect.
 #'
 #' @examples
-#' \dontrun{
 #' fit <- lsa(group_regulation)
 #' plot_chords(fit)                          # ribbons filled by residual
 #' plot_chords(fit, width = "prob")          # width = probability
@@ -94,7 +93,6 @@
 #' g <- lsa(group_regulation,
 #'          group = rep(c("A", "B"), length.out = nrow(group_regulation)))
 #' plot_chords(g$A, compare = g$B)
-#' }
 #'
 #' @seealso [plot.lsa()] (heatmap), [plot_transitions()] (network),
 #'   [transitions()]

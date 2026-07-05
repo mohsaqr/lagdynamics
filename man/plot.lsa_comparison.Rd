@@ -62,7 +62,7 @@ barrel is drawn per pair via facets. The \code{"heatmap"} style draws the
 signed difference as a \verb{from x to} grid on the same diverging scale.
 }
 \examples{
-\dontrun{
+\donttest{
 grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
 g <- lsa(group_regulation, group = grp)
 cmp <- compare_lsa(g, R = 200)

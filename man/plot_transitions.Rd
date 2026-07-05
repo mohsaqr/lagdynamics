@@ -82,7 +82,6 @@ keep only significant edges. Nodes are white and edges are labelled
 by default. Returns the \code{cograph} network invisibly.
 }
 \examples{
-\dontrun{
 fit <- lsa(group_regulation)
 plot_transitions(fit)                                   # residual network
 plot_transitions(fit, weights = "tna")                  # TNA probabilities
@@ -94,7 +93,6 @@ plot_transitions(fit, top = 12)                         # 12 strongest edges
 plot_transitions(fit, top = 0.5)                        # strongest 50\%
 plot_transitions(fit, decimals = 2)                     # 2-dp edge labels
 plot_transitions(fit, node_shape = "square")            # splot passthrough
-}
 
 }
 \seealso{

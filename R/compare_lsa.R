@@ -503,6 +503,13 @@ compare_lsa <- function(x,
 #' @param row.names,optional,... Standard [as.data.frame()] arguments
 #'   (unused; present for method consistency).
 #' @return The tidy per-edge data frame.
+#' @examples
+#' \donttest{
+#' grp <- ifelse(group_regulation$T1 == "plan", "plan", "other")
+#' g <- lsa(group_regulation, group = grp)
+#' cmp <- compare_lsa(g, R = 200)
+#' head(as.data.frame(cmp))
+#' }
 #' @export
 as.data.frame.lsa_comparison <- function(x, row.names = NULL,
                                          optional = FALSE, ...) {

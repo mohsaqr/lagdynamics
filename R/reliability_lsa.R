@@ -193,6 +193,12 @@ print.lsa_reliability_group <- function(x, ...) {
 #' @return A `data.frame`, one row per replicate, with columns
 #'   `replicate` and `correlation` (a grouped object gains a leading
 #'   `group` column). `NA` correlations from degenerate splits are kept.
+#' @examples
+#' \donttest{
+#' fit <- lsa(group_regulation)
+#' rel <- reliability_lsa(fit, R = 200)
+#' head(as.data.frame(rel))
+#' }
 #' @export
 as.data.frame.lsa_reliability <- function(x, row.names = NULL,
                                           optional = FALSE, ...) {

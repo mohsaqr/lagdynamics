@@ -78,7 +78,8 @@ implementation is cross-validated against base-R primitives
 (`stats::loglin()` for iterative proportional fitting,
 `stats::chisq.test()` standardized residuals, `stats::binom.test()`,
 `stats::pchisq()`) and against hand-derived algebraic identities.
-The package depends only on base R.
+The analytical core depends only on base R; the plotting functions
+additionally use `ggplot2` and `cograph`.
 
 # The method
 

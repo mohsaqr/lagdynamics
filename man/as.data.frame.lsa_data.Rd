@@ -21,3 +21,7 @@ event (\code{seq_id}, within-sequence \code{index}, \code{state}) for event-leve
 input, or one row per \code{from}/\code{to}/\code{count} cell for transition-matrix
 input.
 }
+\examples{
+d <- lsa_data(c("a", "b", "a", "c", "b"))
+as.data.frame(d)
+}

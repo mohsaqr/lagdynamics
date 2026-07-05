@@ -69,12 +69,10 @@
 #' @return A `ggplot` object (drawn when printed).
 #'
 #' @examples
-#' \dontrun{
 #' fit <- lsa(group_regulation)
 #' plot_polar(fit)                          # rose: bars filled by residual
 #' plot_polar(fit, style = "wedge")         # classic frequency wedges
 #' plot_polar(fit, significant = TRUE)      # non-significant cells greyed
-#' }
 #'
 #' @seealso [plot.lsa()] (heatmap), [plot_chords()] (chord),
 #'   [plot_forest()] (bootstrap forest)
@@ -175,7 +173,7 @@ plot_polar <- function(fit, style = c("rose", "wedge"),
     sprintf("%s engine, lag %d \u00b7 sector = source volume, wedge width = frequency, fill = %s",
             fit$method, fit$params$lag, legname)
   }
-  gg + ggplot2::labs(title = sprintf("Transition sunburst \u2014 %s", fbase),
+  gg + ggplot2::labs(title = sprintf("Transition sunburst - %s", fbase),
                      subtitle = sub)
 }
 

@@ -23,3 +23,11 @@ Returns the per-edge comparison table (the same data frame as
 \code{x$edges}) so a comparison can be read with \code{as.data.frame()} like the
 other result objects, without reaching into the object.
 }
+\examples{
+\donttest{
+grp <- ifelse(group_regulation$T1 == "plan", "plan", "other")
+g <- lsa(group_regulation, group = grp)
+cmp <- compare_lsa(g, R = 200)
+head(as.data.frame(cmp))
+}
+}

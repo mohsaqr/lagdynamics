@@ -38,10 +38,9 @@ This function is deliberately named \code{lsa_to_tna()}, not \code{as_tna()},
 to avoid overlapping export names with sibling packages.
 }
 \examples{
-\dontrun{
+\dontshow{if (requireNamespace("tna", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 fit <- lsa(engagement)
 net <- lsa_to_tna(fit, weights = "prob")
 tna::centralities(net)
-}
-
+\dontshow{\}) # examplesIf}
 }

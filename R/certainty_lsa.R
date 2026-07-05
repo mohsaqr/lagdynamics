@@ -203,6 +203,10 @@ print.lsa_certainty <- function(x, ...) {
 #' @param metric Which credible interval to draw. Default `"prob"`.
 #' @param ... Passed to [plot_forest()].
 #' @return A `ggplot` object (drawn when printed). Needs `ggplot2`.
+#' @examples
+#' fit <- lsa(group_regulation)
+#' cert <- certainty_lsa(fit)
+#' plot(cert)
 #' @export
 plot.lsa_certainty <- function(x, metric = "prob", ...) {
   plot_forest(x, metric = metric, ...)

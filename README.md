@@ -47,9 +47,10 @@ initial probabilities as tidy objects for downstream network tooling.
 - **Recipe pattern.** Configuration is snapshotted on the fit in
   `$params`. Bootstrap, permutation, and stability inference all read
   from that single snapshot to prevent config drift.
-- **Minimal-dependency policy.** Runtime imports are base packages only
-  (`grDevices`, `grid`, `stats`, `utils`). The plotting packages
-  (`ggplot2`, `cograph`) are soft `Suggests`, used only when present.
+- **Lean-core policy.** The analytical core imports only base packages
+  (`grDevices`, `grid`, `stats`, `utils`); the plotting surface imports
+  `ggplot2` and `cograph`. Interoperability packages (`tna`, `Nestimate`)
+  stay soft `Suggests`, used only when present.
 
 ## Installation
 
@@ -75,9 +76,10 @@ Or the development version from GitHub:
 remotes::install_github("mohsaqr/lagdynamics")
 ```
 
-`lagdynamics` needs only base R at runtime (`grDevices`, `grid`, `stats`,
-`utils`). The plotting packages (`ggplot2`, `cograph`) are optional
-`Suggests` — install only the ones you need.
+`lagdynamics`'s analytical core needs only base R at runtime (`grDevices`,
+`grid`, `stats`, `utils`); the plotting surface imports `ggplot2` and
+`cograph`, which install automatically. Interoperability packages (`tna`,
+`Nestimate`) remain optional `Suggests` — install only the ones you need.
 
 ## Quick start
 

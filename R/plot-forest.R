@@ -31,7 +31,7 @@
 #' @return A `ggplot` object (drawn when printed).
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' fit <- lsa(group_regulation)
 #' b <- bootstrap_lsa(fit, R = 500)
 #' plot_forest(b)                       # residual CIs, circular
@@ -72,7 +72,7 @@ plot_forest <- function(boot, metric = c("residuals", "count", "prob",
   status <- ifelse(!sig, "n.s.",
             ifelse(over, "over-represented", "avoided"))
 
-  df <- data.frame(edge = paste0(e$from, " \u2192 ", e$to),
+  df <- data.frame(edge = paste0(e$from, " -> ", e$to),
                    est = est, lo = lo, hi = hi, sig = sig,
                    status = status, stringsAsFactors = FALSE)
   df <- df[is.finite(df$est) & is.finite(df$lo) & is.finite(df$hi), ,
@@ -156,7 +156,7 @@ plot_forest <- function(boot, metric = c("residuals", "count", "prob",
                                             size = 8.5),
       plot.margin = ggplot2::margin(8, 8, 8, 8)) +
     ggplot2::labs(
-      title = sprintf("Bootstrap forest \u2014 %s",
+      title = sprintf("Bootstrap forest - %s",
         c(residuals = "adjusted residuals", count = "counts",
           prob = "probabilities", yules_q = "Yule's Q")[[metric]]),
       subtitle = sprintf(

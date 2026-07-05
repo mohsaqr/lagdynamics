@@ -22,3 +22,10 @@ A \code{data.frame}, one row per replicate, with columns
 \description{
 Tidy the per-replicate split-half correlations
 }
+\examples{
+\donttest{
+fit <- lsa(group_regulation)
+rel <- reliability_lsa(fit, R = 200)
+head(as.data.frame(rel))
+}
+}

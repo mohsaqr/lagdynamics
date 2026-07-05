@@ -55,7 +55,7 @@
 #' @return A `ggplot` object (drawn when printed). Needs `ggplot2`.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
 #' g <- lsa(group_regulation, group = grp)
 #' cmp <- compare_lsa(g, R = 200)
@@ -112,8 +112,8 @@ plot.lsa_comparison <- function(x, style = c("barrel", "heatmap"),
   nsig <- sum(sel$edges$significant, na.rm = TRUE)
   sub <- sprintf(
     paste0("bar length = %s \u00b7 fill = log odds ratio \u00b7 centre = ",
-           "difference p (adjust = %s)\n%s  \u2190\u2190    ",
-           "\u2192\u2192  %s \u00b7 %d of %d shown significant \u00b7 rows by %s"),
+           "difference p (adjust = %s)\n%s  <<    ",
+           ">>  %s \u00b7 %d of %d shown significant \u00b7 rows by %s"),
     .barrel_value_name(value), x$adjust, ga, gb, nsig, nrow(sel$edges),
     rank)
 
@@ -137,8 +137,8 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
     e <- x$edges
     e$.diff <- e$diff
     e$.sig  <- !is.na(e$significant) & e$significant
-    pair_levels <- paste0(x$global$group_a, " \u2212 ", x$global$group_b)
-    e$.pair <- factor(paste0(e$group_a, " \u2212 ", e$group_b),
+    pair_levels <- paste0(x$global$group_a, " - ", x$global$group_b)
+    e$.pair <- factor(paste0(e$group_a, " - ", e$group_b),
                       levels = pair_levels)
     nsig <- sum(e$.sig, na.rm = TRUE)
     sub <- sprintf(
@@ -179,7 +179,7 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
   shared <- base[sel_idx, , drop = FALSE]
   shared$y <- rev(seq_len(nrow(shared)))
   labels_y <- paste0(shared$from, " -> ", shared$to)
-  pair_levels <- paste0(x$global$group_a, " \u2212 ", x$global$group_b)
+  pair_levels <- paste0(x$global$group_a, " - ", x$global$group_b)
 
   parts <- lapply(seq_along(x$comparisons), function(p) {
     cp <- x$comparisons[[p]]
@@ -288,7 +288,7 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
   )
   sig <- !is.na(edges$significant) & edges$significant
   padj <- edges$p_adj
-  p_txt <- ifelse(!is.finite(padj), "\u2014",
+  p_txt <- ifelse(!is.finite(padj), "-",
             ifelse(padj < 0.001, "<.001", sprintf("%.3f", padj)))
   p <- data.frame(
     y = y, label = ifelse(sig, paste0(p_txt, "*"), p_txt),

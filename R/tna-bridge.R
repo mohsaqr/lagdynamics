@@ -23,12 +23,10 @@
 #'   `labels`, and, when available, `data` slots. For an `lsa_group`, a
 #'   `group_tna` object.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf requireNamespace("tna", quietly = TRUE)
 #' fit <- lsa(engagement)
 #' net <- lsa_to_tna(fit, weights = "prob")
 #' tna::centralities(net)
-#' }
 #'
 #' @export
 lsa_to_tna <- function(x, ...) UseMethod("lsa_to_tna")

@@ -21,3 +21,8 @@ Circular forest of the per-edge transition-probability credible
 intervals from \code{\link[=certainty_lsa]{certainty_lsa()}} (delegates to \code{\link[=plot_forest]{plot_forest()}} with
 \code{metric = "prob"}).
 }
+\examples{
+fit <- lsa(group_regulation)
+cert <- certainty_lsa(fit)
+plot(cert)
+}

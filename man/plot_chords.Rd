@@ -62,7 +62,6 @@ This is the circular companion to the \code{\link[=plot.lsa]{plot.lsa()}} heatma
 \code{cograph}; it needs the \code{cograph} package installed.
 }
 \examples{
-\dontrun{
 fit <- lsa(group_regulation)
 plot_chords(fit)                          # ribbons filled by residual
 plot_chords(fit, width = "prob")          # width = probability
@@ -72,7 +71,6 @@ plot_chords(fit, significant = TRUE, ticks = TRUE)
 g <- lsa(group_regulation,
          group = rep(c("A", "B"), length.out = nrow(group_regulation)))
 plot_chords(g$A, compare = g$B)
-}
 
 }
 \seealso{

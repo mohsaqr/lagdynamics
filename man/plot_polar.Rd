@@ -59,12 +59,10 @@ look), omitting tiny wedges. Both fill by the adjusted residual (warm
 colour scale. Needs \code{ggplot2}.
 }
 \examples{
-\dontrun{
 fit <- lsa(group_regulation)
 plot_polar(fit)                          # rose: bars filled by residual
 plot_polar(fit, style = "wedge")         # classic frequency wedges
 plot_polar(fit, significant = TRUE)      # non-significant cells greyed
-}
 
 }
 \seealso{

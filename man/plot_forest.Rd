@@ -46,7 +46,7 @@ resamples are coloured by direction (warm = over-represented, cool =
 avoided); non-significant ones are grey. Needs \code{ggplot2}.
 }
 \examples{
-\dontrun{
+\donttest{
 fit <- lsa(group_regulation)
 b <- bootstrap_lsa(fit, R = 500)
 plot_forest(b)                       # residual CIs, circular

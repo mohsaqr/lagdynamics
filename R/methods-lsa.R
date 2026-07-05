@@ -31,7 +31,7 @@ print.lsa <- function(x, ...) {
   dir <- if (isTRUE(x$directed)) "directed" else "undirected"
 
   # --- header ---
-  cat(sprintf("Lag Sequential Analysis  \u2014  %s  (lag %d, %s)\n",
+  cat(sprintf("Lag Sequential Analysis  -  %s  (lag %d, %s)\n",
               x$method, x$params$lag, dir))
   if (identical(x$data$source, "events")) {
     cat(sprintf("  %d states | %d transitions | %d events | %d sequences\n",

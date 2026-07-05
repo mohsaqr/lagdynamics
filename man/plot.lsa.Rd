@@ -45,7 +45,6 @@ arguments are forwarded to the chosen view's worker
 view-specific options.
 }
 \examples{
-\dontrun{
 fit <- lsa(group_regulation)
 plot(fit)                     # residual heatmap (default)
 plot(fit, which = "prob")     # heatmap of probabilities
@@ -53,7 +52,6 @@ plot(fit, type = "network")   # transition network
 plot(fit, type = "network", weights = "tna")  # TNA probability network
 plot(fit, type = "chord")     # chord diagram
 plot(fit, type = "sunburst")  # polar sunburst
-}
 
 }
 \seealso{

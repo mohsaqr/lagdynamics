@@ -297,6 +297,9 @@ lsa_data <- function(x, labels = NULL) {
 #' @param row.names,optional,... Standard [as.data.frame()] arguments
 #'   (unused; present for method consistency).
 #' @return A tidy data frame.
+#' @examples
+#' d <- lsa_data(c("a", "b", "a", "c", "b"))
+#' as.data.frame(d)
 #' @export
 as.data.frame.lsa_data <- function(x, row.names = NULL, optional = FALSE,
                                    ...) {
