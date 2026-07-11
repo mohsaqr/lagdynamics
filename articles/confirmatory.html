@@ -63,8 +63,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Confirmatory testing: matching claims to evidence</h1>
-                        <h4 data-toc-skip class="author"><a href="https://saqr.me" class="external-link">Mohammed Saqr</a></h4>
-                        <h4 data-toc-skip class="author"><a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a></h4>
+                        <h4 data-toc-skip class="author">Mohammed
+Saqr</h4>
+                        <h4 data-toc-skip class="author">Sonsoles
+López-Pernas</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/confirmatory.Rmd" class="external-link"><code>vignettes/confirmatory.Rmd</code></a></small>
@@ -74,12 +76,12 @@
     
     
 <p>A fitted model is an estimate, not a finding. The Dynalytics
-framework (Saqr, Lopez-Pernas, and Misiejuk, 2026) formalises this as a
-<em>scientific contract</em>: every analytical claim must be matched by
-evidence appropriate to its structure, scope, and complexity.
-<code>lagdynamics</code> provides the confirmatory testing battery that
-discharges that contract for lag-sequential models, where each edge is a
-tested departure from independence.</p>
+framework formalises this as a <em>scientific contract</em>: every
+analytical claim must be matched by evidence appropriate to its
+structure, scope, and complexity. <code>lagdynamics</code> provides the
+confirmatory testing battery that discharges that contract for
+lag-sequential models, where each edge is a tested departure from
+independence.</p>
 <p>The battery pairs a kind of claim with a kind of evidence:</p>
 <table class="table">
 <colgroup>
@@ -162,7 +164,7 @@ the population is homogeneous; the bootstrap is preferred for a mixture,
 because resampling sequences preserves within-sequence dependence that
 the analytic model treats as independent.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>   <span class="co"># resampling CIs</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>   <span class="co"># resampling CIs</span></span>
 <span><span class="co">#&gt;         from      to observed count_mean count_se count_ci_low count_ci_high</span></span>
 <span><span class="co">#&gt; 1     Active  Active      459      466.9    53.63          369           566</span></span>
 <span><span class="co">#&gt; 2    Average  Active      153      152.7    15.24          127           183</span></span>
@@ -183,7 +185,7 @@ the analytic model treats as independent.</p>
 <span><span class="co">#&gt; 2        0.249           -0.601       -0.605         -0.695          -0.487</span></span>
 <span><span class="co">#&gt; 3        0.159           -0.698       -0.696         -0.800          -0.581</span></span>
 <span><span class="co">#&gt; 4        0.323           -0.534       -0.537         -0.633          -0.406</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/certainty_lsa.html">certainty_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>            <span class="co"># analytic CIs</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="fu"><a href="../reference/certainty_lsa.html">certainty_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span>            <span class="co"># analytic CIs</span></span>
 <span><span class="co">#&gt;         from      to observed prob_observed prob_mean prob_se prob_ci_low</span></span>
 <span><span class="co">#&gt; 1     Active  Active      459         0.698     0.697  0.0179      0.6611</span></span>
 <span><span class="co">#&gt; 2    Average  Active      153         0.204     0.204  0.0147      0.1760</span></span>
@@ -208,7 +210,7 @@ and re-fits, recording how often each significant edge stays
 significant. A high stability supports reading the edge as a property of
 the process; a low one marks it as sample-dependent.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/stability_lsa.html">stability_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="fu"><a href="../reference/stability_lsa.html">stability_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from      to observed_sig stability stable</span></span>
 <span><span class="co">#&gt; 1     Active  Active         TRUE         1   TRUE</span></span>
 <span><span class="co">#&gt; 2    Average  Active         TRUE         1   TRUE</span></span>
@@ -241,7 +243,7 @@ sample.</p>
 of no sequential structure, giving a p-value that does not depend on the
 adjusted residual’s large-sample approximation.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/permute_lsa.html">permute_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="fu"><a href="../reference/permute_lsa.html">permute_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from      to observed_count observed_adj_res  p_perm significant</span></span>
 <span><span class="co">#&gt; 1     Active  Active            459             21.7 0.00498        TRUE</span></span>
 <span><span class="co">#&gt; 2    Average  Active            153            -12.9 0.00498        TRUE</span></span>
@@ -274,12 +276,12 @@ statistic.</p>
 <span><span class="co">#&gt;   R:        500 label permutations</span></span>
 <span><span class="co">#&gt;   edges:    38 significant of 78 tested (adjust = BH)</span></span>
 <span><span class="co">#&gt;   omnibus:  statistic = 79.48, p = 0.001996</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">significant</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co">#&gt;          from       to log_or_a log_or_b  diff p_perm   p_adj significant</span></span>
-<span><span class="co">#&gt; 2    cohesion    adapt   -0.794    -3.92  3.13  0.002 0.00599        TRUE</span></span>
-<span><span class="co">#&gt; 4  coregulate    adapt    0.778    -1.08  1.85  0.002 0.00599        TRUE</span></span>
-<span><span class="co">#&gt; 5     discuss    adapt    1.010     2.25 -1.24  0.002 0.00599        TRUE</span></span>
-<span><span class="co">#&gt; 11   cohesion cohesion   -0.587    -2.34  1.75  0.002 0.00599        TRUE</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">cmp</span>, significant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         from       to log_or_a log_or_b  diff p_perm   p_adj significant</span></span>
+<span><span class="co">#&gt; 1   cohesion    adapt   -0.794    -3.92  3.13  0.002 0.00599        TRUE</span></span>
+<span><span class="co">#&gt; 2 coregulate    adapt    0.778    -1.08  1.85  0.002 0.00599        TRUE</span></span>
+<span><span class="co">#&gt; 3    discuss    adapt    1.010     2.25 -1.24  0.002 0.00599        TRUE</span></span>
+<span><span class="co">#&gt; 4   cohesion cohesion   -0.587    -2.34  1.75  0.002 0.00599        TRUE</span></span></code></pre></div>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span></span></code></pre></div>
 <p><img src="confirmatory_files/figure-html/barrel-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
@@ -306,9 +308,6 @@ stronger claim needs the test that targets exactly its structure.</p>
 <span><span class="fu"><a href="../reference/reliability_lsa.html">reliability_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                     <span class="co"># the whole network</span></span>
 <span><span class="fu"><a href="../reference/permute_lsa.html">permute_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                         <span class="co"># more than chance</span></span>
 <span><span class="fu"><a href="../reference/compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span>; <span class="fu"><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span>  <span class="co"># a group difference</span></span></code></pre></div>
-<hr>
-<p>Full documentation and reference: <a href="https://pak.dynasite.org/lagdynamics/" class="uri">https://pak.dynasite.org/lagdynamics/</a></p>
-<p>Part of the <a href="https://saqr.me/" class="external-link">Dynalytics framework</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -321,7 +320,7 @@ stronger claim needs the test that targets exactly its structure.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

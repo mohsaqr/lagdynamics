@@ -63,8 +63,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Introduction</h1>
-                        <h4 data-toc-skip class="author"><a href="https://saqr.me" class="external-link">Mohammed Saqr</a></h4>
-                        <h4 data-toc-skip class="author"><a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a></h4>
+                        <h4 data-toc-skip class="author">Mohammed
+Saqr</h4>
+                        <h4 data-toc-skip class="author">Sonsoles
+López-Pernas</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/intro.Rmd" class="external-link"><code>vignettes/intro.Rmd</code></a></small>
@@ -81,28 +83,28 @@ its network representation, the lag transition network, for categorical
 event and sequence data. LSA is the classical inferential method for
 temporal contingency in observed behaviour: it tests, for every ordered
 pair of states, whether one state follows another more or less often
-than independence predicts (Sackett, 1979; Bakeman &amp; Gottman, 1997).
-The package restates this method as a modern statistical workflow built
-on six commitments:</p>
+than independence predicts. The package restates this method as a modern
+statistical workflow built on six commitments:</p>
 <ul>
 <li>
 <strong>Tidy.</strong> Every result is produced by a verb –
 <code><a href="../reference/transitions.html">transitions()</a></code>, <code><a href="../reference/nodes.html">nodes()</a></code>, <code><a href="../reference/tests.html">tests()</a></code>,
 <code><a href="../reference/initial.html">initial()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>,
-<code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code>, <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> –
-that returns a one-row-per-observation data frame. Filters are arguments
-(<code>significant = TRUE</code>, <code>direction = "over"</code>,
-<code>min_count =</code>), never subsetting; the user never indexes into
-an object.</li>
+<code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code> – that returns a
+one-row-per-observation data frame. <code><a href="../reference/transitions.html">transitions()</a></code> reads the
+fitted model and every inference result through the same arguments.
+Filters are arguments (<code>significant = TRUE</code>,
+<code>direction = "over"</code>, <code>min_count =</code>), never
+subsetting; the user never indexes into an object.</li>
 <li>
 <strong>Confirmatory, following Dynalytics.</strong> The package
-operationalizes the Dynalytics framework (Saqr, Lopez-Pernas, &amp;
-Misiejuk, 2026), whose central tenet is a scientific contract: every
-analytical claim is matched by evidence appropriate to its structure,
-scope, and complexity. Validation is therefore expanded far beyond the
-classical residual test into a full battery – analytic Bayesian
-certainty, sequence-level bootstrap, split-half reliability, case-drop
-stability, and a within-sequence permutation null.</li>
+operationalizes the Dynalytics framework, whose central tenet is a
+scientific contract: every analytical claim is matched by evidence
+appropriate to its structure, scope, and complexity. Validation is
+therefore expanded far beyond the classical residual test into a full
+battery – analytic Bayesian certainty, sequence-level bootstrap,
+split-half reliability, case-drop stability, and a within-sequence
+permutation null.</li>
 <li>
 <strong>Expanded.</strong> Beyond the classical engine the package
 offers five estimation engines plus an open registry for user-defined
@@ -176,7 +178,7 @@ and
 are the margins of the table and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
 its total. The test statistic for each cell is the adjusted
-(standardized Pearson) residual (Haberman, 1979),</p>
+(standardized Pearson) residual,</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>z</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mfrac><mrow><msub><mi>O</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>−</mo><msub><mi>E</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub></mrow><msqrt><mrow><msub><mi>E</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>R</mi><mi>i</mi></msub><mi>/</mi><mi>N</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>C</mi><mi>j</mi></msub><mi>/</mi><mi>N</mi><mo stretchy="false" form="postfix">)</mo></mrow></msqrt></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">z_{ij} = \frac{O_{ij} - E_{ij}}
   {\sqrt{E_{ij}\,(1 - R_i/N)\,(1 - C_j/N)}},</annotation></semantics></math></p>
 <p>which is asymptotically standard normal under independence. A
@@ -188,12 +190,12 @@ be frequent yet unremarkable, or rare yet strongly over-represented.</p>
 <p>When some transitions are impossible by design – self-transitions
 under continuous coding are the standard case – the affected cells are
 structural zeros. Expected counts then come from the quasi-independence
-model, fitted by iterative proportional fitting (Wickens, 1989), and the
-residuals use the design-matrix form of Christensen (1997). The two
-formulations provably coincide when no structural zeros are present, and
-the package pins that identity in its test suite. Structural-zero cells
-are reported as non-estimable (<code>NA</code>), never as “expected
-zero”: no test is defined there.</p>
+model, fitted by iterative proportional fitting, and the residuals use
+the design-matrix form. The two formulations provably coincide when no
+structural zeros are present, and the package pins that identity in its
+test suite. Structural-zero cells are reported as non-estimable
+(<code>NA</code>), never as “expected zero”: no test is defined
+there.</p>
 <p>A <strong>lag transition network</strong> is the graph form of the
 fitted model: states are nodes, each ordered pair is a directed edge,
 and the edge weight is the tested departure from independence. This
@@ -210,11 +212,10 @@ following. Each item is exercised in this vignette or in a dedicated
 companion vignette.</p>
 <p><strong>Estimation</strong></p>
 <ul>
-<li>Five estimation engines: <code>classical</code> (Bakeman &amp;
-Quera; the default), <code>two_cell</code>, <code>bidirectional</code>
-(Sackett’s matched-pair test on the symmetrized table),
-<code>parallel_dominance</code>, and <code>nonparallel_dominance</code>
-(Sackett, 1979; Wampold, 1984), each available through
+<li>Five estimation engines: <code>classical</code> (the default),
+<code>two_cell</code>, <code>bidirectional</code> (the matched-pair test
+on the symmetrized table), <code>parallel_dominance</code>, and
+<code>nonparallel_dominance</code>, each available through
 <code>lsa(engine = )</code> or a direct wrapper such as
 <code><a href="../reference/lsa.html">lsa_two_cell()</a></code>.</li>
 <li>An open engine registry: <code><a href="../reference/register_lsa_engine.html">register_lsa_engine()</a></code> /
@@ -232,7 +233,7 @@ the exported <code><a href="../reference/lsa_ipf.html">lsa_ipf()</a></code>.</li
 a shared state space, so groups remain comparable even when a group
 never visits a state.</li>
 <li>An experimental directed transfer-entropy measure,
-<code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code> (Schreiber, 2000).</li>
+<code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code>.</li>
 </ul>
 <p><strong>Inference and validation</strong></p>
 <ul>
@@ -257,9 +258,10 @@ pairwise comparison.</li>
 <ul>
 <li>Tidy accessors throughout: <code><a href="../reference/transitions.html">transitions()</a></code>,
 <code><a href="../reference/nodes.html">nodes()</a></code>, <code><a href="../reference/tests.html">tests()</a></code>, <code><a href="../reference/initial.html">initial()</a></code>,
-<code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, and
-<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> on every result object. No result requires
-indexing into an object.</li>
+<code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code>, and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>.
+<code><a href="../reference/transitions.html">transitions()</a></code> reads the fitted model and every inference
+result with the same arguments. No result requires indexing into an
+object.</li>
 <li>One plotting verb with several geometries, plus dedicated plots for
 uncertainty and comparison results (see the gallery below).</li>
 <li>Ingestion of long event logs, wide sequence data, lists of
@@ -404,7 +406,7 @@ multi-lag model.</p>
 <span><span class="co">#&gt; 1   1 Active Disengaged    23 0.0350  -12.56 3.64e-36        TRUE</span></span>
 <span><span class="co">#&gt; 2   2 Active Disengaged    33 0.0536  -10.65 1.77e-26        TRUE</span></span>
 <span><span class="co">#&gt; 3   3 Active Disengaged    35 0.0615   -9.42 4.68e-21        TRUE</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="../reference/lsa_lags.html">lsa_lags</a></span><span class="op">(</span><span class="va">engagement</span>, lags <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="fu"><a href="../reference/lsa_lags.html">lsa_lags</a></span><span class="op">(</span><span class="va">engagement</span>, lags <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from      to lag count expected  prob prob_col adj_res         p</span></span>
 <span><span class="co">#&gt; 1     Active  Active   1   459      247 0.698   0.7051   21.66 4.60e-104</span></span>
 <span><span class="co">#&gt; 2    Average  Active   1   153      282 0.204   0.2350  -12.91  4.16e-38</span></span>
@@ -602,7 +604,7 @@ results.</p>
 <span><span class="co">#&gt;   R:        100 label permutations</span></span>
 <span><span class="co">#&gt;   edges:    38 significant of 78 tested (adjust = BH)</span></span>
 <span><span class="co">#&gt;   omnibus:  statistic = 79.48, p = 0.009901</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from    to log_or_a log_or_b  diff p_perm  p_adj significant</span></span>
 <span><span class="co">#&gt; 1      adapt adapt   -1.183    -3.17 1.984     NA     NA       FALSE</span></span>
 <span><span class="co">#&gt; 2   cohesion adapt   -0.794    -3.92 3.127 0.0099 0.0234        TRUE</span></span>
@@ -615,7 +617,7 @@ results.</p>
 <span><span class="co">#&gt;   groups:    High vs Low</span></span>
 <span><span class="co">#&gt;   prior:     Dirichlet(0.50)  |  draws: 1000  |  CI: 95%</span></span>
 <span><span class="co">#&gt;   edges:     39 credibly different of 81 compared</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">bcmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">bcmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from    to  prob_a   prob_b     diff    ci_low ci_high    pd</span></span>
 <span><span class="co">#&gt; 1      adapt adapt 0.00344 0.001342  0.00209 -0.005313 0.01663 0.650</span></span>
 <span><span class="co">#&gt; 2   cohesion adapt 0.00584 0.000657  0.00518  0.001209 0.01097 0.989</span></span>
@@ -686,7 +688,7 @@ with a matching procedure:</p>
 </table>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cert</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/certainty_lsa.html">certainty_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cert</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">cert</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from     to observed prob_observed prob_mean prob_se prob_ci_low</span></span>
 <span><span class="co">#&gt; 1     Active Active      459         0.698     0.697  0.0179      0.6611</span></span>
 <span><span class="co">#&gt; 2    Average Active      153         0.204     0.204  0.0147      0.1760</span></span>
@@ -697,7 +699,7 @@ with a matching procedure:</p>
 <span><span class="co">#&gt; 3        0.158 9.45e-02  FALSE            -10.5          FALSE</span></span>
 <span></span>
 <span><span class="va">boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">boot</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">boot</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from     to observed count_mean count_se count_ci_low count_ci_high</span></span>
 <span><span class="co">#&gt; 1     Active Active      459      467.5    60.53          360           559</span></span>
 <span><span class="co">#&gt; 2    Average Active      153      156.5    14.79          131           178</span></span>
@@ -811,10 +813,9 @@ downstream transition-network tooling –
 matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">to</mtext><mo>∣</mo><mtext mathvariant="normal">from</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(\text{to} \mid \text{from})</annotation></semantics></math>
 and <code><a href="../reference/initial.html">initial()</a></code> the initial-state distribution, the two
-ingredients a TNA-style model requires – and every result object
-flattens to a plain data frame with <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, so
-results move into any tabular pipeline without package-specific
-code.</p>
+ingredients a TNA-style model requires – and every result object reads
+as a plain data frame through <code><a href="../reference/transitions.html">transitions()</a></code>, so results
+move into any tabular pipeline without package-specific code.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/transition_probabilities.html">transition_probabilities</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            Active Average Disengaged</span></span>
@@ -838,35 +839,6 @@ collaborative-learning sessions), <code>group_regulation_long</code>
 <code>ai_long</code> (long event log of coded AI actions in human–AI
 coding sessions).</p>
 </div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p>Bakeman, R., &amp; Gottman, J. M. (1997). <em>Observing interaction:
-An introduction to sequential analysis</em> (2nd ed.). Cambridge
-University Press.</p>
-<p>Bakeman, R., &amp; Quera, V. (1995). <em>Analyzing interaction:
-Sequential analysis with SDIS and GSEQ</em>. Cambridge University
-Press.</p>
-<p>Christensen, R. (1997). <em>Log-linear models and logistic
-regression</em> (2nd ed.). Springer.</p>
-<p>Haberman, S. J. (1979). <em>Analysis of qualitative data: Volume 2,
-New developments</em>. Academic Press.</p>
-<p>Sackett, G. P. (1979). The lag sequential analysis of contingency and
-cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
-<em>Handbook of infant development</em> (pp. 623–649). Wiley.</p>
-<p>Saqr, M., Lopez-Pernas, S., &amp; Misiejuk, K. (2026).
-<em>Dynalytics: A framework for the analysis of temporal
-processes</em>.</p>
-<p>Schreiber, T. (2000). Measuring information transfer. <em>Physical
-Review Letters</em>, 85(2), 461–464. <a href="doi:10.1103/PhysRevLett.85.461" class="uri">doi:10.1103/PhysRevLett.85.461</a>.</p>
-<p>Wampold, B. E. (1984). Tests of dominance in sequential categorical
-data. <em>Psychological Bulletin</em>, 96(2), 424–429.</p>
-<p>Wickens, T. D. (1989). <em>Multiway contingency tables analysis for
-the social sciences</em>. Erlbaum.</p>
-<hr>
-<p>Full documentation and reference: <a href="https://pak.dynasite.org/lagdynamics/" class="uri">https://pak.dynasite.org/lagdynamics/</a></p>
-<p>Part of the <a href="https://saqr.me/" class="external-link">Dynalytics framework</a>.</p>
-</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
@@ -878,7 +850,7 @@ the social sciences</em>. Erlbaum.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

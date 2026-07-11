@@ -63,8 +63,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Lag transition networks</h1>
-                        <h4 data-toc-skip class="author"><a href="https://saqr.me" class="external-link">Mohammed Saqr</a></h4>
-                        <h4 data-toc-skip class="author"><a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a></h4>
+                        <h4 data-toc-skip class="author">Mohammed
+Saqr</h4>
+                        <h4 data-toc-skip class="author">Sonsoles
+López-Pernas</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/lag-transition-networks.Rmd" class="external-link"><code>vignettes/lag-transition-networks.Rmd</code></a></small>
@@ -211,8 +213,8 @@ than any other state, which makes it the most frequently visited state
 in the process. <code>Ask</code>, <code>Report</code>, and
 <code>Explain</code> are visited rarely. The magnitude of these totals
 is exactly what the expected-count calculation controls for, so that a
-busy state is not credited with meaningful transitions merely for being
-busy.</p>
+busy state is not credited with meaningful transitions on the strength
+of its activity alone.</p>
 <p>The omnibus test evaluates the whole table against independence and
 is the first result to consult.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -379,8 +381,8 @@ the link from planning to execution is one-directional.
 <code>Execute -&gt; Execute</code> is a heavy self-loop (residual 16.1),
 so the process remains in execution once it arrives. The red edges
 <code>Plan -&gt; Plan</code> and <code>Investigate -&gt; Execute</code>
-confirm that planning does not repeat and that investigation does not
-jump straight to execution.</p>
+show that planning does not repeat and that investigation does not jump
+straight to execution.</p>
 <p>The Yule’s Q network shows the same signed departures on a bounded
 scale, so its edge values are comparable across datasets and across
 groups of different sizes. The full network again draws every edge, and
@@ -461,8 +463,8 @@ not.</p>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>The analysis of <code>ai_long</code> establishes that the order of
-actions is not random
+<p>The analysis of <code>ai_long</code> shows that the order of actions
+is not random
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>G</mi><mn>2</mn></msup><mo>=</mo><mn>2168</mn></mrow><annotation encoding="application/x-tex">G^2 = 2168</annotation></semantics></math>,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>&lt;</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">p &lt; 0.001</annotation></semantics></math>)
 and that the process has a definite shape. Sessions almost always begin
@@ -484,22 +486,6 @@ network remain complementary throughout: the probability network
 describes where the process tends to go, and the residual network
 identifies which transitions occur more or less often than chance.</p>
 </div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p>Bakeman, R., &amp; Gottman, J. M. (1997). <em>Observing interaction:
-An introduction to sequential analysis</em> (2nd ed.). Cambridge
-University Press.</p>
-<p>Haberman, S. J. (1973). The analysis of residuals in cross-classified
-tables. <em>Biometrics</em>, 29(1), 205–220.</p>
-<p>Saqr, M., López-Pernas, S., &amp; Tikka, S. (2025). Mapping
-relational dynamics with transition network analysis: A primer and
-tutorial. In <em>Advanced Learning Analytics Methods and
-Tutorials</em>.</p>
-<hr>
-<p>Full documentation and reference: <a href="https://pak.dynasite.org/lagdynamics/" class="uri">https://pak.dynasite.org/lagdynamics/</a></p>
-<p>Part of the <a href="https://saqr.me/" class="external-link">Dynalytics framework</a>.</p>
-</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
@@ -511,7 +497,7 @@ Tutorials</em>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

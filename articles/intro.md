@@ -7,9 +7,8 @@ representation, the lag transition network, for categorical event and
 sequence data. LSA is the classical inferential method for temporal
 contingency in observed behaviour: it tests, for every ordered pair of
 states, whether one state follows another more or less often than
-independence predicts (Sackett, 1979; Bakeman & Gottman, 1997). The
-package restates this method as a modern statistical workflow built on
-six commitments:
+independence predicts. The package restates this method as a modern
+statistical workflow built on six commitments:
 
 - **Tidy.** Every result is produced by a verb –
   [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
@@ -17,19 +16,20 @@ six commitments:
   [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
   [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
   [`summary()`](https://rdrr.io/r/base/summary.html),
-  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
-  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) – that
-  returns a one-row-per-observation data frame. Filters are arguments
-  (`significant = TRUE`, `direction = "over"`, `min_count =`), never
-  subsetting; the user never indexes into an object.
+  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+  – that returns a one-row-per-observation data frame.
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+  reads the fitted model and every inference result through the same
+  arguments. Filters are arguments (`significant = TRUE`,
+  `direction = "over"`, `min_count =`), never subsetting; the user never
+  indexes into an object.
 - **Confirmatory, following Dynalytics.** The package operationalizes
-  the Dynalytics framework (Saqr, Lopez-Pernas, & Misiejuk, 2026), whose
-  central tenet is a scientific contract: every analytical claim is
-  matched by evidence appropriate to its structure, scope, and
-  complexity. Validation is therefore expanded far beyond the classical
-  residual test into a full battery – analytic Bayesian certainty,
-  sequence-level bootstrap, split-half reliability, case-drop stability,
-  and a within-sequence permutation null.
+  the Dynalytics framework, whose central tenet is a scientific
+  contract: every analytical claim is matched by evidence appropriate to
+  its structure, scope, and complexity. Validation is therefore expanded
+  far beyond the classical residual test into a full battery – analytic
+  Bayesian certainty, sequence-level bootstrap, split-half reliability,
+  case-drop stability, and a within-sequence permutation null.
 - **Expanded.** Beyond the classical engine the package offers five
   estimation engines plus an open registry for user-defined ones,
   multi-lag analysis with positive and negative lags, structural-zero
@@ -89,7 +89,7 @@ E_{ij} = \frac{R_i \, C_j}{N},
 
 where $`R_i`$ and $`C_j`$ are the margins of the table and $`N`$ its
 total. The test statistic for each cell is the adjusted (standardized
-Pearson) residual (Haberman, 1979),
+Pearson) residual,
 
 ``` math
 z_{ij} = \frac{O_{ij} - E_{ij}}
@@ -106,12 +106,11 @@ unremarkable, or rare yet strongly over-represented.
 When some transitions are impossible by design – self-transitions under
 continuous coding are the standard case – the affected cells are
 structural zeros. Expected counts then come from the quasi-independence
-model, fitted by iterative proportional fitting (Wickens, 1989), and the
-residuals use the design-matrix form of Christensen (1997). The two
-formulations provably coincide when no structural zeros are present, and
-the package pins that identity in its test suite. Structural-zero cells
-are reported as non-estimable (`NA`), never as “expected zero”: no test
-is defined there.
+model, fitted by iterative proportional fitting, and the residuals use
+the design-matrix form. The two formulations provably coincide when no
+structural zeros are present, and the package pins that identity in its
+test suite. Structural-zero cells are reported as non-estimable (`NA`),
+never as “expected zero”: no test is defined there.
 
 A **lag transition network** is the graph form of the fitted model:
 states are nodes, each ordered pair is a directed edge, and the edge
@@ -128,11 +127,10 @@ is exercised in this vignette or in a dedicated companion vignette.
 
 **Estimation**
 
-- Five estimation engines: `classical` (Bakeman & Quera; the default),
-  `two_cell`, `bidirectional` (Sackett’s matched-pair test on the
-  symmetrized table), `parallel_dominance`, and `nonparallel_dominance`
-  (Sackett, 1979; Wampold, 1984), each available through
-  `lsa(engine = )` or a direct wrapper such as
+- Five estimation engines: `classical` (the default), `two_cell`,
+  `bidirectional` (the matched-pair test on the symmetrized table),
+  `parallel_dominance`, and `nonparallel_dominance`, each available
+  through `lsa(engine = )` or a direct wrapper such as
   [`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 - An open engine registry:
   [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
@@ -154,8 +152,7 @@ is exercised in this vignette or in a dedicated companion vignette.
   shared state space, so groups remain comparable even when a group
   never visits a state.
 - An experimental directed transfer-entropy measure,
-  [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md)
-  (Schreiber, 2000).
+  [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md).
 
 **Inference and validation**
 
@@ -191,9 +188,10 @@ is exercised in this vignette or in a dedicated companion vignette.
   [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
   [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
   [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
-  [`summary()`](https://rdrr.io/r/base/summary.html), and
-  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on
-  every result object. No result requires indexing into an object.
+  and [`summary()`](https://rdrr.io/r/base/summary.html).
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+  reads the fitted model and every inference result with the same
+  arguments. No result requires indexing into an object.
 - One plotting verb with several geometries, plus dedicated plots for
   uncertainty and comparison results (see the gallery below).
 - Ingestion of long event logs, wide sequence data, lists of sequences,
@@ -348,7 +346,7 @@ lag_profile(engagement, "Active", "Disengaged", lags = 1:3)
 #> 1   1 Active Disengaged    23 0.0350  -12.56 3.64e-36        TRUE
 #> 2   2 Active Disengaged    33 0.0536  -10.65 1.77e-26        TRUE
 #> 3   3 Active Disengaged    35 0.0615   -9.42 4.68e-21        TRUE
-as.data.frame(lsa_lags(engagement, lags = 1:2)) |> head(6)
+transitions(lsa_lags(engagement, lags = 1:2)) |> head(6)
 #>         from      to lag count expected  prob prob_col adj_res         p
 #> 1     Active  Active   1   459      247 0.698   0.7051   21.66 4.60e-104
 #> 2    Average  Active   1   153      282 0.204   0.2350  -12.91  4.16e-38
@@ -535,7 +533,7 @@ cmp
 #>   R:        100 label permutations
 #>   edges:    38 significant of 78 tested (adjust = BH)
 #>   omnibus:  statistic = 79.48, p = 0.009901
-as.data.frame(cmp) |> head(4)
+transitions(cmp) |> head(4)
 #>         from    to log_or_a log_or_b  diff p_perm  p_adj significant
 #> 1      adapt adapt   -1.183    -3.17 1.984     NA     NA       FALSE
 #> 2   cohesion adapt   -0.794    -3.92 3.127 0.0099 0.0234        TRUE
@@ -548,7 +546,7 @@ bcmp
 #>   groups:    High vs Low
 #>   prior:     Dirichlet(0.50)  |  draws: 1000  |  CI: 95%
 #>   edges:     39 credibly different of 81 compared
-as.data.frame(bcmp) |> head(4)
+transitions(bcmp) |> head(4)
 #>         from    to  prob_a   prob_b     diff    ci_low ci_high    pd
 #> 1      adapt adapt 0.00344 0.001342  0.00209 -0.005313 0.01663 0.650
 #> 2   cohesion adapt 0.00584 0.000657  0.00518  0.001209 0.01097 0.989
@@ -594,7 +592,7 @@ with a matching procedure:
 ``` r
 
 cert <- certainty_lsa(fit)
-as.data.frame(cert) |> head(3)
+transitions(cert) |> head(3)
 #>         from     to observed prob_observed prob_mean prob_se prob_ci_low
 #> 1     Active Active      459         0.698     0.697  0.0179      0.6611
 #> 2    Average Active      153         0.204     0.204  0.0147      0.1760
@@ -605,7 +603,7 @@ as.data.frame(cert) |> head(3)
 #> 3        0.158 9.45e-02  FALSE            -10.5          FALSE
 
 boot <- bootstrap_lsa(fit, R = 50)
-as.data.frame(boot) |> head(3)
+transitions(boot) |> head(3)
 #>         from     to observed count_mean count_se count_ci_low count_ci_high
 #> 1     Active Active      459      467.5    60.53          360           559
 #> 2    Average Active      153      156.5    14.79          131           178
@@ -725,9 +723,9 @@ are exposed for any downstream transition-network tooling –
 returns the row-stochastic matrix $`P(\text{to} \mid \text{from})`$ and
 [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
 the initial-state distribution, the two ingredients a TNA-style model
-requires – and every result object flattens to a plain data frame with
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), so
-results move into any tabular pipeline without package-specific code.
+requires – and every result object reads as a plain data frame through
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+so results move into any tabular pipeline without package-specific code.
 
 ``` r
 
@@ -751,41 +749,3 @@ shapes: `engagement` (wide; 138 students, weekly engagement states),
 `group_regulation_long` (long event log with actor, action, time, and an
 achievement group), and `ai_long` (long event log of coded AI actions in
 human–AI coding sessions).
-
-## References
-
-Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
-introduction to sequential analysis* (2nd ed.). Cambridge University
-Press.
-
-Bakeman, R., & Quera, V. (1995). *Analyzing interaction: Sequential
-analysis with SDIS and GSEQ*. Cambridge University Press.
-
-Christensen, R. (1997). *Log-linear models and logistic regression* (2nd
-ed.). Springer.
-
-Haberman, S. J. (1979). *Analysis of qualitative data: Volume 2, New
-developments*. Academic Press.
-
-Sackett, G. P. (1979). The lag sequential analysis of contingency and
-cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
-*Handbook of infant development* (pp. 623–649). Wiley.
-
-Saqr, M., Lopez-Pernas, S., & Misiejuk, K. (2026). *Dynalytics: A
-framework for the analysis of temporal processes*.
-
-Schreiber, T. (2000). Measuring information transfer. *Physical Review
-Letters*, 85(2), 461–464. <doi:10.1103/PhysRevLett.85.461>.
-
-Wampold, B. E. (1984). Tests of dominance in sequential categorical
-data. *Psychological Bulletin*, 96(2), 424–429.
-
-Wickens, T. D. (1989). *Multiway contingency tables analysis for the
-social sciences*. Erlbaum.
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

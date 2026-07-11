@@ -233,7 +233,7 @@ cert
 #>   prior:         Dirichlet(0.50)
 #>   CI level:      95%  |  inference: stability
 #>   certain edges: 7 of 9
-as.data.frame(cert) |> head(4)
+transitions(cert) |> head(4)
 #>         from      to observed prob_observed prob_mean prob_se prob_ci_low
 #> 1     Active  Active      459         0.698     0.697  0.0179      0.6611
 #> 2    Average  Active      153         0.204     0.204  0.0147      0.1760
@@ -277,10 +277,3 @@ Use the focused vignettes according to the claim you need to support:
   group comparison.
 - [`vignette("lag-transition-networks", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.md)
   for TNA-style transition networks.
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

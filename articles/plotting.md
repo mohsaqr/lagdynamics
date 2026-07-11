@@ -204,10 +204,3 @@ plot(bootstrap_lsa(fit)); plot(certainty_lsa(fit))   # uncertainty forests
 plot(compare_lsa(gfit)); plot(bayes_compare_lsa(gfit))  # group barrels
 plot(gfit)                                  # grouped: one panel per group
 ```
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

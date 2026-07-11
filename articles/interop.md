@@ -474,10 +474,3 @@ Use the residual network when the claim is lag-sequential: which
 transitions occur more or less often than expected under independence.
 Use the probability/TNA network when the claim is descriptive: where the
 process tends to go next.
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

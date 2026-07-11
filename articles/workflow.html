@@ -63,8 +63,10 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>A complete workflow: from sequences to a group comparison</h1>
-                        <h4 data-toc-skip class="author"><a href="https://saqr.me" class="external-link">Mohammed Saqr</a></h4>
-                        <h4 data-toc-skip class="author"><a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a></h4>
+                        <h4 data-toc-skip class="author">Mohammed
+Saqr</h4>
+                        <h4 data-toc-skip class="author">Sonsoles
+López-Pernas</h4>
             
       
       <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/workflow.Rmd" class="external-link"><code>vignettes/workflow.Rmd</code></a></small>
@@ -239,7 +241,7 @@ transition probabilities.</p>
 <span><span class="co">#&gt;   prior:         Dirichlet(0.50)</span></span>
 <span><span class="co">#&gt;   CI level:      95%  |  inference: stability</span></span>
 <span><span class="co">#&gt;   certain edges: 7 of 9</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cert</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">cert</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from      to observed prob_observed prob_mean prob_se prob_ci_low</span></span>
 <span><span class="co">#&gt; 1     Active  Active      459         0.698     0.697  0.0179      0.6611</span></span>
 <span><span class="co">#&gt; 2    Average  Active      153         0.204     0.204  0.0147      0.1760</span></span>
@@ -262,7 +264,7 @@ be a mixture of different sequence types.</p>
 <span><span class="co">#&gt;   replicates:    100</span></span>
 <span><span class="co">#&gt;   CI level:      95%</span></span>
 <span><span class="co">#&gt;   stable edges:  7 of 9</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">boot</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">boot</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from      to observed count_mean count_se count_ci_low count_ci_high</span></span>
 <span><span class="co">#&gt; 1     Active  Active      459      465.2    51.55          378           560</span></span>
 <span><span class="co">#&gt; 2    Average  Active      153      153.9    16.30          126           187</span></span>
@@ -437,7 +439,7 @@ differences and an omnibus comparison.</p>
 <span><span class="co">#&gt;   R:        100 label permutations</span></span>
 <span><span class="co">#&gt;   edges:    35 significant of 78 tested (adjust = BH)</span></span>
 <span><span class="co">#&gt;   omnibus:  statistic = 79.48, p = 0.009901</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         from    to log_or_a log_or_b   diff p_perm  p_adj significant</span></span>
 <span><span class="co">#&gt; 1      adapt adapt   -1.183    -3.17  1.984     NA     NA       FALSE</span></span>
 <span><span class="co">#&gt; 2   cohesion adapt   -0.794    -3.92  3.127 0.0099 0.0249        TRUE</span></span>
@@ -473,9 +475,6 @@ edge.</p>
 <p>Descriptive claims use the fitted transition tables and plots. Edge
 claims add uncertainty. Whole-network claims add reliability or
 stability. Group-difference claims use permutation comparison.</p>
-<hr>
-<p>Full documentation and reference: <a href="https://pak.dynasite.org/lagdynamics/" class="uri">https://pak.dynasite.org/lagdynamics/</a></p>
-<p>Part of the <a href="https://saqr.me/" class="external-link">Dynalytics framework</a>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -488,7 +487,7 @@ stability. Group-difference claims use permutation comparison.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

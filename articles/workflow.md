@@ -198,7 +198,7 @@ cert
 #>   prior:         Dirichlet(0.50)
 #>   CI level:      95%  |  inference: stability
 #>   certain edges: 7 of 9
-as.data.frame(cert) |> head(4)
+transitions(cert) |> head(4)
 #>         from      to observed prob_observed prob_mean prob_se prob_ci_low
 #> 1     Active  Active      459         0.698     0.697  0.0179      0.6611
 #> 2    Average  Active      153         0.204     0.204  0.0147      0.1760
@@ -226,7 +226,7 @@ boot
 #>   replicates:    100
 #>   CI level:      95%
 #>   stable edges:  7 of 9
-as.data.frame(boot) |> head(4)
+transitions(boot) |> head(4)
 #>         from      to observed count_mean count_se count_ci_low count_ci_high
 #> 1     Active  Active      459      465.2    51.55          378           560
 #> 2    Average  Active      153      153.9    16.30          126           187
@@ -425,7 +425,7 @@ cmp
 #>   R:        100 label permutations
 #>   edges:    35 significant of 78 tested (adjust = BH)
 #>   omnibus:  statistic = 79.48, p = 0.009901
-as.data.frame(cmp) |> head(6)
+transitions(cmp) |> head(6)
 #>         from    to log_or_a log_or_b   diff p_perm  p_adj significant
 #> 1      adapt adapt   -1.183    -3.17  1.984     NA     NA       FALSE
 #> 2   cohesion adapt   -0.794    -3.92  3.127 0.0099 0.0249        TRUE
@@ -469,10 +469,3 @@ compare_lsa(group_fit)
 Descriptive claims use the fitted transition tables and plots. Edge
 claims add uncertainty. Whole-network claims add reliability or
 stability. Group-difference claims use permutation comparison.
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

@@ -155,8 +155,8 @@ nodes(fit)
 state, which makes it the most frequently visited state in the process.
 `Ask`, `Report`, and `Explain` are visited rarely. The magnitude of
 these totals is exactly what the expected-count calculation controls
-for, so that a busy state is not credited with meaningful transitions
-merely for being busy.
+for, so that a busy state is not credited with meaningful transitions on
+the strength of its activity alone.
 
 The omnibus test evaluates the whole table against independence and is
 the first result to consult.
@@ -340,7 +340,7 @@ make explicit. `Investigate -> Plan` is the heaviest edge (residual
 `Execute -> Plan` is red (residual -14.5), so the link from planning to
 execution is one-directional. `Execute -> Execute` is a heavy self-loop
 (residual 16.1), so the process remains in execution once it arrives.
-The red edges `Plan -> Plan` and `Investigate -> Execute` confirm that
+The red edges `Plan -> Plan` and `Investigate -> Execute` show that
 planning does not repeat and that investigation does not jump straight
 to execution.
 
@@ -445,9 +445,9 @@ are estimated with confidence, and the rare transitions are not.
 
 ## Summary
 
-The analysis of `ai_long` establishes that the order of actions is not
-random ($`G^2 = 2168`$, $`p < 0.001`$) and that the process has a
-definite shape. Sessions almost always begin in `Investigate` (initial
+The analysis of `ai_long` shows that the order of actions is not random
+($`G^2 = 2168`$, $`p < 0.001`$) and that the process has a definite
+shape. Sessions almost always begin in `Investigate` (initial
 probability 0.71). `Investigate` and `Plan` form a mutual pair, feed
 forward into `Execute` through the one-directional `Plan -> Execute`,
 and terminate in `Execute`, which is the busiest state (in-strength
@@ -463,23 +463,3 @@ and the probability network remain complementary throughout: the
 probability network describes where the process tends to go, and the
 residual network identifies which transitions occur more or less often
 than chance.
-
-## References
-
-Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
-introduction to sequential analysis* (2nd ed.). Cambridge University
-Press.
-
-Haberman, S. J. (1973). The analysis of residuals in cross-classified
-tables. *Biometrics*, 29(1), 205–220.
-
-Saqr, M., López-Pernas, S., & Tikka, S. (2025). Mapping relational
-dynamics with transition network analysis: A primer and tutorial. In
-*Advanced Learning Analytics Methods and Tutorials*.
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

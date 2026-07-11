@@ -1,12 +1,11 @@
 # Confirmatory testing: matching claims to evidence
 
 A fitted model is an estimate, not a finding. The Dynalytics framework
-(Saqr, Lopez-Pernas, and Misiejuk, 2026) formalises this as a
-*scientific contract*: every analytical claim must be matched by
-evidence appropriate to its structure, scope, and complexity.
-`lagdynamics` provides the confirmatory testing battery that discharges
-that contract for lag-sequential models, where each edge is a tested
-departure from independence.
+formalises this as a *scientific contract*: every analytical claim must
+be matched by evidence appropriate to its structure, scope, and
+complexity. `lagdynamics` provides the confirmatory testing battery that
+discharges that contract for lag-sequential models, where each edge is a
+tested departure from independence.
 
 The battery pairs a kind of claim with a kind of evidence:
 
@@ -64,7 +63,7 @@ independent.
 
 ``` r
 
-as.data.frame(bootstrap_lsa(fit, R = 200)) |> head(4)   # resampling CIs
+transitions(bootstrap_lsa(fit, R = 200)) |> head(4)   # resampling CIs
 #>         from      to observed count_mean count_se count_ci_low count_ci_high
 #> 1     Active  Active      459      466.9    53.63          369           566
 #> 2    Average  Active      153      152.7    15.24          127           183
@@ -85,7 +84,7 @@ as.data.frame(bootstrap_lsa(fit, R = 200)) |> head(4)   # resampling CIs
 #> 2        0.249           -0.601       -0.605         -0.695          -0.487
 #> 3        0.159           -0.698       -0.696         -0.800          -0.581
 #> 4        0.323           -0.534       -0.537         -0.633          -0.406
-as.data.frame(certainty_lsa(fit)) |> head(4)            # analytic CIs
+transitions(certainty_lsa(fit)) |> head(4)            # analytic CIs
 #>         from      to observed prob_observed prob_mean prob_se prob_ci_low
 #> 1     Active  Active      459         0.698     0.697  0.0179      0.6611
 #> 2    Average  Active      153         0.204     0.204  0.0147      0.1760
@@ -118,7 +117,7 @@ sample-dependent.
 
 ``` r
 
-as.data.frame(stability_lsa(fit, R = 200)) |> head(4)
+transitions(stability_lsa(fit, R = 200)) |> head(4)
 #>         from      to observed_sig stability stable
 #> 1     Active  Active         TRUE         1   TRUE
 #> 2    Average  Active         TRUE         1   TRUE
@@ -156,7 +155,7 @@ large-sample approximation.
 
 ``` r
 
-as.data.frame(permute_lsa(fit, R = 200)) |> head(4)
+transitions(permute_lsa(fit, R = 200)) |> head(4)
 #>         from      to observed_count observed_adj_res  p_perm significant
 #> 1     Active  Active            459             21.7 0.00498        TRUE
 #> 2    Average  Active            153            -12.9 0.00498        TRUE
@@ -196,12 +195,12 @@ cmp
 #>   R:        500 label permutations
 #>   edges:    38 significant of 78 tested (adjust = BH)
 #>   omnibus:  statistic = 79.48, p = 0.001996
-as.data.frame(cmp) |> subset(significant) |> head(4)
-#>          from       to log_or_a log_or_b  diff p_perm   p_adj significant
-#> 2    cohesion    adapt   -0.794    -3.92  3.13  0.002 0.00599        TRUE
-#> 4  coregulate    adapt    0.778    -1.08  1.85  0.002 0.00599        TRUE
-#> 5     discuss    adapt    1.010     2.25 -1.24  0.002 0.00599        TRUE
-#> 11   cohesion cohesion   -0.587    -2.34  1.75  0.002 0.00599        TRUE
+transitions(cmp, significant = TRUE) |> head(4)
+#>         from       to log_or_a log_or_b  diff p_perm   p_adj significant
+#> 1   cohesion    adapt   -0.794    -3.92  3.13  0.002 0.00599        TRUE
+#> 2 coregulate    adapt    0.778    -1.08  1.85  0.002 0.00599        TRUE
+#> 3    discuss    adapt    1.010     2.25 -1.24  0.002 0.00599        TRUE
+#> 4   cohesion cohesion   -0.587    -2.34  1.75  0.002 0.00599        TRUE
 ```
 
 ``` r
@@ -239,10 +238,3 @@ reliability_lsa(fit)                     # the whole network
 permute_lsa(fit)                         # more than chance
 compare_lsa(gfit); bayes_compare_lsa(gfit)  # a group difference
 ```
-
-------------------------------------------------------------------------
-
-Full documentation and reference:
-<https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).

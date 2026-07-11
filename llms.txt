@@ -198,7 +198,7 @@ MIT © 2026 Mohammed Saqr
 - [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
   : Transition-Probability Matrix of an LSA Fit
 - [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
-  : Transitions of an LSA Fit (Tidy)
+  : Transitions of an LSA Fit or an Inference Result (Tidy)
 - [`unregister_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/unregister_lsa_engine.md)
   : Remove a Registered LSA Engine
 
