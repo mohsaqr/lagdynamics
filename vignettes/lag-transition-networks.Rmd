@@ -1,8 +1,8 @@
 ---
 title: "Lag transition networks"
 author:
-  - "[Mohammed Saqr](https://saqr.me)"
-  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+  - "Mohammed Saqr"
+  - "Sonsoles López-Pernas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Lag transition networks}
@@ -17,8 +17,8 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.align = "center")
 set.seed(2026)
 library(lagdynamics)
-options(digits = 3)
-has <- function(p) requireNamespace(p, quietly = TRUE)
+old_options <- options(digits = 3)
+has_cograph <- requireNamespace("cograph", quietly = TRUE)
 ```
 
 Lag-sequential analysis studies the order in which categorical events occur.
@@ -111,7 +111,8 @@ nodes(fit)
 state, which makes it the most frequently visited state in the process.
 `Ask`, `Report`, and `Explain` are visited rarely. The magnitude of these
 totals is exactly what the expected-count calculation controls for, so that a
-busy state is not credited with meaningful transitions merely for being busy.
+busy state is not credited with meaningful transitions on the strength of its
+activity alone.
 
 The omnibus test evaluates the whole table against independence and is the
 first result to consult.
@@ -175,11 +176,11 @@ the Transition Network Analysis view, comes last.
 The residual network draws the tested departures from independence. The full
 network draws every edge:
 
-```{r net-residual-full, eval = has("cograph")}
+```{r net-residual-full, eval = has_cograph}
 plot_transitions(fit, weights = "residuals", decimals = 1)
 ```
 
-```{r net-residual-full-skip, echo = FALSE, eval = !has("cograph")}
+```{r net-residual-full-skip, echo = FALSE, eval = !has_cograph}
 message("Install 'cograph' to draw the residual network.")
 ```
 
@@ -187,7 +188,7 @@ Because a residual grows with sample size and the data set has many
 transitions, most edges are significant and the full network is dense. The
 `top` argument keeps the strongest edges by absolute residual:
 
-```{r net-residual-top, eval = has("cograph")}
+```{r net-residual-top, eval = has_cograph}
 plot_transitions(fit, weights = "residuals", top = 12, decimals = 1)
 ```
 
@@ -199,7 +200,7 @@ then runs forward (residual 6.3), while its reverse `Execute -> Plan` is red
 (residual -14.5), so the link from planning to execution is one-directional.
 `Execute -> Execute` is a heavy self-loop (residual 16.1), so the process
 remains in execution once it arrives. The red edges `Plan -> Plan` and
-`Investigate -> Execute` confirm that planning does not repeat and that
+`Investigate -> Execute` show that planning does not repeat and that
 investigation does not jump straight to execution.
 
 The Yule's Q network shows the same signed departures on a bounded scale, so
@@ -207,15 +208,15 @@ its edge values are comparable across datasets and across groups of different
 sizes. The full network again draws every edge, and `top` keeps the
 strongest:
 
-```{r net-yulesq-full, eval = has("cograph")}
+```{r net-yulesq-full, eval = has_cograph}
 plot_transitions(fit, weights = "yules_q", decimals = 2)
 ```
 
-```{r net-yulesq-full-skip, echo = FALSE, eval = !has("cograph")}
+```{r net-yulesq-full-skip, echo = FALSE, eval = !has_cograph}
 message("Install 'cograph' to draw the Yule's Q network.")
 ```
 
-```{r net-yulesq-top, eval = has("cograph")}
+```{r net-yulesq-top, eval = has_cograph}
 plot_transitions(fit, weights = "yules_q", top = 12, decimals = 2)
 ```
 
@@ -230,11 +231,11 @@ each destination. This is the network of Transition Network Analysis (TNA); a
 thin ring around each node shows the initial probability of starting in that
 state.
 
-```{r net-prob, eval = has("cograph")}
+```{r net-prob, eval = has_cograph}
 plot_transitions(fit, weights = "tna")
 ```
 
-```{r net-prob-skip, echo = FALSE, eval = !has("cograph")}
+```{r net-prob-skip, echo = FALSE, eval = !has_cograph}
 message("Install 'cograph' to draw the probability network.")
 ```
 
@@ -285,7 +286,7 @@ estimated with confidence, and the rare transitions are not.
 
 # Summary
 
-The analysis of `ai_long` establishes that the order of actions is not random
+The analysis of `ai_long` shows that the order of actions is not random
 ($G^2 = 2168$, $p < 0.001$) and that the process has a definite shape.
 Sessions almost always begin in `Investigate` (initial probability 0.71).
 `Investigate` and `Plan` form a mutual pair, feed forward into `Execute`
@@ -303,20 +304,6 @@ complementary throughout: the probability network describes where the
 process tends to go, and the residual network identifies which transitions
 occur more or less often than chance.
 
-# References
-
-Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
-introduction to sequential analysis* (2nd ed.). Cambridge University Press.
-
-Haberman, S. J. (1973). The analysis of residuals in cross-classified
-tables. *Biometrics*, 29(1), 205--220.
-
-Saqr, M., López-Pernas, S., & Tikka, S. (2025). Mapping relational dynamics
-with transition network analysis: A primer and tutorial. In *Advanced
-Learning Analytics Methods and Tutorials*.
-
----
-
-Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).
+```{r cleanup, include = FALSE}
+options(old_options)
+```

@@ -1,8 +1,8 @@
 ---
 title: "Interoperability: wide data, long logs, tna, and Nestimate"
 author:
-  - "[Mohammed Saqr](https://saqr.me)"
-  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+  - "Mohammed Saqr"
+  - "Sonsoles López-Pernas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Interoperability: wide data, long logs, tna, and Nestimate}
@@ -17,8 +17,10 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.align = "center")
 set.seed(2026)
 library(lagdynamics)
-options(digits = 3)
-has <- function(p) requireNamespace(p, quietly = TRUE)
+old_options <- options(digits = 3)
+has_tna <- requireNamespace("tna", quietly = TRUE)
+has_Nestimate <- requireNamespace("Nestimate", quietly = TRUE)
+has_cograph <- requireNamespace("cograph", quietly = TRUE)
 ```
 
 `lagdynamics` is designed to sit inside the same event-sequence workflow
@@ -116,7 +118,7 @@ sequences. The example below starts from the same included wide sequence
 data, fits a TNA model with `tna`, and then hands that fitted object to
 `lsa()`.
 
-```{r tna-object, eval = has("tna")}
+```{r tna-object, eval = has_tna}
 tna_fit <- tna::tna(engagement)
 tna_fit
 
@@ -127,7 +129,7 @@ fit_from_tna
 Fitting the `tna` object and fitting the original wide data give the same
 LSA transition table.
 
-```{r tna-equivalence, eval = has("tna")}
+```{r tna-equivalence, eval = has_tna}
 isTRUE(all.equal(transitions(fit_from_tna), transitions(fit_wide),
                  check.attributes = FALSE))
 ```
@@ -138,7 +140,7 @@ isTRUE(all.equal(transitions(fit_from_tna), transitions(fit_wide),
 it returns carries the prepared sequence data, so `lsa()` can read it
 directly.
 
-```{r nestimate-object, eval = has("Nestimate")}
+```{r nestimate-object, eval = has_Nestimate}
 nestimate_fit <- Nestimate::build_network(
   ai_long,
   method = "tna",
@@ -158,7 +160,7 @@ The same raw log can also be fitted directly with the long-format
 grammar. The `Nestimate` object and the direct `lsa()` call
 recover the same transition table.
 
-```{r nestimate-equivalence, eval = has("Nestimate")}
+```{r nestimate-equivalence, eval = has_Nestimate}
 fit_ai_direct <- lsa(ai_long, actor = "project", session = "session_id",
                      action = "code", order = "order_in_session")
 
@@ -171,7 +173,7 @@ isTRUE(all.equal(transitions(fit_nestimate), transitions(fit_ai_direct),
 Use `lsa_to_tna()` when the model is estimated with `lagdynamics` and
 then handed to `tna` for TNA-specific tooling.
 
-```{r lsa-to-tna, eval = has("tna")}
+```{r lsa-to-tna, eval = has_tna}
 tn <- lsa_to_tna(fit_wide, weights = "prob")
 tn
 
@@ -191,7 +193,7 @@ read the nodes and edges directly. The probability-weighted network uses
 the TNA interpretation: edge weights are conditional transition
 probabilities.
 
-```{r tna-plot, eval = has("cograph")}
+```{r tna-plot, eval = has_cograph}
 plot(fit_long, type = "network", weights = "tna")
 ```
 
@@ -200,8 +202,6 @@ transitions occur more or less often than expected under independence.
 Use the probability/TNA network when the claim is descriptive: where the
 process tends to go next.
 
----
-
-Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).
+```{r cleanup, include = FALSE}
+options(old_options)
+```

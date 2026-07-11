@@ -1,8 +1,8 @@
 ---
 title: "Get started with lagdynamics"
 author:
-  - "[Mohammed Saqr](https://saqr.me)"
-  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+  - "Mohammed Saqr"
+  - "Sonsoles López-Pernas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Get started with lagdynamics}
@@ -17,8 +17,9 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.align = "center")
 set.seed(1)
 library(lagdynamics)
-options(digits = 3)
-has <- function(p) requireNamespace(p, quietly = TRUE)
+old_options <- options(digits = 3)
+has_cograph <- requireNamespace("cograph", quietly = TRUE)
+has_ggplot2 <- requireNamespace("ggplot2", quietly = TRUE)
 ```
 
 This quick start takes one bundled sequence data set from raw rows to a
@@ -79,14 +80,14 @@ summary(fit)
 The default plot is a residual heatmap. Rows are current states, columns
 are next states, and colour is the adjusted residual.
 
-```{r heatmap, eval = has("ggplot2")}
+```{r heatmap, eval = has_ggplot2}
 plot(fit)
 ```
 
 The network view uses the same residual model: edges show transitions
 that are over- or under-represented relative to independence.
 
-```{r residual-network, eval = has("cograph")}
+```{r residual-network, eval = has_cograph}
 plot(fit, type = "network")
 ```
 
@@ -94,7 +95,7 @@ Use `weights = "tna"` or `weights = "relative"` when the question is the
 usual transition-network question: where does the process tend to go
 next?
 
-```{r tna-network, eval = has("cograph")}
+```{r tna-network, eval = has_cograph}
 plot(fit, type = "network", weights = "tna")
 ```
 
@@ -108,7 +109,7 @@ probabilities without resampling.
 ```{r certainty}
 cert <- certainty_lsa(fit)
 cert
-as.data.frame(cert) |> head(4)
+transitions(cert) |> head(4)
 ```
 
 For resampling-based edge uncertainty, use `bootstrap_lsa()`. For
@@ -134,8 +135,6 @@ Use the focused vignettes according to the claim you need to support:
 - `vignette("lag-transition-networks", package = "lagdynamics")` for
   TNA-style transition networks.
 
----
-
-Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).
+```{r cleanup, include = FALSE}
+options(old_options)
+```

@@ -1,8 +1,8 @@
 ---
 title: "Plotting lag-sequential models"
 author:
-  - "[Mohammed Saqr](https://saqr.me)"
-  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+  - "Mohammed Saqr"
+  - "Sonsoles López-Pernas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Plotting lag-sequential models}
@@ -17,8 +17,9 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.align = "center")
 set.seed(2026)
 library(lagdynamics)
-options(digits = 3)
-has <- function(p) requireNamespace(p, quietly = TRUE)
+old_options <- options(digits = 3)
+has_cograph <- requireNamespace("cograph", quietly = TRUE)
+has_ggplot2 <- requireNamespace("ggplot2", quietly = TRUE)
 fit <- lsa(engagement)
 ```
 
@@ -51,7 +52,7 @@ network reads like any other transition network.
 The default. Rows are the current state, columns the next; colour is the
 adjusted residual. `which` selects the matrix.
 
-```{r heatmap, eval = has("ggplot2")}
+```{r heatmap, eval = has_ggplot2}
 plot(fit)                       # adjusted residuals (default)
 plot(fit, which = "prob")       # transition probabilities
 ```
@@ -61,7 +62,7 @@ plot(fit, which = "prob")       # transition probabilities
 The same residuals as a directed graph: **blue** edges (solid) are
 over-represented, **red** edges (dashed, with a soft halo) are avoided.
 
-```{r net-residual, eval = has("cograph")}
+```{r net-residual, eval = has_cograph}
 plot(fit, type = "network")
 ```
 
@@ -73,7 +74,7 @@ transition network, drawn in the Transition Network Analysis (TNA) style by
 weighted directed edges. This shows what happens, where the residual network
 shows what is surprising.
 
-```{r net-transition, eval = has("cograph")}
+```{r net-transition, eval = has_cograph}
 plot(fit, type = "network", weights = "tna")
 ```
 
@@ -82,11 +83,11 @@ plot(fit, type = "network", weights = "tna")
 A chord diagram of the transition flow, and a polar sunburst of each
 state's outgoing distribution.
 
-```{r chord, eval = has("cograph")}
+```{r chord, eval = has_cograph}
 plot(fit, type = "chord")
 ```
 
-```{r sunburst, eval = has("ggplot2")}
+```{r sunburst, eval = has_ggplot2}
 plot(fit, type = "sunburst")                 # rose (default)
 plot(fit, type = "sunburst", style = "wedge")  # frequency wedges
 ```
@@ -97,7 +98,7 @@ A fitted edge is one estimate; the forest shows its interval. Both the
 resampling bootstrap and the analytic certainty plot as a circular forest
 of per-edge intervals.
 
-```{r forest, eval = has("ggplot2"), fig.height = 6.5}
+```{r forest, eval = has_ggplot2, fig.height = 6.5}
 plot(bootstrap_lsa(fit, R = 200))            # resampling CIs
 plot(certainty_lsa(fit))                     # analytic credible intervals
 ```
@@ -116,7 +117,7 @@ gfit <- lsa(group_regulation_long, actor = "Actor",
 runs to one side, the higher group's bar is bordered (darker for a larger
 difference), and the centre chip carries the difference p-value.
 
-```{r barrel, eval = has("ggplot2"), fig.height = 7}
+```{r barrel, eval = has_ggplot2, fig.height = 7}
 cmp <- compare_lsa(gfit, R = 500)
 plot(cmp)                                    # frequency-ranked rows
 plot(cmp, rank = "effect")                   # surface avoided (red) edges
@@ -126,7 +127,7 @@ plot(cmp, style = "heatmap")                 # full-grid difference
 The Bayesian comparison reuses the same barrel, with the credible
 posterior in place of the permutation p-value.
 
-```{r bayes-barrel, eval = has("ggplot2"), fig.height = 7}
+```{r bayes-barrel, eval = has_ggplot2, fig.height = 7}
 plot(bayes_compare_lsa(gfit, seed = 1))
 ```
 
@@ -136,7 +137,7 @@ Every `type` works on a grouped fit, drawing one panel per group
 (`combined = FALSE`, the default) or a single tiled figure
 (`combined = TRUE`).
 
-```{r grouped, eval = has("ggplot2")}
+```{r grouped, eval = has_ggplot2}
 plot(gfit)                                   # one heatmap per group
 ```
 
@@ -164,8 +165,6 @@ plot(compare_lsa(gfit)); plot(bayes_compare_lsa(gfit))  # group barrels
 plot(gfit)                                  # grouped: one panel per group
 ```
 
----
-
-Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).
+```{r cleanup, include = FALSE}
+options(old_options)
+```

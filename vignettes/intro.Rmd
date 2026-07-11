@@ -1,8 +1,8 @@
 ---
 title: "Introduction"
 author:
-  - "[Mohammed Saqr](https://saqr.me)"
-  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+  - "Mohammed Saqr"
+  - "Sonsoles López-Pernas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction}
@@ -17,8 +17,9 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.align = "center")
 set.seed(2026)
 library(lagdynamics)
-options(digits = 3)
-has <- function(p) requireNamespace(p, quietly = TRUE)
+old_options <- options(digits = 3)
+has_cograph <- requireNamespace("cograph", quietly = TRUE)
+has_ggplot2 <- requireNamespace("ggplot2", quietly = TRUE)
 ```
 
 # Summary
@@ -28,18 +29,19 @@ representation, the lag transition network, for categorical event and
 sequence data. LSA is the classical inferential method for temporal
 contingency in observed behaviour: it tests, for every ordered pair of
 states, whether one state follows another more or less often than
-independence predicts (Sackett, 1979; Bakeman & Gottman, 1997). The
-package restates this method as a modern statistical workflow built on
-six commitments:
+independence predicts. The package restates this method as a modern
+statistical workflow built on six commitments:
 
 - **Tidy.** Every result is produced by a verb -- `transitions()`,
   `nodes()`, `tests()`, `initial()`, `summary()`,
-  `transition_probabilities()`, `as.data.frame()` -- that returns a
-  one-row-per-observation data frame. Filters are arguments
-  (`significant = TRUE`, `direction = "over"`, `min_count = `), never
-  subsetting; the user never indexes into an object.
+  `transition_probabilities()` -- that returns a
+  one-row-per-observation data frame. `transitions()` reads the fitted
+  model and every inference result through the same arguments. Filters
+  are arguments (`significant = TRUE`, `direction = "over"`,
+  `min_count = `), never subsetting; the user never indexes into an
+  object.
 - **Confirmatory, following Dynalytics.** The package operationalizes
-  the Dynalytics framework (Saqr, Lopez-Pernas, & Misiejuk, 2026),
+  the Dynalytics framework,
   whose central tenet is a scientific contract: every analytical claim
   is matched by evidence appropriate to its structure, scope, and
   complexity. Validation is therefore expanded far beyond the classical
@@ -97,7 +99,7 @@ $$E_{ij} = \frac{R_i \, C_j}{N},$$
 
 where $R_i$ and $C_j$ are the margins of the table and $N$ its total.
 The test statistic for each cell is the adjusted (standardized Pearson)
-residual (Haberman, 1979),
+residual,
 
 $$z_{ij} = \frac{O_{ij} - E_{ij}}
   {\sqrt{E_{ij}\,(1 - R_i/N)\,(1 - C_j/N)}},$$
@@ -112,8 +114,8 @@ frequent yet unremarkable, or rare yet strongly over-represented.
 When some transitions are impossible by design -- self-transitions
 under continuous coding are the standard case -- the affected cells are
 structural zeros. Expected counts then come from the quasi-independence
-model, fitted by iterative proportional fitting (Wickens, 1989), and
-the residuals use the design-matrix form of Christensen (1997). The two
+model, fitted by iterative proportional fitting, and the residuals use
+the design-matrix form. The two
 formulations provably coincide when no structural zeros are present,
 and the package pins that identity in its test suite. Structural-zero
 cells are reported as non-estimable (`NA`), never as "expected zero":
@@ -135,10 +137,10 @@ is exercised in this vignette or in a dedicated companion vignette.
 
 **Estimation**
 
-- Five estimation engines: `classical` (Bakeman & Quera; the default),
-  `two_cell`, `bidirectional` (Sackett's matched-pair test on the
+- Five estimation engines: `classical` (the default),
+  `two_cell`, `bidirectional` (the matched-pair test on the
   symmetrized table), `parallel_dominance`, and
-  `nonparallel_dominance` (Sackett, 1979; Wampold, 1984), each
+  `nonparallel_dominance`, each
   available through `lsa(engine = )` or a direct wrapper such as
   `lsa_two_cell()`.
 - An open engine registry: `register_lsa_engine()` /
@@ -154,7 +156,7 @@ is exercised in this vignette or in a dedicated companion vignette.
   shared state space, so groups remain comparable even when a group
   never visits a state.
 - An experimental directed transfer-entropy measure,
-  `transfer_entropy()` (Schreiber, 2000).
+  `transfer_entropy()`.
 
 **Inference and validation**
 
@@ -176,9 +178,9 @@ is exercised in this vignette or in a dedicated companion vignette.
 **Interface**
 
 - Tidy accessors throughout: `transitions()`, `nodes()`, `tests()`,
-  `initial()`, `transition_probabilities()`, `summary()`, and
-  `as.data.frame()` on every result object. No result requires
-  indexing into an object.
+  `initial()`, `transition_probabilities()`, and `summary()`.
+  `transitions()` reads the fitted model and every inference result
+  with the same arguments. No result requires indexing into an object.
 - One plotting verb with several geometries, plus dedicated plots for
   uncertainty and comparison results (see the gallery below).
 - Ingestion of long event logs, wide sequence data, lists of
@@ -215,7 +217,7 @@ temporal distances; `lsa_lags()` fits the full multi-lag model.
 
 ```{r lags}
 lag_profile(engagement, "Active", "Disengaged", lags = 1:3)
-as.data.frame(lsa_lags(engagement, lags = 1:2)) |> head(6)
+transitions(lsa_lags(engagement, lags = 1:2)) |> head(6)
 ```
 
 Structural zeros restate the model rather than filter its output:
@@ -257,23 +259,23 @@ cool = avoided). The network and comparison plots follow the TNA
 convention -- blue = more than chance, red = less, avoided edges
 dashed -- so an `lsa` network reads like any other transition network.
 
-```{r heatmap, eval = has("ggplot2")}
+```{r heatmap, eval = has_ggplot2}
 plot(fit)
 ```
 
-```{r network, eval = has("cograph")}
+```{r network, eval = has_cograph}
 plot(fit, type = "network")
 ```
 
-```{r tna-network, eval = has("cograph")}
+```{r tna-network, eval = has_cograph}
 plot(fit, type = "network", weights = "tna")
 ```
 
-```{r chord, eval = has("cograph")}
+```{r chord, eval = has_cograph}
 plot(fit, type = "chord")
 ```
 
-```{r sunburst, eval = has("ggplot2")}
+```{r sunburst, eval = has_ggplot2}
 plot(fit, type = "sunburst")
 ```
 
@@ -306,14 +308,14 @@ results.
 ```{r compare}
 cmp <- compare_lsa(gfit, R = 100, adjust = "BH")
 cmp
-as.data.frame(cmp) |> head(4)
+transitions(cmp) |> head(4)
 
 bcmp <- bayes_compare_lsa(gfit, draws = 1000, adjust = "BH", seed = 1)
 bcmp
-as.data.frame(bcmp) |> head(4)
+transitions(bcmp) |> head(4)
 ```
 
-```{r compare-plots, eval = has("ggplot2")}
+```{r compare-plots, eval = has_ggplot2}
 plot(cmp)
 plot(cmp, style = "heatmap")
 ```
@@ -336,10 +338,10 @@ kind of claim with a matching procedure:
 
 ```{r battery}
 cert <- certainty_lsa(fit)
-as.data.frame(cert) |> head(3)
+transitions(cert) |> head(3)
 
 boot <- bootstrap_lsa(fit, R = 50)
-as.data.frame(boot) |> head(3)
+transitions(boot) |> head(3)
 
 rel <- reliability_lsa(fit, R = 20)
 rel
@@ -351,7 +353,7 @@ pm <- permute_lsa(fit, R = 100)
 pm
 ```
 
-```{r forest, eval = has("ggplot2")}
+```{r forest, eval = has_ggplot2}
 plot(boot)
 ```
 
@@ -393,8 +395,8 @@ are exposed for any downstream transition-network tooling --
 `transition_probabilities()` returns the row-stochastic matrix
 $P(\text{to} \mid \text{from})$ and `initial()` the initial-state
 distribution, the two ingredients a TNA-style model requires -- and
-every result object flattens to a plain data frame with
-`as.data.frame()`, so results move into any tabular pipeline without
+every result object reads as a plain data frame through
+`transitions()`, so results move into any tabular pipeline without
 package-specific code.
 
 ```{r output-interop}
@@ -411,40 +413,6 @@ shapes: `engagement` (wide; 138 students, weekly engagement states),
 an achievement group), and `ai_long` (long event log of coded AI
 actions in human--AI coding sessions).
 
-# References
-
-Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
-introduction to sequential analysis* (2nd ed.). Cambridge University
-Press.
-
-Bakeman, R., & Quera, V. (1995). *Analyzing interaction: Sequential
-analysis with SDIS and GSEQ*. Cambridge University Press.
-
-Christensen, R. (1997). *Log-linear models and logistic regression*
-(2nd ed.). Springer.
-
-Haberman, S. J. (1979). *Analysis of qualitative data: Volume 2, New
-developments*. Academic Press.
-
-Sackett, G. P. (1979). The lag sequential analysis of contingency and
-cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
-*Handbook of infant development* (pp. 623--649). Wiley.
-
-Saqr, M., Lopez-Pernas, S., & Misiejuk, K. (2026). *Dynalytics: A
-framework for the analysis of temporal processes*.
-
-Schreiber, T. (2000). Measuring information transfer. *Physical Review
-Letters*, 85(2), 461--464.
-doi:10.1103/PhysRevLett.85.461.
-
-Wampold, B. E. (1984). Tests of dominance in sequential categorical
-data. *Psychological Bulletin*, 96(2), 424--429.
-
-Wickens, T. D. (1989). *Multiway contingency tables analysis for the
-social sciences*. Erlbaum.
-
----
-
-Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).
+```{r cleanup, include = FALSE}
+options(old_options)
+```

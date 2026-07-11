@@ -1,8 +1,8 @@
 ---
 title: "Confirmatory testing: matching claims to evidence"
 author:
-  - "[Mohammed Saqr](https://saqr.me)"
-  - "[Sonsoles López-Pernas](https://sonsoles.me)"
+  - "Mohammed Saqr"
+  - "Sonsoles López-Pernas"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Confirmatory testing: matching claims to evidence}
@@ -17,13 +17,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", message = FALSE,
                       fig.align = "center")
 set.seed(2026)
 library(lagdynamics)
-options(digits = 3)
-has <- function(p) requireNamespace(p, quietly = TRUE)
+old_options <- options(digits = 3)
+has_ggplot2 <- requireNamespace("ggplot2", quietly = TRUE)
 ```
 
 A fitted model is an estimate, not a finding. The Dynalytics framework
-(Saqr, Lopez-Pernas, and Misiejuk, 2026) formalises this as a *scientific
-contract*: every analytical claim must be matched by evidence appropriate
+formalises this as a *scientific contract*: every analytical claim must
+be matched by evidence appropriate
 to its structure, scope, and complexity. `lagdynamics` provides the
 confirmatory testing battery that discharges that contract for
 lag-sequential models, where each edge is a tested departure from
@@ -64,14 +64,14 @@ sequences preserves within-sequence dependence that the analytic model
 treats as independent.
 
 ```{r edge}
-as.data.frame(bootstrap_lsa(fit, R = 200)) |> head(4)   # resampling CIs
-as.data.frame(certainty_lsa(fit)) |> head(4)            # analytic CIs
+transitions(bootstrap_lsa(fit, R = 200)) |> head(4)   # resampling CIs
+transitions(certainty_lsa(fit)) |> head(4)            # analytic CIs
 ```
 
 The bootstrap forest shows every edge's interval at once; tightly pinned
 edges support stronger claims.
 
-```{r forest, eval = has("ggplot2"), fig.height = 6.5}
+```{r forest, eval = has_ggplot2, fig.height = 6.5}
 plot(bootstrap_lsa(fit, R = 200))
 ```
 
@@ -83,7 +83,7 @@ stability supports reading the edge as a property of the process; a low
 one marks it as sample-dependent.
 
 ```{r stability}
-as.data.frame(stability_lsa(fit, R = 200)) |> head(4)
+transitions(stability_lsa(fit, R = 200)) |> head(4)
 ```
 
 # The whole network: structural reliability
@@ -104,7 +104,7 @@ sequential structure, giving a p-value that does not depend on the
 adjusted residual's large-sample approximation.
 
 ```{r permute}
-as.data.frame(permute_lsa(fit, R = 200)) |> head(4)
+transitions(permute_lsa(fit, R = 200)) |> head(4)
 ```
 
 # Two groups: inference under exchangeability
@@ -130,10 +130,10 @@ difference and a single omnibus statistic.
 ```{r compare}
 cmp <- compare_lsa(gfit, R = 500, adjust = "BH")
 cmp
-as.data.frame(cmp) |> subset(significant) |> head(4)
+transitions(cmp, significant = TRUE) |> head(4)
 ```
 
-```{r barrel, eval = has("ggplot2"), fig.height = 6.5}
+```{r barrel, eval = has_ggplot2, fig.height = 6.5}
 plot(cmp)
 ```
 
@@ -160,8 +160,6 @@ permute_lsa(fit)                         # more than chance
 compare_lsa(gfit); bayes_compare_lsa(gfit)  # a group difference
 ```
 
----
-
-Full documentation and reference: <https://pak.dynasite.org/lagdynamics/>
-
-Part of the [Dynalytics framework](https://saqr.me/).
+```{r cleanup, include = FALSE}
+options(old_options)
+```
