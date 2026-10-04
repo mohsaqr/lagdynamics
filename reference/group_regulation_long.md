@@ -45,7 +45,7 @@ A `data.frame` with 27,533 rows and 6 columns:
 ## Source
 
 Derived without modification from
-[`tna::group_regulation_long`](http://sonsoles.me/tna/reference/group_regulation_long.md)
+[`tna::group_regulation_long`](https://sonsoles.me/tna/reference/group_regulation_long.html)
 (`tna` package, MIT license).
 
 ## Details

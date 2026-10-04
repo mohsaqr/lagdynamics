@@ -50,11 +50,12 @@ avoid overlapping export names with sibling packages.
 fit <- lsa(engagement)
 net <- lsa_to_tna(fit, weights = "prob")
 tna::centralities(net)
-#> # A tibble: 3 × 10
+#> # A tibble: 3 × 11
 #>   state    OutStrength InStrength ClosenessIn ClosenessOut Closeness Betweenness
 #> * <fct>          <dbl>      <dbl>       <dbl>        <dbl>     <dbl>       <dbl>
 #> 1 Active         0.302      0.324      0.0811       0.0779     0.100           0
 #> 2 Average        0.390      0.664      0.160        0.0973     0.160           2
 #> 3 Disenga…       0.517      0.221      0.0691       0.101      0.114           0
-#> # ℹ 3 more variables: BetweennessRSP <dbl>, Diffusion <dbl>, Clustering <dbl>
+#> # ℹ 4 more variables: BetweennessRSP <dbl>, Diffusion <dbl>, Clustering <dbl>,
+#> #   PageRank <dbl>
 ```

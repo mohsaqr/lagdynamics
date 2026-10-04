@@ -1,5 +1,48 @@
 # Changelog
 
+## lagdynamics 0.32
+
+CRAN release: 2026-07-21
+
+### New features
+
+- [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+  now reads inference results, not only fitted models. It accepts the
+  output of
+  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
+  [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
+  [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
+  [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
+  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md),
+  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  and
+  [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md),
+  and returns the same tidy one-row-per-transition data frame.
+  `significant = TRUE` keeps the transitions the method itself flags,
+  and `sort = "strength"` orders them by that method’s signed effect.
+  Previously the per-transition table of an inference result was
+  reachable only through
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html),
+  because the print methods show a header summary alone.
+- The
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+  generic is now `transitions(fit, ...)`, so each class declares only
+  the arguments backed by columns it actually has. Existing calls on a
+  fit are unaffected.
+
+### Documentation
+
+- Vignettes restore the user’s
+  [`options()`](https://rdrr.io/r/base/options.html) after changing
+  `digits`, as CRAN requires.
+- Vignettes read every result with
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+  rather than coercing it with
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html), and
+  select rows with the `significant` argument rather than subsetting.
+- Removed the citations, reference lists, DOIs, documentation URLs and
+  linked author metadata that 0.31 added to the shipped vignettes.
+
 ## lagdynamics 0.31
 
 ### CRAN candidate

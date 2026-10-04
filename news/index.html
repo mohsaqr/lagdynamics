@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.31</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.32</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,6 +42,21 @@
       <small>Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.32" id="lagdynamics-032">lagdynamics 0.32<a class="anchor" aria-label="anchor" href="#lagdynamics-032"></a></h2><p class="text-muted">CRAN release: 2026-07-21</p>
+<div class="section level3">
+<h3 id="new-features-0-32">New features<a class="anchor" aria-label="anchor" href="#new-features-0-32"></a></h3>
+<ul><li>
+<code><a href="../reference/transitions.html">transitions()</a></code> now reads inference results, not only fitted models. It accepts the output of <code><a href="../reference/bootstrap_lsa.html">bootstrap_lsa()</a></code>, <code><a href="../reference/certainty_lsa.html">certainty_lsa()</a></code>, <code><a href="../reference/stability_lsa.html">stability_lsa()</a></code>, <code><a href="../reference/permute_lsa.html">permute_lsa()</a></code>, <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code>, <code><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code> and <code><a href="../reference/lsa_lags.html">lsa_lags()</a></code>, and returns the same tidy one-row-per-transition data frame. <code>significant = TRUE</code> keeps the transitions the method itself flags, and <code>sort = "strength"</code> orders them by that method’s signed effect. Previously the per-transition table of an inference result was reachable only through <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, because the print methods show a header summary alone.</li>
+<li>The <code><a href="../reference/transitions.html">transitions()</a></code> generic is now <code>transitions(fit, ...)</code>, so each class declares only the arguments backed by columns it actually has. Existing calls on a fit are unaffected.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-32">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-32"></a></h3>
+<ul><li>Vignettes restore the user’s <code><a href="https://rdrr.io/r/base/options.html" class="external-link">options()</a></code> after changing <code>digits</code>, as CRAN requires.</li>
+<li>Vignettes read every result with <code><a href="../reference/transitions.html">transitions()</a></code> rather than coercing it with <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code>, and select rows with the <code>significant</code> argument rather than subsetting.</li>
+<li>Removed the citations, reference lists, DOIs, documentation URLs and linked author metadata that 0.31 added to the shipped vignettes.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.31" id="lagdynamics-031">lagdynamics 0.31<a class="anchor" aria-label="anchor" href="#lagdynamics-031"></a></h2>
 <div class="section level3">
