@@ -1,6 +1,6 @@
 Package: lagdynamics
 Title: Lag Sequential Analysis, Dynamics, and Lag Transition Networks
-Version: 0.31
+Version: 0.32
 Authors@R:
     c(person("Mohammed", "Saqr", email = "saqr@saqr.me",
              role = c("aut", "cre", "cph")),

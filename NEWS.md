@@ -1,3 +1,30 @@
+# lagdynamics 0.32
+
+## New features
+
+- `transitions()` now reads inference results, not only fitted models. It
+  accepts the output of `bootstrap_lsa()`, `certainty_lsa()`,
+  `stability_lsa()`, `permute_lsa()`, `compare_lsa()`,
+  `bayes_compare_lsa()` and `lsa_lags()`, and returns the same tidy
+  one-row-per-transition data frame. `significant = TRUE` keeps the
+  transitions the method itself flags, and `sort = "strength"` orders them
+  by that method's signed effect. Previously the per-transition table of an
+  inference result was reachable only through `as.data.frame()`, because the
+  print methods show a header summary alone.
+- The `transitions()` generic is now `transitions(fit, ...)`, so each class
+  declares only the arguments backed by columns it actually has. Existing
+  calls on a fit are unaffected.
+
+## Documentation
+
+- Vignettes restore the user's `options()` after changing `digits`, as CRAN
+  requires.
+- Vignettes read every result with `transitions()` rather than coercing it
+  with `as.data.frame()`, and select rows with the `significant` argument
+  rather than subsetting.
+- Removed the citations, reference lists, DOIs, documentation URLs and
+  linked author metadata that 0.31 added to the shipped vignettes.
+
 # lagdynamics 0.31
 
 ## CRAN candidate
