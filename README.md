@@ -3,6 +3,7 @@
 > Modern, tidy lag sequential analysis for categorical event sequences.
 
 <!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/lagdynamics)](https://CRAN.R-project.org/package=lagdynamics)
 [![R-CMD-check](https://github.com/mohsaqr/lagdynamics/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mohsaqr/lagdynamics/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -43,7 +44,7 @@ polar sunburst, or uncertainty forest.
 ## Installation
 
 ```r
-# CRAN (after acceptance)
+# From CRAN
 install.packages("lagdynamics")
 
 # r-universe (pre-built binaries, no compiler needed)
