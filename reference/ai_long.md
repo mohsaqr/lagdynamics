@@ -56,7 +56,7 @@ A `data.frame` with 8,551 rows and 9 columns:
 ## Source
 
 Derived without modification from
-[`Nestimate::ai_long`](https://saqr.me/Nestimate/reference/long-data.html)
+[`Nestimate::ai_long`](https://pak.dynasite.org/Nestimate/reference/long-data.html)
 (`Nestimate` version 0.7.7, MIT license).
 
 ## Details

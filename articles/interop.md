@@ -298,7 +298,7 @@ isTRUE(all.equal(transitions(fit_from_tna), transitions(fit_wide),
 
 ## Nestimate objects
 
-[`Nestimate::build_network()`](https://saqr.me/Nestimate/reference/build_network.html)
+[`Nestimate::build_network()`](https://pak.dynasite.org/Nestimate/reference/build_network.html)
 uses the same long-log grammar. The object it returns carries the
 prepared sequence data, so
 [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) can

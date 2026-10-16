@@ -44,7 +44,7 @@ sunburst, or uncertainty forest.
 
 ``` r
 
-# CRAN (after acceptance)
+# From CRAN
 install.packages("lagdynamics")
 
 # r-universe (pre-built binaries, no compiler needed)

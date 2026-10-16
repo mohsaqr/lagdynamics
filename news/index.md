@@ -60,7 +60,7 @@ CRAN release: 2026-07-21
   [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md)
   for handing an `lsa` fit to `tna` tooling.
 - Added ingestion of
-  [`Nestimate::build_network()`](https://saqr.me/Nestimate/reference/build_network.html)
+  [`Nestimate::build_network()`](https://pak.dynasite.org/Nestimate/reference/build_network.html)
   netobjects through their prepared sequence data.
 - Stored the bundled `engagement` data as a data frame so
   `tna::tna(engagement)` works directly.
