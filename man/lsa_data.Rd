@@ -27,7 +27,7 @@ as \code{events}, or \code{NULL} if input was a transition matrix.}
 \item{n_events}{Total number of events across all sequences.}
 \item{transitions_per_seq}{Integer vector: number of transitions
 each sequence contributes at lag 1.}
-\item{source}{One of \code{"events"}, \code{"transitions"} — flags whether
+\item{source}{One of \code{"events"}, \code{"transitions"} -- flags whether
 event-level data is available.}
 \item{obs_input}{If \code{source = "transitions"}, the original \verb{K x K}
 count matrix. Otherwise \code{NULL}.}
@@ -41,9 +41,9 @@ bootstrap, permutation, grouping, plotting).
 \details{
 Accepted input forms:
 \itemize{
-\item An atomic vector of integer or character codes — treated as a
+\item An atomic vector of integer or character codes -- treated as a
 single sequence.
-\item A list of atomic vectors — treated as multiple independent
+\item A list of atomic vectors -- treated as multiple independent
 sequences; transitions are not counted across sequence boundaries.
 \item A wide matrix or data.frame with rows = sequences, columns =
 ordered time points. Missing values (\code{NA}) and empty strings are
@@ -56,10 +56,11 @@ calling \code{\link[=lsa]{lsa()}}.
 \code{i}, column \code{j} is the count of \code{i -> j} transitions. In this case
 \code{events} and \code{seq_id} are not available and downstream resampling
 tools that need event-level data will error.
-\item A sequence-bearing object: a \code{tna} or
-\code{group_tna} (sequences read from its \verb{$data} slot), a \code{tna_data}
-or \code{nestimate_data} (\verb{$sequence_data}), or an \code{stslist}. The stored event
-sequences are recovered and analysed.
+\item A sequence-bearing object: a \code{tna} or \code{group_tna} (sequences read
+from its \code{data} slot), a \code{tna_seq_data} code matrix, a \code{tna_data} or
+\code{nestimate_data} (its \code{sequence_data}), a \code{Nestimate} \code{netobject}
+(its prepared sequence data), or a \code{TraMineR} \code{stslist}. The stored
+event sequences are recovered and analysed.
 A \code{tna} built from a bare matrix (no retained sequences) errors,
 because transition \emph{counts} cannot be recovered from probability
 weights.
@@ -67,18 +68,15 @@ weights.
 }
 \examples{
 # Single character sequence
-d1 <- lsa_data(c("a", "b", "a", "c", "b"))
-d1$n_events
+lsa_data(c("a", "b", "a", "c", "b"))
 
-# Multiple sequences
-d2 <- lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
-d2$n_sequences
+# Multiple sequences: no transition is counted across the boundary
+lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
 
-# Pre-computed transition matrix
+# Pre-computed transition matrix (source = "transitions")
 tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
-             dimnames = list(c("a","b","c"), c("a","b","c")))
-d3 <- lsa_data(tm)
-d3$source
+             dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+lsa_data(tm)
 
 }
 \seealso{

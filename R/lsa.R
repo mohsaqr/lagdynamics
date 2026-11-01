@@ -14,7 +14,8 @@
 #'   `action` arguments are supplied (see below). Accepted already-
 #'   sequenced forms include vectors, lists of sequences, wide
 #'   matrices/data.frames, transition-count matrices, and sequence-
-#'   bearing objects (`tna`, `group_tna`, `nestimate_data`, `stslist`).
+#'   bearing objects (`tna`, `group_tna`, `tna_seq_data`, `tna_data`,
+#'   `nestimate_data`, `netobject`, `stslist`); see [lsa_data()].
 #'   `NA` and empty-string cells are treated as missingness, not as a
 #'   state: they are dropped wherever they occur and no transition is
 #'   counted into or out of them. To model missingness as its own
@@ -34,7 +35,8 @@
 #'   adjusted-residual and kappa p-values: one of `"two.sided"`
 #'   (default), `"greater"`, or `"less"`.
 #' @param alpha Numeric. Significance threshold used to mark edges as
-#'   significant in `fit$edges$significant`. Default `0.05`.
+#'   significant (the `significant` column of [transitions()]). Default
+#'   `0.05`.
 #' @param loops Logical. Keep self-transitions (the diagonal)? **Default
 #'   `TRUE`.** Set `loops = FALSE` to forbid every self-transition -- the
 #'   common reason to exclude cells -- without building a matrix by hand.
@@ -44,7 +46,8 @@
 #'   of the model.** Combines with `loops`: `loops = FALSE` also zeros the
 #'   diagonal of a supplied matrix. When any cell is forbidden the engine
 #'   switches to iterative proportional fitting and Christensen's
-#'   design-matrix residuals (see `inst/REFERENCES.md` §2.2, §4.2).
+#'   design-matrix residuals (see `inst/REFERENCES.md`, sections 2.2 and
+#'   4.2).
 #' @param labels Optional character vector of state labels.
 #' @param group Optional grouping for a multi-group fit. Either a vector
 #'   with one entry per input sequence (length `n_sequences`), or --- for
@@ -67,8 +70,9 @@
 #'   given else by `time`, and -- when `time` is given and no `session`
 #'   column is -- a new sequence starts whenever the gap between
 #'   consecutive events exceeds `time_threshold` seconds. All `NULL` by
-#'   default except `action` in long-format mode (input is otherwise
-#'   taken as already-sequenced).
+#'   default; `action` is required in long-format mode (without it the
+#'   input is taken as already sequenced). See the *Long-format input*
+#'   section for a limit on combining `actor` and `session`.
 #' @param time_threshold Numeric. Maximum gap in seconds between
 #'   consecutive events before a new session is started in long-format
 #'   mode. Default `900` (15 minutes). Ignored unless `time` is given
@@ -84,7 +88,29 @@
 #' @param params Optional named list of engine-specific parameters
 #'   forwarded to the engine function.
 #' @param ... Additional engine-specific parameters (merged into
-#'   `params`).
+#'   `params`). For the engine wrappers (`lsa_classical()`,
+#'   `lsa_two_cell()`, `lsa_bidirectional()`, `lsa_parallel_dominance()`,
+#'   `lsa_nonparallel_dominance()`), any argument of `lsa()` other than
+#'   `engine`.
+#'
+#' @details
+#' The engine wrappers `lsa_classical()`, `lsa_two_cell()`,
+#' `lsa_bidirectional()`, `lsa_parallel_dominance()` and
+#' `lsa_nonparallel_dominance()` are `lsa()` with `engine` fixed to the
+#' matching built-in engine; they return the same object.
+#'
+#' @section Long-format input:
+#' When both `actor` and `session` are given, each sequence is keyed by
+#' the actor x session combination, built with [interaction()]. That key
+#' is an integer index over the full cross of distinct actors and
+#' distinct sessions, so it overflows once the number of distinct actors
+#' times the number of distinct sessions exceeds `.Machine$integer.max`
+#' (about 2.1e9). The overflowing keys become `NA` and those sequences
+#' are dropped, with only R's warning "NAs produced by integer overflow".
+#' Check that the sequence count reported by `summary(fit)` matches the
+#' number of distinct sessions in the log. When the session identifier is
+#' already unique across actors, pass it as `actor` and leave `session`
+#' `NULL`: no cross is formed and every sequence is kept.
 #'
 #' @return An object of class `c("lsa", "cograph_network")`. Read it with
 #' the verbs rather than by reaching into slots: [transitions()] for the
@@ -132,7 +158,36 @@
 #'          "Agree", "Question", "Explain")
 #' fit <- lsa(seq, engine = "classical")
 #' fit
-#' head(fit$edges)
+#' transitions(fit)
+#'
+#' # The same model through an engine wrapper
+#' lsa_classical(seq)
+#'
+#' # Long-format event log with a recorded grouping column
+#' gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'             time = "Time", group = "Achiever")
+#' summary(gfit)
+#'
+#' @references
+#' Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+#' Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+#'
+#' Bakeman, R., & Gottman, J. M. (1997). \emph{Observing interaction: An
+#' introduction to sequential analysis} (2nd ed.). Cambridge University
+#' Press.
+#'
+#' Christensen, R. (1997). \emph{Log-linear models and logistic
+#' regression} (2nd ed.). Springer.
+#'
+#' Haberman, S. J. (1979). \emph{Analysis of qualitative data: Volume 2,
+#' New developments}. Academic Press.
+#'
+#' Sackett, G. P. (1979). The lag sequential analysis of contingency and
+#' cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+#' \emph{Handbook of infant development} (pp. 623-649). Wiley.
+#'
+#' Wampold, B. E. (1984). Tests of dominance in sequential categorical
+#' data. \emph{Psychological Bulletin, 96}(2), 424-429.
 #'
 #' @seealso [lsa_data()], [lsa_transitions()], [register_lsa_engine()],
 #'   [list_lsa_engines()]
@@ -322,6 +377,63 @@ lsa <- function(data,
   g
 }
 
+#' Print, Summarise and Tidy an LSA Fit
+#'
+#' Methods for the objects returned by [lsa()]. `print()` gives a compact
+#' model overview: engine, sizes, the tablewise independence test, the
+#' strongest over-represented transitions, and the initial-state
+#' distribution. `summary()` prints that overview followed by the node
+#' activity and the observed, expected, probability and residual matrices,
+#' and returns a one-row tidy overview. `as.data.frame()` returns the full
+#' edge table, including the integer ids and `cograph_network` protocol
+#' columns that [transitions()] leaves out. `nobs()` is the number of
+#' transitions the model was fitted to.
+#'
+#' For reading results, prefer the verbs: [transitions()] for the
+#' per-transition table, [nodes()], [tests()] and [initial()] for the
+#' other parts of the fit.
+#'
+#' @param x,object An `lsa` fit from [lsa()], or (for the `lsa_group`
+#'   methods) a grouped fit from `lsa(..., group = )`.
+#' @param row.names Optional row names for the returned data frame
+#'   (`as.data.frame.lsa()` only); ignored by the grouped method.
+#' @param optional Ignored; present for consistency with the generic.
+#' @param ... Ignored.
+#'
+#' @return
+#' * `print()` returns `x` invisibly.
+#' * `summary.lsa()` prints the extended view and returns, invisibly, a
+#'   one-row `data.frame` with columns `engine`, `lag`, `n_states`,
+#'   `n_sequences`, `n_events`, `n_transitions`, `n_significant`,
+#'   `alpha`, `lrx2`, `lrx2_df`, `lrx2_p`, `x2`, `x2_df`, `x2_p`
+#'   (`NA` where the engine computed no tablewise test or the input was a
+#'   transition matrix).
+#' * `summary.lsa_group()` returns that frame visibly with one row per
+#'   group and a leading `group` column; it prints nothing else.
+#' * `as.data.frame.lsa()` returns a `data.frame` with one row per
+#'   `from -> to` cell: integer `from`/`to` ids, `from_label`, `to_label`,
+#'   the statistic columns of [transitions()], and the protocol columns
+#'   `edge` and `weight`. `as.data.frame.lsa_group()` stacks these with a
+#'   leading `group` column.
+#' * `nobs()` returns a single number, the total transition count.
+#'
+#' @examples
+#' fit <- lsa(engagement)
+#' print(fit)
+#' summary(fit)
+#' nobs(fit)
+#' head(as.data.frame(fit))
+#'
+#' gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'             time = "Time", group = "Achiever")
+#' gfit
+#' summary(gfit)
+#'
+#' @seealso [lsa()], [transitions()]
+#' @name lsa-methods
+NULL
+
+#' @rdname lsa-methods
 #' @export
 print.lsa_group <- function(x, ...) {
   labels <- attr(x, "labels")

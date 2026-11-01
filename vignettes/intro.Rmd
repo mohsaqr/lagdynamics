@@ -33,9 +33,9 @@ independence predicts. The package restates this method as a modern
 statistical workflow built on six commitments:
 
 - **Tidy.** Every result is produced by a verb -- `transitions()`,
-  `nodes()`, `tests()`, `initial()`, `summary()`,
-  `transition_probabilities()` -- that returns a
-  one-row-per-observation data frame. `transitions()` reads the fitted
+  `nodes()`, `tests()`, `initial()`, `summary()` -- that returns a
+  one-row-per-observation data frame (`transition_probabilities()`
+  alone returns the matrix form that TNA tooling expects). `transitions()` reads the fitted
   model and every inference result through the same arguments. Filters
   are arguments (`significant = TRUE`, `direction = "over"`,
   `min_count = `), never subsetting; the user never indexes into an
@@ -48,8 +48,8 @@ statistical workflow built on six commitments:
   residual test into a full battery -- analytic Bayesian certainty,
   sequence-level bootstrap, split-half reliability, case-drop
   stability, and a within-sequence permutation null.
-- **Expanded.** Beyond the classical engine the package offers five
-  estimation engines plus an open registry for user-defined ones,
+- **Expanded.** Alongside the classical engine the package offers four
+  further estimation engines plus an open registry for user-defined ones,
   multi-lag analysis with positive and negative lags, structural-zero
   constraints under quasi-independence, initial and transition
   probabilities, grouped estimation in a shared state space, and an
@@ -178,7 +178,8 @@ is exercised in this vignette or in a dedicated companion vignette.
 **Interface**
 
 - Tidy accessors throughout: `transitions()`, `nodes()`, `tests()`,
-  `initial()`, `transition_probabilities()`, and `summary()`.
+  `initial()`, and `summary()`, plus `transition_probabilities()` for
+  the matrix form.
   `transitions()` reads the fitted model and every inference result
   with the same arguments. No result requires indexing into an object.
 - One plotting verb with several geometries, plus dedicated plots for
@@ -189,8 +190,9 @@ is exercised in this vignette or in a dedicated companion vignette.
 # Fitting and reading a model
 
 The examples use the bundled `engagement` data: weekly engagement
-states (`active`, `average`, `disengaged`) for 138 students, one row
-per student.
+states (`Active`, `Average`, `Disengaged`) for 138 students, one row
+per student; two rows are entirely missing, so the fit uses 136
+sequences.
 
 ```{r fit}
 fit <- lsa(engagement)
@@ -221,7 +223,8 @@ transitions(lsa_lags(engagement, lags = 1:2)) |> head(6)
 ```
 
 Structural zeros restate the model rather than filter its output:
-forbidden cells are non-estimable.
+a forbidden cell has an expected count of zero and no residual or
+p-value, so it can never be flagged significant.
 
 ```{r structural}
 fz <- lsa(engagement, loops = FALSE)

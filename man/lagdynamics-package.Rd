@@ -31,36 +31,49 @@ visualization layer when it is installed.
 \section{Main functions}{
 
 
-Construction: \code{\link[=lsa]{lsa()}}, \code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa_transitions]{lsa_transitions()}}
+Construction: \code{\link[=lsa]{lsa()}} (sequences, wide tables, transition matrices,
+long event logs and \code{tna} / \code{Nestimate} / \code{TraMineR} objects),
+\code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa_transitions]{lsa_transitions()}}, and the multi-lag \code{\link[=lsa_lags]{lsa_lags()}} and
+\code{\link[=lag_profile]{lag_profile()}}.
 
-Convenience wrappers: \code{lsa_classical()}, \code{lsa_two_cell()},
+Engine wrappers: \code{lsa_classical()}, \code{lsa_two_cell()},
 \code{lsa_bidirectional()}, \code{lsa_parallel_dominance()},
-\code{lsa_nonparallel_dominance()}
+\code{lsa_nonparallel_dominance()} (documented with \code{\link[=lsa]{lsa()}}).
 
-Engine registry: \code{register_lsa_engine()}, \code{get_lsa_engine()},
-\code{list_lsa_engines()}
+Engine registry: \code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}},
+\code{\link[=list_lsa_engines]{list_lsa_engines()}}, \code{\link[=unregister_lsa_engine]{unregister_lsa_engine()}}.
+
+Reading a fit (tidy data frames): \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}},
+\code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{summary()} (see \link{lsa-methods}).
+\code{\link[=transition_probabilities]{transition_probabilities()}} returns the row-stochastic
+transition-probability matrix.
 
 Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}},
 \code{\link[=reliability_lsa]{reliability_lsa()}}, and analytic certainty via \code{\link[=certainty_lsa]{certainty_lsa()}}.
+Every result is read with \code{\link[=transitions]{transitions()}}.
 
-Group comparison: \code{compare_lsa()} and \code{bayes_compare_lsa()} for
-between-group differences in transition structure.
+Group comparison: \code{\link[=compare_lsa]{compare_lsa()}} (permutation) and
+\code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} (Dirichlet-Multinomial) for between-group
+differences in transition structure, on a grouped fit from
+\code{lsa(data, group = )}.
 
-Reading a fit (tidy data frames): \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}},
-\code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{\link[=summary]{summary()}}.
+Plotting: \code{\link[=plot.lsa]{plot.lsa()}} (heatmap, network, chord, sunburst),
+\code{\link[=plot_transitions]{plot_transitions()}}, \code{\link[=plot_chords]{plot_chords()}}, \code{\link[=plot_polar]{plot_polar()}},
+\code{\link[=plot_forest]{plot_forest()}}, and \code{\link[=plot.lsa_comparison]{plot.lsa_comparison()}}.
 
-Transition and initial probabilities: \code{\link[=transition_probabilities]{transition_probabilities()}}
-returns the row-stochastic transition-probability matrix and
-\code{\link[=initial]{initial()}} the initial-state probabilities.
+Other: \code{\link[=transfer_entropy]{transfer_entropy()}} (directed information flow, experimental),
+\code{\link[=lsa_ipf]{lsa_ipf()}} (iterative proportional fitting for structural zeros),
+and \code{\link[=lsa_to_tna]{lsa_to_tna()}} (hand a fit to the \code{tna} package).
+
+Data: \link{engagement}, \link{group_regulation}, \link{group_regulation_long},
+\link{ai_long}.
 }
 
 \section{Roadmap (not yet implemented)}{
 
 
 Stationarity tests (\code{stationarity_lsa()}) are planned but not yet
-exported. Multi-group fits are built with \code{lsa(data, group = ...)};
-between-group differences are then tested with \code{compare_lsa()} or
-\code{bayes_compare_lsa()}.
+exported.
 }
 
 \references{

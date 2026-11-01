@@ -6,7 +6,11 @@
 \title{Collaborative Learning Self-Regulation Sequences}
 \format{
 A \code{data.frame} with 2,000 rows (sequences) and 26 columns
-(ordered time points), character-coded.
+(ordered time points \code{T1} to \code{T26}), character-coded.
+}
+\source{
+Identical in content to \code{tna::group_regulation} (\code{tna}
+package, MIT license).
 }
 \usage{
 group_regulation
@@ -28,5 +32,9 @@ The nine coded actions are \code{adapt}, \code{cohesion}, \code{consensus},
 fit <- lsa(group_regulation)
 transitions(fit, significant = TRUE)
 
+}
+\seealso{
+\link{group_regulation_long} (the long event log of the same
+actions)
 }
 \keyword{datasets}

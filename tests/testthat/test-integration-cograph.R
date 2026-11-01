@@ -15,7 +15,10 @@ test_that("lsa fits satisfy the cograph network protocol", {
   expect_identical(cograph::get_edges(fit), fit$edges)
 
   flat <- cograph::to_df(fit)
-  expect_named(flat, c("from", "to", "weight"))
+  # cograph >= 2.5 keeps any extra edge columns the network carries (lag, count,
+  # prob, ...), so the protocol guarantees these three come FIRST, not that they
+  # are the only ones. Asserting the full name vector pinned the old narrow shape.
+  expect_identical(names(flat)[1:3], c("from", "to", "weight"))
   expect_equal(nrow(flat), nrow(fit$edges))
   expect_equal(sum(flat$weight), sum(fit$obs))
 

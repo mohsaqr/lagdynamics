@@ -33,9 +33,10 @@ variants, see `vignette("plotting", package = "lagdynamics")`.
 
 # Fit a model
 
-`engagement` contains weekly engagement states for students. It is a
-wide sequence table: each row is one sequence, each column is an ordered
-time point, and each cell is a state.
+`engagement` contains weekly engagement states for 138 students. It is
+a wide sequence table: each row is one sequence, each column is an
+ordered time point, and each cell is a state; `NA` marks a missing week
+and is skipped rather than treated as a state.
 
 ```{r data}
 head(engagement)
@@ -65,6 +66,15 @@ Most first reads start with the transitions that depart from chance.
 ```{r significant}
 transitions(fit, significant = TRUE)
 ```
+
+Seven of the nine transitions depart from independence. The three
+self-transitions carry the largest positive residuals (Active -> Active
+z = 21.7, Disengaged -> Disengaged z = 15.4, Average -> Average
+z = 12.5), and for every state the most likely next week is the same
+state (probabilities 0.698, 0.610 and 0.483). Every move out of Active is under-represented, so active
+students rarely slip in a single week, whereas the two moves between
+Average and Disengaged occur at the rate their base rates predict and
+do not appear in this table.
 
 The companion verbs read the other parts of the same fitted model.
 
@@ -111,6 +121,14 @@ cert <- certainty_lsa(fit)
 cert
 transitions(cert) |> head(4)
 ```
+
+The persistence edge Active -> Active is pinned down tightly: a
+probability of 0.698 with a 95% credible interval from 0.661 to 0.731.
+Disengaged -> Active is the edge here that is not flagged `stable`: its
+interval (0.088 to 0.158) is wide relative to a probability of 0.120,
+because Disengaged is the least visited source state. A residual can be
+large while the probability behind it is still imprecise, which is why
+the two are reported together.
 
 For resampling-based edge uncertainty, use `bootstrap_lsa()`. For
 whole-network reproducibility, use `reliability_lsa()` and

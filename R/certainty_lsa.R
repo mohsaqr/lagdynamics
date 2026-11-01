@@ -23,9 +23,9 @@
 #' available analytically. No resampling, so it runs in microseconds.
 #'
 #' The result carries class `c("lsa_certainty", "lsa_bootstrap")` and an
-#' `edges` table with the columns [plot_forest()] and
-#' [as.data.frame()] expect, so it is a drop-in for a bootstrap result
-#' (use `metric = "prob"`).
+#' `edges` table with the columns [plot_forest()] and [transitions()]
+#' expect, so it is a drop-in for a bootstrap result (use
+#' `metric = "prob"`).
 #'
 #' **Certainty vs bootstrap.** Both answer "how precisely is this edge
 #' pinned down?". They agree on homogeneous data. The Dirichlet posterior
@@ -47,22 +47,35 @@
 #' @param edge_threshold Numeric or `NULL`. Fixed threshold for
 #'   `inference = "threshold"`; `NULL` uses the 0.10 quantile of
 #'   non-zero edge probabilities.
+#' @param x An `lsa_certainty` or `lsa_certainty_group` object (`print()`
+#'   and `as.data.frame()` methods).
+#' @param row.names,optional,... Ignored by the methods; present for
+#'   consistency with the generics.
 #'
 #' @return An object of class `c("lsa_certainty", "lsa_bootstrap", "list")`
 #'   with an `edges` data frame (`from`, `to`, `prob_observed`,
 #'   `prob_mean`, `prob_se`, `prob_ci_low`, `prob_ci_high`, `p_value`,
 #'   `stable`, plus `adj_res_observed`/`adj_res_stable` for plotting), the
 #'   posterior matrices (`mean`, `sd`, `ci_lower`, `ci_upper`), and call
-#'   metadata (`prior`, `level_alpha`, `inference`, ...). For an
-#'   `lsa_group`, a named list of these (class `lsa_certainty_group`).
+#'   metadata (`prior`, `level_alpha`, `inference`, ...). Read the
+#'   per-edge table with [transitions()]. For an `lsa_group`, a named
+#'   list of these, one per group (class `lsa_certainty_group`), whose
+#'   `as.data.frame()` stacks the group tables with a leading `group`
+#'   column. `print()` shows a header summary (the number of certain
+#'   edges) and returns `x` invisibly.
 #'
 #' @examples
-#' \donttest{
 #' fit  <- lsa(engagement)
 #' cert <- certainty_lsa(fit)
 #' cert
-#' head(as.data.frame(cert))
-#' }
+#' transitions(cert, significant = TRUE)
+#'
+#' # One certainty table per group
+#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'          time = "Time", group = "Achiever")
+#' gcert <- certainty_lsa(g)
+#' gcert
+#' head(as.data.frame(gcert))
 #'
 #' @references
 #' Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
@@ -179,6 +192,7 @@ certainty_lsa <- function(fit,
   )
 }
 
+#' @rdname certainty_lsa
 #' @export
 print.lsa_certainty <- function(x, ...) {
   cat("<lsa_certainty>  (analytic Dirichlet-Multinomial)\n")
@@ -202,7 +216,7 @@ print.lsa_certainty <- function(x, ...) {
 #' @param x An `lsa_certainty` object.
 #' @param metric Which credible interval to draw. Default `"prob"`.
 #' @param ... Passed to [plot_forest()].
-#' @return A `ggplot` object (drawn when printed). Needs `ggplot2`.
+#' @return A `ggplot` object (drawn when printed).
 #' @examples
 #' fit <- lsa(group_regulation)
 #' cert <- certainty_lsa(fit)
@@ -212,12 +226,14 @@ plot.lsa_certainty <- function(x, metric = "prob", ...) {
   plot_forest(x, metric = metric, ...)
 }
 
+#' @rdname certainty_lsa
 #' @export
 as.data.frame.lsa_certainty_group <- function(x, row.names = NULL,
                                               optional = FALSE, ...) {
   .grouped_df(x)
 }
 
+#' @rdname certainty_lsa
 #' @export
 print.lsa_certainty_group <- function(x, ...) {
   cat("<lsa_certainty_group>\n")

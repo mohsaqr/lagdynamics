@@ -12,7 +12,13 @@
 #' `synthesis`.
 #'
 #' @format A `data.frame` with 2,000 rows (sequences) and 26 columns
-#'   (ordered time points), character-coded.
+#'   (ordered time points `T1` to `T26`), character-coded.
+#'
+#' @source Identical in content to `tna::group_regulation` (`tna`
+#'   package, MIT license).
+#'
+#' @seealso [group_regulation_long] (the long event log of the same
+#'   actions)
 #'
 #' @examples
 #' fit <- lsa(group_regulation)

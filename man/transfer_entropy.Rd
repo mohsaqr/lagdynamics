@@ -43,9 +43,11 @@ Default \code{TRUE}.}
 }
 \value{
 A tidy \code{data.frame}, one row per ordered pair, with columns
-\code{from}, \code{to}, \code{te} (bits), \code{te_effective} (surrogate-debiased),
-\code{te_normalised} (0-1, if \code{normalize}), \code{p} (surrogate p-value), and
-\code{n} (pooled transitions used). Rows are ordered by descending \code{te}.
+\code{from}, \code{to}, \code{te} (bits), \code{te_effective} (surrogate-debiased; only
+when \code{test = "surrogate"}), \code{te_normalised} (0-1; only when
+\code{normalize = TRUE}), \code{p} (surrogate p-value; only when
+\code{test = "surrogate"}), and \code{n} (pooled transitions used). Rows are
+ordered by descending \code{te}.
 }
 \description{
 \strong{Experimental.} Transfer entropy (Schreiber, 2000) measures \emph{directed}
@@ -74,6 +76,9 @@ aligned categorical series, in both directions.
 \examples{
 # Directed information-flow network over engagement states
 transfer_entropy(engagement, test = "none")
+
+# With the surrogate test (a real analysis uses the default R = 199)
+transfer_entropy(engagement, R = 19, seed = 1)
 
 # Bivariate transfer entropy between two aligned series
 a <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")

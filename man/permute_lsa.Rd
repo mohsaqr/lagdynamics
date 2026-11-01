@@ -36,20 +36,17 @@ replaces internal RNG.}
 
 \item{verbose}{Logical. Print progress every 100 replicates.}
 
-\item{...}{Reserved.
-
-\strong{NA handling.} The exceedance count that drives \code{p_perm} is
-computed with \code{na.rm = TRUE}, so replicates that produced \code{NA}
-for a cell (structural-zero cells, zero-margin cells in the
-permuted table) are excluded from that cell's tally rather than
-counted as either an exceedance or a non-exceedance.}
+\item{...}{Reserved.}
 }
 \value{
-An object of class \code{c("lsa_permutation", "list")} with:
+An object of class \code{c("lsa_permutation", "list")}. Read the
+per-edge table with \code{\link[=transitions]{transitions()}}; see \link{lsa-inference-methods} for
+\code{print()} and \code{as.data.frame()}. Elements:
 \describe{
-\item{edges}{Tidy per-edge data frame with observed counts and
-residuals, the empirical permutation p-value \code{p_perm}, and a
-\code{significant} flag at the recipe's alpha threshold.}
+\item{edges}{Tidy data frame, one row per \code{from -> to} cell:
+\code{from}, \code{to}, \code{observed_count}, \code{observed_adj_res}, the empirical
+permutation p-value \code{p_perm}, and \code{significant}
+(\code{p_perm < alpha} of the fit).}
 \item{perm_adj_res}{\verb{R x K^2} numeric matrix of permuted
 residuals (cells in \code{as.vector(adj_res)} order).}
 \item{R, within_sequence}{Recipe metadata.}
@@ -64,11 +61,21 @@ matrix, producing a permutation distribution for each cell. The
 two-sided p-value is \verb{(1 + #\{ |stat_perm| >= |stat_obs| \}) / (1 + R)}
 (Phipson & Smyth 2010).
 }
+\details{
+\strong{NA handling.} The exceedance count that drives \code{p_perm} is
+computed with \code{na.rm = TRUE}, so replicates that produced \code{NA}
+for a cell (structural-zero cells, zero-margin cells in the
+permuted table) are excluded from that cell's tally rather than
+counted as either an exceedance or a non-exceedance.
+}
 \examples{
-\donttest{
 fit <- lsa(engagement, engine = "classical")
-pm <- permute_lsa(fit, R = 200)
-head(pm$edges)
+pm <- permute_lsa(fit, R = 100)
+pm
+transitions(pm, significant = TRUE)
+\donttest{
+# A full analysis uses more permutations
+transitions(permute_lsa(fit, R = 1000), sort = "strength")
 }
 
 }

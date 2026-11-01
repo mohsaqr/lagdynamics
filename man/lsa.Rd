@@ -48,14 +48,18 @@ lsa(
 \code{action} arguments are supplied (see below). Accepted already-
 sequenced forms include vectors, lists of sequences, wide
 matrices/data.frames, transition-count matrices, and sequence-
-bearing objects (\code{tna}, \code{group_tna}, \code{nestimate_data}, \code{stslist}).
+bearing objects (\code{tna}, \code{group_tna}, \code{tna_seq_data}, \code{tna_data},
+\code{nestimate_data}, \code{netobject}, \code{stslist}); see \code{\link[=lsa_data]{lsa_data()}}.
 \code{NA} and empty-string cells are treated as missingness, not as a
 state: they are dropped wherever they occur and no transition is
 counted into or out of them. To model missingness as its own
 state, recode it (e.g. \code{NA -> "missing"}) before calling \code{lsa()}.}
 
 \item{...}{Additional engine-specific parameters (merged into
-\code{params}).}
+\code{params}). For the engine wrappers (\code{lsa_classical()},
+\code{lsa_two_cell()}, \code{lsa_bidirectional()}, \code{lsa_parallel_dominance()},
+\code{lsa_nonparallel_dominance()}), any argument of \code{lsa()} other than
+\code{engine}.}
 
 \item{lag}{Integer. The transition lag. Default \code{1}. Positive lags
 count successors (state at \code{t -> t + lag}); negative lags count
@@ -75,7 +79,8 @@ adjusted-residual and kappa p-values: one of \code{"two.sided"}
 (default), \code{"greater"}, or \code{"less"}.}
 
 \item{alpha}{Numeric. Significance threshold used to mark edges as
-significant in \code{fit$edges$significant}. Default \code{0.05}.}
+significant (the \code{significant} column of \code{\link[=transitions]{transitions()}}). Default
+\code{0.05}.}
 
 \item{loops}{Logical. Keep self-transitions (the diagonal)? \strong{Default
 \code{TRUE}.} Set \code{loops = FALSE} to forbid every self-transition -- the
@@ -87,7 +92,8 @@ cell and \code{1} an estimable one. \strong{Default \code{NULL}: every cell is p
 of the model.} Combines with \code{loops}: \code{loops = FALSE} also zeros the
 diagonal of a supplied matrix. When any cell is forbidden the engine
 switches to iterative proportional fitting and Christensen's
-design-matrix residuals (see \code{inst/REFERENCES.md} §2.2, §4.2).}
+design-matrix residuals (see \code{inst/REFERENCES.md}, sections 2.2 and
+4.2).}
 
 \item{labels}{Optional character vector of state labels.}
 
@@ -113,8 +119,9 @@ is supplied. Events are ordered within each sequence by \code{order} if
 given else by \code{time}, and -- when \code{time} is given and no \code{session}
 column is -- a new sequence starts whenever the gap between
 consecutive events exceeds \code{time_threshold} seconds. All \code{NULL} by
-default except \code{action} in long-format mode (input is otherwise
-taken as already-sequenced).}
+default; \code{action} is required in long-format mode (without it the
+input is taken as already sequenced). See the \emph{Long-format input}
+section for a limit on combining \code{actor} and \code{session}.}
 
 \item{time_threshold}{Numeric. Maximum gap in seconds between
 consecutive events before a new session is started in long-format
@@ -181,14 +188,64 @@ data using a registered engine. Returns a tidy S3 object with named
 slots for observed/expected/probability/residual matrices and a
 long-format edge table suitable for transition-network visualization.
 }
+\details{
+The engine wrappers \code{lsa_classical()}, \code{lsa_two_cell()},
+\code{lsa_bidirectional()}, \code{lsa_parallel_dominance()} and
+\code{lsa_nonparallel_dominance()} are \code{lsa()} with \code{engine} fixed to the
+matching built-in engine; they return the same object.
+}
+\section{Long-format input}{
+
+When both \code{actor} and \code{session} are given, each sequence is keyed by
+the actor x session combination, built with \code{\link[=interaction]{interaction()}}. That key
+is an integer index over the full cross of distinct actors and
+distinct sessions, so it overflows once the number of distinct actors
+times the number of distinct sessions exceeds \code{.Machine$integer.max}
+(about 2.1e9). The overflowing keys become \code{NA} and those sequences
+are dropped, with only R's warning "NAs produced by integer overflow".
+Check that the sequence count reported by \code{summary(fit)} matches the
+number of distinct sessions in the log. When the session identifier is
+already unique across actors, pass it as \code{actor} and leave \code{session}
+\code{NULL}: no cross is formed and every sequence is kept.
+}
+
 \examples{
 seq <- c("Question", "Explain", "Agree",
          "Question", "Explain", "Elaborate",
          "Agree", "Question", "Explain")
 fit <- lsa(seq, engine = "classical")
 fit
-head(fit$edges)
+transitions(fit)
 
+# The same model through an engine wrapper
+lsa_classical(seq)
+
+# Long-format event log with a recorded grouping column
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+summary(gfit)
+
+}
+\references{
+Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+
+Bakeman, R., & Gottman, J. M. (1997). \emph{Observing interaction: An
+introduction to sequential analysis} (2nd ed.). Cambridge University
+Press.
+
+Christensen, R. (1997). \emph{Log-linear models and logistic
+regression} (2nd ed.). Springer.
+
+Haberman, S. J. (1979). \emph{Analysis of qualitative data: Volume 2,
+New developments}. Academic Press.
+
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+\emph{Handbook of infant development} (pp. 623-649). Wiley.
+
+Wampold, B. E. (1984). Tests of dominance in sequential categorical
+data. \emph{Psychological Bulletin, 96}(2), 424-429.
 }
 \seealso{
 \code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa_transitions]{lsa_transitions()}}, \code{\link[=register_lsa_engine]{register_lsa_engine()}},

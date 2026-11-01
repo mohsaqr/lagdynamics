@@ -13,11 +13,14 @@ initial(fit)
 \method{initial}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\code{lsa(..., group = )}.}
 }
 \value{
-A \code{data.frame} with columns \code{state}, \code{init_prob}; zero rows
-when the fit came from a transition matrix (no initial states).
+A \code{data.frame}, one row per state, with columns \code{state},
+\code{init_prob}; zero rows when the fit came from a transition matrix
+(no initial states). A grouped fit gains a leading \code{group}
+column.
 }
 \description{
 The proportion of sequences starting in each state, as a tidy

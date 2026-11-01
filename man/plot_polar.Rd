@@ -56,7 +56,7 @@ radial \strong{bar height} (so nothing crams); \code{"wedge"} sizes each
 transition's angular \strong{width} by its frequency share (the classic
 look), omitting tiny wedges. Both fill by the adjusted residual (warm
 = over-represented, cool = avoided), sharing the \code{\link[=plot.lsa]{plot.lsa()}} heatmap
-colour scale. Needs \code{ggplot2}.
+colour scale.
 }
 \examples{
 fit <- lsa(group_regulation)

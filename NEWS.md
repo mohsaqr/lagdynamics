@@ -1,3 +1,37 @@
+# lagdynamics 0.33
+
+## Documentation
+
+- Every exported S3 method now has a help page with a `Value` section:
+  `print()`, `summary()`, `as.data.frame()` and `nobs()` for fits (new
+  topic `?"lsa-methods"`), and the `print()` / `as.data.frame()` methods
+  of every inference, comparison, lag and data object, each documented
+  on its constructor's page.
+- `?lsa` documents the engine wrappers (`lsa_classical()` and siblings),
+  adds method references, and warns that combining `actor` and `session`
+  overflows R's integer range once distinct actors x distinct sessions
+  exceeds about 2.1e9, silently dropping sequences; the fix (pass a
+  globally unique session id as `actor`) is given there and in the
+  interoperability vignette.
+- Examples read results with `transitions()`, `summary()` and the print
+  methods instead of reaching into objects with `$`, and group examples
+  use the recorded `Achiever` column of `group_regulation_long` instead
+  of a derived grouping vector. Resampling examples now run a small
+  unwrapped version before the `\donttest{}` full-size call.
+- Corrected return-value descriptions: the column names of
+  `bootstrap_lsa()` edges, the conditional columns of
+  `transfer_entropy()`, the engine-function contract of
+  `register_lsa_engine()`, and the size of the `engagement` data (136
+  non-empty sequences). Details that were attached to the wrong roxygen
+  tag (`permute_lsa()`, `compare_lsa()`, `reliability_lsa()`) now sit in
+  Details.
+- README: CRAN install line, a bundled-data example, and the missing
+  `intro` vignette. Vignettes gain interpretation of the printed results
+  in the quick start, the permutation-null section of the confirmatory
+  vignette and the comparison step of the workflow, and correct several
+  stale statements (engine count, `transition_probabilities()` returns a
+  matrix, state capitalization, time-gap splitting of long logs).
+
 # lagdynamics 0.32
 
 ## New features

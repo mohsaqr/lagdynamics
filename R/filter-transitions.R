@@ -34,7 +34,8 @@
 #' inference result as a tidy one-row-per-transition `data.frame`.
 #' `transitions(x)` returns every transition; the arguments narrow it.
 #'
-#' Applied to a fit from [lsa()] the table holds the estimated transition
+#' Applied to a fit from [lsa()] (or a grouped fit, or the multi-lag
+#' result of [lsa_lags()]) the table holds the estimated transition
 #' statistics. Applied to the result of [bootstrap_lsa()],
 #' [certainty_lsa()], [stability_lsa()], [permute_lsa()], [compare_lsa()]
 #' or [bayes_compare_lsa()] the table holds that method's per-transition
@@ -50,19 +51,27 @@
 #'   [permute_lsa()], [compare_lsa()] or [bayes_compare_lsa()].
 #' @param significant Logical. Keep only the transitions the method flags
 #'   as significant or stable. Default `FALSE` (keep all).
-#' @param direction One of `"any"` (default), `"over"`
-#'   (over-represented: significant with a positive residual), or
+#' @param direction (Fits, grouped fits and `lsa_lags` only.) One of
+#'   `"any"` (default), `"over"` (over-represented: significant with a
+#'   positive residual), or
 #'   `"under"` (under-represented: significant with a negative
 #'   residual). Selecting a direction implies `significant = TRUE`.
-#' @param min_count Optional integer. Keep only transitions observed at
-#'   least this many times. Default `NULL` (no count filter).
-#' @param alpha Significance threshold. Default `NULL`, which uses the
-#'   alpha recorded on the fit (`fit$params$alpha`).
+#' @param min_count (Fits, grouped fits and `lsa_lags` only.) Optional
+#'   integer. Keep only transitions observed at least this many times.
+#'   Default `NULL` (no count filter).
+#' @param alpha (Fits, grouped fits and `lsa_lags` only.) Significance
+#'   threshold. Default `NULL`, which uses the `alpha` the fit was built
+#'   with.
 #' @param sort Row ordering. `"none"` (default) keeps the matrix
-#'   (column-major) order; `"strength"` orders by the method's signed
-#'   effect, `"count"` by observed count, `"prob"` by transition
-#'   probability -- each descending, so the table reads strongest-first.
-#' @param ... Arguments passed to the method.
+#'   (column-major) order; `"strength"` orders by the absolute size of
+#'   the method's signed effect (the adjusted residual for a fit, a
+#'   bootstrap, certainty or permutation result; the stability
+#'   proportion for [stability_lsa()]; the group difference `diff` for a
+#'   comparison), `"count"` by observed count and `"prob"` by transition
+#'   probability (these two not for inference results) -- each
+#'   descending, so the table reads strongest-first.
+#' @param ... Arguments passed to the method; ignored by the methods
+#'   themselves.
 #'
 #' @return A `data.frame`, one row per transition. For a fit the columns are
 #'   `from`, `to` (the source and target **state names**), `lag`, `count`,
@@ -71,8 +80,10 @@
 #'   `kappa_p`, `lift`, `sign`, `significant`. Engines that compute extra
 #'   per-cell statistics append them as further columns (e.g. the two-cell
 #'   engine adds `odds_ratio`, `log_or`, `log_or_se`). An inference result
-#'   carries `from`, `to` and that method's own quantities. A grouped fit
-#'   gains a leading `group` column. Row names are reset.
+#'   carries `from`, `to` and that method's own quantities (the columns
+#'   listed under *Value* of that function; a pairwise comparison adds
+#'   `group_a`, `group_b`). A grouped fit gains a leading `group` column.
+#'   Row names are reset.
 #'
 #' @examples
 #' fit <- lsa(group_regulation)

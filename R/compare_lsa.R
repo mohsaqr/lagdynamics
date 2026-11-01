@@ -65,6 +65,7 @@
 #' @param verbose Logical. Print progress every 100 permutations.
 #' @param ... Reserved.
 #'
+#' @details
 #' **NA handling.** Non-estimable cells (structural zeros, zero-margin
 #' rows in a permuted pseudo-group) carry `NA` in the measure matrix and
 #' are never coerced to zero. Such cells get `p_perm = NA` rather than a
@@ -107,21 +108,24 @@
 #'   \item{measure, R, adjust, groups}{Call metadata; `groups` lists all
 #'     group labels.}
 #' }
+#' Read the per-edge table with [transitions()]; `print()` shows the
+#' group labels, the number of significant edges and the omnibus test.
 #'
 #' @examples
+#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'          time = "Time", group = "Achiever")
+#' cmp <- compare_lsa(g, R = 100)
+#' cmp
+#' transitions(cmp, significant = TRUE, sort = "strength")
 #' \donttest{
-#' # group_regulation is wide sequences with no grouping column, so
-#' # derive one: sessions whose first regulation act is planning vs not.
-#' grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
-#' g <- lsa(group_regulation, group = grp)
-#' cmp <- compare_lsa(g, R = 200)
-#' head(cmp$edges)
-#' cmp$global
+#' # A full analysis uses more label permutations
+#' compare_lsa(g, R = 1000, adjust = "BH")
 #' }
 #'
 #' @references
 #' Phipson, B., & Smyth, G. K. (2010). Permutation p-values should
-#' never be zero. \emph{Statistical Applications in Genetics and
+#' never be zero: calculating exact p-values when permutations are
+#' randomly drawn. \emph{Statistical Applications in Genetics and
 #' Molecular Biology}, 9(1), Article 39.
 #'
 #' van Borkulo, C. D., et al. (2022). Comparing network structures on
@@ -495,21 +499,23 @@ compare_lsa <- function(x,
 
 #' Tidy a Group Comparison
 #'
-#' Returns the per-edge comparison table (the same data frame as
-#' `x$edges`) so a comparison can be read with `as.data.frame()` like the
-#' other result objects, without reaching into the object.
+#' Returns the per-edge comparison table, the same table
+#' [transitions()] reads, as a plain data frame. `print()` shows the
+#' header summary (groups, measure, significant edges, omnibus test).
 #'
 #' @param x An `lsa_comparison` or `lsa_comparison_pairwise` object.
 #' @param row.names,optional,... Standard [as.data.frame()] arguments
 #'   (unused; present for method consistency).
-#' @return The tidy per-edge data frame.
+#' @return `as.data.frame()`: the per-edge data frame described under
+#'   *Value* in [compare_lsa()] (one row per transition; for a pairwise
+#'   object one row per transition and pair, with leading `group_a`,
+#'   `group_b`). `print()`: `x`, invisibly.
 #' @examples
-#' \donttest{
-#' grp <- ifelse(group_regulation$T1 == "plan", "plan", "other")
-#' g <- lsa(group_regulation, group = grp)
-#' cmp <- compare_lsa(g, R = 200)
+#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'          time = "Time", group = "Achiever")
+#' cmp <- compare_lsa(g, R = 50)
+#' cmp
 #' head(as.data.frame(cmp))
-#' }
 #' @export
 as.data.frame.lsa_comparison <- function(x, row.names = NULL,
                                          optional = FALSE, ...) {
@@ -523,6 +529,7 @@ as.data.frame.lsa_comparison_pairwise <- function(x, row.names = NULL,
   x$edges
 }
 
+#' @rdname as.data.frame.lsa_comparison
 #' @export
 print.lsa_comparison <- function(x, ...) {
   cat("<lsa_comparison>\n")
@@ -539,6 +546,7 @@ print.lsa_comparison <- function(x, ...) {
   invisible(x)
 }
 
+#' @rdname as.data.frame.lsa_comparison
 #' @export
 print.lsa_comparison_pairwise <- function(x, ...) {
   cat("<lsa_comparison_pairwise>\n")

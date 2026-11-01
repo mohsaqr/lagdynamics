@@ -19,7 +19,8 @@
 #' ([plot_transitions()], [plot_chords()], [plot_polar()]); see those for
 #' view-specific options.
 #'
-#' @param x An `lsa` fit from [lsa()].
+#' @param x An `lsa` fit from [lsa()], or an `lsa_group` from
+#'   `lsa(..., group = )` (one figure per group).
 #' @param type Which view to draw: `"heatmap"` (default), `"network"`,
 #'   `"chord"`, or `"sunburst"`.
 #' @param ... Forwarded to the chosen view. For `"heatmap"`: `which`
@@ -30,7 +31,8 @@
 #'
 #' @return A `ggplot` object for `"heatmap"` and `"sunburst"`; the
 #'   (invisible) `cograph` object for `"network"` and `"chord"`. Drawn
-#'   when printed.
+#'   when printed. For an `lsa_group`, the per-group figures are drawn and
+#'   returned invisibly as a list, one element per group.
 #'
 #' @examples
 #' fit <- lsa(group_regulation)
@@ -40,6 +42,10 @@
 #' plot(fit, type = "network", weights = "tna")  # TNA probability network
 #' plot(fit, type = "chord")     # chord diagram
 #' plot(fit, type = "sunburst")  # polar sunburst
+#'
+#' gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'             time = "Time", group = "Achiever")
+#' plot(gfit, combined = TRUE)   # one heatmap per group, tiled
 #'
 #' @seealso [plot_transitions()], [plot_chords()], [plot_polar()],
 #'   [plot_forest()], [transitions()]

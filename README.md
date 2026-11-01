@@ -38,8 +38,8 @@ across the sequence-analysis ecosystem: `lsa()` ingests long event logs, wide
 matrices, lists of sequences, and objects from `tna`, `Nestimate`, and
 `TraMineR`, while fitted objects carry a `cograph` network class and expose
 transition and initial probabilities for downstream tooling. A single `plot()`
-verb renders any fit as a residual heatmap, transition network, chord diagram,
-polar sunburst, or uncertainty forest.
+verb renders a fit as a residual heatmap, transition network, chord diagram, or
+polar sunburst, and a bootstrap or certainty result as an uncertainty forest.
 
 ## Installation
 
@@ -66,23 +66,21 @@ The analytical core depends only on base R; plotting adds `ggplot2` and
 | Task | Functions |
 |---|---|
 | Fit a model | `lsa()`, `lsa_lags()`, `lag_profile()` |
-| Read results (tidy) | `transitions()`, `nodes()`, `tests()`, `initial()`, `as.data.frame()` |
+| Read results (tidy) | `transitions()`, `nodes()`, `tests()`, `initial()`, `summary()` |
 | Weigh the evidence | `bootstrap_lsa()`, `certainty_lsa()`, `permute_lsa()`, `stability_lsa()`, `reliability_lsa()` |
 | Compare groups | `compare_lsa()`, `bayes_compare_lsa()` |
 | Plot | `plot(fit, type = )`, `plot_transitions()`, `plot_chords()`, `plot_polar()`, `plot_forest()` |
 | Probabilities | `transition_probabilities()`, `initial()` |
 | Engines | `lsa(engine = )`, `register_lsa_engine()`, `list_lsa_engines()` |
+| Beyond LSA | `transfer_entropy()`, `lsa_to_tna()`, `lsa_ipf()` |
 
 ## Example
 
 ```r
 library(lagdynamics)
 
-seq <- c("Question", "Explain", "Agree",
-         "Question", "Explain", "Elaborate",
-         "Agree", "Question", "Explain")
-
-fit <- lsa(seq, engine = "classical")
+# 138 students' weekly engagement states (bundled data)
+fit <- lsa(engagement)
 fit
 
 transitions(fit, significant = TRUE)   # tidy table of tested transitions
@@ -90,6 +88,7 @@ plot(fit, type = "network")            # residual transition network
 
 # quantify the evidence behind each edge
 boot <- bootstrap_lsa(fit, R = 1000)
+transitions(boot, significant = TRUE)  # edges whose residual CI excludes 0
 plot(boot)                             # circular bootstrap CI forest
 ```
 
@@ -97,7 +96,8 @@ plot(boot)                             # circular bootstrap CI forest
 
 | Vignette | Topic |
 |---|---|
-| `vignette("lagdynamics")` | Get started: the method, why lagdynamics, and a hands-on tour |
+| `vignette("lagdynamics")` | Get started: from raw rows to a fitted model, tidy tables, plots, and one uncertainty check |
+| `vignette("intro")` | Concepts: what LSA tests, the engine family, and the package map |
 | `vignette("interop")` | Interoperability with wide data, long logs, `tna`, `Nestimate`, and `cograph` |
 | `vignette("workflow")` | A complete analysis from sequences to a group comparison |
 | `vignette("confirmatory")` | The confirmatory testing battery: matching claims to evidence |

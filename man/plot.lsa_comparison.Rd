@@ -24,7 +24,9 @@
 )
 }
 \arguments{
-\item{x}{An \code{lsa_comparison} or \code{lsa_comparison_pairwise} object.}
+\item{x}{An \code{lsa_comparison} or \code{lsa_comparison_pairwise} object from
+\code{\link[=compare_lsa]{compare_lsa()}} (or the Bayesian equivalents from
+\code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}).}
 
 \item{style}{\code{"barrel"} (default) or \code{"heatmap"}.}
 
@@ -45,7 +47,7 @@ facets so they line up). Default \code{12}.}
 \item{...}{Reserved.}
 }
 \value{
-A \code{ggplot} object (drawn when printed). Needs \code{ggplot2}.
+A \code{ggplot} object (drawn when printed).
 }
 \description{
 Two views of a \code{\link[=compare_lsa]{compare_lsa()}} result. The default \code{"barrel"} is a
@@ -62,13 +64,11 @@ barrel is drawn per pair via facets. The \code{"heatmap"} style draws the
 signed difference as a \verb{from x to} grid on the same diverging scale.
 }
 \examples{
-\donttest{
-grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
-g <- lsa(group_regulation, group = grp)
-cmp <- compare_lsa(g, R = 200)
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+cmp <- compare_lsa(g, R = 100)
 plot(cmp)                    # back-to-back barrel
 plot(cmp, style = "heatmap") # difference heatmap
-}
 
 }
 \seealso{

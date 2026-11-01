@@ -21,6 +21,8 @@
 #'   `t + lag`), a negative lag counts predecessors, and `0` pairs each
 #'   event with itself (a degenerate diagonal). Must be a single finite
 #'   whole number.
+#' @param row.names,optional,... Ignored by the `print()` and
+#'   `as.data.frame()` methods; present for consistency with the generics.
 #'
 #' @return An object of class `c("lsa_transitions", "list")` with
 #'   elements:
@@ -36,12 +38,16 @@
 #'     `(from, to)` cell containing columns `from`, `to`, `lag`,
 #'     `count`, `row_total`, `col_total`, `n_transitions`.}
 #' }
+#' `print()` shows the lag, the number of states and transitions and the
+#' count matrix, and returns `x` invisibly. `as.data.frame()` returns the
+#' `edges` table: one row per `from -> to` cell with the columns listed
+#' above.
 #'
 #' @examples
 #' d <- lsa_data(c("a", "b", "a", "c", "b", "a"))
 #' tx <- lsa_transitions(d, lag = 1)
-#' tx$obs
-#' head(tx$edges)
+#' tx
+#' as.data.frame(tx)
 #'
 #' @seealso [lsa_data()], [lsa()]
 #'
@@ -133,6 +139,7 @@ lsa_transitions <- function(x, lag = 1) {
   )
 }
 
+#' @rdname lsa_transitions
 #' @export
 print.lsa_transitions <- function(x, ...) {
   cat("<lsa_transitions>\n")

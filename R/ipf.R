@@ -34,7 +34,7 @@
 #' @param max_iter Integer. Maximum number of row+column scaling
 #'   passes. Default `200L`.
 #'
-#' @return A list with elements:
+#' @return A plain list (no class) with elements:
 #' \describe{
 #'   \item{fit}{The fitted `K x K` expected-frequency matrix.}
 #'   \item{iterations}{Number of row+column passes used.}
@@ -48,10 +48,12 @@
 #' obs <- matrix(c(0, 4, 6,
 #'                 3, 0, 5,
 #'                 7, 2, 0), nrow = 3, byrow = TRUE)
-#' fit <- lsa_ipf(obs)
-#' fit$fit                                       # fitted expected counts
-#' all.equal(rowSums(fit$fit), rowSums(obs))     # TRUE
-#' all.equal(colSums(fit$fit), colSums(obs))     # TRUE
+#' # Every cell estimable: the ordinary independence table
+#' lsa_ipf(obs)
+#'
+#' # Diagonal forbidden: the empty self-transition cells become structural
+#' # zeros and the fit keeps the observed row and column totals
+#' lsa_ipf(obs, structure = 1 - diag(3))
 #'
 #' @references
 #' Wickens, T. D. (1989). \emph{Multiway contingency tables analysis

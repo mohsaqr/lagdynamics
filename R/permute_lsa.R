@@ -32,17 +32,21 @@
 #' @param verbose Logical. Print progress every 100 replicates.
 #' @param ... Reserved.
 #'
+#' @details
 #' **NA handling.** The exceedance count that drives `p_perm` is
 #' computed with `na.rm = TRUE`, so replicates that produced `NA`
 #' for a cell (structural-zero cells, zero-margin cells in the
 #' permuted table) are excluded from that cell's tally rather than
 #' counted as either an exceedance or a non-exceedance.
 #'
-#' @return An object of class `c("lsa_permutation", "list")` with:
+#' @return An object of class `c("lsa_permutation", "list")`. Read the
+#' per-edge table with [transitions()]; see [lsa-inference-methods] for
+#' `print()` and `as.data.frame()`. Elements:
 #' \describe{
-#'   \item{edges}{Tidy per-edge data frame with observed counts and
-#'     residuals, the empirical permutation p-value `p_perm`, and a
-#'     `significant` flag at the recipe's alpha threshold.}
+#'   \item{edges}{Tidy data frame, one row per `from -> to` cell:
+#'     `from`, `to`, `observed_count`, `observed_adj_res`, the empirical
+#'     permutation p-value `p_perm`, and `significant`
+#'     (`p_perm < alpha` of the fit).}
 #'   \item{perm_adj_res}{`R x K^2` numeric matrix of permuted
 #'     residuals (cells in `as.vector(adj_res)` order).}
 #'   \item{R, within_sequence}{Recipe metadata.}
@@ -50,10 +54,13 @@
 #' }
 #'
 #' @examples
-#' \donttest{
 #' fit <- lsa(engagement, engine = "classical")
-#' pm <- permute_lsa(fit, R = 200)
-#' head(pm$edges)
+#' pm <- permute_lsa(fit, R = 100)
+#' pm
+#' transitions(pm, significant = TRUE)
+#' \donttest{
+#' # A full analysis uses more permutations
+#' transitions(permute_lsa(fit, R = 1000), sort = "strength")
 #' }
 #'
 #' @references

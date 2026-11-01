@@ -41,9 +41,11 @@
 #' @param seed Optional integer seed for the surrogate test.
 #'
 #' @return A tidy `data.frame`, one row per ordered pair, with columns
-#'   `from`, `to`, `te` (bits), `te_effective` (surrogate-debiased),
-#'   `te_normalised` (0-1, if `normalize`), `p` (surrogate p-value), and
-#'   `n` (pooled transitions used). Rows are ordered by descending `te`.
+#'   `from`, `to`, `te` (bits), `te_effective` (surrogate-debiased; only
+#'   when `test = "surrogate"`), `te_normalised` (0-1; only when
+#'   `normalize = TRUE`), `p` (surrogate p-value; only when
+#'   `test = "surrogate"`), and `n` (pooled transitions used). Rows are
+#'   ordered by descending `te`.
 #'
 #' @references Schreiber, T. (2000). Measuring information transfer.
 #'   *Physical Review Letters*, 85(2), 461-464.
@@ -51,6 +53,9 @@
 #' @examples
 #' # Directed information-flow network over engagement states
 #' transfer_entropy(engagement, test = "none")
+#'
+#' # With the surrogate test (a real analysis uses the default R = 199)
+#' transfer_entropy(engagement, R = 19, seed = 1)
 #'
 #' # Bivariate transfer entropy between two aligned series
 #' a <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")

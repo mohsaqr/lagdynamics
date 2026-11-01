@@ -58,8 +58,7 @@ between the two fits.
 }
 \details{
 This is the circular companion to the \code{\link[=plot.lsa]{plot.lsa()}} heatmap and the
-\code{\link[=plot_transitions]{plot_transitions()}} network. Like them it delegates the drawing to
-\code{cograph}; it needs the \code{cograph} package installed.
+\code{\link[=plot_transitions]{plot_transitions()}} network; the drawing is delegated to \code{cograph}.
 }
 \examples{
 fit <- lsa(group_regulation)
@@ -68,9 +67,11 @@ plot_chords(fit, width = "prob")          # width = probability
 plot_chords(fit, significant = TRUE, ticks = TRUE)
 
 # Compare two groups: ribbon colour = difference in residuals.
-g <- lsa(group_regulation,
-         group = rep(c("A", "B"), length.out = nrow(group_regulation)))
-plot_chords(g$A, compare = g$B)
+high <- lsa(subset(group_regulation_long, Achiever == "High"),
+            actor = "Actor", action = "Action", time = "Time")
+low  <- lsa(subset(group_regulation_long, Achiever == "Low"),
+            actor = "Actor", action = "Action", time = "Time")
+plot_chords(high, compare = low)
 
 }
 \seealso{

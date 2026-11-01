@@ -22,11 +22,10 @@ bootstrap_lsa(
 
 \item{R}{Integer. Number of bootstrap replicates. Default \code{1000}.}
 
-\item{level}{Character. Resampling unit: \code{"sequence"} (resample
-whole sequences with replacement, default when fit has more than
-one sequence), \code{"event"} (stationary block bootstrap on the
-event stream, used automatically for single-sequence input), or
-\code{"auto"} (default; pick based on \code{fit$data$n_sequences}).}
+\item{level}{Character. Resampling unit: \code{"auto"} (default) picks
+\code{"sequence"} when the fit has more than one sequence and \code{"event"}
+otherwise; \code{"sequence"} resamples whole sequences with replacement;
+\code{"event"} runs a stationary block bootstrap on the event stream.}
 
 \item{block_length}{For event-level bootstrap, mean geometric
 block length. Default \code{NULL} -> \code{ceiling(sqrt(T))}.}
@@ -55,17 +54,26 @@ Default \code{FALSE}.}
 \item{...}{Reserved for future use.}
 }
 \value{
-An object of class \code{c("lsa_bootstrap", "list")} with:
+An object of class \code{c("lsa_bootstrap", "list")}. Read the
+per-edge table with \code{\link[=transitions]{transitions()}}; see \link{lsa-inference-methods} for
+\code{print()} and \code{as.data.frame()}. Elements:
 \describe{
-\item{edges}{Tidy per-edge data frame with observed + bootstrap
-\code{mean}, \code{se}, \code{ci_low}, \code{ci_high}, \code{p_boot}, and \code{stable} for
-\code{count}, \code{adj_res}, \code{prob}, and \code{yules_q}.}
-\item{boot_obs}{\verb{R x K^2} numeric matrix: cell-wise observed
-count from each replicate (flattened in \code{as.vector(obs)}
+\item{edges}{Tidy data frame, one row per \code{from -> to} cell:
+\code{from}, \code{to}, \code{observed} (observed count); \code{count_mean},
+\code{count_se}, \code{count_ci_low}, \code{count_ci_high};
+\code{adj_res_observed}, \code{adj_res_mean}, \code{adj_res_se},
+\code{adj_res_ci_low}, \code{adj_res_ci_high}, the two-sided bootstrap
+p-value \code{adj_res_p_boot}, and \code{adj_res_stable} (\code{TRUE} when the
+residual interval excludes zero); \code{prob_observed}, \code{prob_mean},
+\code{prob_ci_low}, \code{prob_ci_high}; and \code{yules_q_observed},
+\code{yules_q_mean}, \code{yules_q_ci_low}, \code{yules_q_ci_high}.}
+\item{boot_obs, boot_adj_res, boot_prob, boot_yulesq}{\verb{R x K^2}
+numeric matrices of the per-replicate counts, adjusted residuals,
+transition probabilities and Yule's Q (cells in \code{as.vector(obs)}
 order).}
-\item{boot_adj_res}{\verb{R x K^2} matrix of adjusted residuals.}
-\item{R, level, level_alpha, indices_used}{Recipe metadata.}
-\item{fit}{Reference to the original fit (for $params / labels).}
+\item{R, level, level_alpha, indices_used}{Recipe metadata;
+\code{indices_used} is the replay matrix accepted by \code{indices}.}
+\item{fit}{The original fit.}
 }
 }
 \description{
@@ -107,10 +115,13 @@ replicates; cells whose every replicate was \code{NA} come back as
 \code{NA} themselves.
 }
 \examples{
-\donttest{
 fit <- lsa(engagement, engine = "classical")
-bs <- bootstrap_lsa(fit, R = 200)
-head(bs$edges)
+bs <- bootstrap_lsa(fit, R = 100)
+bs
+transitions(bs, significant = TRUE)
+\donttest{
+# A full analysis uses more replicates
+transitions(bootstrap_lsa(fit, R = 1000), sort = "strength")
 }
 
 }

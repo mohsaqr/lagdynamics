@@ -13,12 +13,15 @@ nodes(fit)
 \method{nodes}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\code{lsa(..., group = )}.}
 }
 \value{
-A \code{data.frame} with columns \code{state} (the state name, matching
-the \code{from}/\code{to} endpoints of \code{\link[=transitions]{transitions()}}), \code{outgoing}, and
-\code{incoming} (its total out- and in-transition counts).
+A \code{data.frame}, one row per state, with columns \code{state} (the
+state name, matching the \code{from}/\code{to} endpoints of \code{\link[=transitions]{transitions()}}),
+\code{outgoing}, and \code{incoming} (its total out- and in-transition
+counts). A grouped fit gains a leading \code{group} column (one row per
+group and state).
 }
 \description{
 The states and their incoming / outgoing transition totals, as a

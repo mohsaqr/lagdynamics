@@ -36,9 +36,12 @@ the \code{stable} flag in the output edge frame. Default \code{0.95}.}
 \item{...}{Reserved.}
 }
 \value{
-An object of class \code{c("lsa_stability", "list")} with:
+An object of class \code{c("lsa_stability", "list")}. Read the
+per-edge table with \code{\link[=transitions]{transitions()}}; see \link{lsa-inference-methods} for
+\code{print()} and \code{as.data.frame()}. Elements:
 \describe{
-\item{edges}{Tidy per-edge data frame with \code{observed_sig}
+\item{edges}{Tidy data frame, one row per \code{from -> to} cell: \code{from},
+\code{to}, \code{observed_sig}
 (whether the cell was significant in the original fit),
 \code{stability} (fraction of subsamples in which the cell was
 significant), and \code{stable} (\code{stability >= min_stable}).}
@@ -58,12 +61,20 @@ significant. Edges with stability >= \code{min_stable} (default
 \code{0.95}) are flagged as robust.
 }
 \examples{
-\donttest{
 fit <- lsa(engagement, engine = "classical")
 st <- stability_lsa(fit, R = 100)
-head(as.data.frame(st))
+st
+transitions(st, significant = TRUE)
+\donttest{
+# A full analysis uses more subsamples
+transitions(stability_lsa(fit, R = 500), sort = "strength")
 }
 
+}
+\references{
+Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating
+psychological networks and their accuracy: A tutorial paper.
+\emph{Behavior Research Methods, 50}(1), 195-212.
 }
 \seealso{
 \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}

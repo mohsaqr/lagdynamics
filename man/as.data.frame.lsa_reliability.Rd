@@ -3,7 +3,7 @@
 \name{as.data.frame.lsa_reliability}
 \alias{as.data.frame.lsa_reliability}
 \alias{as.data.frame.lsa_reliability_group}
-\title{Tidy the per-replicate split-half correlations}
+\title{Tidy the Per-Replicate Split-Half Correlations}
 \usage{
 \method{as.data.frame}{lsa_reliability}(x, row.names = NULL, optional = FALSE, ...)
 
@@ -20,12 +20,18 @@ A \code{data.frame}, one row per replicate, with columns
 \code{group} column). \code{NA} correlations from degenerate splits are kept.
 }
 \description{
-Tidy the per-replicate split-half correlations
+Returns the split-half correlation of every replicate from
+\code{\link[=reliability_lsa]{reliability_lsa()}} as a tidy data frame.
 }
 \examples{
-\donttest{
-fit <- lsa(group_regulation)
-rel <- reliability_lsa(fit, R = 200)
-head(as.data.frame(rel))
-}
+fit <- lsa(engagement)
+rel <- reliability_lsa(fit, R = 20)
+rel
+as.data.frame(rel)
+
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+grel <- reliability_lsa(g, R = 10)
+grel
+head(as.data.frame(grel))
 }

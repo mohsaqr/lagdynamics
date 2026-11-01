@@ -15,7 +15,8 @@
 )
 }
 \arguments{
-\item{x}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
+\item{x}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\code{lsa(..., group = )} (one figure per group).}
 
 \item{type}{Which view to draw: \code{"heatmap"} (default), \code{"network"},
 \code{"chord"}, or \code{"sunburst"}.}
@@ -33,7 +34,8 @@ groups into a single figure (compact, but cramped for many groups).}
 \value{
 A \code{ggplot} object for \code{"heatmap"} and \code{"sunburst"}; the
 (invisible) \code{cograph} object for \code{"network"} and \code{"chord"}. Drawn
-when printed.
+when printed. For an \code{lsa_group}, the per-group figures are drawn and
+returned invisibly as a list, one element per group.
 }
 \description{
 One entry point for every view of a fit; pick it with \code{type}:
@@ -52,6 +54,10 @@ plot(fit, type = "network")   # transition network
 plot(fit, type = "network", weights = "tna")  # TNA probability network
 plot(fit, type = "chord")     # chord diagram
 plot(fit, type = "sunburst")  # polar sunburst
+
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+plot(gfit, combined = TRUE)   # one heatmap per group, tiled
 
 }
 \seealso{

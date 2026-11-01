@@ -7,8 +7,9 @@
 #' weeks.
 #'
 #' This is a standard small-K, multi-sequence example for lag
-#' sequential analysis: K = 3 states, S = 138 sequences, mean sequence
-#' length about 15. It exercises the wide-data input path of
+#' sequential analysis: K = 3 states and 136 non-empty sequences (two
+#' rows are entirely missing), with a mean observed length of about 14
+#' weeks. It exercises the wide-data input path of
 #' [lsa_data()] and produces a stable transition pattern with clear
 #' adjusted-residual signals.
 #'
@@ -24,6 +25,7 @@
 #' @examples
 #' fit <- lsa(engagement, engine = "classical")
 #' fit
-#' fit$adj_res
+#' transitions(fit, significant = TRUE)
 #'
+#' @keywords datasets
 "engagement"

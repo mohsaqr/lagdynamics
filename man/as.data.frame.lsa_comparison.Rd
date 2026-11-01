@@ -3,11 +3,17 @@
 \name{as.data.frame.lsa_comparison}
 \alias{as.data.frame.lsa_comparison}
 \alias{as.data.frame.lsa_comparison_pairwise}
+\alias{print.lsa_comparison}
+\alias{print.lsa_comparison_pairwise}
 \title{Tidy a Group Comparison}
 \usage{
 \method{as.data.frame}{lsa_comparison}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{as.data.frame}{lsa_comparison_pairwise}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{print}{lsa_comparison}(x, ...)
+
+\method{print}{lsa_comparison_pairwise}(x, ...)
 }
 \arguments{
 \item{x}{An \code{lsa_comparison} or \code{lsa_comparison_pairwise} object.}
@@ -16,18 +22,20 @@
 (unused; present for method consistency).}
 }
 \value{
-The tidy per-edge data frame.
+\code{as.data.frame()}: the per-edge data frame described under
+\emph{Value} in \code{\link[=compare_lsa]{compare_lsa()}} (one row per transition; for a pairwise
+object one row per transition and pair, with leading \code{group_a},
+\code{group_b}). \code{print()}: \code{x}, invisibly.
 }
 \description{
-Returns the per-edge comparison table (the same data frame as
-\code{x$edges}) so a comparison can be read with \code{as.data.frame()} like the
-other result objects, without reaching into the object.
+Returns the per-edge comparison table, the same table
+\code{\link[=transitions]{transitions()}} reads, as a plain data frame. \code{print()} shows the
+header summary (groups, measure, significant edges, omnibus test).
 }
 \examples{
-\donttest{
-grp <- ifelse(group_regulation$T1 == "plan", "plan", "other")
-g <- lsa(group_regulation, group = grp)
-cmp <- compare_lsa(g, R = 200)
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+cmp <- compare_lsa(g, R = 50)
+cmp
 head(as.data.frame(cmp))
-}
 }

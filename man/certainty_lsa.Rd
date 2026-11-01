@@ -2,6 +2,9 @@
 % Please edit documentation in R/certainty_lsa.R
 \name{certainty_lsa}
 \alias{certainty_lsa}
+\alias{print.lsa_certainty}
+\alias{as.data.frame.lsa_certainty_group}
+\alias{print.lsa_certainty_group}
 \title{Analytic Certainty of Transition Edges (Dirichlet-Multinomial)}
 \usage{
 certainty_lsa(
@@ -12,6 +15,12 @@ certainty_lsa(
   consistency_range = c(0.75, 1.25),
   edge_threshold = NULL
 )
+
+\method{print}{lsa_certainty}(x, ...)
+
+\method{as.data.frame}{lsa_certainty_group}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{print}{lsa_certainty_group}(x, ...)
 }
 \arguments{
 \item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group}.}
@@ -33,6 +42,12 @@ inference. Default \code{c(0.75, 1.25)}.}
 \item{edge_threshold}{Numeric or \code{NULL}. Fixed threshold for
 \code{inference = "threshold"}; \code{NULL} uses the 0.10 quantile of
 non-zero edge probabilities.}
+
+\item{x}{An \code{lsa_certainty} or \code{lsa_certainty_group} object (\code{print()}
+and \code{as.data.frame()} methods).}
+
+\item{row.names, optional, ...}{Ignored by the methods; present for
+consistency with the generics.}
 }
 \value{
 An object of class \code{c("lsa_certainty", "lsa_bootstrap", "list")}
@@ -40,8 +55,12 @@ with an \code{edges} data frame (\code{from}, \code{to}, \code{prob_observed},
 \code{prob_mean}, \code{prob_se}, \code{prob_ci_low}, \code{prob_ci_high}, \code{p_value},
 \code{stable}, plus \code{adj_res_observed}/\code{adj_res_stable} for plotting), the
 posterior matrices (\code{mean}, \code{sd}, \code{ci_lower}, \code{ci_upper}), and call
-metadata (\code{prior}, \code{level_alpha}, \code{inference}, ...). For an
-\code{lsa_group}, a named list of these (class \code{lsa_certainty_group}).
+metadata (\code{prior}, \code{level_alpha}, \code{inference}, ...). Read the
+per-edge table with \code{\link[=transitions]{transitions()}}. For an \code{lsa_group}, a named
+list of these, one per group (class \code{lsa_certainty_group}), whose
+\code{as.data.frame()} stacks the group tables with a leading \code{group}
+column. \code{print()} shows a header summary (the number of certain
+edges) and returns \code{x} invisibly.
 }
 \description{
 Closed-form Bayesian alternative to \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} for the
@@ -54,9 +73,9 @@ available analytically. No resampling, so it runs in microseconds.
 }
 \details{
 The result carries class \code{c("lsa_certainty", "lsa_bootstrap")} and an
-\code{edges} table with the columns \code{\link[=plot_forest]{plot_forest()}} and
-\code{\link[=as.data.frame]{as.data.frame()}} expect, so it is a drop-in for a bootstrap result
-(use \code{metric = "prob"}).
+\code{edges} table with the columns \code{\link[=plot_forest]{plot_forest()}} and \code{\link[=transitions]{transitions()}}
+expect, so it is a drop-in for a bootstrap result (use
+\code{metric = "prob"}).
 
 \strong{Certainty vs bootstrap.} Both answer "how precisely is this edge
 pinned down?". They agree on homogeneous data. The Dirichlet posterior
@@ -65,12 +84,17 @@ mixture of latent classes with long sequences) it reports \emph{more}
 certainty than the sequence bootstrap -- prefer \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} then.
 }
 \examples{
-\donttest{
 fit  <- lsa(engagement)
 cert <- certainty_lsa(fit)
 cert
-head(as.data.frame(cert))
-}
+transitions(cert, significant = TRUE)
+
+# One certainty table per group
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+gcert <- certainty_lsa(g)
+gcert
+head(as.data.frame(gcert))
 
 }
 \references{

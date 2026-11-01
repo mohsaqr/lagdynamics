@@ -11,9 +11,9 @@
 #'
 #' Accepted input forms:
 #'
-#' - An atomic vector of integer or character codes — treated as a
+#' - An atomic vector of integer or character codes -- treated as a
 #'   single sequence.
-#' - A list of atomic vectors — treated as multiple independent
+#' - A list of atomic vectors -- treated as multiple independent
 #'   sequences; transitions are not counted across sequence boundaries.
 #' - A wide matrix or data.frame with rows = sequences, columns =
 #'   ordered time points. Missing values (`NA`) and empty strings are
@@ -26,10 +26,11 @@
 #'   `i`, column `j` is the count of `i -> j` transitions. In this case
 #'   `events` and `seq_id` are not available and downstream resampling
 #'   tools that need event-level data will error.
-#' - A sequence-bearing object: a `tna` or
-#'   `group_tna` (sequences read from its `$data` slot), a `tna_data`
-#'   or `nestimate_data` (`$sequence_data`), or an `stslist`. The stored event
-#'   sequences are recovered and analysed.
+#' - A sequence-bearing object: a `tna` or `group_tna` (sequences read
+#'   from its `data` slot), a `tna_seq_data` code matrix, a `tna_data` or
+#'   `nestimate_data` (its `sequence_data`), a `Nestimate` `netobject`
+#'   (its prepared sequence data), or a `TraMineR` `stslist`. The stored
+#'   event sequences are recovered and analysed.
 #'   A `tna` built from a bare matrix (no retained sequences) errors,
 #'   because transition *counts* cannot be recovered from probability
 #'   weights.
@@ -52,7 +53,7 @@
 #'   \item{n_events}{Total number of events across all sequences.}
 #'   \item{transitions_per_seq}{Integer vector: number of transitions
 #'     each sequence contributes at lag 1.}
-#'   \item{source}{One of `"events"`, `"transitions"` — flags whether
+#'   \item{source}{One of `"events"`, `"transitions"` -- flags whether
 #'     event-level data is available.}
 #'   \item{obs_input}{If `source = "transitions"`, the original `K x K`
 #'     count matrix. Otherwise `NULL`.}
@@ -60,18 +61,15 @@
 #'
 #' @examples
 #' # Single character sequence
-#' d1 <- lsa_data(c("a", "b", "a", "c", "b"))
-#' d1$n_events
+#' lsa_data(c("a", "b", "a", "c", "b"))
 #'
-#' # Multiple sequences
-#' d2 <- lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
-#' d2$n_sequences
+#' # Multiple sequences: no transition is counted across the boundary
+#' lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
 #'
-#' # Pre-computed transition matrix
+#' # Pre-computed transition matrix (source = "transitions")
 #' tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
-#'              dimnames = list(c("a","b","c"), c("a","b","c")))
-#' d3 <- lsa_data(tm)
-#' d3$source
+#'              dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+#' lsa_data(tm)
 #'
 #' @seealso [lsa_transitions()], [lsa()]
 #'
@@ -293,12 +291,19 @@ lsa_data <- function(x, labels = NULL) {
 #' input, or one row per `from`/`to`/`count` cell for transition-matrix
 #' input.
 #'
+#' `print()` shows the input source, the number of states, sequences,
+#' events and lag-1 transitions.
+#'
 #' @param x An `lsa_data` object from [lsa_data()].
 #' @param row.names,optional,... Standard [as.data.frame()] arguments
 #'   (unused; present for method consistency).
-#' @return A tidy data frame.
+#' @return `as.data.frame()`: a `data.frame` with one row per event and
+#'   columns `seq_id`, `index`, `state` (event-level input), or one row
+#'   per cell and columns `from`, `to`, `count` (transition-matrix
+#'   input). `print()`: `x`, invisibly.
 #' @examples
 #' d <- lsa_data(c("a", "b", "a", "c", "b"))
+#' d
 #' as.data.frame(d)
 #' @export
 as.data.frame.lsa_data <- function(x, row.names = NULL, optional = FALSE,
@@ -318,6 +323,7 @@ as.data.frame.lsa_data <- function(x, row.names = NULL, optional = FALSE,
   }
 }
 
+#' @rdname as.data.frame.lsa_data
 #' @export
 print.lsa_data <- function(x, ...) {
   cat("<lsa_data>\n")

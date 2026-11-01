@@ -22,34 +22,47 @@
 #'
 #' @section Main functions:
 #'
-#' Construction: [lsa()], [lsa_data()], [lsa_transitions()]
+#' Construction: [lsa()] (sequences, wide tables, transition matrices,
+#' long event logs and `tna` / `Nestimate` / `TraMineR` objects),
+#' [lsa_data()], [lsa_transitions()], and the multi-lag [lsa_lags()] and
+#' [lag_profile()].
 #'
-#' Convenience wrappers: `lsa_classical()`, `lsa_two_cell()`,
+#' Engine wrappers: `lsa_classical()`, `lsa_two_cell()`,
 #' `lsa_bidirectional()`, `lsa_parallel_dominance()`,
-#' `lsa_nonparallel_dominance()`
+#' `lsa_nonparallel_dominance()` (documented with [lsa()]).
 #'
-#' Engine registry: `register_lsa_engine()`, `get_lsa_engine()`,
-#' `list_lsa_engines()`
+#' Engine registry: [register_lsa_engine()], [get_lsa_engine()],
+#' [list_lsa_engines()], [unregister_lsa_engine()].
+#'
+#' Reading a fit (tidy data frames): [transitions()], [nodes()],
+#' [tests()], [initial()], and `summary()` (see [lsa-methods]).
+#' [transition_probabilities()] returns the row-stochastic
+#' transition-probability matrix.
 #'
 #' Inference: [bootstrap_lsa()], [permute_lsa()], [stability_lsa()],
 #' [reliability_lsa()], and analytic certainty via [certainty_lsa()].
+#' Every result is read with [transitions()].
 #'
-#' Group comparison: `compare_lsa()` and `bayes_compare_lsa()` for
-#' between-group differences in transition structure.
+#' Group comparison: [compare_lsa()] (permutation) and
+#' [bayes_compare_lsa()] (Dirichlet-Multinomial) for between-group
+#' differences in transition structure, on a grouped fit from
+#' `lsa(data, group = )`.
 #'
-#' Reading a fit (tidy data frames): [transitions()], [nodes()],
-#' [tests()], [initial()], and [summary()].
+#' Plotting: [plot.lsa()] (heatmap, network, chord, sunburst),
+#' [plot_transitions()], [plot_chords()], [plot_polar()],
+#' [plot_forest()], and [plot.lsa_comparison()].
 #'
-#' Transition and initial probabilities: [transition_probabilities()]
-#' returns the row-stochastic transition-probability matrix and
-#' [initial()] the initial-state probabilities.
+#' Other: [transfer_entropy()] (directed information flow, experimental),
+#' [lsa_ipf()] (iterative proportional fitting for structural zeros),
+#' and [lsa_to_tna()] (hand a fit to the `tna` package).
+#'
+#' Data: [engagement], [group_regulation], [group_regulation_long],
+#' [ai_long].
 #'
 #' @section Roadmap (not yet implemented):
 #'
 #' Stationarity tests (`stationarity_lsa()`) are planned but not yet
-#' exported. Multi-group fits are built with `lsa(data, group = ...)`;
-#' between-group differences are then tested with `compare_lsa()` or
-#' `bayes_compare_lsa()`.
+#' exported.
 #'
 #' @references
 #'

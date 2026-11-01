@@ -16,9 +16,9 @@
 #' half-network edge-weight vectors. Returns the distribution of
 #' replicate correlations plus a point summary.
 #'
-#' @param fit An `lsa` object returned by [lsa()]. Must be built from
-#'   event-level data (sequences), not from a pre-computed transition
-#'   matrix.
+#' @param fit An `lsa` object returned by [lsa()], or an `lsa_group`
+#'   from `lsa(..., group = )`. Must be built from event-level data
+#'   (sequences), not from a pre-computed transition matrix.
 #' @param R Integer. Number of split-half replicates. Default `100`.
 #' @param weights Character. Which edge matrix to correlate across
 #'   halves: `"prob"` (default), `"count"`, or `"adj_res"`.
@@ -27,9 +27,20 @@
 #' @param parallel Logical. Use multi-core resampling. Default `FALSE`.
 #' @param n_cores Integer. Worker count when `parallel = TRUE`.
 #' @param verbose Logical. Print progress every 100 replicates.
-#' @param ... Reserved.
+#' @param ... For the `lsa_group` method, the arguments above, passed to
+#'   each group's fit; otherwise reserved (and ignored by `print()`).
+#' @param x An `lsa_reliability` or `lsa_reliability_group` object
+#'   (`print()` methods).
 #'
-#' @return An object of class `c("lsa_reliability", "list")` with:
+#' @details
+#' For a grouped fit (`lsa_group`), reliability is estimated separately
+#' within each group and the per-group `lsa_reliability` objects are
+#' returned in an `lsa_reliability_group` container.
+#'
+#' @return An object of class `c("lsa_reliability", "list")`. `print()`
+#' shows the mean split-half correlation with its spread and interval and
+#' returns `x` invisibly; [as.data.frame()][as.data.frame.lsa_reliability]
+#' gives the per-replicate correlations. Elements:
 #' \describe{
 #'   \item{correlations}{Numeric vector of length `R`: the split-half
 #'     correlation of each replicate.}
@@ -39,23 +50,22 @@
 #'   \item{R, weights, method, n_sequences}{Recipe metadata.}
 #'   \item{fit}{Reference to the original fit.}
 #' }
+#' For an `lsa_group`, a named list of these, one per group, of class
+#' `c("lsa_reliability_group", "list")`.
 #'
 #' @examples
-#' \donttest{
 #' fit <- lsa(engagement, engine = "classical")
 #' rel <- reliability_lsa(fit, R = 50)
 #' rel
+#' \donttest{
+#' # A full analysis uses more split-half replicates
+#' reliability_lsa(fit, R = 500)
 #' }
 #'
 #' @references
 #' Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating
 #' psychological networks and their accuracy: A tutorial paper.
 #' \emph{Behavior Research Methods, 50}(1), 195-212.
-#'
-#' For a grouped fit (`lsa_group`), reliability is estimated separately
-#' within each group and the per-group `lsa_reliability` objects are
-#' returned in an `lsa_reliability_group` container with its own print
-#' method.
 #'
 #' @seealso [bootstrap_lsa()], [stability_lsa()], [permute_lsa()]
 #'
@@ -174,6 +184,7 @@ reliability_lsa.lsa_group <- function(fit, ...) {
             class = c("lsa_reliability_group", "list"))
 }
 
+#' @rdname reliability_lsa
 #' @export
 print.lsa_reliability_group <- function(x, ...) {
   cat("<lsa_reliability_group>\n")
@@ -186,7 +197,10 @@ print.lsa_reliability_group <- function(x, ...) {
   invisible(x)
 }
 
-#' Tidy the per-replicate split-half correlations
+#' Tidy the Per-Replicate Split-Half Correlations
+#'
+#' Returns the split-half correlation of every replicate from
+#' [reliability_lsa()] as a tidy data frame.
 #'
 #' @param x An `lsa_reliability` (or `lsa_reliability_group`) object.
 #' @param row.names,optional,... Ignored (method signature compatibility).
@@ -194,11 +208,16 @@ print.lsa_reliability_group <- function(x, ...) {
 #'   `replicate` and `correlation` (a grouped object gains a leading
 #'   `group` column). `NA` correlations from degenerate splits are kept.
 #' @examples
-#' \donttest{
-#' fit <- lsa(group_regulation)
-#' rel <- reliability_lsa(fit, R = 200)
-#' head(as.data.frame(rel))
-#' }
+#' fit <- lsa(engagement)
+#' rel <- reliability_lsa(fit, R = 20)
+#' rel
+#' as.data.frame(rel)
+#'
+#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'          time = "Time", group = "Achiever")
+#' grel <- reliability_lsa(g, R = 10)
+#' grel
+#' head(as.data.frame(grel))
 #' @export
 as.data.frame.lsa_reliability <- function(x, row.names = NULL,
                                           optional = FALSE, ...) {
@@ -214,6 +233,7 @@ as.data.frame.lsa_reliability_group <- function(x, row.names = NULL,
   .grouped_df(x)
 }
 
+#' @rdname reliability_lsa
 #' @export
 print.lsa_reliability <- function(x, ...) {
   cat("<lsa_reliability>\n")

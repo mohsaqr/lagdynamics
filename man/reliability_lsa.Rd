@@ -4,6 +4,8 @@
 \alias{reliability_lsa}
 \alias{reliability_lsa.lsa}
 \alias{reliability_lsa.lsa_group}
+\alias{print.lsa_reliability_group}
+\alias{print.lsa_reliability}
 \title{Split-Half Reliability for an LSA Fit}
 \usage{
 reliability_lsa(fit, ...)
@@ -20,13 +22,18 @@ reliability_lsa(fit, ...)
 )
 
 \method{reliability_lsa}{lsa_group}(fit, ...)
+
+\method{print}{lsa_reliability_group}(x, ...)
+
+\method{print}{lsa_reliability}(x, ...)
 }
 \arguments{
-\item{fit}{An \code{lsa} object returned by \code{\link[=lsa]{lsa()}}. Must be built from
-event-level data (sequences), not from a pre-computed transition
-matrix.}
+\item{fit}{An \code{lsa} object returned by \code{\link[=lsa]{lsa()}}, or an \code{lsa_group}
+from \code{lsa(..., group = )}. Must be built from event-level data
+(sequences), not from a pre-computed transition matrix.}
 
-\item{...}{Reserved.}
+\item{...}{For the \code{lsa_group} method, the arguments above, passed to
+each group's fit; otherwise reserved (and ignored by \code{print()}).}
 
 \item{R}{Integer. Number of split-half replicates. Default \code{100}.}
 
@@ -41,9 +48,15 @@ or \code{"spearman"}.}
 \item{n_cores}{Integer. Worker count when \code{parallel = TRUE}.}
 
 \item{verbose}{Logical. Print progress every 100 replicates.}
+
+\item{x}{An \code{lsa_reliability} or \code{lsa_reliability_group} object
+(\code{print()} methods).}
 }
 \value{
-An object of class \code{c("lsa_reliability", "list")} with:
+An object of class \code{c("lsa_reliability", "list")}. \code{print()}
+shows the mean split-half correlation with its spread and interval and
+returns \code{x} invisibly; \link[=as.data.frame.lsa_reliability]{as.data.frame()}
+gives the per-replicate correlations. Elements:
 \describe{
 \item{correlations}{Numeric vector of length \code{R}: the split-half
 correlation of each replicate.}
@@ -53,6 +66,8 @@ replicate correlations.}
 \item{R, weights, method, n_sequences}{Recipe metadata.}
 \item{fit}{Reference to the original fit.}
 }
+For an \code{lsa_group}, a named list of these, one per group, of class
+\code{c("lsa_reliability_group", "list")}.
 }
 \description{
 Estimates the reliability of an LSA network by repeated random
@@ -62,11 +77,18 @@ engine on each half, and computes the correlation between the two
 half-network edge-weight vectors. Returns the distribution of
 replicate correlations plus a point summary.
 }
+\details{
+For a grouped fit (\code{lsa_group}), reliability is estimated separately
+within each group and the per-group \code{lsa_reliability} objects are
+returned in an \code{lsa_reliability_group} container.
+}
 \examples{
-\donttest{
 fit <- lsa(engagement, engine = "classical")
 rel <- reliability_lsa(fit, R = 50)
 rel
+\donttest{
+# A full analysis uses more split-half replicates
+reliability_lsa(fit, R = 500)
 }
 
 }
@@ -74,11 +96,6 @@ rel
 Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating
 psychological networks and their accuracy: A tutorial paper.
 \emph{Behavior Research Methods, 50}(1), 195-212.
-
-For a grouped fit (\code{lsa_group}), reliability is estimated separately
-within each group and the per-group \code{lsa_reliability} objects are
-returned in an \code{lsa_reliability_group} container with its own print
-method.
 }
 \seealso{
 \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}

@@ -7,7 +7,9 @@
 list_lsa_engines()
 }
 \value{
-A data.frame with columns \code{name}, \code{description}, \code{requires}.
+A \code{data.frame}, one row per registered engine, with columns
+\code{name}, \code{description}, and \code{requires} (comma-separated package
+names, \code{""} when none).
 }
 \description{
 List All Registered LSA Engines

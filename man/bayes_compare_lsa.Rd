@@ -2,6 +2,8 @@
 % Please edit documentation in R/bayes_compare_lsa.R
 \name{bayes_compare_lsa}
 \alias{bayes_compare_lsa}
+\alias{print.lsa_bayes}
+\alias{print.lsa_bayes_pairwise}
 \title{Bayesian Comparison of Group Transition Structures (Dirichlet-Multinomial)}
 \usage{
 bayes_compare_lsa(
@@ -15,10 +17,15 @@ bayes_compare_lsa(
   adjust = "none",
   seed = NULL
 )
+
+\method{print}{lsa_bayes}(x, ...)
+
+\method{print}{lsa_bayes_pairwise}(x, ...)
 }
 \arguments{
-\item{x}{An \code{lsa_group} (two or more groups), or a single \code{lsa} fit for
-the first group.}
+\item{x}{An \code{lsa_bayes} or \code{lsa_bayes_pairwise} object (\code{print()}
+methods; for the comparison function itself \code{x} is the input
+described above).}
 
 \item{y}{The second group's \code{lsa} fit when \code{x} is a single fit;
 otherwise \code{NULL}.}
@@ -42,13 +49,18 @@ Bayesian p across edges (and family-wide across pairs); any method of
 \code{\link[stats:p.adjust]{stats::p.adjust()}}. Default \code{"none"}.}
 
 \item{seed}{Optional integer for reproducible credible intervals.}
+
+\item{...}{Ignored by the \code{print()} methods.}
 }
 \value{
 For two groups, class \code{c("lsa_bayes", "lsa_comparison", "list")}
 with an \code{edges} data frame (\code{from}, \code{to}, \code{prob_a}, \code{prob_b}, \code{diff},
 \code{ci_low}, \code{ci_high}, \code{pd}, \code{effect_size}, \code{p_value}, \code{p_adj},
 \code{significant}), the two \code{fits}, and the Bayesian settings. For more
-than two groups, an all-pairwise \code{c("lsa_bayes_pairwise", "lsa_comparison_pairwise", "list")}.
+than two groups, an all-pairwise \code{c("lsa_bayes_pairwise", "lsa_comparison_pairwise", "list")} whose \code{edges} table gains leading
+\code{group_a}, \code{group_b} columns. Read the per-edge table with
+\code{\link[=transitions]{transitions()}}; \code{print()} shows the number of credibly different
+edges and returns \code{x} invisibly.
 }
 \description{
 Closed-form Bayesian alternative to \code{\link[=compare_lsa]{compare_lsa()}} for comparing the
@@ -70,16 +82,15 @@ decisive.
 
 The result carries class \code{c("lsa_bayes", "lsa_comparison")} (and the
 pairwise object \code{c("lsa_bayes_pairwise", "lsa_comparison_pairwise")}),
-so \link[=plot.lsa_comparison]{plot()} (barrel / heatmap) and
-\code{\link[=as.data.frame]{as.data.frame()}} work as for a permutation comparison.
+so \link[=plot.lsa_comparison]{plot()} (barrel / heatmap), \code{\link[=transitions]{transitions()}}
+and \code{\link[=as.data.frame]{as.data.frame()}} work as for a permutation comparison.
 }
 \examples{
-\donttest{
-g <- lsa(group_regulation,
-         group = ifelse(group_regulation$T1 == "plan", "p", "o"))
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
 bc <- bayes_compare_lsa(g, seed = 1)
-head(as.data.frame(bc))
-}
+bc
+transitions(bc, significant = TRUE, sort = "strength")
 
 }
 \references{

@@ -13,12 +13,14 @@ tests(fit)
 \method{tests}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\code{lsa(..., group = )}.}
 }
 \value{
-A \code{data.frame} with columns \code{test} (\code{"lrx2"} / \code{"x2"}),
-\code{statistic}, \code{df}, \code{p}. Tests the engine did not compute are
-omitted.
+A \code{data.frame}, one row per test, with columns \code{test}
+(\code{"lrx2"} / \code{"x2"}), \code{statistic}, \code{df}, \code{p}. Tests the engine did
+not compute are omitted. A grouped fit gains a leading \code{group}
+column.
 }
 \description{
 The global tests of independence (likelihood-ratio G^2 and Pearson

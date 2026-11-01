@@ -14,7 +14,7 @@
 \item{...}{Passed to \code{\link[=plot_forest]{plot_forest()}}.}
 }
 \value{
-A \code{ggplot} object (drawn when printed). Needs \code{ggplot2}.
+A \code{ggplot} object (drawn when printed).
 }
 \description{
 Circular forest of the per-edge transition-probability credible

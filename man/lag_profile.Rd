@@ -27,7 +27,8 @@ one-row-per-lag data frame. A clean shortcut for "track this
 transition over lags 1, 2, 3, ...".
 }
 \examples{
-lag_profile(group_regulation, "plan", "consensus", lags = 1:3)
+lag_profile(group_regulation, from = "plan", to = "consensus",
+            lags = 1:3)
 
 }
 \seealso{

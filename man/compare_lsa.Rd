@@ -58,21 +58,7 @@ than flagged significant. Set \code{0} to test every cell.}
 
 \item{verbose}{Logical. Print progress every 100 permutations.}
 
-\item{...}{Reserved.
-
-\strong{NA handling.} Non-estimable cells (structural zeros, zero-margin
-rows in a permuted pseudo-group) carry \code{NA} in the measure matrix and
-are never coerced to zero. Such cells get \code{p_perm = NA} rather than a
-spurious significant flag, and the exceedance tally and omnibus
-statistic are computed with \code{na.rm = TRUE}, matching \code{\link[=permute_lsa]{permute_lsa()}}.
-
-\strong{Interpretation caveats.} The odds ratio is non-collapsible: the
-per-group log odds ratios are group-specific departure-from-
-independence measures and should not be pooled across groups that
-have different marginal state distributions. As with any LSA, a
-between-group difference can also be driven by subgroup composition
-(Simpson's paradox); confirm with subgroup analysis when a confound
-is plausible.}
+\item{...}{Reserved.}
 }
 \value{
 For two groups, an object of class
@@ -103,6 +89,8 @@ drill-down.}
 \item{measure, R, adjust, groups}{Call metadata; \code{groups} lists all
 group labels.}
 }
+Read the per-edge table with \code{\link[=transitions]{transitions()}}; \code{print()} shows the
+group labels, the number of significant edges and the omnibus test.
 }
 \description{
 Permutation test for whether groups produce different LSA transition
@@ -121,22 +109,37 @@ than two groups every pairwise comparison is run and the requested
 \code{adjust} correction is applied \strong{once across the whole family} of
 per-edge p-values (and separately across the per-pair omnibus tests),
 giving family-wise control rather than per-pair control.
+
+\strong{NA handling.} Non-estimable cells (structural zeros, zero-margin
+rows in a permuted pseudo-group) carry \code{NA} in the measure matrix and
+are never coerced to zero. Such cells get \code{p_perm = NA} rather than a
+spurious significant flag, and the exceedance tally and omnibus
+statistic are computed with \code{na.rm = TRUE}, matching \code{\link[=permute_lsa]{permute_lsa()}}.
+
+\strong{Interpretation caveats.} The odds ratio is non-collapsible: the
+per-group log odds ratios are group-specific departure-from-
+independence measures and should not be pooled across groups that
+have different marginal state distributions. As with any LSA, a
+between-group difference can also be driven by subgroup composition
+(Simpson's paradox); confirm with subgroup analysis when a confound
+is plausible.
 }
 \examples{
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+cmp <- compare_lsa(g, R = 100)
+cmp
+transitions(cmp, significant = TRUE, sort = "strength")
 \donttest{
-# group_regulation is wide sequences with no grouping column, so
-# derive one: sessions whose first regulation act is planning vs not.
-grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
-g <- lsa(group_regulation, group = grp)
-cmp <- compare_lsa(g, R = 200)
-head(cmp$edges)
-cmp$global
+# A full analysis uses more label permutations
+compare_lsa(g, R = 1000, adjust = "BH")
 }
 
 }
 \references{
 Phipson, B., & Smyth, G. K. (2010). Permutation p-values should
-never be zero. \emph{Statistical Applications in Genetics and
+never be zero: calculating exact p-values when permutations are
+randomly drawn. \emph{Statistical Applications in Genetics and
 Molecular Biology}, 9(1), Article 39.
 
 van Borkulo, C. D., et al. (2022). Comparing network structures on

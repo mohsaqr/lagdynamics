@@ -51,7 +51,6 @@ The `ai_long` data set is a long-format event log of coded AI-side actions in
 human--AI coding sessions, with one row per event.
 
 ```{r data}
-data(ai_long)
 head(ai_long)
 ```
 

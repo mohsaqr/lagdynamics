@@ -10,9 +10,12 @@ register_lsa_engine(name, fn, description, requires = character())
 \item{name}{Character scalar. The engine's identifier as used in
 \code{lsa(engine = name)}.}
 
-\item{fn}{A function. Must accept a \code{transitions} argument (a tidy
-transition table produced by \code{\link[=lsa_transitions]{lsa_transitions()}}) and arbitrary
-named \code{...} arguments forwarded from \code{lsa(params = list(...))}.
+\item{fn}{A function. \code{\link[=lsa]{lsa()}} calls it with \code{transitions} (the
+\code{lsa_transitions} object produced by \code{\link[=lsa_transitions]{lsa_transitions()}}),
+\code{structural_zeros} (\code{NULL} or a \verb{K x K} 0/1 matrix), \code{alternative},
+\code{n_events} (\code{NULL} for transition-matrix input), and any engine
+parameters supplied through \code{params} or \code{...} of \code{\link[=lsa]{lsa()}}, so it
+should accept \code{transitions} and \code{...}.
 Must return a named list with at least the matrix elements \code{obs},
 \code{exp}, \code{prob}, \code{adj_res}, and \code{p} (each \verb{K x K}). Additional \verb{K x K}
 matrices are preserved as engine-specific edge statistics.}
@@ -24,7 +27,7 @@ description shown by \code{\link[=list_lsa_engines]{list_lsa_engines()}}.}
 depends on. Empty by default.}
 }
 \value{
-Invisibly returns \code{name}.
+Invisibly returns \code{name} (a character scalar).
 }
 \description{
 Adds a new engine to the lagdynamics registry so it can be referenced by

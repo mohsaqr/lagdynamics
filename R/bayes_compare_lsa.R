@@ -35,8 +35,8 @@
 #'
 #' The result carries class `c("lsa_bayes", "lsa_comparison")` (and the
 #' pairwise object `c("lsa_bayes_pairwise", "lsa_comparison_pairwise")`),
-#' so [plot()][plot.lsa_comparison] (barrel / heatmap) and
-#' [as.data.frame()] work as for a permutation comparison.
+#' so [plot()][plot.lsa_comparison] (barrel / heatmap), [transitions()]
+#' and [as.data.frame()] work as for a permutation comparison.
 #'
 #' @param x An `lsa_group` (two or more groups), or a single `lsa` fit for
 #'   the first group.
@@ -57,21 +57,27 @@
 #'   Bayesian p across edges (and family-wide across pairs); any method of
 #'   [stats::p.adjust()]. Default `"none"`.
 #' @param seed Optional integer for reproducible credible intervals.
+#' @param x An `lsa_bayes` or `lsa_bayes_pairwise` object (`print()`
+#'   methods; for the comparison function itself `x` is the input
+#'   described above).
+#' @param ... Ignored by the `print()` methods.
 #'
 #' @return For two groups, class `c("lsa_bayes", "lsa_comparison", "list")`
 #'   with an `edges` data frame (`from`, `to`, `prob_a`, `prob_b`, `diff`,
 #'   `ci_low`, `ci_high`, `pd`, `effect_size`, `p_value`, `p_adj`,
 #'   `significant`), the two `fits`, and the Bayesian settings. For more
 #'   than two groups, an all-pairwise `c("lsa_bayes_pairwise",
-#'   "lsa_comparison_pairwise", "list")`.
+#'   "lsa_comparison_pairwise", "list")` whose `edges` table gains leading
+#'   `group_a`, `group_b` columns. Read the per-edge table with
+#'   [transitions()]; `print()` shows the number of credibly different
+#'   edges and returns `x` invisibly.
 #'
 #' @examples
-#' \donttest{
-#' g <- lsa(group_regulation,
-#'          group = ifelse(group_regulation$T1 == "plan", "p", "o"))
+#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'          time = "Time", group = "Achiever")
 #' bc <- bayes_compare_lsa(g, seed = 1)
-#' head(as.data.frame(bc))
-#' }
+#' bc
+#' transitions(bc, significant = TRUE, sort = "strength")
 #'
 #' @references
 #' Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
@@ -252,6 +258,7 @@ bayes_compare_lsa <- function(x,
 
 # --- print methods (Bayesian framing; dispatch before lsa_comparison) ---
 
+#' @rdname bayes_compare_lsa
 #' @export
 print.lsa_bayes <- function(x, ...) {
   cat("<lsa_bayes>  (Bayesian Dirichlet-Multinomial comparison)\n")
@@ -265,6 +272,7 @@ print.lsa_bayes <- function(x, ...) {
   invisible(x)
 }
 
+#' @rdname bayes_compare_lsa
 #' @export
 print.lsa_bayes_pairwise <- function(x, ...) {
   cat("<lsa_bayes_pairwise>\n")

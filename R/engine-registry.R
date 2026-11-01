@@ -15,9 +15,12 @@
 #'
 #' @param name Character scalar. The engine's identifier as used in
 #'   `lsa(engine = name)`.
-#' @param fn A function. Must accept a `transitions` argument (a tidy
-#'   transition table produced by [lsa_transitions()]) and arbitrary
-#'   named `...` arguments forwarded from `lsa(params = list(...))`.
+#' @param fn A function. [lsa()] calls it with `transitions` (the
+#'   `lsa_transitions` object produced by [lsa_transitions()]),
+#'   `structural_zeros` (`NULL` or a `K x K` 0/1 matrix), `alternative`,
+#'   `n_events` (`NULL` for transition-matrix input), and any engine
+#'   parameters supplied through `params` or `...` of [lsa()], so it
+#'   should accept `transitions` and `...`.
 #'   Must return a named list with at least the matrix elements `obs`,
 #'   `exp`, `prob`, `adj_res`, and `p` (each `K x K`). Additional `K x K`
 #'   matrices are preserved as engine-specific edge statistics.
@@ -26,7 +29,7 @@
 #' @param requires Character vector. Names of packages the engine
 #'   depends on. Empty by default.
 #'
-#' @return Invisibly returns `name`.
+#' @return Invisibly returns `name` (a character scalar).
 #'
 #' @examples
 #' my_engine <- function(transitions, ...) {
@@ -66,8 +69,7 @@ register_lsa_engine <- function(name, fn, description, requires = character()) {
 #'   `description`, `requires`.
 #'
 #' @examples
-#' classical <- get_lsa_engine("classical")
-#' classical$description
+#' str(get_lsa_engine("classical"), give.attr = FALSE)
 #'
 #' @seealso [register_lsa_engine()], [list_lsa_engines()]
 #'
@@ -95,7 +97,9 @@ get_lsa_engine <- function(name) {
 
 #' List All Registered LSA Engines
 #'
-#' @return A data.frame with columns `name`, `description`, `requires`.
+#' @return A `data.frame`, one row per registered engine, with columns
+#'   `name`, `description`, and `requires` (comma-separated package
+#'   names, `""` when none).
 #'
 #' @examples
 #' list_lsa_engines()

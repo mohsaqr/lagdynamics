@@ -13,17 +13,26 @@
 #' @param lags Integer vector of lags. May include negative lags
 #'   (predecessors) and `0`. Default `1:3`.
 #' @param ... Passed to [lsa()] (e.g. `engine`, `alpha`,
-#'   `structural_zeros`).
+#'   `structural_zeros`). Ignored by the `print()` and `as.data.frame()`
+#'   methods.
+#' @param x An `lsa_lags` object (`print()` and `as.data.frame()`
+#'   methods).
+#' @param row.names Optional row names for the stacked data frame.
+#' @param optional Ignored; present for consistency with the generic.
 #'
 #' @return An object of class `c("lsa_lags", "list")`: a named list of
 #'   `lsa` fits (names `"lag1"`, `"lag2"`, ...), with a `lags` attribute.
-#'   [as.data.frame()] on it row-binds [transitions()] of every fit (each
-#'   already carries its `lag` column) into one tidy long frame with the
-#'   same columns as `transitions()`.
+#'   [transitions()] (with all its filtering arguments) and
+#'   `as.data.frame()` row-bind the per-lag transition tables (each
+#'   carries its `lag` column) into one tidy frame, one row per
+#'   transition and lag, with the same columns as `transitions()`.
+#'   `print()` lists the number of significant transitions per lag and
+#'   returns `x` invisibly.
 #'
 #' @examples
 #' prof <- lsa_lags(engagement, lags = 1:3)
 #' prof
+#' transitions(prof, significant = TRUE, sort = "strength")
 #' # Track one transition across lags with the dedicated verb:
 #' lag_profile(engagement, from = "Active", to = "Average", lags = 1:3)
 #'
@@ -39,6 +48,7 @@ lsa_lags <- function(data, lags = 1:3, ...) {
   structure(fits, lags = lags, class = c("lsa_lags", "list"))
 }
 
+#' @rdname lsa_lags
 #' @export
 print.lsa_lags <- function(x, ...) {
   lags <- attr(x, "lags")
@@ -53,6 +63,7 @@ print.lsa_lags <- function(x, ...) {
   invisible(x)
 }
 
+#' @rdname lsa_lags
 #' @export
 as.data.frame.lsa_lags <- function(x, row.names = NULL, optional = FALSE,
                                    ...) {
@@ -78,7 +89,8 @@ as.data.frame.lsa_lags <- function(x, row.names = NULL, optional = FALSE,
 #'   `from`, `to`, `count`, `prob`, `adj_res`, `p`, and `significant`.
 #'
 #' @examples
-#' lag_profile(group_regulation, "plan", "consensus", lags = 1:3)
+#' lag_profile(group_regulation, from = "plan", to = "consensus",
+#'             lags = 1:3)
 #'
 #' @seealso [lsa_lags()]
 #'

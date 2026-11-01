@@ -2,9 +2,15 @@
 % Please edit documentation in R/lsa-lags.R
 \name{lsa_lags}
 \alias{lsa_lags}
+\alias{print.lsa_lags}
+\alias{as.data.frame.lsa_lags}
 \title{Lag Sequential Analysis Across Several Lags}
 \usage{
 lsa_lags(data, lags = 1:3, ...)
+
+\method{print}{lsa_lags}(x, ...)
+
+\method{as.data.frame}{lsa_lags}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
 \item{data}{Sequence input (any form accepted by \code{\link[=lsa]{lsa()}}).}
@@ -13,14 +19,25 @@ lsa_lags(data, lags = 1:3, ...)
 (predecessors) and \code{0}. Default \code{1:3}.}
 
 \item{...}{Passed to \code{\link[=lsa]{lsa()}} (e.g. \code{engine}, \code{alpha},
-\code{structural_zeros}).}
+\code{structural_zeros}). Ignored by the \code{print()} and \code{as.data.frame()}
+methods.}
+
+\item{x}{An \code{lsa_lags} object (\code{print()} and \code{as.data.frame()}
+methods).}
+
+\item{row.names}{Optional row names for the stacked data frame.}
+
+\item{optional}{Ignored; present for consistency with the generic.}
 }
 \value{
 An object of class \code{c("lsa_lags", "list")}: a named list of
 \code{lsa} fits (names \code{"lag1"}, \code{"lag2"}, ...), with a \code{lags} attribute.
-\code{\link[=as.data.frame]{as.data.frame()}} on it row-binds \code{\link[=transitions]{transitions()}} of every fit (each
-already carries its \code{lag} column) into one tidy long frame with the
-same columns as \code{transitions()}.
+\code{\link[=transitions]{transitions()}} (with all its filtering arguments) and
+\code{as.data.frame()} row-bind the per-lag transition tables (each
+carries its \code{lag} column) into one tidy frame, one row per
+transition and lag, with the same columns as \code{transitions()}.
+\code{print()} lists the number of significant transitions per lag and
+returns \code{x} invisibly.
 }
 \description{
 Fits \code{\link[=lsa]{lsa()}} at each requested lag and returns the fits together, so
@@ -30,6 +47,7 @@ profile}). Each element is an ordinary \code{lsa} fit.
 \examples{
 prof <- lsa_lags(engagement, lags = 1:3)
 prof
+transitions(prof, significant = TRUE, sort = "strength")
 # Track one transition across lags with the dedicated verb:
 lag_profile(engagement, from = "Active", to = "Average", lags = 1:3)
 

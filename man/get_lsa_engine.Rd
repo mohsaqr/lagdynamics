@@ -17,8 +17,7 @@ The registry entry: a list with elements \code{name}, \code{fn},
 Retrieve a Registered LSA Engine
 }
 \examples{
-classical <- get_lsa_engine("classical")
-classical$description
+str(get_lsa_engine("classical"), give.attr = FALSE)
 
 }
 \seealso{

@@ -11,14 +11,16 @@
 
 #' Circular Bootstrap Forest of an LSA Fit
 #'
-#' Draws a radial forest of an [bootstrap_lsa()] result: each transition
+#' Draws a radial forest of a [bootstrap_lsa()] result: each transition
 #' is a spoke around a ring, spanning its bootstrap confidence interval,
 #' with a square at the observed estimate and a dashed reference ring at
 #' the null. Spokes whose adjusted residual is significant across
 #' resamples are coloured by direction (warm = over-represented, cool =
-#' avoided); non-significant ones are grey. Needs `ggplot2`.
+#' avoided); non-significant ones are grey. A [certainty_lsa()] result
+#' works too, with `metric = "prob"`.
 #'
-#' @param boot An `lsa_bootstrap` object from [bootstrap_lsa()].
+#' @param boot An `lsa_bootstrap` object from [bootstrap_lsa()] (or an
+#'   `lsa_certainty` object from [certainty_lsa()]).
 #' @param metric Which bootstrapped quantity to plot: `"residuals"`
 #'   (default, adjusted residual), `"count"`, `"prob"`, or `"yules_q"`.
 #' @param n_top Optional integer: keep only the `n_top` edges with the
@@ -28,13 +30,16 @@
 #'   `TRUE`; set `FALSE` to keep only significant transitions.
 #' @param label_size Edge-label text size. Default `2.6`.
 #'
-#' @return A `ggplot` object (drawn when printed).
+#' @return A `ggplot` object (drawn when printed); `plot()` on an
+#'   `lsa_bootstrap` returns the same object.
 #'
 #' @examples
+#' b <- bootstrap_lsa(lsa(engagement), R = 100)
+#' plot_forest(b)                       # residual CIs, circular
+#' plot(b)                              # the same view
 #' \donttest{
 #' fit <- lsa(group_regulation)
 #' b <- bootstrap_lsa(fit, R = 500)
-#' plot_forest(b)                       # residual CIs, circular
 #' plot_forest(b, metric = "prob")      # probability CIs
 #' plot_forest(b, show_nonsig = FALSE)  # significant transitions only
 #' }

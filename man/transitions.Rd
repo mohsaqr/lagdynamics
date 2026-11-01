@@ -63,26 +63,34 @@ transitions(fit, ...)
 \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=certainty_lsa]{certainty_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}},
 \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=compare_lsa]{compare_lsa()}} or \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}.}
 
-\item{...}{Arguments passed to the method.}
+\item{...}{Arguments passed to the method; ignored by the methods
+themselves.}
 
 \item{significant}{Logical. Keep only the transitions the method flags
 as significant or stable. Default \code{FALSE} (keep all).}
 
-\item{direction}{One of \code{"any"} (default), \code{"over"}
-(over-represented: significant with a positive residual), or
+\item{direction}{(Fits, grouped fits and \code{lsa_lags} only.) One of
+\code{"any"} (default), \code{"over"} (over-represented: significant with a
+positive residual), or
 \code{"under"} (under-represented: significant with a negative
 residual). Selecting a direction implies \code{significant = TRUE}.}
 
-\item{min_count}{Optional integer. Keep only transitions observed at
-least this many times. Default \code{NULL} (no count filter).}
+\item{min_count}{(Fits, grouped fits and \code{lsa_lags} only.) Optional
+integer. Keep only transitions observed at least this many times.
+Default \code{NULL} (no count filter).}
 
-\item{alpha}{Significance threshold. Default \code{NULL}, which uses the
-alpha recorded on the fit (\code{fit$params$alpha}).}
+\item{alpha}{(Fits, grouped fits and \code{lsa_lags} only.) Significance
+threshold. Default \code{NULL}, which uses the \code{alpha} the fit was built
+with.}
 
 \item{sort}{Row ordering. \code{"none"} (default) keeps the matrix
-(column-major) order; \code{"strength"} orders by the method's signed
-effect, \code{"count"} by observed count, \code{"prob"} by transition
-probability -- each descending, so the table reads strongest-first.}
+(column-major) order; \code{"strength"} orders by the absolute size of
+the method's signed effect (the adjusted residual for a fit, a
+bootstrap, certainty or permutation result; the stability
+proportion for \code{\link[=stability_lsa]{stability_lsa()}}; the group difference \code{diff} for a
+comparison), \code{"count"} by observed count and \code{"prob"} by transition
+probability (these two not for inference results) -- each
+descending, so the table reads strongest-first.}
 }
 \value{
 A \code{data.frame}, one row per transition. For a fit the columns are
@@ -92,8 +100,10 @@ conditional), \code{adj_res}, \code{p}, \code{yules_q}, \code{kappa}, \code{kapp
 \code{kappa_p}, \code{lift}, \code{sign}, \code{significant}. Engines that compute extra
 per-cell statistics append them as further columns (e.g. the two-cell
 engine adds \code{odds_ratio}, \code{log_or}, \code{log_or_se}). An inference result
-carries \code{from}, \code{to} and that method's own quantities. A grouped fit
-gains a leading \code{group} column. Row names are reset.
+carries \code{from}, \code{to} and that method's own quantities (the columns
+listed under \emph{Value} of that function; a pairwise comparison adds
+\code{group_a}, \code{group_b}). A grouped fit gains a leading \code{group} column.
+Row names are reset.
 }
 \description{
 The canonical way to read the per-transition table of a fit or of any
@@ -101,7 +111,8 @@ inference result as a tidy one-row-per-transition \code{data.frame}.
 \code{transitions(x)} returns every transition; the arguments narrow it.
 }
 \details{
-Applied to a fit from \code{\link[=lsa]{lsa()}} the table holds the estimated transition
+Applied to a fit from \code{\link[=lsa]{lsa()}} (or a grouped fit, or the multi-lag
+result of \code{\link[=lsa_lags]{lsa_lags()}}) the table holds the estimated transition
 statistics. Applied to the result of \code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
 \code{\link[=certainty_lsa]{certainty_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=compare_lsa]{compare_lsa()}}
 or \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} the table holds that method's per-transition

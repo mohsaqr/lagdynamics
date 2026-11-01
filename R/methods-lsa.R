@@ -21,6 +21,7 @@
   ifelse(p < 0.05,  "*  ", "   "))))
 }
 
+#' @rdname lsa-methods
 #' @export
 print.lsa <- function(x, ...) {
   labels <- rownames(x$obs)
@@ -81,6 +82,7 @@ print.lsa <- function(x, ...) {
   invisible(x)
 }
 
+#' @rdname lsa-methods
 #' @export
 summary.lsa <- function(object, ...) {
   cat("Lag Sequential Analysis\n")
@@ -115,6 +117,7 @@ summary.lsa <- function(object, ...) {
   invisible(.lsa_glance(object))
 }
 
+#' @rdname lsa-methods
 #' @export
 as.data.frame.lsa <- function(x, row.names = NULL, optional = FALSE,
                               ...) {
@@ -123,12 +126,14 @@ as.data.frame.lsa <- function(x, row.names = NULL, optional = FALSE,
   out
 }
 
+#' @rdname lsa_transitions
 #' @export
 as.data.frame.lsa_transitions <- function(x, row.names = NULL,
                                           optional = FALSE, ...) {
   x$edges
 }
 
+#' @rdname lsa-methods
 #' @export
 as.data.frame.lsa_group <- function(x, row.names = NULL, optional = FALSE,
                                     ...) {
@@ -179,6 +184,7 @@ as.data.frame.lsa_group <- function(x, row.names = NULL, optional = FALSE,
   )
 }
 
+#' @rdname lsa-methods
 #' @export
 summary.lsa_group <- function(object, ...) {
   # Grouped summary: one tidy row per group (no rich per-group dump).
@@ -190,6 +196,7 @@ summary.lsa_group <- function(object, ...) {
   out
 }
 
+#' @rdname lsa-methods
 #' @importFrom stats nobs
 #' @export
 nobs.lsa <- function(object, ...) sum(object$obs)

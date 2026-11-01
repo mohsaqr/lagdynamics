@@ -2,9 +2,12 @@
 % Please edit documentation in R/lsa-data.R
 \name{as.data.frame.lsa_data}
 \alias{as.data.frame.lsa_data}
+\alias{print.lsa_data}
 \title{Tidy the Canonical Sequence Object}
 \usage{
 \method{as.data.frame}{lsa_data}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{print}{lsa_data}(x, ...)
 }
 \arguments{
 \item{x}{An \code{lsa_data} object from \code{\link[=lsa_data]{lsa_data()}}.}
@@ -13,7 +16,10 @@
 (unused; present for method consistency).}
 }
 \value{
-A tidy data frame.
+\code{as.data.frame()}: a \code{data.frame} with one row per event and
+columns \code{seq_id}, \code{index}, \code{state} (event-level input), or one row
+per cell and columns \code{from}, \code{to}, \code{count} (transition-matrix
+input). \code{print()}: \code{x}, invisibly.
 }
 \description{
 Returns the canonical \code{lsa_data} as a tidy data frame: one row per
@@ -21,7 +27,12 @@ event (\code{seq_id}, within-sequence \code{index}, \code{state}) for event-leve
 input, or one row per \code{from}/\code{to}/\code{count} cell for transition-matrix
 input.
 }
+\details{
+\code{print()} shows the input source, the number of states, sequences,
+events and lag-1 transitions.
+}
 \examples{
 d <- lsa_data(c("a", "b", "a", "c", "b"))
+d
 as.data.frame(d)
 }

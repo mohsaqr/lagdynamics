@@ -16,7 +16,8 @@ plot_forest(
 \method{plot}{lsa_bootstrap}(x, ...)
 }
 \arguments{
-\item{boot}{An \code{lsa_bootstrap} object from \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}.}
+\item{boot}{An \code{lsa_bootstrap} object from \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} (or an
+\code{lsa_certainty} object from \code{\link[=certainty_lsa]{certainty_lsa()}}).}
 
 \item{metric}{Which bootstrapped quantity to plot: \code{"residuals"}
 (default, adjusted residual), \code{"count"}, \code{"prob"}, or \code{"yules_q"}.}
@@ -35,21 +36,25 @@ largest absolute estimate (the rest are dropped). Default \code{NULL}
 \item{...}{Passed to \code{\link[=plot_forest]{plot_forest()}} (e.g. \code{metric}, \code{n_top}).}
 }
 \value{
-A \code{ggplot} object (drawn when printed).
+A \code{ggplot} object (drawn when printed); \code{plot()} on an
+\code{lsa_bootstrap} returns the same object.
 }
 \description{
-Draws a radial forest of an \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} result: each transition
+Draws a radial forest of a \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} result: each transition
 is a spoke around a ring, spanning its bootstrap confidence interval,
 with a square at the observed estimate and a dashed reference ring at
 the null. Spokes whose adjusted residual is significant across
 resamples are coloured by direction (warm = over-represented, cool =
-avoided); non-significant ones are grey. Needs \code{ggplot2}.
+avoided); non-significant ones are grey. A \code{\link[=certainty_lsa]{certainty_lsa()}} result
+works too, with \code{metric = "prob"}.
 }
 \examples{
+b <- bootstrap_lsa(lsa(engagement), R = 100)
+plot_forest(b)                       # residual CIs, circular
+plot(b)                              # the same view
 \donttest{
 fit <- lsa(group_regulation)
 b <- bootstrap_lsa(fit, R = 500)
-plot_forest(b)                       # residual CIs, circular
 plot_forest(b, metric = "prob")      # probability CIs
 plot_forest(b, show_nonsig = FALSE)  # significant transitions only
 }

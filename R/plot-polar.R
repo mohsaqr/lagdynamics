@@ -44,7 +44,7 @@
 #' transition's angular **width** by its frequency share (the classic
 #' look), omitting tiny wedges. Both fill by the adjusted residual (warm
 #' = over-represented, cool = avoided), sharing the [plot.lsa()] heatmap
-#' colour scale. Needs `ggplot2`.
+#' colour scale.
 #'
 #' @param fit An `lsa` fit from [lsa()].
 #' @param style `"rose"` (default, equal slots + bar height) or `"wedge"`

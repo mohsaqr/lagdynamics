@@ -26,9 +26,12 @@
 #' @param verbose Logical. Print progress every 100 replicates.
 #' @param ... Reserved.
 #'
-#' @return An object of class `c("lsa_stability", "list")` with:
+#' @return An object of class `c("lsa_stability", "list")`. Read the
+#' per-edge table with [transitions()]; see [lsa-inference-methods] for
+#' `print()` and `as.data.frame()`. Elements:
 #' \describe{
-#'   \item{edges}{Tidy per-edge data frame with `observed_sig`
+#'   \item{edges}{Tidy data frame, one row per `from -> to` cell: `from`,
+#'     `to`, `observed_sig`
 #'     (whether the cell was significant in the original fit),
 #'     `stability` (fraction of subsamples in which the cell was
 #'     significant), and `stable` (`stability >= min_stable`).}
@@ -39,11 +42,19 @@
 #' }
 #'
 #' @examples
-#' \donttest{
 #' fit <- lsa(engagement, engine = "classical")
 #' st <- stability_lsa(fit, R = 100)
-#' head(as.data.frame(st))
+#' st
+#' transitions(st, significant = TRUE)
+#' \donttest{
+#' # A full analysis uses more subsamples
+#' transitions(stability_lsa(fit, R = 500), sort = "strength")
 #' }
+#'
+#' @references
+#' Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating
+#' psychological networks and their accuracy: A tutorial paper.
+#' \emph{Behavior Research Methods, 50}(1), 195-212.
 #'
 #' @seealso [bootstrap_lsa()], [permute_lsa()]
 #'

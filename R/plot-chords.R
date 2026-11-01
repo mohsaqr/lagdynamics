@@ -57,8 +57,7 @@
 #' between the two fits.
 #'
 #' This is the circular companion to the [plot.lsa()] heatmap and the
-#' [plot_transitions()] network. Like them it delegates the drawing to
-#' `cograph`; it needs the `cograph` package installed.
+#' [plot_transitions()] network; the drawing is delegated to `cograph`.
 #'
 #' @param fit An `lsa` fit from [lsa()].
 #' @param compare Optional second `lsa` fit. When supplied, ribbon colour
@@ -90,9 +89,11 @@
 #' plot_chords(fit, significant = TRUE, ticks = TRUE)
 #'
 #' # Compare two groups: ribbon colour = difference in residuals.
-#' g <- lsa(group_regulation,
-#'          group = rep(c("A", "B"), length.out = nrow(group_regulation)))
-#' plot_chords(g$A, compare = g$B)
+#' high <- lsa(subset(group_regulation_long, Achiever == "High"),
+#'             actor = "Actor", action = "Action", time = "Time")
+#' low  <- lsa(subset(group_regulation_long, Achiever == "Low"),
+#'             actor = "Actor", action = "Action", time = "Time")
+#' plot_chords(high, compare = low)
 #'
 #' @seealso [plot.lsa()] (heatmap), [plot_transitions()] (network),
 #'   [transitions()]

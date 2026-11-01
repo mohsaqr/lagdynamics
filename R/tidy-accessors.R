@@ -7,11 +7,14 @@
 #' The states and their incoming / outgoing transition totals, as a
 #' tidy `data.frame` (one row per state).
 #'
-#' @param fit An `lsa` fit from [lsa()].
+#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#'   `lsa(..., group = )`.
 #'
-#' @return A `data.frame` with columns `state` (the state name, matching
-#'   the `from`/`to` endpoints of [transitions()]), `outgoing`, and
-#'   `incoming` (its total out- and in-transition counts).
+#' @return A `data.frame`, one row per state, with columns `state` (the
+#'   state name, matching the `from`/`to` endpoints of [transitions()]),
+#'   `outgoing`, and `incoming` (its total out- and in-transition
+#'   counts). A grouped fit gains a leading `group` column (one row per
+#'   group and state).
 #'
 #' @examples
 #' nodes(lsa(group_regulation))
@@ -40,11 +43,13 @@ nodes.lsa_group <- function(fit) .bind_group_edges(fit, nodes)
 #' The global tests of independence (likelihood-ratio G^2 and Pearson
 #' chi-square) as a one-row-per-test `data.frame`.
 #'
-#' @param fit An `lsa` fit from [lsa()].
+#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#'   `lsa(..., group = )`.
 #'
-#' @return A `data.frame` with columns `test` (`"lrx2"` / `"x2"`),
-#'   `statistic`, `df`, `p`. Tests the engine did not compute are
-#'   omitted.
+#' @return A `data.frame`, one row per test, with columns `test`
+#'   (`"lrx2"` / `"x2"`), `statistic`, `df`, `p`. Tests the engine did
+#'   not compute are omitted. A grouped fit gains a leading `group`
+#'   column.
 #'
 #' @examples
 #' tests(lsa(group_regulation))
@@ -85,7 +90,8 @@ tests.lsa_group <- function(fit) .bind_group_edges(fit, tests)
 #' This is the transition-probability matrix a Transition Network Analysis
 #' reads; pair it with [initial()] for the initial-state probabilities.
 #'
-#' @param fit An `lsa` fit from [lsa()].
+#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#'   `lsa(..., group = )`.
 #'
 #' @return A square numeric matrix with `from` states in rows and `to`
 #'   states in columns. For an `lsa_group`, a named list of such matrices,
@@ -119,10 +125,13 @@ transition_probabilities.lsa_group <- function(fit) {
 #' complement the transition-probability matrix from
 #' [transition_probabilities()].
 #'
-#' @param fit An `lsa` fit from [lsa()].
+#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#'   `lsa(..., group = )`.
 #'
-#' @return A `data.frame` with columns `state`, `init_prob`; zero rows
-#'   when the fit came from a transition matrix (no initial states).
+#' @return A `data.frame`, one row per state, with columns `state`,
+#'   `init_prob`; zero rows when the fit came from a transition matrix
+#'   (no initial states). A grouped fit gains a leading `group`
+#'   column.
 #'
 #' @examples
 #' initial(lsa(group_regulation))

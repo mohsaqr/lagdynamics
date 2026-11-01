@@ -37,7 +37,9 @@
 #' barrel is drawn per pair via facets. The `"heatmap"` style draws the
 #' signed difference as a `from x to` grid on the same diverging scale.
 #'
-#' @param x An `lsa_comparison` or `lsa_comparison_pairwise` object.
+#' @param x An `lsa_comparison` or `lsa_comparison_pairwise` object from
+#'   [compare_lsa()] (or the Bayesian equivalents from
+#'   [bayes_compare_lsa()]).
 #' @param style `"barrel"` (default) or `"heatmap"`.
 #' @param value For `"barrel"`, the quantity mapped to bar length:
 #'   `"prob"` (transition probability, default) or `"count"`.
@@ -52,16 +54,14 @@
 #'   facets so they line up). Default `12`.
 #' @param ... Reserved.
 #'
-#' @return A `ggplot` object (drawn when printed). Needs `ggplot2`.
+#' @return A `ggplot` object (drawn when printed).
 #'
 #' @examples
-#' \donttest{
-#' grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
-#' g <- lsa(group_regulation, group = grp)
-#' cmp <- compare_lsa(g, R = 200)
+#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'          time = "Time", group = "Achiever")
+#' cmp <- compare_lsa(g, R = 100)
 #' plot(cmp)                    # back-to-back barrel
 #' plot(cmp, style = "heatmap") # difference heatmap
-#' }
 #'
 #' @seealso [compare_lsa()], [plot.lsa()]
 #'

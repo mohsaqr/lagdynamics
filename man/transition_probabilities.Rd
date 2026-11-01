@@ -13,7 +13,8 @@ transition_probabilities(fit)
 \method{transition_probabilities}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\code{lsa(..., group = )}.}
 }
 \value{
 A square numeric matrix with \code{from} states in rows and \code{to}
