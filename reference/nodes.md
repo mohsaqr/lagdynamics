@@ -20,14 +20,17 @@ nodes(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
+  an `lsa_group` from `lsa(..., group = )`.
 
 ## Value
 
-A `data.frame` with columns `state` (the state name, matching the
-`from`/`to` endpoints of
+A `data.frame`, one row per state, with columns `state` (the state name,
+matching the `from`/`to` endpoints of
 [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)),
-`outgoing`, and `incoming` (its total out- and in-transition counts).
+`outgoing`, and `incoming` (its total out- and in-transition counts). A
+grouped fit gains a leading `group` column (one row per group and
+state).
 
 ## See also
 

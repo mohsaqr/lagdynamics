@@ -79,8 +79,7 @@ This is the circular companion to the
 [`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
 heatmap and the
 [`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
-network. Like them it delegates the drawing to `cograph`; it needs the
-`cograph` package installed.
+network; the drawing is delegated to `cograph`.
 
 ## See also
 
@@ -102,8 +101,10 @@ plot_chords(fit, significant = TRUE, ticks = TRUE)
 
 
 # Compare two groups: ribbon colour = difference in residuals.
-g <- lsa(group_regulation,
-         group = rep(c("A", "B"), length.out = nrow(group_regulation)))
-plot_chords(g$A, compare = g$B)
+high <- lsa(subset(group_regulation_long, Achiever == "High"),
+            actor = "Actor", action = "Action", time = "Time")
+low  <- lsa(subset(group_regulation_long, Achiever == "Low"),
+            actor = "Actor", action = "Action", time = "Time")
+plot_chords(high, compare = low)
 
 ```

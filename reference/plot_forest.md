@@ -1,13 +1,14 @@
 # Circular Bootstrap Forest of an LSA Fit
 
-Draws a radial forest of an
+Draws a radial forest of a
 [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
 result: each transition is a spoke around a ring, spanning its bootstrap
 confidence interval, with a square at the observed estimate and a dashed
 reference ring at the null. Spokes whose adjusted residual is
 significant across resamples are coloured by direction (warm =
-over-represented, cool = avoided); non-significant ones are grey. Needs
-`ggplot2`.
+over-represented, cool = avoided); non-significant ones are grey. A
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+result works too, with `metric = "prob"`.
 
 ## Usage
 
@@ -29,7 +30,9 @@ plot(x, ...)
 - boot:
 
   An `lsa_bootstrap` object from
-  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md).
+  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+  (or an `lsa_certainty` object from
+  [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)).
 
 - metric:
 
@@ -61,7 +64,9 @@ plot(x, ...)
 
 ## Value
 
-A `ggplot` object (drawn when printed).
+A `ggplot` object (drawn when printed);
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) on an
+`lsa_bootstrap` returns the same object.
 
 ## See also
 
@@ -74,11 +79,14 @@ A `ggplot` object (drawn when printed).
 ## Examples
 
 ``` r
+b <- bootstrap_lsa(lsa(engagement), R = 100)
+plot_forest(b)                       # residual CIs, circular
+
+plot(b)                              # the same view
+
 # \donttest{
 fit <- lsa(group_regulation)
 b <- bootstrap_lsa(fit, R = 500)
-plot_forest(b)                       # residual CIs, circular
-
 plot_forest(b, metric = "prob")      # probability CIs
 
 plot_forest(b, show_nonsig = FALSE)  # significant transitions only

@@ -25,7 +25,8 @@ transition_probabilities(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
+  an `lsa_group` from `lsa(..., group = )`.
 
 ## Value
 

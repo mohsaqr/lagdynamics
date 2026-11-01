@@ -39,7 +39,7 @@ lsa_ipf(obs, structure = NULL, tol = 1e-08, max_iter = 200L)
 
 ## Value
 
-A list with elements:
+A plain list (no class) with elements:
 
 - fit:
 
@@ -75,14 +75,40 @@ social sciences*, pp. 107-112. Lawrence Erlbaum.
 obs <- matrix(c(0, 4, 6,
                 3, 0, 5,
                 7, 2, 0), nrow = 3, byrow = TRUE)
-fit <- lsa_ipf(obs)
-fit$fit                                       # fitted expected counts
+# Every cell estimable: the ordinary independence table
+lsa_ipf(obs)
+#> $fit
 #>          [,1]     [,2]     [,3]
 #> [1,] 3.703704 2.222222 4.074074
 #> [2,] 2.962963 1.777778 3.259259
 #> [3,] 3.333333 2.000000 3.666667
-all.equal(rowSums(fit$fit), rowSums(obs))     # TRUE
+#> 
+#> $iterations
+#> [1] 1
+#> 
+#> $converged
 #> [1] TRUE
-all.equal(colSums(fit$fit), colSums(obs))     # TRUE
+#> 
+#> $max_margin_diff
+#> [1] 0
+#> 
+
+# Diagonal forbidden: the empty self-transition cells become structural
+# zeros and the fit keeps the observed row and column totals
+lsa_ipf(obs, structure = 1 - diag(3))
+#> $fit
+#>          [,1]     [,2]     [,3]
+#> [1,] 0.000000 3.104423 6.895577
+#> [2,] 3.895577 0.000000 4.104423
+#> [3,] 6.104423 2.895577 0.000000
+#> 
+#> $iterations
+#> [1] 20
+#> 
+#> $converged
 #> [1] TRUE
+#> 
+#> $max_margin_diff
+#> [1] 4.908683e-09
+#> 
 ```

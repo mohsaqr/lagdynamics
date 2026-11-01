@@ -30,7 +30,17 @@ The column names are passed as strings. `action` is the only mandatory
 long-format column. If neither `actor` nor `session` is supplied, the
 log is treated as one long sequence. If `session` is supplied, each
 session is a sequence. If both `actor` and `session` are supplied, each
-actor-session pair is a sequence.
+actor-session pair is a sequence. When `time` is given without
+`session`, a new sequence also starts wherever two consecutive events
+are more than `time_threshold` seconds (default 900) apart.
+
+The actor-session key indexes the full cross of distinct actors and
+distinct sessions, so it overflows R’s integer range once their product
+passes about 2.1 billion; the affected sequences are then dropped with
+only an “integer overflow” warning. On very large logs, compare the
+number of sequences in `summary(fit)` with the number of distinct
+sessions, and when session identifiers are already unique across actors,
+pass the session column as `actor` and omit `session`.
 
 ## Wide sequence data
 

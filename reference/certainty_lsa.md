@@ -20,6 +20,15 @@ certainty_lsa(
   consistency_range = c(0.75, 1.25),
   edge_threshold = NULL
 )
+
+# S3 method for class 'lsa_certainty'
+print(x, ...)
+
+# S3 method for class 'lsa_certainty_group'
+as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+
+# S3 method for class 'lsa_certainty_group'
+print(x, ...)
 ```
 
 ## Arguments
@@ -58,6 +67,17 @@ certainty_lsa(
   Numeric or `NULL`. Fixed threshold for `inference = "threshold"`;
   `NULL` uses the 0.10 quantile of non-zero edge probabilities.
 
+- x:
+
+  An `lsa_certainty` or `lsa_certainty_group` object
+  ([`print()`](https://rdrr.io/r/base/print.html) and
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+  methods).
+
+- row.names, optional, ...:
+
+  Ignored by the methods; present for consistency with the generics.
+
 ## Value
 
 An object of class `c("lsa_certainty", "lsa_bootstrap", "list")` with an
@@ -65,15 +85,22 @@ An object of class `c("lsa_certainty", "lsa_bootstrap", "list")` with an
 `prob_se`, `prob_ci_low`, `prob_ci_high`, `p_value`, `stable`, plus
 `adj_res_observed`/`adj_res_stable` for plotting), the posterior
 matrices (`mean`, `sd`, `ci_lower`, `ci_upper`), and call metadata
-(`prior`, `level_alpha`, `inference`, ...). For an `lsa_group`, a named
-list of these (class `lsa_certainty_group`).
+(`prior`, `level_alpha`, `inference`, ...). Read the per-edge table with
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md).
+For an `lsa_group`, a named list of these, one per group (class
+`lsa_certainty_group`), whose
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) stacks
+the group tables with a leading `group` column.
+[`print()`](https://rdrr.io/r/base/print.html) shows a header summary
+(the number of certain edges) and returns `x` invisibly.
 
 ## Details
 
 The result carries class `c("lsa_certainty", "lsa_bootstrap")` and an
 `edges` table with the columns
 [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
-and [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
+and
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 expect, so it is a drop-in for a bootstrap result (use
 `metric = "prob"`).
 
@@ -99,7 +126,6 @@ Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
 ## Examples
 
 ``` r
-# \donttest{
 fit  <- lsa(engagement)
 cert <- certainty_lsa(fit)
 cert
@@ -108,20 +134,46 @@ cert
 #>   prior:         Dirichlet(0.50)
 #>   CI level:      95%  |  inference: stability
 #>   certain edges: 7 of 9
-head(as.data.frame(cert))
-#>         from      to observed prob_observed prob_mean    prob_se prob_ci_low
-#> 1     Active  Active      459     0.6975684 0.6967400 0.01788572  0.66113410
-#> 2    Average  Active      153     0.2037284 0.2039867 0.01467978  0.17597523
-#> 3 Disengaged  Active       39     0.1200000 0.1209801 0.01801983  0.08793233
-#> 4     Active Average      176     0.2674772 0.2676270 0.01722641  0.23454702
-#> 5    Average Average      458     0.6098535 0.6093023 0.01777441  0.57420054
-#> 6 Disengaged Average      129     0.3969231 0.3966309 0.02703206  0.34428578
+transitions(cert, significant = TRUE)
+#>         from         to observed prob_observed prob_mean    prob_se prob_ci_low
+#> 1     Active     Active      459     0.6975684 0.6967400 0.01788572   0.6611341
+#> 2    Average     Active      153     0.2037284 0.2039867 0.01467978   0.1759752
+#> 3     Active    Average      176     0.2674772 0.2676270 0.01722641   0.2345470
+#> 4    Average    Average      458     0.6098535 0.6093023 0.01777441   0.5742005
+#> 5 Disengaged    Average      129     0.3969231 0.3966309 0.02703206   0.3442858
+#> 6    Average Disengaged      140     0.1864181 0.1867110 0.01419599   0.1596920
+#> 7 Disengaged Disengaged      157     0.4830769 0.4823890 0.02761180   0.4284082
 #>   prob_ci_high      p_value stable adj_res_observed adj_res_stable
-#> 1    0.7312156 5.560385e-20   TRUE        21.662811           TRUE
-#> 2    0.2334883 6.063196e-04   TRUE       -12.906038           TRUE
-#> 3    0.1584213 9.448149e-02  FALSE       -10.549486          FALSE
-#> 4    0.3020418 1.205186e-04   TRUE       -11.319132           TRUE
-#> 5    0.6438538 3.141020e-17   TRUE        12.452615           TRUE
-#> 6    0.4501757 2.232689e-04   TRUE        -1.736461           TRUE
-# }
+#> 1    0.7312156 5.560385e-20   TRUE       21.6628107           TRUE
+#> 2    0.2334883 6.063196e-04   TRUE      -12.9060384           TRUE
+#> 3    0.3020418 1.205186e-04   TRUE      -11.3191319           TRUE
+#> 4    0.6438538 3.141020e-17   TRUE       12.4526148           TRUE
+#> 5    0.4501757 2.232689e-04   TRUE       -1.7364613           TRUE
+#> 6    0.2153070 1.168633e-03   TRUE        0.1757996           TRUE
+#> 7    0.5365741 9.440665e-06   TRUE       15.3904661           TRUE
+
+# One certainty table per group
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+gcert <- certainty_lsa(g)
+gcert
+#> <lsa_certainty_group>
+#>   groups: 2 (High, Low)
+#>     - High:        40 certain edges
+#>     - Low:         43 certain edges
+head(as.data.frame(gcert))
+#>   group       from    to observed prob_observed   prob_mean     prob_se
+#> 1  High      adapt adapt        0   0.000000000 0.003436426 0.004834897
+#> 2  High   cohesion adapt        5   0.005330490 0.005835544 0.002479698
+#> 3  High  consensus adapt       14   0.004127358 0.004269101 0.001118560
+#> 4  High coregulate adapt       20   0.022371365 0.022815804 0.004978580
+#> 5  High    discuss adapt       48   0.023964054 0.024159402 0.003426073
+#> 6  High    emotion adapt        5   0.003225806 0.003538115 0.001505502
+#>    prob_ci_low prob_ci_high    p_value stable adj_res_observed adj_res_stable
+#> 1 3.392283e-06  0.017203890 1.00000000  FALSE        -1.273187          FALSE
+#> 2 2.029216e-03  0.011601136 0.56804423  FALSE        -1.784125          FALSE
+#> 3 2.364900e-03  0.006723496 0.34397924  FALSE        -4.589083          FALSE
+#> 4 1.410149e-02  0.033535629 0.25336217  FALSE         3.273701          FALSE
+#> 5 1.790475e-02  0.031310858 0.07902483  FALSE         5.884023          FALSE
+#> 6 1.229139e-03  0.007040395 0.56880929  FALSE        -3.194153          FALSE
 ```

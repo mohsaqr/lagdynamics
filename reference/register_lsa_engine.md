@@ -21,14 +21,18 @@ register_lsa_engine(name, fn, description, requires = character())
 
 - fn:
 
-  A function. Must accept a `transitions` argument (a tidy transition
-  table produced by
-  [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md))
-  and arbitrary named `...` arguments forwarded from
-  `lsa(params = list(...))`. Must return a named list with at least the
-  matrix elements `obs`, `exp`, `prob`, `adj_res`, and `p` (each
-  `K x K`). Additional `K x K` matrices are preserved as engine-specific
-  edge statistics.
+  A function.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) calls
+  it with `transitions` (the `lsa_transitions` object produced by
+  [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)),
+  `structural_zeros` (`NULL` or a `K x K` 0/1 matrix), `alternative`,
+  `n_events` (`NULL` for transition-matrix input), and any engine
+  parameters supplied through `params` or `...` of
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), so
+  it should accept `transitions` and `...`. Must return a named list
+  with at least the matrix elements `obs`, `exp`, `prob`, `adj_res`, and
+  `p` (each `K x K`). Additional `K x K` matrices are preserved as
+  engine-specific edge statistics.
 
 - description:
 
@@ -42,7 +46,7 @@ register_lsa_engine(name, fn, description, requires = character())
 
 ## Value
 
-Invisibly returns `name`.
+Invisibly returns `name` (a character scalar).
 
 ## See also
 

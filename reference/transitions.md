@@ -80,7 +80,7 @@ transitions(
 
 - ...:
 
-  Arguments passed to the method.
+  Arguments passed to the method; ignored by the methods themselves.
 
 - significant:
 
@@ -89,27 +89,33 @@ transitions(
 
 - direction:
 
-  One of `"any"` (default), `"over"` (over-represented: significant with
-  a positive residual), or `"under"` (under-represented: significant
-  with a negative residual). Selecting a direction implies
-  `significant = TRUE`.
+  (Fits, grouped fits and `lsa_lags` only.) One of `"any"` (default),
+  `"over"` (over-represented: significant with a positive residual), or
+  `"under"` (under-represented: significant with a negative residual).
+  Selecting a direction implies `significant = TRUE`.
 
 - min_count:
 
-  Optional integer. Keep only transitions observed at least this many
-  times. Default `NULL` (no count filter).
+  (Fits, grouped fits and `lsa_lags` only.) Optional integer. Keep only
+  transitions observed at least this many times. Default `NULL` (no
+  count filter).
 
 - alpha:
 
-  Significance threshold. Default `NULL`, which uses the alpha recorded
-  on the fit (`fit$params$alpha`).
+  (Fits, grouped fits and `lsa_lags` only.) Significance threshold.
+  Default `NULL`, which uses the `alpha` the fit was built with.
 
 - sort:
 
   Row ordering. `"none"` (default) keeps the matrix (column-major)
-  order; `"strength"` orders by the method's signed effect, `"count"` by
-  observed count, `"prob"` by transition probability – each descending,
-  so the table reads strongest-first.
+  order; `"strength"` orders by the absolute size of the method's signed
+  effect (the adjusted residual for a fit, a bootstrap, certainty or
+  permutation result; the stability proportion for
+  [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md);
+  the group difference `diff` for a comparison), `"count"` by observed
+  count and `"prob"` by transition probability (these two not for
+  inference results) – each descending, so the table reads
+  strongest-first.
 
 ## Value
 
@@ -120,15 +126,19 @@ A `data.frame`, one row per transition. For a fit the columns are
 `sign`, `significant`. Engines that compute extra per-cell statistics
 append them as further columns (e.g. the two-cell engine adds
 `odds_ratio`, `log_or`, `log_or_se`). An inference result carries
-`from`, `to` and that method's own quantities. A grouped fit gains a
-leading `group` column. Row names are reset.
+`from`, `to` and that method's own quantities (the columns listed under
+*Value* of that function; a pairwise comparison adds `group_a`,
+`group_b`). A grouped fit gains a leading `group` column. Row names are
+reset.
 
 ## Details
 
 Applied to a fit from
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) the
-table holds the estimated transition statistics. Applied to the result
-of
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) (or a
+grouped fit, or the multi-lag result of
+[`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md))
+the table holds the estimated transition statistics. Applied to the
+result of
 [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
 [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
 [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),

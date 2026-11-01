@@ -31,7 +31,7 @@ plot(x, metric = "prob", ...)
 
 ## Value
 
-A `ggplot` object (drawn when printed). Needs `ggplot2`.
+A `ggplot` object (drawn when printed).
 
 ## Examples
 

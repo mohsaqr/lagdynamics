@@ -52,15 +52,21 @@ lsa(
   `action` arguments are supplied (see below). Accepted already-
   sequenced forms include vectors, lists of sequences, wide
   matrices/data.frames, transition-count matrices, and sequence- bearing
-  objects (`tna`, `group_tna`, `nestimate_data`, `stslist`). `NA` and
-  empty-string cells are treated as missingness, not as a state: they
-  are dropped wherever they occur and no transition is counted into or
-  out of them. To model missingness as its own state, recode it (e.g.
-  `NA -> "missing"`) before calling `lsa()`.
+  objects (`tna`, `group_tna`, `tna_seq_data`, `tna_data`,
+  `nestimate_data`, `netobject`, `stslist`); see
+  [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md).
+  `NA` and empty-string cells are treated as missingness, not as a
+  state: they are dropped wherever they occur and no transition is
+  counted into or out of them. To model missingness as its own state,
+  recode it (e.g. `NA -> "missing"`) before calling `lsa()`.
 
 - ...:
 
-  Additional engine-specific parameters (merged into `params`).
+  Additional engine-specific parameters (merged into `params`). For the
+  engine wrappers (`lsa_classical()`, `lsa_two_cell()`,
+  `lsa_bidirectional()`, `lsa_parallel_dominance()`,
+  `lsa_nonparallel_dominance()`), any argument of `lsa()` other than
+  `engine`.
 
 - lag:
 
@@ -88,8 +94,10 @@ lsa(
 
 - alpha:
 
-  Numeric. Significance threshold used to mark edges as significant in
-  `fit$edges$significant`. Default `0.05`.
+  Numeric. Significance threshold used to mark edges as significant (the
+  `significant` column of
+  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)).
+  Default `0.05`.
 
 - loops:
 
@@ -105,7 +113,7 @@ lsa(
   Combines with `loops`: `loops = FALSE` also zeros the diagonal of a
   supplied matrix. When any cell is forbidden the engine switches to
   iterative proportional fitting and Christensen's design-matrix
-  residuals (see `inst/REFERENCES.md` §2.2, §4.2).
+  residuals (see `inst/REFERENCES.md`, sections 2.2 and 4.2).
 
 - labels:
 
@@ -135,8 +143,9 @@ lsa(
   by `order` if given else by `time`, and – when `time` is given and no
   `session` column is – a new sequence starts whenever the gap between
   consecutive events exceeds `time_threshold` seconds. All `NULL` by
-  default except `action` in long-format mode (input is otherwise taken
-  as already-sequenced).
+  default; `action` is required in long-format mode (without it the
+  input is taken as already sequenced). See the *Long-format input*
+  section for a limit on combining `actor` and `session`.
 
 - time_threshold:
 
@@ -249,6 +258,50 @@ attributes. Downstream verbs
 [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md),
 etc.) dispatch on it and return grouped results.
 
+## Details
+
+The engine wrappers `lsa_classical()`, `lsa_two_cell()`,
+`lsa_bidirectional()`, `lsa_parallel_dominance()` and
+`lsa_nonparallel_dominance()` are `lsa()` with `engine` fixed to the
+matching built-in engine; they return the same object.
+
+## Long-format input
+
+When both `actor` and `session` are given, each sequence is keyed by the
+actor x session combination, built with
+[`interaction()`](https://rdrr.io/r/base/interaction.html). That key is
+an integer index over the full cross of distinct actors and distinct
+sessions, so it overflows once the number of distinct actors times the
+number of distinct sessions exceeds `.Machine$integer.max` (about
+2.1e9). The overflowing keys become `NA` and those sequences are
+dropped, with only R's warning "NAs produced by integer overflow". Check
+that the sequence count reported by `summary(fit)` matches the number of
+distinct sessions in the log. When the session identifier is already
+unique across actors, pass it as `actor` and leave `session` `NULL`: no
+cross is formed and every sequence is kept.
+
+## References
+
+Bakeman, R., & Quera, V. (1995). *Analyzing interaction: Sequential
+analysis with SDIS and GSEQ*. Cambridge University Press.
+
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
+introduction to sequential analysis* (2nd ed.). Cambridge University
+Press.
+
+Christensen, R. (1997). *Log-linear models and logistic regression* (2nd
+ed.). Springer.
+
+Haberman, S. J. (1979). *Analysis of qualitative data: Volume 2, New
+developments*. Academic Press.
+
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+*Handbook of infant development* (pp. 623-649). Wiley.
+
+Wampold, B. E. (1984). Tests of dominance in sequential categorical
+data. *Psychological Bulletin, 96*(2), 424-429.
+
 ## See also
 
 [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md),
@@ -279,26 +332,68 @@ fit
 #>     Agree     0.000  
 #>     Elaborate 0.000  
 #>     Explain   0.000  
-head(fit$edges)
-#>   from to from_label  to_label lag count expected prob prob_col    adj_res
-#> 1    1  1      Agree     Agree   1     0    0.500  0.0      0.0 -0.9428090
-#> 2    2  1  Elaborate     Agree   1     1    0.250  1.0      0.5  1.8516402
-#> 3    3  1    Explain     Agree   1     1    0.500  0.5      0.5  0.9428090
-#> 4    4  1   Question     Agree   1     0    0.750  0.0      0.0 -1.2649111
-#> 5    1  2      Agree Elaborate   1     0    0.250  0.0      0.0 -0.6172134
-#> 6    2  2  Elaborate Elaborate   1     0    0.125  0.0      0.0 -0.4040610
-#>            p    yules_q kappa    kappa_z    kappa_p lift  sign significant
-#> 1 0.34577859 -1.0000000 -1.00 -0.8081220 0.41902033    0 under       FALSE
-#> 2 0.06407751  1.0000000  1.00  1.8708287 0.06136883    4  over       FALSE
-#> 3 0.34577859  0.6666667  0.25  0.5345225 0.59298010    2  over       FALSE
-#> 4 0.20590321 -1.0000000 -1.00 -1.0690450 0.28504941    0 under       FALSE
-#> 5 0.53709398 -1.0000000 -1.00 -0.5345225 0.59298010    0 under       FALSE
-#> 6 0.68616785 -1.0000000 -1.00 -0.3535534 0.72367361    0 under       FALSE
-#>                     edge weight
-#> 1         Agree -> Agree      0
-#> 2     Elaborate -> Agree      1
-#> 3       Explain -> Agree      1
-#> 4      Question -> Agree      0
-#> 5     Agree -> Elaborate      0
-#> 6 Elaborate -> Elaborate      0
+transitions(fit)
+#>         from        to lag count expected prob prob_col    adj_res           p
+#> 1      Agree     Agree   1     0    0.500  0.0      0.0 -0.9428090 0.345778586
+#> 2  Elaborate     Agree   1     1    0.250  1.0      0.5  1.8516402 0.064077506
+#> 3    Explain     Agree   1     1    0.500  0.5      0.5  0.9428090 0.345778586
+#> 4   Question     Agree   1     0    0.750  0.0      0.0 -1.2649111 0.205903211
+#> 5      Agree Elaborate   1     0    0.250  0.0      0.0 -0.6172134 0.537093978
+#> 6  Elaborate Elaborate   1     0    0.125  0.0      0.0 -0.4040610 0.686167850
+#> 7    Explain Elaborate   1     1    0.250  0.5      1.0  1.8516402 0.064077506
+#> 8   Question Elaborate   1     0    0.375  0.0      0.0 -0.8280787 0.407625948
+#> 9      Agree   Explain   1     0    0.750  0.0      0.0 -1.2649111 0.205903211
+#> 10 Elaborate   Explain   1     0    0.375  0.0      0.0 -0.8280787 0.407625948
+#> 11   Explain   Explain   1     0    0.750  0.0      0.0 -1.2649111 0.205903211
+#> 12  Question   Explain   1     3    1.125  1.0      1.0  2.8284271 0.004677735
+#> 13     Agree  Question   1     2    0.500  1.0      1.0  2.8284271 0.004677735
+#> 14 Elaborate  Question   1     0    0.250  0.0      0.0 -0.6172134 0.537093978
+#> 15   Explain  Question   1     0    0.500  0.0      0.0 -0.9428090 0.345778586
+#> 16  Question  Question   1     0    0.750  0.0      0.0 -1.2649111 0.205903211
+#>       yules_q kappa    kappa_z     kappa_p     lift  sign significant
+#> 1  -1.0000000 -1.00 -0.8081220 0.419020334 0.000000 under       FALSE
+#> 2   1.0000000  1.00  1.8708287 0.061368829 4.000000  over       FALSE
+#> 3   0.6666667  0.25  0.5345225 0.592980098 2.000000  over       FALSE
+#> 4  -1.0000000 -1.00 -1.0690450 0.285049407 0.000000 under       FALSE
+#> 5  -1.0000000 -1.00 -0.5345225 0.592980098 0.000000 under       FALSE
+#> 6  -1.0000000 -1.00 -0.3535534 0.723673610 0.000000 under       FALSE
+#> 7   1.0000000  1.00  1.4142136 0.157299207 4.000000  over       FALSE
+#> 8  -1.0000000 -1.00 -0.7071068 0.479500122 0.000000 under       FALSE
+#> 9  -1.0000000 -1.00 -1.0690450 0.285049407 0.000000 under       FALSE
+#> 10 -1.0000000 -1.00 -0.7071068 0.479500122 0.000000 under       FALSE
+#> 11 -1.0000000 -1.00 -1.4142136 0.157299207 0.000000 under       FALSE
+#> 12  1.0000000  1.00  2.8284271 0.004677735 2.666667  over        TRUE
+#> 13  1.0000000  1.00  2.1380899 0.032509445 4.000000  over        TRUE
+#> 14 -1.0000000 -1.00 -0.7071068 0.479500122 0.000000 under       FALSE
+#> 15 -1.0000000 -1.00 -1.4142136 0.157299207 0.000000 under       FALSE
+#> 16 -1.0000000 -1.00 -1.4142136 0.157299207 0.000000 under       FALSE
+
+# The same model through an engine wrapper
+lsa_classical(seq)
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
+#>   4 states | 8 transitions | 9 events | 1 sequences
+#>   states: Agree, Elaborate, Explain, Question
+#>   independence: G² = 18.4, df = 9, p 0.0312
+#> 
+#>   Significant transitions (p < 0.05): 2 of 16
+#>   strongest over-represented (of 2):
+#>     Agree -> Question    z =   +2.8  ** 
+#>     Question -> Explain  z =   +2.8  ** 
+#> 
+#>   Initial states:
+#>     Question  1.000  ████████████████████████
+#>     Agree     0.000  
+#>     Elaborate 0.000  
+#>     Explain   0.000  
+
+# Long-format event log with a recorded grouping column
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+summary(gfit)
+#>   group    engine lag n_states n_sequences n_events n_transitions n_significant
+#> 1  High classical   1        9        1000    13721         12721            66
+#> 2   Low classical   1        9        1000    13812         12812            67
+#>   alpha     lrx2 lrx2_df lrx2_p       x2 x2_df x2_p
+#> 1  0.05 6146.793      64      0 6806.682    64    0
+#> 2  0.05 7714.714      64      0 9197.143    64    0
 ```

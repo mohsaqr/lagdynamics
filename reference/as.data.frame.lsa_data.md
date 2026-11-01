@@ -9,6 +9,9 @@ one row per `from`/`to`/`count` cell for transition-matrix input.
 ``` r
 # S3 method for class 'lsa_data'
 as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+
+# S3 method for class 'lsa_data'
+print(x, ...)
 ```
 
 ## Arguments
@@ -26,12 +29,29 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 
 ## Value
 
-A tidy data frame.
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html): a
+`data.frame` with one row per event and columns `seq_id`, `index`,
+`state` (event-level input), or one row per cell and columns `from`,
+`to`, `count` (transition-matrix input).
+[`print()`](https://rdrr.io/r/base/print.html): `x`, invisibly.
+
+## Details
+
+[`print()`](https://rdrr.io/r/base/print.html) shows the input source,
+the number of states, sequences, events and lag-1 transitions.
 
 ## Examples
 
 ``` r
 d <- lsa_data(c("a", "b", "a", "c", "b"))
+d
+#> <lsa_data>
+#>   source:        events
+#>   states (K):    3
+#>   labels:        a, b, c
+#>   sequences:     1
+#>   events:        5
+#>   transitions:   4 (lag 1, summed across sequences)
 as.data.frame(d)
 #>   seq_id index state
 #> 1      1     1     a

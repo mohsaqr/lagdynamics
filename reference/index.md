@@ -6,18 +6,26 @@
   : Human-AI Vibe Coding Interaction Events
 - [`as.data.frame(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
   [`as.data.frame(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
+  [`print(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
+  [`print(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
   : Tidy a Group Comparison
 - [`as.data.frame(`*`<lsa_data>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_data.md)
+  [`print(`*`<lsa_data>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_data.md)
   : Tidy the Canonical Sequence Object
 - [`as.data.frame(`*`<lsa_reliability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
   [`as.data.frame(`*`<lsa_reliability_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
-  : Tidy the per-replicate split-half correlations
+  : Tidy the Per-Replicate Split-Half Correlations
 - [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  [`print(`*`<lsa_bayes>`*`)`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  [`print(`*`<lsa_bayes_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
   : Bayesian Comparison of Group Transition Structures
   (Dirichlet-Multinomial)
 - [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
   : Bootstrap Confidence Intervals for an LSA Fit
 - [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+  [`print(`*`<lsa_certainty>`*`)`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+  [`as.data.frame(`*`<lsa_certainty_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+  [`print(`*`<lsa_certainty_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
   : Analytic Certainty of Transition Edges (Dirichlet-Multinomial)
 - [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
   : Compare Groups' Transition Structures
@@ -35,6 +43,21 @@
   : Lag Profile of a Single Transition
 - [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
   : List All Registered LSA Engines
+- [`print(`*`<lsa_bootstrap>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
+  [`print(`*`<lsa_permutation>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
+  [`print(`*`<lsa_stability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
+  [`as.data.frame(`*`<lsa_bootstrap>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
+  [`as.data.frame(`*`<lsa_permutation>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
+  [`as.data.frame(`*`<lsa_stability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
+  : Print and Tidy Resampling Results
+- [`print(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`print(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`summary(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`as.data.frame(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`as.data.frame(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`summary(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`nobs(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  : Print, Summarise and Tidy an LSA Fit
 - [`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
   [`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
   [`lsa_bidirectional()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
@@ -48,10 +71,14 @@
   : Iterative Proportional Fitting for Two-Way Tables with Structural
   Zeros
 - [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
+  [`print(`*`<lsa_lags>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
+  [`as.data.frame(`*`<lsa_lags>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
   : Lag Sequential Analysis Across Several Lags
 - [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md)
   : Convert an lsa Fit to a tna Network
 - [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
+  [`print(`*`<lsa_transitions>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
+  [`as.data.frame(`*`<lsa_transitions>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
   : Tidy Transition Counts at a Given Lag
 - [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md) :
   Nodes of an LSA Fit (Tidy)
@@ -77,6 +104,8 @@
 - [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
   : Register a Lag Sequential Analysis Engine
 - [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  [`print(`*`<lsa_reliability_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  [`print(`*`<lsa_reliability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
   : Split-Half Reliability for an LSA Fit
 - [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
   : Case-Drop Stability for an LSA Fit

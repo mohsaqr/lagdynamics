@@ -59,7 +59,7 @@ An object of class `c("lsa_data", "list")` with elements:
 
 - source:
 
-  One of `"events"`, `"transitions"` — flags whether event-level data is
+  One of `"events"`, `"transitions"` – flags whether event-level data is
   available.
 
 - obs_input:
@@ -71,10 +71,10 @@ An object of class `c("lsa_data", "list")` with elements:
 
 Accepted input forms:
 
-- An atomic vector of integer or character codes — treated as a single
+- An atomic vector of integer or character codes – treated as a single
   sequence.
 
-- A list of atomic vectors — treated as multiple independent sequences;
+- A list of atomic vectors – treated as multiple independent sequences;
   transitions are not counted across sequence boundaries.
 
 - A wide matrix or data.frame with rows = sequences, columns = ordered
@@ -91,11 +91,12 @@ Accepted input forms:
   need event-level data will error.
 
 - A sequence-bearing object: a `tna` or `group_tna` (sequences read from
-  its `$data` slot), a `tna_data` or `nestimate_data`
-  (`$sequence_data`), or an `stslist`. The stored event sequences are
-  recovered and analysed. A `tna` built from a bare matrix (no retained
-  sequences) errors, because transition *counts* cannot be recovered
-  from probability weights.
+  its `data` slot), a `tna_seq_data` code matrix, a `tna_data` or
+  `nestimate_data` (its `sequence_data`), a `Nestimate` `netobject` (its
+  prepared sequence data), or a `TraMineR` `stslist`. The stored event
+  sequences are recovered and analysed. A `tna` built from a bare matrix
+  (no retained sequences) errors, because transition *counts* cannot be
+  recovered from probability weights.
 
 ## See also
 
@@ -106,19 +107,32 @@ Accepted input forms:
 
 ``` r
 # Single character sequence
-d1 <- lsa_data(c("a", "b", "a", "c", "b"))
-d1$n_events
-#> [1] 5
+lsa_data(c("a", "b", "a", "c", "b"))
+#> <lsa_data>
+#>   source:        events
+#>   states (K):    3
+#>   labels:        a, b, c
+#>   sequences:     1
+#>   events:        5
+#>   transitions:   4 (lag 1, summed across sequences)
 
-# Multiple sequences
-d2 <- lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
-d2$n_sequences
-#> [1] 2
+# Multiple sequences: no transition is counted across the boundary
+lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
+#> <lsa_data>
+#>   source:        events
+#>   states (K):    3
+#>   labels:        a, b, c
+#>   sequences:     2
+#>   events:        7
+#>   transitions:   5 (lag 1, summed across sequences)
 
-# Pre-computed transition matrix
+# Pre-computed transition matrix (source = "transitions")
 tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
-             dimnames = list(c("a","b","c"), c("a","b","c")))
-d3 <- lsa_data(tm)
-d3$source
-#> [1] "transitions"
+             dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+lsa_data(tm)
+#> <lsa_data>
+#>   source:        transitions
+#>   states (K):    3
+#>   labels:        a, b, c
+#>   transitions:   16 (from input matrix)
 ```

@@ -27,7 +27,11 @@ The registry entry: a list with elements `name`, `fn`, `description`,
 ## Examples
 
 ``` r
-classical <- get_lsa_engine("classical")
-classical$description
-#> [1] "Bakeman & Quera classical lag sequential analysis"
+str(get_lsa_engine("classical"), give.attr = FALSE)
+#> List of 4
+#>  $ name       : chr "classical"
+#>  $ fn         :function (transitions, structural_zeros = NULL, alternative = c("two.sided", 
+#>     "greater", "less"), n_events = NULL, ...)  
+#>  $ description: chr "Bakeman & Quera classical lag sequential analysis"
+#>  $ requires   : chr(0) 
 ```

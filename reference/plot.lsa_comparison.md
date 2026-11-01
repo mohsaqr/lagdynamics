@@ -42,7 +42,10 @@ plot(
 
 - x:
 
-  An `lsa_comparison` or `lsa_comparison_pairwise` object.
+  An `lsa_comparison` or `lsa_comparison_pairwise` object from
+  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+  (or the Bayesian equivalents from
+  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)).
 
 - style:
 
@@ -74,7 +77,7 @@ plot(
 
 ## Value
 
-A `ggplot` object (drawn when printed). Needs `ggplot2`.
+A `ggplot` object (drawn when printed).
 
 ## See also
 
@@ -84,13 +87,11 @@ A `ggplot` object (drawn when printed). Needs `ggplot2`.
 ## Examples
 
 ``` r
-# \donttest{
-grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
-g <- lsa(group_regulation, group = grp)
-cmp <- compare_lsa(g, R = 200)
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+cmp <- compare_lsa(g, R = 100)
 plot(cmp)                    # back-to-back barrel
 
 plot(cmp, style = "heatmap") # difference heatmap
 
-# }
 ```

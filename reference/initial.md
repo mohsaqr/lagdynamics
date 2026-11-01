@@ -22,12 +22,14 @@ initial(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
+  an `lsa_group` from `lsa(..., group = )`.
 
 ## Value
 
-A `data.frame` with columns `state`, `init_prob`; zero rows when the fit
-came from a transition matrix (no initial states).
+A `data.frame`, one row per state, with columns `state`, `init_prob`;
+zero rows when the fit came from a transition matrix (no initial
+states). A grouped fit gains a leading `group` column.
 
 ## See also
 

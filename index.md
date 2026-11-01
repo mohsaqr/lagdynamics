@@ -36,9 +36,9 @@ long event logs, wide matrices, lists of sequences, and objects from
 `tna`, `Nestimate`, and `TraMineR`, while fitted objects carry a
 `cograph` network class and expose transition and initial probabilities
 for downstream tooling. A single
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) verb renders
-any fit as a residual heatmap, transition network, chord diagram, polar
-sunburst, or uncertainty forest.
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) verb renders a
+fit as a residual heatmap, transition network, chord diagram, or polar
+sunburst, and a bootstrap or certainty result as an uncertainty forest.
 
 ## Installation
 
@@ -66,12 +66,13 @@ The analytical core depends only on base R; plotting adds `ggplot2` and
 | Task | Functions |
 |----|----|
 | Fit a model | [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md), [`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md) |
-| Read results (tidy) | [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md), [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md), [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md), [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md), [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) |
+| Read results (tidy) | [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md), [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md), [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md), [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md), [`summary()`](https://rdrr.io/r/base/summary.html) |
 | Weigh the evidence | [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md), [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md), [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md), [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md), [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md) |
 | Compare groups | [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md), [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md) |
 | Plot | `plot(fit, type = )`, [`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md), [`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md), [`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md), [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md) |
 | Probabilities | [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md), [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md) |
 | Engines | `lsa(engine = )`, [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md), [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md) |
+| Beyond LSA | [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md), [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md), [`lsa_ipf()`](https://pak.dynasite.org/lagdynamics/reference/lsa_ipf.md) |
 
 ## Example
 
@@ -79,11 +80,8 @@ The analytical core depends only on base R; plotting adds `ggplot2` and
 
 library(lagdynamics)
 
-seq <- c("Question", "Explain", "Agree",
-         "Question", "Explain", "Elaborate",
-         "Agree", "Question", "Explain")
-
-fit <- lsa(seq, engine = "classical")
+# 138 students' weekly engagement states (bundled data)
+fit <- lsa(engagement)
 fit
 
 transitions(fit, significant = TRUE)   # tidy table of tested transitions
@@ -91,6 +89,7 @@ plot(fit, type = "network")            # residual transition network
 
 # quantify the evidence behind each edge
 boot <- bootstrap_lsa(fit, R = 1000)
+transitions(boot, significant = TRUE)  # edges whose residual CI excludes 0
 plot(boot)                             # circular bootstrap CI forest
 ```
 
@@ -98,7 +97,8 @@ plot(boot)                             # circular bootstrap CI forest
 
 | Vignette | Topic |
 |----|----|
-| [`vignette("lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/lagdynamics.md) | Get started: the method, why lagdynamics, and a hands-on tour |
+| [`vignette("lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/lagdynamics.md) | Get started: from raw rows to a fitted model, tidy tables, plots, and one uncertainty check |
+| [`vignette("intro")`](https://pak.dynasite.org/lagdynamics/articles/intro.md) | Concepts: what LSA tests, the engine family, and the package map |
 | [`vignette("interop")`](https://pak.dynasite.org/lagdynamics/articles/interop.md) | Interoperability with wide data, long logs, `tna`, `Nestimate`, and `cograph` |
 | [`vignette("workflow")`](https://pak.dynasite.org/lagdynamics/articles/workflow.md) | A complete analysis from sequences to a group comparison |
 | [`vignette("confirmatory")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md) | The confirmatory testing battery: matching claims to evidence |

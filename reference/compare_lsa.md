@@ -87,21 +87,6 @@ compare_lsa(
 
   Reserved.
 
-  **NA handling.** Non-estimable cells (structural zeros, zero-margin
-  rows in a permuted pseudo-group) carry `NA` in the measure matrix and
-  are never coerced to zero. Such cells get `p_perm = NA` rather than a
-  spurious significant flag, and the exceedance tally and omnibus
-  statistic are computed with `na.rm = TRUE`, matching
-  [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md).
-
-  **Interpretation caveats.** The odds ratio is non-collapsible: the
-  per-group log odds ratios are group-specific departure-from-
-  independence measures and should not be pooled across groups that have
-  different marginal state distributions. As with any LSA, a
-  between-group difference can also be driven by subgroup composition
-  (Simpson's paradox); confirm with subgroup analysis when a confound is
-  plausible.
-
 ## Value
 
 For two groups, an object of class `c("lsa_comparison", "list")` with:
@@ -154,6 +139,11 @@ For more than two groups, an object of class
 
   Call metadata; `groups` lists all group labels.
 
+Read the per-edge table with
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md);
+[`print()`](https://rdrr.io/r/base/print.html) shows the group labels,
+the number of significant edges and the omnibus test.
+
 ## Details
 
 With exactly two groups a single comparison is returned. With more than
@@ -162,11 +152,26 @@ correction is applied **once across the whole family** of per-edge
 p-values (and separately across the per-pair omnibus tests), giving
 family-wise control rather than per-pair control.
 
+**NA handling.** Non-estimable cells (structural zeros, zero-margin rows
+in a permuted pseudo-group) carry `NA` in the measure matrix and are
+never coerced to zero. Such cells get `p_perm = NA` rather than a
+spurious significant flag, and the exceedance tally and omnibus
+statistic are computed with `na.rm = TRUE`, matching
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md).
+
+**Interpretation caveats.** The odds ratio is non-collapsible: the
+per-group log odds ratios are group-specific departure-from-
+independence measures and should not be pooled across groups that have
+different marginal state distributions. As with any LSA, a between-group
+difference can also be driven by subgroup composition (Simpson's
+paradox); confirm with subgroup analysis when a confound is plausible.
+
 ## References
 
 Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never be
-zero. *Statistical Applications in Genetics and Molecular Biology*,
-9(1), Article 39.
+zero: calculating exact p-values when permutations are randomly drawn.
+*Statistical Applications in Genetics and Molecular Biology*, 9(1),
+Article 39.
 
 van Borkulo, C. D., et al. (2022). Comparing network structures on three
 aspects: A permutation test. *Psychological Methods*.
@@ -179,36 +184,113 @@ aspects: A permutation test. *Psychological Methods*.
 ## Examples
 
 ``` r
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+cmp <- compare_lsa(g, R = 100)
+cmp
+#> <lsa_comparison>
+#>   groups:   High vs Low
+#>   measure:  log_or difference (High - Low)
+#>   R:        100 label permutations
+#>   edges:    43 significant of 78 tested (adjust = none)
+#>   omnibus:  statistic = 79.48, p = 0.009901
+transitions(cmp, significant = TRUE, sort = "strength")
+#>          from         to    log_or_a    log_or_b       diff     p_perm
+#> 1    cohesion      adapt -0.79358879 -3.92090141  3.1273126 0.00990099
+#> 2     emotion  synthesis -1.61865035 -4.52153508  2.9028847 0.00990099
+#> 3        plan  synthesis -2.14522408 -4.95050449  2.8052804 0.00990099
+#> 4    cohesion  synthesis -1.35530113 -3.94457485  2.5892737 0.00990099
+#> 5   synthesis    monitor -3.22853627 -0.97455001 -2.2539863 0.02970297
+#> 6   synthesis       plan -0.58056730 -2.68043829  2.0998710 0.00990099
+#> 7       adapt coregulate -3.14559229 -1.17601724 -1.9695750 0.00990099
+#> 8        plan      adapt -2.33764937 -4.23038186  1.8927325 0.02970297
+#> 9  coregulate      adapt  0.77815349 -1.07661947  1.8547730 0.00990099
+#> 10   cohesion   cohesion -0.58689097 -2.33812956  1.7512386 0.00990099
+#> 11  synthesis coregulate -1.73380230 -0.31919923 -1.4146031 0.00990099
+#> 12    discuss      adapt  1.00995539  2.25071658 -1.2407612 0.00990099
+#> 13  synthesis    discuss -1.85303029 -0.62037619 -1.2326541 0.00990099
+#> 14       plan coregulate -1.39829837 -2.43430237  1.0360040 0.00990099
+#> 15    monitor      adapt -0.01744120 -1.05200843  1.0345672 0.04950495
+#> 16    discuss  synthesis  2.76148241  3.77841337 -1.0169310 0.00990099
+#> 17   cohesion    monitor -0.98452606 -0.01973429 -0.9647918 0.00990099
+#> 18    discuss  consensus  0.84183283 -0.09611980  0.9379526 0.00990099
+#> 19  consensus    discuss  0.72233489 -0.14721343  0.8695483 0.00990099
+#> 20   cohesion    discuss -1.54566436 -0.70245954 -0.8432048 0.00990099
+#> 21    emotion    emotion -0.77996171 -0.05035498 -0.7296067 0.00990099
+#> 22   cohesion coregulate  0.09080815  0.77561247 -0.6848043 0.00990099
+#> 23 coregulate  consensus -1.17441323 -0.50890395 -0.6655093 0.00990099
+#> 24    emotion coregulate -1.32586326 -0.73147590 -0.5943874 0.04950495
+#> 25  consensus   cohesion -1.62877101 -2.18856416  0.5597932 0.01980198
+#> 26  synthesis  consensus  1.33223346  0.77429226  0.5579412 0.00990099
+#> 27 coregulate    monitor  0.98297844  0.44335452  0.5396239 0.01980198
+#> 28    discuss   cohesion -0.21681786 -0.73390412  0.5170863 0.00990099
+#> 29    emotion    discuss -0.32240670 -0.80671989  0.4843132 0.00990099
+#> 30 coregulate    discuss  0.55245810  1.02535891 -0.4729008 0.00990099
+#> 31 coregulate       plan  0.21564991 -0.24687495  0.4625249 0.00990099
+#> 32    discuss    discuss  0.11514755  0.57379923 -0.4586517 0.00990099
+#> 33       plan    emotion  0.68789133  0.25378782  0.4341035 0.00990099
+#> 34  consensus    monitor -0.24860635  0.14315978 -0.3917661 0.00990099
+#> 35       plan    monitor  0.88978802  0.51554999  0.3742380 0.00990099
+#> 36   cohesion       plan -0.54489516 -0.90097330  0.3560781 0.02970297
+#> 37       plan       plan  0.66801871  1.02175484 -0.3537361 0.00990099
+#> 38       plan   cohesion -1.06300840 -1.40300799  0.3399996 0.03960396
+#> 39       plan    discuss -1.26146322 -0.97661999 -0.2848432 0.00990099
+#> 40    monitor       plan -0.01892834 -0.29879500  0.2798667 0.03960396
+#> 41       plan  consensus  0.15190086  0.42448522 -0.2725844 0.00990099
+#> 42  consensus  consensus -1.72572997 -1.45713398 -0.2685960 0.00990099
+#> 43  consensus       plan  0.96085946  1.07782451 -0.1169651 0.01980198
+#>         p_adj significant
+#> 1  0.00990099        TRUE
+#> 2  0.00990099        TRUE
+#> 3  0.00990099        TRUE
+#> 4  0.00990099        TRUE
+#> 5  0.02970297        TRUE
+#> 6  0.00990099        TRUE
+#> 7  0.00990099        TRUE
+#> 8  0.02970297        TRUE
+#> 9  0.00990099        TRUE
+#> 10 0.00990099        TRUE
+#> 11 0.00990099        TRUE
+#> 12 0.00990099        TRUE
+#> 13 0.00990099        TRUE
+#> 14 0.00990099        TRUE
+#> 15 0.04950495        TRUE
+#> 16 0.00990099        TRUE
+#> 17 0.00990099        TRUE
+#> 18 0.00990099        TRUE
+#> 19 0.00990099        TRUE
+#> 20 0.00990099        TRUE
+#> 21 0.00990099        TRUE
+#> 22 0.00990099        TRUE
+#> 23 0.00990099        TRUE
+#> 24 0.04950495        TRUE
+#> 25 0.01980198        TRUE
+#> 26 0.00990099        TRUE
+#> 27 0.01980198        TRUE
+#> 28 0.00990099        TRUE
+#> 29 0.00990099        TRUE
+#> 30 0.00990099        TRUE
+#> 31 0.00990099        TRUE
+#> 32 0.00990099        TRUE
+#> 33 0.00990099        TRUE
+#> 34 0.00990099        TRUE
+#> 35 0.00990099        TRUE
+#> 36 0.02970297        TRUE
+#> 37 0.00990099        TRUE
+#> 38 0.03960396        TRUE
+#> 39 0.00990099        TRUE
+#> 40 0.03960396        TRUE
+#> 41 0.00990099        TRUE
+#> 42 0.00990099        TRUE
+#> 43 0.01980198        TRUE
 # \donttest{
-# group_regulation is wide sequences with no grouping column, so
-# derive one: sessions whose first regulation act is planning vs not.
-grp <- ifelse(group_regulation$T1 == "plan", "starts_plan", "other")
-g <- lsa(group_regulation, group = grp)
-cmp <- compare_lsa(g, R = 200)
-head(cmp$edges)
-#>         from    to  log_or_a    log_or_b        diff    p_perm     p_adj
-#> 1      adapt adapt -2.934854 -1.22410616 -1.71074827        NA        NA
-#> 2   cohesion adapt -1.878259 -2.41906008  0.54080059 0.6019900 0.6019900
-#> 3  consensus adapt -1.773051 -1.53109175 -0.24195921 0.6865672 0.6865672
-#> 4 coregulate adapt -0.309429 -0.09747994 -0.21194909 0.6318408 0.6318408
-#> 5    discuss adapt  1.882091  1.89742114 -0.01533041 0.9502488 0.9502488
-#> 6    emotion adapt -2.247226 -2.33556543  0.08833958 1.0000000 1.0000000
-#>   significant
-#> 1       FALSE
-#> 2       FALSE
-#> 3       FALSE
-#> 4       FALSE
-#> 5       FALSE
-#> 6       FALSE
-cmp$global
-#> $statistic
-#> [1] 18.33942
-#> 
-#> $p_value
-#> [1] 0.07462687
-#> 
-#> $R
-#> [1] 200
-#> 
+# A full analysis uses more label permutations
+compare_lsa(g, R = 1000, adjust = "BH")
+#> <lsa_comparison>
+#>   groups:   High vs Low
+#>   measure:  log_or difference (High - Low)
+#>   R:        1000 label permutations
+#>   edges:    38 significant of 78 tested (adjust = BH)
+#>   omnibus:  statistic = 79.48, p = 0.000999
 # }
 ```

@@ -287,8 +287,9 @@ head(group_regulation_long)
 [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) can
 recover sequences and fit the model in one call. `actor` identifies the
 sequence, `action` identifies the event state, and `time` orders events.
-If there is no actor column, `action` alone is valid and the log is
-treated as one long sequence.
+If there is no actor column, `action` alone is valid: the log is treated
+as one stream, which `time` then splits into a new sequence wherever two
+events are more than `time_threshold` seconds (default 900) apart.
 
 ``` r
 
@@ -435,6 +436,13 @@ transitions(cmp) |> head(6)
 #> 6    emotion adapt   -1.352    -3.10  1.751 0.0891 0.1390       FALSE
 ```
 
+Several permutation p-values equal 0.0099, which is 1 / (1 + R): the
+smallest value 100 permutations can produce. Those edges are as extreme
+as the permutation null allows at this `R`, so the run identifies them
+but cannot rank them; a reported analysis uses `R = 1000` or more. Rows
+with `p_perm = NA` (here `adapt -> adapt`) were not tested because their
+pooled count is below `min_count`.
+
 The default comparison plot is a back-to-back barrel display. It shows
 direction, magnitude, and the permutation p-value for each edge.
 
@@ -460,9 +468,10 @@ certainty_lsa(fit)
 bootstrap_lsa(fit)
 reliability_lsa(fit)
 
-log_fit <- lsa(log_data, actor = "Actor", action = "Action", time = "Time")
-group_fit <- lsa(log_data, actor = "Actor", action = "Action",
-                 time = "Time", group = "Group")
+log_fit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+               time = "Time")
+group_fit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+                 time = "Time", group = "Achiever")
 compare_lsa(group_fit)
 ```
 

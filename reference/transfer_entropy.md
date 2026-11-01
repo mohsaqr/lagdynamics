@@ -91,9 +91,11 @@ transfer_entropy(
 ## Value
 
 A tidy `data.frame`, one row per ordered pair, with columns `from`,
-`to`, `te` (bits), `te_effective` (surrogate-debiased), `te_normalised`
-(0-1, if `normalize`), `p` (surrogate p-value), and `n` (pooled
-transitions used). Rows are ordered by descending `te`.
+`to`, `te` (bits), `te_effective` (surrogate-debiased; only when
+`test = "surrogate"`), `te_normalised` (0-1; only when
+`normalize = TRUE`), `p` (surrogate p-value; only when
+`test = "surrogate"`), and `n` (pooled transitions used). Rows are
+ordered by descending `te`.
 
 ## References
 
@@ -112,6 +114,16 @@ transfer_entropy(engagement, test = "none")
 #> 4 Disengaged    Average 0.006949150   0.007517345 1734
 #> 5    Average     Active 0.004793199   0.006345037 1734
 #> 6 Disengaged     Active 0.004793199   0.006345037 1734
+
+# With the surrogate test (a real analysis uses the default R = 199)
+transfer_entropy(engagement, R = 19, seed = 1)
+#>         from         to          te te_effective te_normalised    p    n
+#> 1     Active Disengaged 0.036448215  0.035496615   0.060023389 0.05 1734
+#> 2    Average Disengaged 0.036448215  0.035862001   0.060023389 0.05 1734
+#> 3     Active    Average 0.006949150  0.005764179   0.007517345 0.05 1734
+#> 4 Disengaged    Average 0.006949150  0.005940226   0.007517345 0.05 1734
+#> 5    Average     Active 0.004793199  0.003806708   0.006345037 0.05 1734
+#> 6 Disengaged     Active 0.004793199  0.004268635   0.006345037 0.05 1734
 
 # Bivariate transfer entropy between two aligned series
 a <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")

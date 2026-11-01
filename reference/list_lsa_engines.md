@@ -10,7 +10,9 @@ list_lsa_engines()
 
 ## Value
 
-A data.frame with columns `name`, `description`, `requires`.
+A `data.frame`, one row per registered engine, with columns `name`,
+`description`, and `requires` (comma-separated package names, `""` when
+none).
 
 ## See also
 

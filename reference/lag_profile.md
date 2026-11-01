@@ -47,7 +47,8 @@ A tidy `data.frame`, one row per lag, with columns `lag`, `from`, `to`,
 ## Examples
 
 ``` r
-lag_profile(group_regulation, "plan", "consensus", lags = 1:3)
+lag_profile(group_regulation, from = "plan", to = "consensus",
+            lags = 1:3)
 #>   lag from        to count      prob   adj_res            p significant
 #> 1   1 plan consensus  1788 0.2904012  8.526657 1.506377e-17        TRUE
 #> 2   2 plan consensus  1316 0.2323036 -3.619001 2.957420e-04        TRUE

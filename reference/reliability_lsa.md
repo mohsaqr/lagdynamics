@@ -26,6 +26,12 @@ reliability_lsa(
 
 # S3 method for class 'lsa_group'
 reliability_lsa(fit, ...)
+
+# S3 method for class 'lsa_reliability_group'
+print(x, ...)
+
+# S3 method for class 'lsa_reliability'
+print(x, ...)
 ```
 
 ## Arguments
@@ -33,13 +39,16 @@ reliability_lsa(fit, ...)
 - fit:
 
   An `lsa` object returned by
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md). Must
-  be built from event-level data (sequences), not from a pre-computed
-  transition matrix.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
+  an `lsa_group` from `lsa(..., group = )`. Must be built from
+  event-level data (sequences), not from a pre-computed transition
+  matrix.
 
 - ...:
 
-  Reserved.
+  For the `lsa_group` method, the arguments above, passed to each
+  group's fit; otherwise reserved (and ignored by
+  [`print()`](https://rdrr.io/r/base/print.html)).
 
 - R:
 
@@ -66,9 +75,18 @@ reliability_lsa(fit, ...)
 
   Logical. Print progress every 100 replicates.
 
+- x:
+
+  An `lsa_reliability` or `lsa_reliability_group` object
+  ([`print()`](https://rdrr.io/r/base/print.html) methods).
+
 ## Value
 
-An object of class `c("lsa_reliability", "list")` with:
+An object of class `c("lsa_reliability", "list")`.
+[`print()`](https://rdrr.io/r/base/print.html) shows the mean split-half
+correlation with its spread and interval and returns `x` invisibly;
+[as.data.frame()](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
+gives the per-replicate correlations. Elements:
 
 - correlations:
 
@@ -91,16 +109,20 @@ An object of class `c("lsa_reliability", "list")` with:
 
   Reference to the original fit.
 
+For an `lsa_group`, a named list of these, one per group, of class
+`c("lsa_reliability_group", "list")`.
+
+## Details
+
+For a grouped fit (`lsa_group`), reliability is estimated separately
+within each group and the per-group `lsa_reliability` objects are
+returned in an `lsa_reliability_group` container.
+
 ## References
 
 Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating
 psychological networks and their accuracy: A tutorial paper. *Behavior
 Research Methods, 50*(1), 195-212.
-
-For a grouped fit (`lsa_group`), reliability is estimated separately
-within each group and the per-group `lsa_reliability` objects are
-returned in an `lsa_reliability_group` container with its own print
-method.
 
 ## See also
 
@@ -111,7 +133,6 @@ method.
 ## Examples
 
 ``` r
-# \donttest{
 fit <- lsa(engagement, engine = "classical")
 rel <- reliability_lsa(fit, R = 50)
 rel
@@ -121,7 +142,18 @@ rel
 #>   weights:       prob
 #>   method:        pearson
 #>   n sequences:   136
-#>   split-half r:  0.971  (sd = 0.022)
-#>   95% CI:        [0.921, 0.993]
+#>   split-half r:  0.971  (sd = 0.029)
+#>   95% CI:        [0.900, 0.995]
+# \donttest{
+# A full analysis uses more split-half replicates
+reliability_lsa(fit, R = 500)
+#> <lsa_reliability>
+#>   engine:        classical
+#>   replicates:    500
+#>   weights:       prob
+#>   method:        pearson
+#>   n sequences:   136
+#>   split-half r:  0.969  (sd = 0.026)
+#>   95% CI:        [0.902, 0.996]
 # }
 ```

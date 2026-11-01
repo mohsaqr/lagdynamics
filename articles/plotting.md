@@ -168,7 +168,7 @@ plot(bayes_compare_lsa(gfit, seed = 1))
 
 ## Grouped fits
 
-Every `type` works on a grouped fit, drawing one panel per group
+Every `type` works on a grouped fit, drawing one figure per group
 (`combined = FALSE`, the default) or a single tiled figure
 (`combined = TRUE`).
 

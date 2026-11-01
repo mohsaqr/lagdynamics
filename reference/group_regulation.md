@@ -15,12 +15,23 @@ group_regulation
 ## Format
 
 A `data.frame` with 2,000 rows (sequences) and 26 columns (ordered time
-points), character-coded.
+points `T1` to `T26`), character-coded.
+
+## Source
+
+Identical in content to
+[`tna::group_regulation`](https://sonsoles.me/tna/reference/group_regulation.html)
+(`tna` package, MIT license).
 
 ## Details
 
 The nine coded actions are `adapt`, `cohesion`, `consensus`,
 `coregulate`, `discuss`, `emotion`, `monitor`, `plan`, and `synthesis`.
+
+## See also
+
+[group_regulation_long](https://pak.dynasite.org/lagdynamics/reference/group_regulation_long.md)
+(the long event log of the same actions)
 
 ## Examples
 

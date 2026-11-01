@@ -33,7 +33,6 @@ actions in human–AI coding sessions, with one row per event.
 
 ``` r
 
-data(ai_long)
 head(ai_long)
 #>   message_id   project   session_id  timestamp session_date        code cluster
 #> 1       3441 Project_7 0086cabebd15 1772661600   2026-03-05    Delegate  Action

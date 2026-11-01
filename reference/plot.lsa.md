@@ -33,7 +33,8 @@ plot(
 - x:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
+  an `lsa_group` from `lsa(..., group = )` (one figure per group).
 
 - type:
 
@@ -56,7 +57,9 @@ plot(
 ## Value
 
 A `ggplot` object for `"heatmap"` and `"sunburst"`; the (invisible)
-`cograph` object for `"network"` and `"chord"`. Drawn when printed.
+`cograph` object for `"network"` and `"chord"`. Drawn when printed. For
+an `lsa_group`, the per-group figures are drawn and returned invisibly
+as a list, one element per group.
 
 ## See also
 
@@ -81,5 +84,10 @@ plot(fit, type = "network", weights = "tna")  # TNA probability network
 plot(fit, type = "chord")     # chord diagram
 
 plot(fit, type = "sunburst")  # polar sunburst
+
+
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+plot(gfit, combined = TRUE)   # one heatmap per group, tiled
 
 ```

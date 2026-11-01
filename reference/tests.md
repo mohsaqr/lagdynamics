@@ -20,12 +20,14 @@ tests(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
+  an `lsa_group` from `lsa(..., group = )`.
 
 ## Value
 
-A `data.frame` with columns `test` (`"lrx2"` / `"x2"`), `statistic`,
-`df`, `p`. Tests the engine did not compute are omitted.
+A `data.frame`, one row per test, with columns `test` (`"lrx2"` /
+`"x2"`), `statistic`, `df`, `p`. Tests the engine did not compute are
+omitted. A grouped fit gains a leading `group` column.
 
 ## See also
 

@@ -15,9 +15,10 @@ statistical workflow built on six commitments:
   [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
   [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
   [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
-  [`summary()`](https://rdrr.io/r/base/summary.html),
-  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
-  – that returns a one-row-per-observation data frame.
+  [`summary()`](https://rdrr.io/r/base/summary.html) – that returns a
+  one-row-per-observation data frame
+  ([`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+  alone returns the matrix form that TNA tooling expects).
   [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
   reads the fitted model and every inference result through the same
   arguments. Filters are arguments (`significant = TRUE`,
@@ -30,12 +31,12 @@ statistical workflow built on six commitments:
   far beyond the classical residual test into a full battery – analytic
   Bayesian certainty, sequence-level bootstrap, split-half reliability,
   case-drop stability, and a within-sequence permutation null.
-- **Expanded.** Beyond the classical engine the package offers five
-  estimation engines plus an open registry for user-defined ones,
-  multi-lag analysis with positive and negative lags, structural-zero
-  constraints under quasi-independence, initial and transition
-  probabilities, grouped estimation in a shared state space, and an
-  experimental directed transfer-entropy measure.
+- **Expanded.** Alongside the classical engine the package offers four
+  further estimation engines plus an open registry for user-defined
+  ones, multi-lag analysis with positive and negative lags,
+  structural-zero constraints under quasi-independence, initial and
+  transition probabilities, grouped estimation in a shared state space,
+  and an experimental directed transfer-entropy measure.
 - **Group-aware.** A grouping variable yields one model per group, and
   group differences are tested rather than eyeballed:
   [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
@@ -187,8 +188,9 @@ is exercised in this vignette or in a dedicated companion vignette.
   [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
   [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
   [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
-  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
-  and [`summary()`](https://rdrr.io/r/base/summary.html).
+  and [`summary()`](https://rdrr.io/r/base/summary.html), plus
+  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+  for the matrix form.
   [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
   reads the fitted model and every inference result with the same
   arguments. No result requires indexing into an object.
@@ -200,8 +202,8 @@ is exercised in this vignette or in a dedicated companion vignette.
 ## Fitting and reading a model
 
 The examples use the bundled `engagement` data: weekly engagement states
-(`active`, `average`, `disengaged`) for 138 students, one row per
-student.
+(`Active`, `Average`, `Disengaged`) for 138 students, one row per
+student; two rows are entirely missing, so the fit uses 136 sequences.
 
 ``` r
 
@@ -363,8 +365,9 @@ transitions(lsa_lags(engagement, lags = 1:2)) |> head(6)
 #> 6  -0.108 -0.162   -2.96 3.03e-03 0.902 under       FALSE
 ```
 
-Structural zeros restate the model rather than filter its output:
-forbidden cells are non-estimable.
+Structural zeros restate the model rather than filter its output: a
+forbidden cell has an expected count of zero and no residual or p-value,
+so it can never be flagged significant.
 
 ``` r
 

@@ -8,7 +8,7 @@ transition's angular **width** by its frequency share (the classic
 look), omitting tiny wedges. Both fill by the adjusted residual (warm =
 over-represented, cool = avoided), sharing the
 [`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
-heatmap colour scale. Needs `ggplot2`.
+heatmap colour scale.
 
 ## Usage
 

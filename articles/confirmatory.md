@@ -163,6 +163,18 @@ transitions(permute_lsa(fit, R = 200)) |> head(4)
 #> 4     Active Average            176            -11.3 0.01493        TRUE
 ```
 
+The two nulls can disagree. Disengaged -\> Active has an adjusted
+residual of -10.5, yet its permutation p-value is 0.085. Shuffling
+within each student keeps that student’s mix of states, so a student who
+is rarely both disengaged and active produces few such moves under the
+null as well; the permutation test asks whether the avoidance exceeds
+what the students’ own state mixes imply, and here it does not. The same
+edge is the one
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+did not flag as stable above, so the claim that disengaged students
+avoid becoming active rests on the residual alone and is not reported as
+an established edge.
+
 ## Two groups: inference under exchangeability
 
 Comparing groups is the claim that most invites over-interpretation: two
