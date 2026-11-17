@@ -9,52 +9,68 @@
 # Owned here in ggplot2 (sibling of plot.lsa()); it consumes the
 # lsa_bootstrap object returned by bootstrap_lsa().
 
-#' Circular Bootstrap Forest of an LSA Fit
+#' Plot a circular forest of bootstrap confidence intervals
 #'
-#' Draws a radial forest of a [bootstrap_lsa()] result: each transition
-#' is a spoke around a ring, spanning its bootstrap confidence interval,
-#' with a square at the observed estimate and a dashed reference ring at
-#' the null. Spokes whose adjusted residual is significant across
-#' resamples are coloured by direction (warm = over-represented, cool =
-#' avoided); non-significant ones are grey. A [certainty_lsa()] result
-#' works too, with `metric = "prob"`.
+#' @description
+#' `plot_forest()` draws the bootstrap confidence intervals of a fit's
+#' transitions as a circular forest plot, one spoke per transition: the spoke
+#' spans the bootstrap confidence interval, a square marks the observed
+#' estimate, and a dashed ring marks the null value. A forest plot shows an
+#' estimate and its confidence interval for each of many quantities, so that
+#' their size and precision can be compared at once; here the quantities are the
+#' transitions, and the plot shows which transitions keep their direction across
+#' resamples of the sequences and how precisely each is estimated.
 #'
-#' @param boot An `lsa_bootstrap` object from [bootstrap_lsa()] (or an
-#'   `lsa_certainty` object from [certainty_lsa()]).
-#' @param metric Which bootstrapped quantity to plot: `"residuals"`
-#'   (default, adjusted residual), `"count"`, `"prob"`, or `"yules_q"`.
-#' @param n_top Optional integer: keep only the `n_top` edges with the
-#'   largest absolute estimate (the rest are dropped). Default `NULL`
-#'   (all edges).
-#' @param show_nonsig Logical. Draw non-significant edges (grey). Default
-#'   `TRUE`; set `FALSE` to keep only significant transitions.
-#' @param label_size Edge-label text size. Default `2.6`.
+#' Transitions whose adjusted residual is stable across resamples are coloured
+#' by direction (red over-represented, blue avoided) and the others are grey.
+#' The interval can be that of the adjusted residual (default), the count, the
+#' transition probability or Yule's Q. `plot()` on a bootstrap result draws the
+#' same display.
 #'
-#' @return A `ggplot` object (drawn when printed); `plot()` on an
-#'   `lsa_bootstrap` returns the same object.
+#' The intervals come from [bootstrap_lsa()]; read them as a table with
+#' `transitions(boot)`. For analytic intervals of the transition
+#' probabilities, see [certainty_lsa()] and its plot method.
+#'
+#' @param boot A bootstrap result from [bootstrap_lsa()].
+#' @param metric Interval to draw: `"residuals"` (default), `"count"`,
+#'   `"prob"` or `"yules_q"`.
+#' @param n_top Keep only the `n_top` transitions with the largest absolute
+#'   estimate. Default `NULL` (all).
+#' @param show_nonsig Draw transitions whose residual is not stable, in
+#'   grey (default `TRUE`).
+#' @param label_size Size of the transition labels (default `2.6`).
+#'
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`
+#' when the bootstrap holds no interval for `metric`, or when no
+#' transition is left to draw.
+#'
+#' @return A `ggplot` object, drawn when printed. `plot()` on a bootstrap
+#'   result returns the same object.
 #'
 #' @examples
-#' b <- bootstrap_lsa(lsa(engagement), R = 100)
-#' plot_forest(b)                       # residual CIs, circular
-#' plot(b)                              # the same view
+#' set.seed(1)
+#' boot <- bootstrap_lsa(lsa(engagement), R = 100)
+#' plot_forest(boot)
+#' plot(boot, metric = "prob")
 #' \donttest{
-#' fit <- lsa(group_regulation)
-#' b <- bootstrap_lsa(fit, R = 500)
-#' plot_forest(b, metric = "prob")      # probability CIs
-#' plot_forest(b, show_nonsig = FALSE)  # significant transitions only
+#' boot9 <- bootstrap_lsa(lsa(group_regulation), R = 500)
+#' plot_forest(boot9, n_top = 20, show_nonsig = FALSE)
 #' }
 #'
-#' @seealso [bootstrap_lsa()], [plot.lsa()] (heatmap),
-#'   [plot_polar()] (sunburst)
+#' @seealso [bootstrap_lsa()], [transitions()], [plot.lsa()],
+#'   [certainty_lsa()]
 #'
 #' @export
 plot_forest <- function(boot, metric = c("residuals", "count", "prob",
                                          "yules_q"),
                         n_top = NULL, show_nonsig = TRUE, label_size = 2.6) {
-  stopifnot(inherits(boot, "lsa_bootstrap"))
+  stopifnot("`boot` must be an `lsa_bootstrap` result from bootstrap_lsa()" =
+              inherits(boot, "lsa_bootstrap"))
   metric <- match.arg(metric)
+  is_certainty <- inherits(boot, "lsa_certainty")
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required for plot_forest(). ",
+    .lsa_stop(class = "missing_package", "Package 'ggplot2' is required for plot_forest(). ",
          "Install with install.packages('ggplot2').", call. = FALSE)
   }
   mkey <- switch(metric, residuals = "adj_res", metric)
@@ -67,7 +83,7 @@ plot_forest <- function(boot, metric = c("residuals", "count", "prob",
   lo  <- e[[paste0(mkey, "_ci_low")]]
   hi  <- e[[paste0(mkey, "_ci_high")]]
   if (is.null(est) || is.null(lo) || is.null(hi)) {
-    stop("Bootstrap has no CI for '", metric, "'.", call. = FALSE)
+    .lsa_stop("Bootstrap has no CI for '", metric, "'.", call. = FALSE)
   }
 
   # An edge is "significant" if its residual is stable across resamples;
@@ -83,11 +99,14 @@ plot_forest <- function(boot, metric = c("residuals", "count", "prob",
   df <- df[is.finite(df$est) & is.finite(df$lo) & is.finite(df$hi), ,
            drop = FALSE]
   if (!show_nonsig) df <- df[df$sig, , drop = FALSE]
-  if (!nrow(df)) stop("No edges to display.", call. = FALSE)
+  if (!nrow(df)) .lsa_stop("No edges to display.", call. = FALSE)
   df <- df[order(df$edge), , drop = FALSE]
   if (!is.null(n_top)) {
-    stopifnot(is.numeric(n_top), length(n_top) == 1L, is.finite(n_top),
-              n_top >= 1)
+    stopifnot(
+      "`n_top` must be a single number >= 1" =
+        is.numeric(n_top) && length(n_top) == 1L && is.finite(n_top) &&
+        n_top >= 1
+    )
     n_top <- as.integer(n_top)
     keep <- order(abs(df$est), decreasing = TRUE)[seq_len(min(n_top, nrow(df)))]
     df <- df[sort(keep), , drop = FALSE]
@@ -161,17 +180,26 @@ plot_forest <- function(boot, metric = c("residuals", "count", "prob",
                                             size = 8.5),
       plot.margin = ggplot2::margin(8, 8, 8, 8)) +
     ggplot2::labs(
-      title = sprintf("Bootstrap forest - %s",
+      title = sprintf("%s forest - %s",
+        if (is_certainty) "Certainty" else "Bootstrap",
         c(residuals = "adjusted residuals", count = "counts",
           prob = "probabilities", yules_q = "Yule's Q")[[metric]]),
-      subtitle = sprintf(
-        "%d resamples \u00b7 spoke = %.0f%% CI, square = estimate, dashed ring = null",
-        boot$R, 100 * boot$level_alpha))
+      subtitle = if (is_certainty) {
+        .lsa_ascii(sprintf(paste0(
+          "analytic Dirichlet posterior \u00b7 spoke = %.0f%% credible ",
+          "interval, square = estimate, dashed ring = null"),
+          100 * boot$level_alpha))
+      } else {
+        .lsa_ascii(sprintf(paste0(
+          "%d resamples \u00b7 spoke = %.0f%% CI, square = estimate, ",
+          "dashed ring = null"),
+          boot$R, 100 * boot$level_alpha))
+      })
 }
 
 #' @rdname plot_forest
-#' @param x An `lsa_bootstrap` object (for the `plot()` method).
-#' @param ... Passed to [plot_forest()] (e.g. `metric`, `n_top`).
+#' @param x A bootstrap result from [bootstrap_lsa()], for `plot()`.
+#' @param ... Passed to `plot_forest()`, for example `metric` or `n_top`.
 #' @export
 plot.lsa_bootstrap <- function(x, ...) plot_forest(x, ...)
 

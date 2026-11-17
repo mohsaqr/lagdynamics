@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-transitions.R
 \name{plot_transitions}
 \alias{plot_transitions}
-\title{Plot the Transition Network}
+\title{Plot a lag transition network}
 \usage{
 plot_transitions(
   fit,
@@ -18,84 +18,66 @@ plot_transitions(
 \arguments{
 \item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
 
-\item{weights}{Which matrix becomes the edge weight, and how it is
-drawn:
-\itemize{
-\item \code{"residuals"} (default) -- a \strong{residual network} (not a transition
-one): adjusted residuals coloured by sign on the TNA / Nestimate
-convention, \strong{blue = more} (over-represented) solid and
-\strong{red = less} (avoided) dashed with a soft halo.
-\item \code{"tna"} / \code{"relative"} / \code{"prob"} / \code{"count"} -- the familiar
-\strong{transition network} of Transition Network Analysis (TNA), drawn with
-\code{cograph::splot(tna_styling = TRUE)}: cograph's own TNA styling
-(coloured nodes, weighted directed edges) plus a donut ring per node
-carrying its initial-state probability, and edges labelled with the
-transition probability (\code{"tna"} / \code{"relative"} / \code{"prob"}) or
-observed count (\code{"count"}). \code{"tna"} and \code{"relative"} are explicit
-aliases for \code{"prob"}. For probability/TNA networks, edges below
-\code{0.05} are dropped by default so weak transitions do not clutter the
-plot (override with \code{edge_cutoff}).
-\item \code{"lift"} -- observed / expected, drawn in a single neutral colour
-with magnitude carried by edge width.
-\item \code{"yules_q"} -- a \strong{signed association network}: Yule's Q on a fixed
-\verb{[-1, 1]} scale, coloured by sign like the residual network (blue
-over-represented, red avoided) but bounded and not growing with
-sample size.
-}}
+\item{weights}{Edge weight: \code{"residuals"} (default), \code{"tna"},
+\code{"relative"}, \code{"prob"} (the three are the transition probability),
+\code{"count"}, \code{"lift"} or \code{"yules_q"}.}
 
-\item{significant}{Logical. Keep only edges whose adjusted-residual
-p-value is below the fit's alpha; weaker cells are set to 0 (no
-edge). Default \code{FALSE}. Note that at large sample sizes almost every
-cell is significant, so this is a weak visual filter -- prefer \code{top}
-(effect-size pruning) to declutter a dense residual network.}
+\item{significant}{Keep only transitions whose residual p-value is below
+the fit's \code{alpha} (default \code{FALSE}).}
 
-\item{top}{Numeric or \code{NULL}. Keep only the strongest edges by absolute
-weight (applied after \code{significant}); the rest are set to 0. A fraction
-\verb{0 < top < 1} keeps that \strong{proportion} of the present edges
-(\code{top = 0.5} -> the strongest half); a value \code{top >= 1} keeps that many
-edges (\code{top = 12} -> the 12 strongest). The legible way to thin a dense
-residual network: it prunes by effect size (\verb{|adjusted residual|})
-rather than by p-value. \code{NULL} (default) keeps every edge. Applies to
-every view; for the probability network it composes with the default
-\code{edge_cutoff = 0.05}.}
+\item{top}{Keep only the strongest edges by absolute weight: a fraction
+below 1 keeps that share of the edges, a number of 1 or more keeps
+that many. Default \code{NULL} (all edges). Applied after \code{significant}.}
 
-\item{decimals}{Number of decimal places for edge labels. Default \code{1}.}
+\item{decimals}{Decimal places of the edge labels (default \code{1}).}
 
-\item{node_fill}{Node fill colour. Default \code{"white"}; the probability /
-count networks use a per-state palette instead unless \code{node_fill} is
-set explicitly.}
+\item{node_fill}{Node colour (default \code{"white"}). The probability and
+count networks colour nodes by state unless \code{node_fill} is set.}
 
-\item{edge_labels}{Logical (or a label vector). Show edge weights as
-labels. Default \code{TRUE}.}
+\item{edge_labels}{Show the edge weights as labels (default \code{TRUE}).}
 
-\item{...}{Passed to \code{\link[cograph:splot]{cograph::splot()}} (e.g. \code{node_shape}, \code{layout},
-\code{edge_cutoff}, \code{curvature}).}
+\item{...}{Passed to \code{\link[cograph:splot]{cograph::splot()}}, for example \code{layout},
+\code{node_shape}, \code{edge_cutoff} or \code{curvature}.}
 }
 \value{
-The \code{cograph_network} object, invisibly (drawn as a side
-effect).
+The network drawn by \code{\link[cograph:splot]{cograph::splot()}}, invisibly; the plot is
+drawn on the current device.
 }
 \description{
-Draws the directed transition network of an \code{lsa} fit with
-\code{cograph::splot()}. Pick the edge weight with \code{weights}; optionally
-keep only significant edges. Nodes are white and edges are labelled
-by default. Returns the \code{cograph} network invisibly.
+\code{plot_transitions()} draws a lag transition network with \pkg{cograph}: the
+states are nodes and the transitions between them directed edges. Which
+quantity weights the edges decides what the network shows. Weighted by
+adjusted residuals it is a residual network: edges show where a transition is
+more frequent (over-represented) or less frequent (avoided) than independence
+predicts, the reading of lag sequential analysis. Weighted by transition
+probabilities it is the network of Transition Network Analysis, which shows
+where the process goes next, whether or not that is more than chance.
+
+With \code{weights = "residuals"} (default), over-represented transitions are
+solid blue edges and avoided transitions dashed red edges; \code{"yules_q"} draws
+the same signed network on the bounded Yule's Q scale, and \code{"lift"} the ratio
+of observed to expected counts. With \code{"prob"} (or its aliases \code{"tna"} and
+\code{"relative"}) or \code{"count"}, the network is drawn in the style of Transition
+Network Analysis, each node ringed by its initial-state probability;
+probability edges below 0.05 are hidden unless \code{edge_cutoff} is passed. Dense
+networks are thinned with \code{significant} or, better at large sample sizes
+where nearly every cell is significant, with \code{top}.
+
+The same display is \code{plot(fit, type = "network")}. For the full table
+use the residual heatmap of \code{\link[=plot.lsa]{plot.lsa()}}; for the per-source breakdown,
+\code{\link[=plot_chords]{plot_chords()}} or \code{\link[=plot_polar]{plot_polar()}}.
 }
 \examples{
-fit <- lsa(group_regulation)
-plot_transitions(fit)                                   # residual network
-plot_transitions(fit, weights = "tna")                  # TNA probabilities
-plot_transitions(fit, weights = "relative")             # same as "tna"
-plot_transitions(fit, weights = "prob")                 # same matrix
-plot_transitions(fit, weights = "residuals",            # residual network,
-                 significant = TRUE)                     #   significant only
-plot_transitions(fit, top = 12)                         # 12 strongest edges
-plot_transitions(fit, top = 0.5)                        # strongest 50\%
-plot_transitions(fit, decimals = 2)                     # 2-dp edge labels
-plot_transitions(fit, node_shape = "square")            # splot passthrough
+fit <- lsa(engagement)
+plot_transitions(fit)
+plot_transitions(fit, weights = "prob")
+
+fit9 <- lsa(group_regulation)
+plot_transitions(fit9, top = 12)
+plot_transitions(fit9, weights = "yules_q", significant = TRUE)
 
 }
 \seealso{
-\code{\link[=plot.lsa]{plot.lsa()}} (heatmap), \code{\link[=transitions]{transitions()}},
+\code{\link[=plot.lsa]{plot.lsa()}}, \code{\link[=plot_chords]{plot_chords()}}, \code{\link[=transitions]{transitions()}},
 \code{\link[=transition_probabilities]{transition_probabilities()}}
 }

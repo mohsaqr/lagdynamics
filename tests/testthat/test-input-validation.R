@@ -180,15 +180,15 @@ test_that("loops = FALSE matches 1 - diag(K) and forbids the diagonal", {
   set.seed(7L)
   seqs <- split(sample(c("a", "b", "c"), 400L, replace = TRUE),
                 rep(seq_len(20L), each = 20L))
-  noloop <- lsa(seqs, loops = FALSE)
-  mat    <- lsa(seqs, structural_zeros = 1 - diag(3))
+  noloop <- lsa_forbidden_counts(seqs, loops = FALSE)
+  mat    <- lsa_forbidden_counts(seqs, structural_zeros = 1 - diag(3))
   expect_equal(noloop$exp, mat$exp)
   expect_true(all(diag(noloop$exp) == 0))        # self-transitions forbidden
   expect_true(all(is.na(diag(noloop$adj_res))))  # and not tested
   # loops = TRUE (default) keeps the diagonal estimable.
   expect_false(any(is.na(diag(lsa(seqs)$adj_res))))
   # loops = FALSE also zeros the diagonal of an explicit matrix.
-  combo <- lsa(seqs, loops = FALSE, structural_zeros = matrix(1, 3, 3))
+  combo <- lsa_forbidden_counts(seqs, loops = FALSE, structural_zeros = matrix(1, 3, 3))
   expect_true(all(diag(combo$exp) == 0))
 })
 

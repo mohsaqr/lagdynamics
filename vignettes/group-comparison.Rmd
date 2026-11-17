@@ -1,0 +1,256 @@
+---
+title: "Comparing groups"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Comparing groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r options, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6.5,
+                      fig.height = 5, fig.align = "center", dpi = 72)
+old_options <- options(digits = 3, width = 90)
+```
+
+Groups of learners, conditions, or courses can differ in the order of their
+actions: one group may move from discussion to consensus where another moves
+from discussion to planning. A lag sequential model fitted to each group
+describes its transitions, but two models estimated separately almost always
+look different, if only because of sampling variation. The question a group
+comparison answers is whether a difference in a transition, or in the
+transition structure as a whole, is larger than would arise if group
+membership carried no information about the sequences.
+
+`lagdynamics` answers it in two steps. `lsa(data, group = )` fits one model
+per group in a shared state space, so the groups can be compared cell by
+cell even when one group never visits a state. `compare_lsa()` then tests
+the differences by permuting group labels over whole sequences, and
+`bayes_compare_lsa()` gives the Bayesian counterpart, a credible interval for
+each difference in transition probability.
+
+## Data
+
+`group_regulation_long` is a long event log of collaborative regulation
+actions, one row per action: 27,533 actions. Two achievement groups
+contribute about equally: 13,721 actions from high achievers and 13,812 from
+low achievers.
+
+- **Actor:** `Actor` identifies the person whose actions form one sequence.
+- **Action:** `Action`, the coded regulation action (9 states: `adapt`,
+  `cohesion`, `consensus`, `coregulate`, `discuss`, `emotion`, `monitor`,
+  `plan`, `synthesis`).
+- **Time:** `Time`, the timestamp that orders the actions; a gap of more
+  than 900 seconds (the default `time_threshold`) starts a new sequence.
+- **Group:** `Achiever`, `High` or `Low`.
+
+`Group` and `Course` are further metadata and are not used here.
+
+```{r data}
+library(lagdynamics)
+head(group_regulation_long)
+```
+
+## One model per group
+
+Naming the grouping column in `group` fits one model per group under the
+same state labels, engine, and lag.
+
+```{r fit}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+gfit
+```
+
+The log yields 1000 sequences in each group over the same 9 states, so the
+two models have the same cells and can be compared one transition at a
+time.
+
+`summary()` of a grouped fit is a data frame with one row per group.
+
+```{r summary}
+summary(gfit)
+```
+
+The two groups are of nearly equal size: 12,721 transitions among high
+achievers and 12,812 among low achievers. Both reject independence
+decisively ($G^2 = 6147$ and $7715$ on 64 degrees of freedom), and both have
+most of their 81 transitions significant (66 and 67). Each group therefore
+has a strongly ordered process, and the comparison asks whether the order
+is the same.
+
+The reading verbs work on the grouped fit and return a leading `group`
+column. The strongest significant transitions of both groups:
+
+```{r group-transitions}
+transitions(gfit, significant = TRUE, sort = "strength") |> head(8)
+```
+
+Sorting applies within each group, so the first rows are those of the
+high achievers; the low achievers' rows follow in the full table. Among high
+achievers, `emotion -> cohesion` is the strongest regularity (505 observed
+against 114 expected, z = 40.6, Q = 0.847), `discuss -> synthesis` follows
+(z = 27.1), and repeating `consensus` is strongly avoided (z = -28.6).
+Each group's table describes its own process; whether a transition differs
+between the groups is a separate test.
+
+## A permutation test of group differences
+
+`compare_lsa()` shuffles the group labels of whole sequences, refits both
+models, and sets each observed difference against the differences produced
+by the shuffles. Permuting whole sequences keeps the dependence between the
+actions of one sequence, so only the link between group and transition
+structure is tested. The compared measure is by default the log odds ratio
+of each transition against all other transitions, which does not grow with
+the number of transitions observed; `diff` is the high-achiever value minus
+the low-achiever value. Transitions with a combined count below
+`min_count` (default 5) are left untested. The call below draws 500
+permutations, so the smallest attainable p-value is 1/501, and
+`adjust = "BH"` corrects the per-transition p-values for multiple
+comparisons with the Benjamini-Hochberg procedure. The seed is set once,
+before the permutations.
+
+```{r compare}
+set.seed(2026)
+cmp <- compare_lsa(gfit, R = 500, adjust = "BH")
+cmp
+```
+
+Of the 81 transitions, 78 have enough observations to be tested; the other
+three have a combined count below 5 and carry `NA` p-values. After the
+Benjamini-Hochberg adjustment, 38 of the 78 differ between the groups. The
+omnibus test, the sum of squared differences over the tested transitions,
+has a statistic of 79.48 and p = 0.001996, the smallest value 500
+permutations can give: no relabelling of the sequences produced a difference
+as large as the observed one, so the transition structures of the two
+groups differ.
+
+The omnibus test is read as a table with `what = "global"`.
+
+```{r global}
+as.data.frame(cmp, what = "global")
+```
+
+The global table has one row per pair of groups, with the statistic, its
+permutation p-value, and the number of permutations, the form to report
+alongside the per-transition results.
+
+`transitions()` reads the per-transition differences. `significant = TRUE`
+keeps the transitions whose Benjamini-Hochberg adjusted p-value (`p_adj`) is
+below 0.05, and `sort = "strength"` orders them by the absolute difference.
+
+```{r compare-transitions}
+transitions(cmp, significant = TRUE, sort = "strength") |> head(8)
+```
+
+The p-values in `p_adj` are Benjamini-Hochberg adjusted. The largest
+differences in log odds ratio concern transitions into `adapt` and
+`synthesis`. `cohesion -> adapt` has a log odds ratio of -0.794 among high
+achievers and -3.921 among low achievers (difference 3.13, adjusted
+p = 0.00599): in the low group, cohesion is followed by adaptation far less
+than base rates predict, whereas in the high group the avoidance is mild.
+`emotion -> synthesis` (2.90) and `plan -> synthesis` (2.81) follow the same
+pattern: high achievers reach synthesis from emotional and planning moves
+that low achievers almost never convert into synthesis. In the other
+direction, `synthesis -> monitor` (-2.25) is relatively more frequent among
+low achievers.
+
+## Barrel plot
+
+`plot()` draws a group barrel plot: for the most frequent transitions, the
+transition probability of each group is drawn back to back, with the result
+of the permutation test on each transition.
+
+```{r barrel, fig.height = 6}
+plot(cmp)
+```
+
+The 12 most frequent transitions are shown, ordered by frequency, with the
+high achievers on the left and the low achievers on the right; each bar is
+labelled with its count and the centre with the adjusted p-value, and 7 of
+the 12 differ significantly. High achievers move from `discuss` to
+`consensus` about twice as often as low achievers (851 against 418
+transitions) and from `consensus` back to `discuss` likewise (789 against
+401), while low achievers repeat `plan` more often (1356 against 948). The
+most frequent transition, `consensus -> plan`, does not differ (adjusted
+p = 0.097), nor do `emotion -> cohesion` or `cohesion -> consensus`: the
+groups share the backbone of the process and differ in how discussion
+connects to consensus and planning.
+
+## A Bayesian comparison
+
+`bayes_compare_lsa()` asks a different question: given the counts, what is
+the plausible range of the true difference between the two groups'
+transition probabilities? Each state's outgoing transitions have a
+Dirichlet posterior in each group, and the comparison reports the posterior
+mean difference, its 95% credible interval, and the probability of direction
+(`pd`). A transition is credibly different when its interval excludes zero
+and the difference is not negligible. No sequences are resampled, so the
+comparison is fast, but it treats transitions as independent draws.
+`adjust = "BH"` applies the Benjamini-Hochberg correction to the two-sided
+Bayesian p-value (`p_adj`); the `significant` flag itself is decided by the
+credible interval. `seed` fixes the Monte Carlo draws.
+
+```{r bayes}
+bcmp <- bayes_compare_lsa(gfit, adjust = "BH", seed = 1)
+bcmp
+transitions(bcmp, significant = TRUE, sort = "strength") |> head(8)
+```
+
+The Bayesian comparison finds 38 of 81 transitions credibly different. The
+largest is `discuss -> consensus`: a posterior probability of 0.424 among
+high achievers and 0.214 among low achievers, a difference of 0.210 with a
+credible interval from 0.182 to 0.238. `synthesis -> consensus` differs
+by 0.186, but its interval (0.109 to 0.260) is wider because `synthesis` is
+a rarely visited source state.
+
+The two comparisons do not flag the same transitions, because they compare
+different quantities. `synthesis -> adapt` illustrates the difference: its
+posterior transition probability is 0.143 among high achievers and 0.300
+among low achievers, a credible difference of -0.16 (interval -0.218 to
+-0.094). The transitions with
+the smallest difference in the permutation comparison are at the end of its
+sorted table:
+
+```{r smallest-differences}
+transitions(cmp, sort = "strength") |> tail(6)
+```
+
+`synthesis -> adapt` is among them: its log odds ratio is 3.002 among high
+achievers and 2.952 among low achievers (adjusted p = 0.869). The
+association between the two states, relative to their base rates, is the
+same in both groups; the larger probability among low achievers follows
+from a higher base rate of `adapt` in that group, not from a stronger link
+between synthesis and adaptation. The Bayesian comparison answers how large
+a difference in transition probability is; the permutation test on the log
+odds ratio answers whether the sequential association itself differs.
+
+## When to use which
+
+- **Describe each group:** `lsa(data, group = )`, then `summary()` and
+  `transitions()` on the grouped fit.
+- **Test whether groups differ, transition by transition and overall:**
+  `compare_lsa()` with an explicit `adjust`. It respects the dependence
+  within sequences and can compare odds ratios, residuals, Yule's Q, or
+  probabilities (`measure`).
+- **Estimate how large a difference in transition probability is:**
+  `bayes_compare_lsa()`, which reports a credible interval for every
+  difference without resampling.
+- **More than two groups:** both functions compare every pair and apply the
+  correction across all pairs.
+
+A difference between groups can also arise from a difference in their
+composition, such as the courses each group comes from; when such a
+confound is plausible, compare within subgroups. The checks for a single
+model are in
+[Evaluating transitions](https://pak.dynasite.org/lagdynamics/articles/confirmatory.html),
+and the method itself in
+[Lag sequential analysis](https://pak.dynasite.org/lagdynamics/articles/lsa.html).
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

@@ -17,7 +17,7 @@
                           custom_format = NULL, is_unix_time = FALSE,
                           unix_time_unit = "seconds") {
   if (!is.data.frame(data)) {
-    stop("Long-format sequencing needs a data.frame; got ",
+    .lsa_stop("Long-format sequencing needs a data.frame; got ",
          paste(class(data), collapse = "/"), ".", call. = FALSE)
   }
   if (!is.null(actor))   .check_col(data, actor, "actor")
@@ -28,7 +28,7 @@
   if (!is.null(group))   .check_col(data, group, "group")
   if (!is.numeric(time_threshold) || length(time_threshold) != 1L ||
       !is.finite(time_threshold) || time_threshold <= 0) {
-    stop("`time_threshold` must be a single finite number > 0.",
+    .lsa_stop("`time_threshold` must be a single finite number > 0.",
          call. = FALSE)
   }
 
@@ -85,7 +85,7 @@
     vapply(idx_by_grp, function(ix) {
       gv <- unique(as.character(data[[group]][ix]))
       if (length(gv) != 1L) {
-        stop(sprintf(
+        .lsa_stop(sprintf(
           paste0("Group column '%s' is not constant within a sequence ",
                  "(actor/session/log): a recovered sequence would span groups ",
                  "%s. Group by a column that is fixed per recovered sequence."),
@@ -135,7 +135,7 @@
   # events during ordering/session splitting and corrupt the counts.
   bad <- which(!is.finite(parsed))
   if (length(bad)) {
-    stop(sprintf(
+    .lsa_stop(sprintf(
       paste0("`time` could not be parsed for %d row(s) (e.g. row %s). ",
              "Fix the values, supply `custom_format`, or set ",
              "`is_unix_time = TRUE`; lagdynamics will not silently drop ",
@@ -149,11 +149,11 @@
 # Validate that a named column exists, with an actionable message.
 .check_col <- function(data, col, role) {
   if (!is.character(col) || length(col) != 1L) {
-    stop(sprintf("`%s` must be a single column name (character).", role),
+    .lsa_stop(sprintf("`%s` must be a single column name (character).", role),
          call. = FALSE)
   }
   if (!col %in% names(data)) {
-    stop(sprintf("`%s` column '%s' not found in the data.",
+    .lsa_stop(sprintf("`%s` column '%s' not found in the data.",
                  role, col), call. = FALSE)
   }
   invisible(TRUE)

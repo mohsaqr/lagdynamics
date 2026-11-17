@@ -2,24 +2,38 @@
 % Please edit documentation in R/engine-registry.R
 \name{get_lsa_engine}
 \alias{get_lsa_engine}
-\title{Retrieve a Registered LSA Engine}
+\title{Retrieve a registered engine}
 \usage{
 get_lsa_engine(name)
 }
 \arguments{
-\item{name}{Character scalar. The engine's identifier.}
+\item{name}{Name of the engine.}
 }
 \value{
-The registry entry: a list with elements \code{name}, \code{fn},
-\code{description}, \code{requires}.
+A list with the elements \code{name}, \code{fn}, \code{description} and
+\code{requires}, as given to \code{\link[=register_lsa_engine]{register_lsa_engine()}}.
 }
 \description{
-Retrieve a Registered LSA Engine
+\code{get_lsa_engine()} returns the registry entry of one engine: its name, its
+function, its description and the packages it requires. It is the lookup
+\code{\link[=lsa]{lsa()}} performs before fitting, and it is useful for inspecting a built-in
+engine's function or for checking that a registered engine can run in the
+current session. To see which engines exist, use \code{\link[=list_lsa_engines]{list_lsa_engines()}}.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_unknown_engine}: no engine is registered under \code{name}.
+\item \code{lagdynamics_missing_package}: a package the engine requires is not
+installed.
+}
+}
+
 \examples{
 str(get_lsa_engine("classical"), give.attr = FALSE)
 
 }
 \seealso{
-\code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=list_lsa_engines]{list_lsa_engines()}}
+\code{\link[=list_lsa_engines]{list_lsa_engines()}}, \code{\link[=register_lsa_engine]{register_lsa_engine()}}
 }

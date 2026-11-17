@@ -1,0 +1,316 @@
+---
+title: "Event logs and interoperability"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Event logs and interoperability}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+Lag sequential analysis counts transitions between consecutive events of
+the same sequence. What counts as a sequence therefore decides what counts
+as a transition: two actions by different students are not a transition,
+and neither are the last action of one working session and the first action
+of the next one a day later. With data that arrive as an event log, one row
+per recorded action, the analysis starts by recovering the sequences: which
+rows belong together, in what order, and where a sequence ends.
+
+`lsa()` performs that step itself. It accepts wide sequence data, a long
+event log described by a small set of column arguments, and the sequence
+objects of the `tna` and `Nestimate` packages, and it returns a fit whose
+transition probabilities, initial probabilities, and network can be handed
+back to those packages. This guide covers each input form, the rules that
+split a log into sequences, grouped logs, and the export of a fit. The
+column grammar is the one used by `tna::prepare_data()` and
+`Nestimate::build_network()`, so a log prepared for one of them needs no
+change.
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+Three bundled data sets cover the input forms.
+
+- `group_regulation_long`: an event log of collaborative learning, 27,533
+  rows. **Actor:** `Actor` (2,000 students). **Action:** `Action`, nine
+  regulation codes. **Time:** `Time`, a POSIXct time stamp. **Group:**
+  `Achiever` (`High` or `Low`), fixed for each actor.
+- `ai_long`: an event log of coded AI behaviours in human-AI programming
+  sessions, 8,551 rows. **Actor:** `project` (34 projects). **Session:**
+  `session_id` (428 sessions). **Action:** `code`, eight behaviour codes.
+  **Order:** `order_in_session`, the position of the coded message within
+  its session.
+- `group_regulation` and `engagement`: wide data, one row per sequence and
+  one column per time point.
+
+```{r data}
+head(group_regulation_long)
+head(ai_long)
+```
+
+## Wide sequence data
+
+Wide data need no column arguments: each row is a sequence and the columns
+are read in order. `group_regulation` holds the same 2,000 sequences as the
+long log above, already assembled.
+
+```{r wide}
+fit_wide <- lsa(group_regulation)
+as.data.frame(summary(fit_wide))
+```
+
+The wide data give 2,000 sequences with 25,533 transitions among nine
+states. Sequences differ in length, and the missing cells that pad the
+shorter rows are dropped, so no transition is counted into or out of them.
+
+## Long event logs
+
+A long log is described by naming its columns, as strings:
+
+| Argument | Role |
+|---|---|
+| `action` | The state of each event. Required; naming it switches to long-format input. |
+| `actor` | Who produced the event. Each actor's events form a sequence. |
+| `session` | A working session. Each session, or each actor-session pair when both are given, forms a sequence. |
+| `time` | A time stamp that orders the events (POSIXct, a parseable string, or Unix time with `is_unix_time = TRUE`). |
+| `order` | An explicit position that orders the events; used in preference to `time`. |
+| `group` | A grouping column, fixed within each sequence, for one model per group. |
+
+The regulation log has an actor, an action, and a time stamp.
+
+```{r long}
+fit_long <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+                time = "Time")
+as.data.frame(summary(fit_long))
+```
+
+The log is assembled into 2,000 sequences, one per actor, with the same
+25,533 transitions as the wide data. The two fits are the same model:
+
+```{r long-equals-wide}
+isTRUE(all.equal(transitions(fit_long), transitions(fit_wide),
+                 check.attributes = FALSE))
+```
+
+## Where a sequence ends
+
+When `time` is given without `session`, a sequence also ends wherever two
+consecutive events of an actor are more than `time_threshold` seconds apart,
+900 seconds (15 minutes) by default. The threshold is an analytic choice: it
+states how long a pause has to be before the next action no longer counts as
+a response to the previous one. A shorter threshold splits the same log into
+more, shorter sequences.
+
+```{r threshold}
+fit_5min <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+                time = "Time", time_threshold = 300)
+as.data.frame(summary(fit_5min))
+```
+
+With a five-minute threshold the 2,000 actor logs break into 12,305
+sequences, and the number of transitions falls from 25,533 to 15,228: every
+pause longer than five minutes removes the transition that spanned it. The
+independence test remains decisive (G² = 7,927 on 64 degrees of freedom) and
+69 transitions stay significant, against 72 with the default, so the
+structure of the process does not hinge on the threshold. Comparing the fit
+at two thresholds in this way is the sensitivity check the choice needs.
+
+Without `actor` or `session`, the whole log is one stream ordered by `time`.
+The regulation log interleaves 2,000 students working at the same time, so
+a single stream mixes their actions into transitions that never happened:
+
+```{r one-stream}
+fit_stream <- lsa(group_regulation_long, action = "Action", time = "Time")
+as.data.frame(summary(fit_stream))
+```
+
+The stream gives one sequence of 27,532 transitions, and its independence
+test is not significant (G² = 46.2, df = 64, p = 0.954): interleaving the
+students destroys the sequential structure. The `actor` argument is what
+makes the regulation log analysable.
+
+## Sessions and explicit order
+
+The AI log records sessions within projects and an explicit position of each
+coded message within its session. Naming `actor` and `session` makes each
+project-session pair a sequence, and `order` sets the order of events within
+it. Several codes can share a message, and the position column keeps them in
+the order they were coded.
+
+```{r session}
+fit_ai <- lsa(ai_long, actor = "project", session = "session_id",
+              action = "code", order = "order_in_session")
+fit_ai
+```
+
+The log yields 428 sequences, one per session, with 8,123 transitions among
+eight codes. Forty of the 64 transitions depart from chance, and the
+strongest favoured transition is `Investigate -> Plan` (z = 33.4). Most sessions open with
+`Investigate` (initial probability 0.715).
+
+## Large logs: the actor-session key
+
+When both `actor` and `session` are given, the sequence key is built over the
+full cross of distinct actors and distinct sessions. The size of that cross
+is held in an R integer, so once the number of distinct actors times the
+number of distinct sessions passes 2,147,483,647, the largest
+integer R can hold, the key overflows. The affected events lose their
+sequence and are dropped, and the only sign is an "NAs produced by integer
+overflow" warning. A log of 50,000 actors and 50,000 sessions is enough to
+trigger it.
+
+On a large log, compare the number of sequences in the summary with the
+number of distinct sessions. When the session identifiers are already unique
+across actors, as in `ai_long`, pass the session column as `actor` and omit
+`session`; the key is then built over the sessions alone.
+
+```{r session-as-actor}
+fit_ai_sessions <- lsa(ai_long, actor = "session_id", action = "code",
+                       order = "order_in_session")
+as.data.frame(summary(fit_ai_sessions))
+isTRUE(all.equal(transitions(fit_ai_sessions), transitions(fit_ai),
+                 check.attributes = FALSE))
+```
+
+Keying on the session alone recovers the same 428 sequences and an identical
+transition table, so the two calls are interchangeable here, and only the
+second one is safe on a log too large for the cross.
+
+## Grouped long logs
+
+Adding `group` fits one model per group from the same log, under one shared
+set of states. The grouping column must take a single value within each
+recovered sequence; a sequence that spans two groups is an error.
+
+```{r grouped}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+gfit
+summary(gfit)
+```
+
+The high and the low achievers contribute 1,000 sequences each, with 12,721
+and 12,812 transitions. Every reading verb on a grouped fit returns a
+leading `group` column, and the grouped fit is the input of the group
+comparisons covered in [the group-comparison vignette](group-comparison.html).
+
+```{r grouped-read}
+transitions(gfit, significant = TRUE, sort = "strength") |> head(4)
+```
+
+## tna objects
+
+A `tna` model keeps the sequences it was fitted from, and `lsa()` reads them
+directly. The model below is fitted by `tna` to the wide `engagement` data
+and passed to `lsa()`.
+
+```{r tna-in}
+tna_fit <- tna::tna(engagement)
+tna_fit
+fit_from_tna <- lsa(tna_fit)
+isTRUE(all.equal(transitions(fit_from_tna), transitions(lsa(engagement)),
+                 check.attributes = FALSE))
+```
+
+Loading `tna` prints a notice that it registers its own plot method for
+bootstrap results in place of the one from `cograph`; the notice does not
+concern the models. The fit from the `tna` model and the fit from the
+original data are identical. The same holds for the output of `tna::prepare_data()`, which
+`lsa()` accepts as it stands. A grouped `tna` model (`group_tna`) is read
+as well, but its groups are pooled into a single fit; for one model per
+group, fit the log with `group =` as in the previous section.
+
+## Nestimate objects
+
+`Nestimate::build_network()` uses the same long-log grammar and keeps the
+prepared sequences in the network object, which `lsa()` reads.
+
+```{r nestimate-in}
+net <- Nestimate::build_network(ai_long, method = "tna", actor = "project",
+                                session = "session_id", action = "code",
+                                order = "order_in_session")
+fit_from_nestimate <- lsa(net)
+isTRUE(all.equal(transitions(fit_from_nestimate), transitions(fit_ai),
+                 check.attributes = FALSE))
+```
+
+`Nestimate` reports that two metadata columns (`session_date` and
+`cluster`) vary within some sessions and keeps their first value; the
+message concerns those columns only, not the sequences. The `Nestimate`
+network and the direct `lsa()` call on the log recover the same transition
+table.
+
+## From a fit to tna and other tools
+
+A fit exposes the quantities that transition network tools consume.
+`transition_probabilities()` returns the row-stochastic transition matrix as
+a tidy data frame, one row per `from -> to` pair, and `initial()` the
+distribution of first states.
+
+```{r probabilities}
+transition_probabilities(fit_long) |> head(9)
+initial(fit_long)
+```
+
+The nine rows shown are the transitions out of `adapt`; their probabilities
+sum to one. The most common first states are `consensus` (0.2140) and
+`plan` (0.2045).
+For a grouped fit both tables carry a leading `group` column.
+
+`lsa_to_tna()` converts a fit to a `tna` model, so the `tna` toolkit
+(centralities, communities, cliques, its plots) applies to a model estimated
+here. `weights` chooses the edge weights; `"prob"` gives the transition
+probabilities of a standard transition network.
+
+```{r to-tna}
+tn <- lsa_to_tna(fit_from_tna, weights = "prob")
+tna::centralities(tn, measures = c("InStrength", "OutStrength", "Betweenness"))
+```
+
+`Average` receives the most probability from the other states
+(in-strength 0.664) and is the only state that lies on shortest paths
+between the other two (betweenness 2, against 0 for `Active` and
+`Disengaged`). A grouped fit converts to a `group_tna` model, one
+`tna` model per group:
+
+```{r to-group-tna}
+tna::centralities(lsa_to_tna(gfit), measures = "InStrength")
+```
+
+`consensus` is the state with the most incoming probability in both groups,
+with in-strength 2.95 among the high achievers and 2.42 among the low
+achievers.
+
+A fit is also a `cograph_network`, so it can be drawn directly as a
+transition network with probability weights; the displays are covered in
+[the plotting guide](plotting.html).
+
+## Summary
+
+| Input | Call |
+|---|---|
+| Wide data, one row per sequence | `lsa(data)` |
+| Long log, one sequence per actor | `lsa(log, actor = , action = , time = )` |
+| Long log with sessions and explicit order | `lsa(log, actor = , session = , action = , order = )` |
+| Very large log with globally unique sessions | `lsa(log, actor = "<session column>", action = , order = )` |
+| One model per group | add `group = ` |
+| `tna` model, `tna::prepare_data()` output | `lsa(object)` |
+| `Nestimate` network or prepared data | `lsa(object)` |
+| Hand a fit to `tna` | `lsa_to_tna(fit)` |
+| Transition and initial probabilities as tables | `transition_probabilities(fit)`, `initial(fit)` |
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

@@ -5,37 +5,75 @@
 \alias{as.data.frame.lsa_comparison_pairwise}
 \alias{print.lsa_comparison}
 \alias{print.lsa_comparison_pairwise}
-\title{Tidy a Group Comparison}
+\title{Read the tables of a group comparison}
 \usage{
-\method{as.data.frame}{lsa_comparison}(x, row.names = NULL, optional = FALSE, ...)
+\method{as.data.frame}{lsa_comparison}(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  what = c("edges", "global"),
+  ...
+)
 
-\method{as.data.frame}{lsa_comparison_pairwise}(x, row.names = NULL, optional = FALSE, ...)
+\method{as.data.frame}{lsa_comparison_pairwise}(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  what = c("edges", "global"),
+  ...
+)
 
 \method{print}{lsa_comparison}(x, ...)
 
 \method{print}{lsa_comparison_pairwise}(x, ...)
 }
 \arguments{
-\item{x}{An \code{lsa_comparison} or \code{lsa_comparison_pairwise} object.}
+\item{x}{A comparison from \code{\link[=compare_lsa]{compare_lsa()}} or \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}
+(class \code{lsa_comparison} or \code{lsa_comparison_pairwise}).}
 
-\item{row.names, optional, ...}{Standard \code{\link[=as.data.frame]{as.data.frame()}} arguments
-(unused; present for method consistency).}
+\item{row.names, optional}{Not used; present for consistency with the
+generic.}
+
+\item{what}{\code{"edges"} (default): one row per transition. \code{"global"}:
+the omnibus result, one row per pair of groups.}
+
+\item{...}{Not used.}
 }
 \value{
-\code{as.data.frame()}: the per-edge data frame described under
-\emph{Value} in \code{\link[=compare_lsa]{compare_lsa()}} (one row per transition; for a pairwise
-object one row per transition and pair, with leading \code{group_a},
-\code{group_b}). \code{print()}: \code{x}, invisibly.
+\code{as.data.frame()} returns a data frame.
+\itemize{
+\item \code{what = "edges"}: one row per transition (and per pair of groups
+when more than two groups were compared, with leading \code{group_a},
+\code{group_b} columns); the columns are listed under \emph{Value} in
+\code{\link[=compare_lsa]{compare_lsa()}} and \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}.
+\item \code{what = "global"}: one row per pair of groups with \code{group_a},
+\code{group_b} and, for \code{\link[=compare_lsa]{compare_lsa()}}, the omnibus \code{statistic} (sum of
+squared differences), its permutation \code{p_value} and either the
+number of permutations \code{R} (two groups) or the across-pairs
+adjusted \code{p_adj} (more than two groups); for \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}},
+\code{n_credible}, the number of credibly different transitions.
+}
+
+\code{print()} returns \code{x} invisibly.
 }
 \description{
-Returns the per-edge comparison table, the same table
-\code{\link[=transitions]{transitions()}} reads, as a plain data frame. \code{print()} shows the
-header summary (groups, measure, significant edges, omnibus test).
+\code{as.data.frame()} returns the tables of a group comparison from
+\code{\link[=compare_lsa]{compare_lsa()}} or \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} as a plain data frame, and \code{print()}
+shows a short summary of the comparison. A comparison holds two tables,
+chosen with \code{what}: the comparison of every transition and the omnibus result
+for the structure as a whole. The per-transition table is the one
+\code{\link[=transitions]{transitions()}} reads; use \code{\link[=transitions]{transitions()}} when you want to keep only the
+significant transitions or order them by the size of the difference.
 }
 \examples{
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
-cmp <- compare_lsa(g, R = 50)
+cmp <- compare_lsa(g, R = 50, adjust = "BH")
 cmp
+as.data.frame(cmp, what = "global")
 head(as.data.frame(cmp))
+
+}
+\seealso{
+\code{\link[=compare_lsa]{compare_lsa()}}, \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}, \code{\link[=transitions]{transitions()}}.
 }

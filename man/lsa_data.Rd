@@ -2,83 +2,81 @@
 % Please edit documentation in R/lsa-data.R
 \name{lsa_data}
 \alias{lsa_data}
-\title{Canonicalize Sequence Input for Lag Sequential Analysis}
+\title{Convert sequence input to the canonical form used by lag sequential analysis}
 \usage{
 lsa_data(x, labels = NULL)
 }
 \arguments{
-\item{x}{Sequence input. See Details.}
+\item{x}{Sequence input in one of the forms listed above. An \code{lsa_data}
+object is returned unchanged.}
 
-\item{labels}{Optional character vector of label names for the
-states. When \code{NULL}, labels are extracted from the data: unique
-sorted values of character input, or \verb{"Code 1", "Code 2", ...} for
-integer input.}
+\item{labels}{Optional character vector of state names. Default \code{NULL}
+takes the sorted distinct values of character input, the levels of a
+factor, or \code{"Code 1"}, \code{"Code 2"}, ... for integer codes. When
+supplied, character codes are matched to it by name and integer codes
+index into it.}
 }
 \value{
-An object of class \code{c("lsa_data", "list")} with elements:
-\describe{
-\item{events}{Integer vector of event codes (1-indexed), or
-\code{NULL} if input was a transition matrix.}
-\item{seq_id}{Integer vector of sequence membership, same length
-as \code{events}, or \code{NULL} if input was a transition matrix.}
-\item{labels}{Character vector of state labels.}
-\item{n_states}{Number of distinct states (\code{K}).}
-\item{n_sequences}{Integer count of independent sequences.}
-\item{n_events}{Total number of events across all sequences.}
-\item{transitions_per_seq}{Integer vector: number of transitions
-each sequence contributes at lag 1.}
-\item{source}{One of \code{"events"}, \code{"transitions"} -- flags whether
-event-level data is available.}
-\item{obs_input}{If \code{source = "transitions"}, the original \verb{K x K}
-count matrix. Otherwise \code{NULL}.}
-}
+An object of class \code{c("lsa_data", "list")}. Print it for the
+input source, the number of states, sequences, events and lag-1
+transitions; read the events with \code{as.data.frame()} (one row per
+event, or per cell for a transition matrix). The object stores the
+integer-coded events and their sequence membership (\code{NULL} for a
+transition matrix), the state labels, the counts of states,
+sequences and events, and the source (\code{"events"} or \code{"transitions"}).
 }
 \description{
-Coerces a wide variety of user input shapes into a single canonical
-representation used by every downstream lagdynamics function (engines,
-bootstrap, permutation, grouping, plotting).
-}
-\details{
-Accepted input forms:
-\itemize{
-\item An atomic vector of integer or character codes -- treated as a
-single sequence.
-\item A list of atomic vectors -- treated as multiple independent
-sequences; transitions are not counted across sequence boundaries.
-\item A wide matrix or data.frame with rows = sequences, columns =
-ordered time points. Missing values (\code{NA}) and empty strings are
-treated as missingness, not as a state: they are dropped wherever
-they occur in a row and the surrounding events close up, so no
-transition is counted into or out of a gap. To model missingness
-as its own state, recode it (e.g. \code{NA -> "missing"}) before
-calling \code{\link[=lsa]{lsa()}}.
-\item A square numeric matrix of pre-computed transition counts. Row
-\code{i}, column \code{j} is the count of \code{i -> j} transitions. In this case
-\code{events} and \code{seq_id} are not available and downstream resampling
-tools that need event-level data will error.
-\item A sequence-bearing object: a \code{tna} or \code{group_tna} (sequences read
-from its \code{data} slot), a \code{tna_seq_data} code matrix, a \code{tna_data} or
-\code{nestimate_data} (its \code{sequence_data}), a \code{Nestimate} \code{netobject}
-(its prepared sequence data), or a \code{TraMineR} \code{stslist}. The stored
-event sequences are recovered and analysed.
-A \code{tna} built from a bare matrix (no retained sequences) errors,
-because transition \emph{counts} cannot be recovered from probability
-weights.
-}
-}
-\examples{
-# Single character sequence
-lsa_data(c("a", "b", "a", "c", "b"))
+\code{lsa_data()} converts the forms in which sequence data usually arrive into
+the canonical representation used by lag sequential analysis, and it is what
+\code{\link[=lsa]{lsa()}} calls on its input. A lag sequential analysis needs, for every
+sequence, the ordered list of coded events, and a common set of state labels
+across sequences. Transitions are counted within sequences only, so the
+boundaries between sequences must be kept.
 
-# Multiple sequences: no transition is counted across the boundary
+Accepted forms are:
+\itemize{
+\item an atomic vector of codes (one sequence);
+\item a list of vectors (several sequences);
+\item a wide matrix or data frame, one row per sequence and one column per
+ordered time point;
+\item a square numeric matrix of transition counts, row \code{i} and column \code{j}
+holding the count of \code{i -> j} (any square numeric matrix is read this
+way, so pass square integer-coded sequences as a data frame);
+\item a sequence object: a \code{tna} or \code{group_tna} model with its data, a
+\code{tna_seq_data}, \code{tna_data} or \code{nestimate_data} object, a
+\pkg{Nestimate} \code{netobject}, or a \pkg{TraMineR} \code{stslist}.
+}
+
+\code{NA} and empty strings are treated as missing observations, not as a
+state: they are dropped wherever they occur and the surrounding events
+close up. To model missingness as a state, recode it (for example to
+\code{"missing"}) first. A transition-count matrix carries no sequences, so
+the functions that resample sequences (\code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
+\code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}, \code{\link[=reliability_lsa]{reliability_lsa()}},
+\code{\link[=compare_lsa]{compare_lsa()}}) cannot be used on a fit built from it. Long event logs
+are read by \code{\link[=lsa]{lsa()}} through its \code{actor} and \code{action} arguments.
+}
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}:
+an unsupported input type, no usable events, invalid counts in a
+transition matrix, invalid integer codes, or codes that do not match
+\code{labels}.
+}
+
+\examples{
+lsa_data(engagement)
+
+# Several sequences: no transition is counted across the boundary
 lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
 
-# Pre-computed transition matrix (source = "transitions")
-tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
-             dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
-lsa_data(tm)
+# A transition-count matrix
+counts <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
+                 dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+lsa_data(counts)
 
 }
 \seealso{
-\code{\link[=lsa_transitions]{lsa_transitions()}}, \code{\link[=lsa]{lsa()}}
+\code{\link[=as.data.frame.lsa_data]{as.data.frame.lsa_data()}} for the event table;
+\code{\link[=lsa_transitions]{lsa_transitions()}} for transition counts; \code{\link[=lsa]{lsa()}}.
 }

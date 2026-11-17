@@ -1,16 +1,17 @@
 # S3 methods for the lsa class. Print is a compact, visual model summary
 # (typed header, key stats, an initial-state bar chart, and the
 # strongest transitions).
-# summary() adds the full matrices; as.data.frame() returns the tidy
-# edge table for downstream tooling.
+# summary() returns a "summary.lsa" object (a one-row overview and a
+# per-state table) with its own print method; as.data.frame() returns the
+# tidy edge table for downstream tooling.
 
-# Horizontal unicode bar, scaled so the largest value fills `width`.
-# Vectorised over `frac` (already in [0, 1] relative to the max).
+# Horizontal bar, scaled so the largest value fills `width`. Vectorised
+# over `frac` (already in [0, 1] relative to the max). Uses the full-block
+# glyph in a UTF-8 session and "#" otherwise.
 .lsa_bar <- function(frac, width = 24L) {
   n <- as.integer(round(frac * width))
-  vapply(n, function(k) {
-    strrep("\u2588", max(0L, k))
-  }, character(1L))
+  glyph <- .lsa_glyph("\u2588", "#")
+  vapply(n, function(k) strrep(glyph, max(0L, k)), character(1L))
 }
 
 # Significance stars from a p-value (vectorised).
@@ -45,8 +46,8 @@ print.lsa <- function(x, ...) {
               paste(utils::head(labels, 12), collapse = ", ")))
   lr <- x$lrx2
   if (!is.null(lr) && is.finite(lr$statistic)) {
-    cat(sprintf("  independence: G\u00b2 = %.1f, df = %d, p %s\n",
-                lr$statistic, lr$df,
+    cat(sprintf("  independence: %s = %.1f, df = %d, p %s\n",
+                .lsa_glyph("G\u00b2", "G^2"), lr$statistic, lr$df,
                 format.pval(lr$p, digits = 3, eps = 2.2e-16)))
   }
 
@@ -85,36 +86,89 @@ print.lsa <- function(x, ...) {
 #' @rdname lsa-methods
 #' @export
 summary.lsa <- function(object, ...) {
-  cat("Lag Sequential Analysis\n")
-  cat("=======================\n")
-  print(object)
+  structure(
+    list(overview = .lsa_glance(object),
+         nodes = .lsa_node_summary(object)),
+    class = "summary.lsa"
+  )
+}
 
-  # Node-activity bar chart: each state's share of outgoing and incoming
-  # transitions. Complements the initial-state bars shown by print() and
-  # gives a quick source/target profile per state.
-  labels <- rownames(object$obs)
-  out_share <- rowSums(object$obs) / sum(object$obs)
-  in_share  <- colSums(object$obs) / sum(object$obs)
-  scale <- max(out_share, in_share)
-  wlab <- max(nchar(labels))
-  cat("\nNode activity (share of transitions):\n")
-  cat(sprintf("    %-*s  out %5.3f %-12s  in %5.3f %s\n",
-              wlab, labels,
-              out_share, .lsa_bar(out_share / scale, 12L),
-              in_share,  .lsa_bar(in_share / scale, 12L)),
+# Per-state profile of a fit: transition totals, their shares, and the
+# initial-state probability. One row per state, in label order.
+.lsa_node_summary <- function(fit) {
+  obs <- fit$obs
+  total <- sum(obs)
+  labels <- rownames(obs)
+  init <- if (is.null(fit$inits)) rep(NA_real_, length(labels))
+          else as.numeric(fit$inits[labels])
+  data.frame(
+    state     = labels,
+    outgoing  = as.numeric(rowSums(obs)),
+    incoming  = as.numeric(colSums(obs)),
+    out_share = if (total > 0) as.numeric(rowSums(obs)) / total
+                else rep(NA_real_, length(labels)),
+    in_share  = if (total > 0) as.numeric(colSums(obs)) / total
+                else rep(NA_real_, length(labels)),
+    init_prob = init,
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
+}
+
+#' @rdname lsa-methods
+#' @export
+print.summary.lsa <- function(x, ...) {
+  o <- x$overview
+  cat(sprintf("Lag sequential analysis: %s engine, lag %d\n",
+              o$engine, o$lag))
+  sizes <- if (is.na(o$n_sequences)) {
+    sprintf("  %d states, %d transitions (from a transition matrix)\n",
+            o$n_states, o$n_transitions)
+  } else {
+    sprintf("  %d states, %d transitions, %d events, %d sequences\n",
+            o$n_states, o$n_transitions, o$n_events, o$n_sequences)
+  }
+  cat(sizes)
+  cat(sprintf("  significant transitions (p < %g): %d of %d\n",
+              o$alpha, o$n_significant, o$n_states^2))
+  if (is.finite(o$lrx2)) {
+    cat(sprintf("  likelihood-ratio test: %s = %.2f, df = %d, p %s\n",
+                .lsa_glyph("G\u00b2", "G^2"), o$lrx2, o$lrx2_df,
+                format.pval(o$lrx2_p, digits = 3, eps = 2.2e-16)))
+  }
+  if (is.finite(o$x2)) {
+    cat(sprintf("  Pearson test: %s = %.2f, df = %d, p %s\n",
+                .lsa_glyph("\u03c7\u00b2", "X^2"), o$x2, o$x2_df,
+                format.pval(o$x2_p, digits = 3, eps = 2.2e-16)))
+  }
+
+  n <- x$nodes
+  scale <- max(c(n$out_share, n$in_share), na.rm = TRUE)
+  wlab <- max(nchar(n$state), 5L)
+  cat("\n  State activity (share of transitions out and in):\n")
+  # Pad the bars by character count: sprintf("%-12s") counts bytes, and
+  # the UTF-8 block glyph is three bytes wide.
+  out_bar <- .lsa_bar(n$out_share / scale, 12L)
+  out_bar <- paste0(out_bar, strrep(" ", 12L - nchar(out_bar)))
+  cat(sprintf("    %-*s  out %5.3f %s  in %5.3f %s\n",
+              wlab, n$state,
+              n$out_share, out_bar,
+              n$in_share, .lsa_bar(n$in_share / scale, 12L)),
       sep = "")
+  invisible(x)
+}
 
-  cat("\nObserved counts (obs):\n")
-  print(object$obs)
-  cat("\nExpected counts (exp):\n")
-  print(round(object$exp, 3))
-  cat("\nTransitional probabilities (prob):\n")
-  print(round(object$prob, 3))
-  cat("\nAdjusted residuals (adj_res):\n")
-  print(round(object$adj_res, 3))
-  # Return the tidy one-row summary (invisibly): summary() prints the
-  # human view above, but `s <- summary(fit)` captures tidy data.
-  invisible(.lsa_glance(object))
+#' @rdname lsa-methods
+#' @param what For `as.data.frame()` on a summary: `"overview"` (default,
+#'   the one-row overview of the fit) or `"nodes"` (one row per state).
+#' @export
+as.data.frame.summary.lsa <- function(x, row.names = NULL,
+                                      optional = FALSE,
+                                      what = c("overview", "nodes"), ...) {
+  what <- match.arg(what)
+  out <- x[[what]]
+  if (!is.null(row.names)) rownames(out) <- row.names
+  out
 }
 
 #' @rdname lsa-methods
@@ -144,18 +198,18 @@ as.data.frame.lsa_group <- function(x, row.names = NULL, optional = FALSE,
 # a `group` column carrying each element's name. Each element is coerced
 # with its own as.data.frame() method, so the same helper tidies a list of
 # fits, certainty results, reliability results, etc.
-.grouped_df <- function(x) {
+.grouped_df <- function(x, ...) {
   pieces <- Map(function(df, g) {
     cbind(group = rep(g, nrow(df)), df, stringsAsFactors = FALSE)
-  }, lapply(x, as.data.frame), names(x))
+  }, lapply(x, as.data.frame, ...), names(x))
   out <- do.call(rbind, pieces)
   rownames(out) <- NULL
   out
 }
 
 # One-row tidy overview of a fit (engine, sizes, significance counts,
-# tablewise tests). Returned invisibly by summary.lsa(); also the body
-# of the public fit_summary() accessor.
+# tablewise tests). The `overview` table of summary.lsa(), and one row
+# per group of summary.lsa_group().
 .lsa_glance <- function(fit) {
   e <- fit$edges
   d <- fit$data

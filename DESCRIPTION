@@ -1,36 +1,40 @@
 Package: lagdynamics
 Title: Lag Sequential Analysis, Dynamics, and Lag Transition Networks
-Version: 0.33
+Version: 0.34.1
 Authors@R:
     c(person("Mohammed", "Saqr", email = "saqr@saqr.me",
-             role = c("aut", "cre", "cph")),
-      person("Sonsoles", "López-Pernas", role = "aut"))
-Description: A modern, tidy toolkit for lag sequential
-    analysis and lag transition networks of categorical event and sequence
-    data. It provides an accessible, unified workflow for fitting, inspecting,
-    visualising, and comparing lagged transition patterns, with tidy outputs
-    throughout. Includes confirmatory tools for uncertainty, robustness, and
-    group differences, including bootstrap intervals, analytic certainty,
-    split-half reliability, case-drop stability, permutation tests, and
-    Bayesian group comparisons. Supports long-format event-log import,
-    import from common sequence and state-sequence objects, multi-lag
-    analysis, structural-zero constraints, transition and initial
-    probabilities, plotting of transition structures, and a directed
-    transfer-entropy measure. The lag sequential analysis framework
+             role = c("aut", "cre", "cph"),
+             comment = c(ORCID = "0000-0001-5881-3109")),
+      person("Sonsoles", "López-Pernas", role = "aut",
+             comment = c(ORCID = "0000-0002-9621-1392")))
+Description: Implements lag sequential analysis of categorical event and
+    sequence data. For each ordered pair of states it tests whether one state
+    follows another at a given lag more or less often than expected under
+    independence, reporting adjusted residuals, transitional probabilities and
+    Yule's Q in tidy data frames. Five test engines are provided (classical,
+    two-cell, bidirectional, parallel dominance and non-parallel dominance).
+    Transitions can be evaluated with bootstrap intervals, analytic certainty,
+    split-half reliability, case-drop stability and permutation tests, and
+    groups compared by permutation or by a Bayesian Dirichlet-multinomial
+    contrast. Supports long-format event logs, sequence objects, multiple lags,
+    structural zeros, transition and initial probabilities, plots of lag
+    transition networks, and a directed transfer-entropy measure. The method
     follows Sackett and others (1979) <doi:10.3758/BF03205679>.
 License: MIT + file LICENSE
-URL: https://github.com/mohsaqr/lagdynamics
+URL: https://github.com/mohsaqr/lagdynamics,
+    https://pak.dynasite.org/lagdynamics/
 BugReports: https://github.com/mohsaqr/lagdynamics/issues
 Language: en-US
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends: R (>= 4.1.0)
 Imports:
     cograph (>= 2.3.6),
     ggplot2 (>= 3.4.0),
+    graphics,
     grDevices,
     grid,
+    parallel,
     stats,
     utils
 Suggests:
@@ -42,3 +46,4 @@ Suggests:
 Config/testthat/edition: 3
 LazyData: true
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.1.1

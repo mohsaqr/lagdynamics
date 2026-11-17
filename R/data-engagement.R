@@ -1,29 +1,29 @@
-#' Student Engagement Trajectories
+#' Engagement states of students over time
 #'
-#' Wide-format categorical sequence data: 138 students observed over 15
-#' weekly time points. Each row is one student; each column is a
-#' week. Entries are the student's engagement state for that week,
-#' one of `"Active"`, `"Average"`, `"Disengaged"`, or `NA` for missing
-#' weeks.
+#' @description
+#' `engagement` is a coded dataset, in wide format, of engagement: 138 students,
+#' each observed at 15 ordered time points and coded at each as `Active`,
+#' `Average` or `Disengaged`. Missing time points are `NA`. Two students have no
+#' observation at all, so a fit reports 136 sequences; the remaining sequences
+#' have on average about 14 observed states.
 #'
-#' This is a standard small-K, multi-sequence example for lag
-#' sequential analysis: K = 3 states and 136 non-empty sequences (two
-#' rows are entirely missing), with a mean observed length of about 14
-#' weeks. It exercises the wide-data input path of
-#' [lsa_data()] and produces a stable transition pattern with clear
-#' adjusted-residual signals.
+#' With three states and many short sequences, the data show the typical
+#' pattern of a lag sequential analysis: each state tends to persist, and
+#' moves between `Active` and `Disengaged` are rare. They are the main
+#' example of the help pages.
 #'
-#' @format A data frame with 138 rows and 15 character columns.
+#' @format A data frame with 138 rows (students) and 15 character columns
+#'   named `1` to `15` (time points, in order). Values are `"Active"`,
+#'   `"Average"`, `"Disengaged"` or `NA`.
 #'
-#' @source Derived from the `trajectories` matrix in the `Nestimate`
-#'   package (\url{https://github.com/mohsaqr/Nestimate}), which is
-#'   MIT-licensed and produced by Saqr and collaborators as a synthetic
-#'   engagement trajectory example. The state values are preserved and
-#'   stored here as a data frame for compatibility with sequence-data
-#'   tooling.
+#' @source Derived from the synthetic `trajectories` example data of the
+#'   \pkg{Nestimate} package (<https://github.com/mohsaqr/Nestimate>, MIT
+#'   license), with the states kept and the matrix stored as a data frame.
+#'
+#' @seealso [group_regulation] for a larger set of sequences; [lsa()].
 #'
 #' @examples
-#' fit <- lsa(engagement, engine = "classical")
+#' fit <- lsa(engagement)
 #' fit
 #' transitions(fit, significant = TRUE)
 #'

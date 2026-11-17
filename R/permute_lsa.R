@@ -8,72 +8,94 @@
 # that exceed the observed cell's magnitude. The +1 correction
 # (Phipson-Smyth 2010) prevents p = 0 artifacts.
 
-#' Permutation Test for an LSA Fit
+#' Test transitions against no sequential structure by permutation
 #'
-#' Empirical null-distribution p-values for every cell of an LSA
-#' transition matrix. Repeatedly shuffles the input event vector
-#' (within sequence boundaries) and recomputes the engine's residual
-#' matrix, producing a permutation distribution for each cell. The
-#' two-sided p-value is `(1 + #{ |stat_perm| >= |stat_obs| }) / (1 + R)`
-#' (Phipson & Smyth 2010).
+#' @description
+#' `permute_lsa()` tests every transition of a fit from [lsa()] against no
+#' sequential structure by permutation: whether the transition is over- or
+#' under-represented beyond what the same events in a random order would give,
+#' keeping the frequency of every state fixed. The adjusted residual of a
+#' transition is otherwise tested against a normal reference distribution, which
+#' holds only approximately, for large counts and independent transitions. A
+#' permutation test builds the reference distribution from the data instead: if
+#' the order of events carried no information, shuffling the events would
+#' produce residuals as large as the observed ones.
 #'
-#' @param fit An `lsa` object returned by [lsa()].
-#' @param R Integer. Number of permutations. Default `1000`.
-#' @param within_sequence Logical. When `TRUE` (default for
-#'   multi-sequence input), each sequence is shuffled independently;
-#'   when `FALSE`, the whole event stream is shuffled across
-#'   sequence boundaries.
-#' @param shuffles Optional list of length `R`, each element an
-#'   integer permutation of `seq_len(n_events)`. When supplied,
-#'   replaces internal RNG.
-#' @param parallel Logical. Use multi-core resampling. Default
+#' The events of the fit are shuffled many times, by default within each
+#' sequence so that every sequence keeps its own length and state frequencies;
+#' the model is refitted with the same engine and settings, and the adjusted
+#' residual of every transition is recorded. The two-sided permutation p-value
+#' of a transition is the share of shuffles whose residual is at least as large
+#' in absolute value as the observed one, counted so that it is never zero
+#' (Phipson & Smyth, 2010). A transition is significant when its p-value is
+#' below the `alpha` of the fit.
+#'
+#' The p-values are not corrected for the number of transitions tested.
+#' For intervals on the residuals and other statistics, use
+#' [bootstrap_lsa()]; for the share of subsamples in which a transition
+#' stays significant, use [stability_lsa()]. To test whether groups
+#' differ, use [compare_lsa()].
+#'
+#' @param fit An `lsa` fit from [lsa()], built from sequences (not from a
+#'   transition matrix).
+#' @param R Number of permutations. Default `1000`.
+#' @param within_sequence Shuffle events within each sequence (`TRUE`,
+#'   default) or across the whole event stream (`FALSE`). A single
+#'   sequence is always shuffled as a whole, with a warning when
+#'   `within_sequence = TRUE`.
+#' @param shuffles Optional list of at least `R` permutations of
+#'   `seq_len(n_events)` to replay instead of random shuffles. Default
+#'   `NULL`.
+#' @param parallel Run the permutations on several cores. Default
 #'   `FALSE`.
-#' @param n_cores Integer. Worker count when `parallel = TRUE`.
-#' @param verbose Logical. Print progress every 100 replicates.
-#' @param ... Reserved.
+#' @param n_cores Number of cores when `parallel = TRUE`. Default `NULL`,
+#'   all cores but one.
+#' @param verbose Report progress every 100 permutations. Default `FALSE`.
+#' @param ... Not used.
 #'
-#' @details
-#' **NA handling.** The exceedance count that drives `p_perm` is
-#' computed with `na.rm = TRUE`, so replicates that produced `NA`
-#' for a cell (structural-zero cells, zero-margin cells in the
-#' permuted table) are excluded from that cell's tally rather than
-#' counted as either an exceedance or a non-exceedance.
+#' @return An object of class `c("lsa_permutation", "list")`. Read it with
+#'   [transitions()], which returns a data frame with one row per
+#'   transition (`from -> to` pair) and the columns `from`, `to`,
+#'   `observed_count`, `observed_adj_res`, `p_perm` (permutation p-value;
+#'   `NA` for transitions that cannot be estimated, such as structural
+#'   zeros) and `significant` (`p_perm` below the fit's `alpha`).
+#'   `transitions(x, significant = TRUE)` keeps the significant
+#'   transitions; `sort = "strength"` orders by the absolute observed
+#'   residual. `print()` shows the settings and the number of significant
+#'   transitions (see [lsa-inference-methods]). The object also stores the
+#'   permuted residuals, the settings and the original fit.
 #'
-#' @return An object of class `c("lsa_permutation", "list")`. Read the
-#' per-edge table with [transitions()]; see [lsa-inference-methods] for
-#' `print()` and `as.data.frame()`. Elements:
-#' \describe{
-#'   \item{edges}{Tidy data frame, one row per `from -> to` cell:
-#'     `from`, `to`, `observed_count`, `observed_adj_res`, the empirical
-#'     permutation p-value `p_perm`, and `significant`
-#'     (`p_perm < alpha` of the fit).}
-#'   \item{perm_adj_res}{`R x K^2` numeric matrix of permuted
-#'     residuals (cells in `as.vector(adj_res)` order).}
-#'   \item{R, within_sequence}{Recipe metadata.}
-#'   \item{fit}{Reference to the original fit.}
-#' }
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and one of:
+#' * `lagdynamics_needs_events`: the fit was built from a transition
+#'   matrix, so there are no events to shuffle.
+#' * `lagdynamics_bad_input`: `shuffles` is not a list of at least `R`
+#'   permutations of `seq_len(n_events)`.
 #'
 #' @examples
-#' fit <- lsa(engagement, engine = "classical")
+#' fit <- lsa(engagement)
 #' pm <- permute_lsa(fit, R = 100)
 #' pm
-#' transitions(pm, significant = TRUE)
+#' transitions(pm, significant = TRUE, sort = "strength")
 #' \donttest{
 #' # A full analysis uses more permutations
-#' transitions(permute_lsa(fit, R = 1000), sort = "strength")
+#' permute_lsa(fit, R = 1000) |>
+#'   transitions(sort = "strength")
 #' }
 #'
 #' @references
-#' Castellan, N. J. (1992). Shuffling arrays: appearances may be
-#' deceiving. \emph{Behavior Research Methods, Instruments, &
-#' Computers}, 24(1), 72-77.
+#' Castellan, N. J. (1992). Shuffling arrays: Appearances may be
+#' deceiving. \emph{Behavior Research Methods, Instruments, & Computers,
+#' 24}(1), 72-77.
 #'
-#' Phipson, B., & Smyth, G. K. (2010). Permutation p-values should
-#' never be zero: calculating exact p-values when permutations are
-#' randomly drawn. \emph{Statistical Applications in Genetics and
-#' Molecular Biology}, 9(1), Article 39.
+#' Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never
+#' be zero: Calculating exact p-values when permutations are randomly
+#' drawn. \emph{Statistical Applications in Genetics and Molecular
+#' Biology, 9}(1), Article 39.
 #'
-#' @seealso [bootstrap_lsa()], [stability_lsa()]
+#' @seealso [transitions()] to read the result; [bootstrap_lsa()],
+#'   [stability_lsa()] and [reliability_lsa()] for other checks of a fit;
+#'   [compare_lsa()] to compare groups.
 #'
 #' @export
 permute_lsa <- function(fit,
@@ -84,15 +106,18 @@ permute_lsa <- function(fit,
                         n_cores = NULL,
                         verbose = FALSE,
                         ...) {
-  stopifnot(inherits(fit, "lsa"))
-  stopifnot(is.numeric(R), length(R) == 1L, is.finite(R),
-            R >= 1L, R == floor(R))
+  stopifnot("`fit` must be an `lsa` fit from lsa()" = inherits(fit, "lsa"))
+  stopifnot(
+    "`R` must be a single whole number >= 1" =
+      is.numeric(R) && length(R) == 1L && is.finite(R) && R >= 1L &&
+      R == floor(R)
+  )
   R <- as.integer(R)
 
   recipe <- fit$params
   d <- fit$data
   if (identical(d$source, "transitions")) {
-    stop("permute_lsa() requires event-level input. The fit was ",
+    .lsa_stop(class = "needs_events", "permute_lsa() requires event-level input. The fit was ",
          "built from a pre-computed transition matrix.",
          call. = FALSE)
   }
@@ -119,14 +144,14 @@ permute_lsa <- function(fit,
   # breaking the documented reproducible-replay contract.
   if (!is.null(shuffles)) {
     if (!is.list(shuffles) || length(shuffles) < R) {
-      stop(sprintf("`shuffles` must be a list of length >= R (%d).", R),
+      .lsa_stop(sprintf("`shuffles` must be a list of length >= R (%d).", R),
            call. = FALSE)
     }
     shuffles <- shuffles[seq_len(R)]
     target <- seq_len(T)
     bad <- which(!vapply(shuffles, .is_permutation, logical(1), n = T))
     if (length(bad) > 0L) {
-      stop(sprintf(
+      .lsa_stop(sprintf(
         "`shuffles[[%d]]` is not a permutation of seq_len(%d). Each ",
         bad[1L], T),
         "shuffle must contain every integer 1..n_events exactly once, ",

@@ -15,7 +15,8 @@
                               alternative = c("two.sided", "greater", "less"),
                               n_events = NULL,
                               ...) {
-  stopifnot(inherits(transitions, "lsa_transitions"))
+  stopifnot("`transitions` must be an `lsa_transitions` object" =
+              inherits(transitions, "lsa_transitions"))
   alternative <- match.arg(alternative)
 
   obs <- transitions$obs
@@ -25,15 +26,15 @@
   N  <- transitions$n_transitions
 
   if (N == 0) {
-    stop("No transitions in input.", call. = FALSE)
+    .lsa_stop(class = "no_transitions", "No transitions in input.", call. = FALSE)
   }
 
   has_struct <- !is.null(structural_zeros)
   if (has_struct) {
     stopifnot(
-      is.matrix(structural_zeros),
-      nrow(structural_zeros) == K, ncol(structural_zeros) == K,
-      all(structural_zeros %in% c(0, 1))
+      "`structural_zeros` must be a K x K matrix of 0/1 values" =
+        is.matrix(structural_zeros) && nrow(structural_zeros) == K &&
+        ncol(structural_zeros) == K && all(structural_zeros %in% c(0, 1))
     )
   }
 

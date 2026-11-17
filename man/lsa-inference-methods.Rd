@@ -8,7 +8,7 @@
 \alias{as.data.frame.lsa_bootstrap}
 \alias{as.data.frame.lsa_permutation}
 \alias{as.data.frame.lsa_stability}
-\title{Print and Tidy Resampling Results}
+\title{Print and read resampling results}
 \usage{
 \method{print}{lsa_bootstrap}(x, ...)
 
@@ -26,22 +26,29 @@
 \item{x}{An \code{lsa_bootstrap}, \code{lsa_permutation} or \code{lsa_stability}
 object.}
 
-\item{row.names, optional, ...}{Ignored; present for consistency with
-the generics.}
+\item{...}{Not used.}
+
+\item{row.names, optional}{Not used; present for consistency with the
+generic.}
 }
 \value{
 \code{print()} returns \code{x} invisibly. \code{as.data.frame()} returns a
-\code{data.frame} with one row per \code{from -> to} cell: the bootstrap,
-permutation or stability columns listed in \code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
+data frame with one row per transition (\code{from -> to} pair); its
+columns are listed under \emph{Value} in \code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
 \code{\link[=permute_lsa]{permute_lsa()}} and \code{\link[=stability_lsa]{stability_lsa()}}.
 }
 \description{
-Methods for the results of \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}} and
-\code{\link[=stability_lsa]{stability_lsa()}}. \code{print()} shows a header summary: the engine, the
-number of replicates, the resampling settings, and how many edges are
-stable or significant. \code{as.data.frame()} returns the per-edge table
-described under \emph{Value} of the constructor; \code{\link[=transitions]{transitions()}} returns
-the same table and adds \verb{significant =} and \verb{sort =} arguments.
+\code{print()} and \code{as.data.frame()} read the results of \code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
+\code{\link[=permute_lsa]{permute_lsa()}} and \code{\link[=stability_lsa]{stability_lsa()}}. \code{print()} shows a short summary: the
+engine, the number of replicates, the resampling settings and how many
+transitions are stable or significant (with the number of failed replicates
+for a stability result). \code{as.data.frame()} returns the per-transition table
+of the result.
+
+\code{\link[=transitions]{transitions()}} returns the same table and adds the arguments
+\code{significant} (keep the transitions the method flags) and \code{sort}
+(order by the size of the effect); it is the usual way to read these
+results. Results of \code{\link[=certainty_lsa]{certainty_lsa()}} use the bootstrap methods.
 }
 \examples{
 fit <- lsa(engagement)
@@ -51,5 +58,6 @@ head(as.data.frame(st))
 
 }
 \seealso{
-\code{\link[=transitions]{transitions()}}
+\code{\link[=transitions]{transitions()}}, \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}},
+\code{\link[=stability_lsa]{stability_lsa()}}.
 }

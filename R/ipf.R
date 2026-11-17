@@ -8,41 +8,44 @@
 #
 # Validated against stats::loglin() — see tests/testthat/test-ipf.R.
 
-#' Iterative Proportional Fitting for Two-Way Tables with Structural Zeros
+#' Fit expected counts with structural zeros by iterative proportional fitting
 #'
-#' Fits expected cell frequencies under the row + column independence
-#' model when some cells are constrained to be exactly zero
-#' (structural zeros). The fitted table has the same row and column
-#' marginals as `obs`, satisfies `E[i, j] = 0` wherever
-#' `structure[i, j] = 0`, and is the maximum likelihood estimate under
-#' the independence model restricted to the non-zero pattern.
+#' @description
+#' `lsa_ipf()` fits the expected counts of a count table with structural zeros
+#' by iterative proportional fitting. When some transitions cannot occur by
+#' construction (structural zeros, such as self-transitions in a coding scheme
+#' that merges repeated codes), the quasi-independence model fits expected
+#' counts that are zero in the forbidden cells and reproduce the observed row
+#' and column totals; it has no closed form and is found by iterative
+#' proportional fitting (Wickens, 1989), which rescales the rows and columns of
+#' the table in turn until both sets of totals match. Under ordinary
+#' independence, the expected count of a transition is the product of its row
+#' and column totals divided by the grand total, a formula that assigns expected
+#' counts to impossible cells.
 #'
-#' Implementation follows Wickens (1989), pp. 107-112: alternately
-#' scale rows then columns of an initialized expected table until row
-#' and column marginals converge to those of `obs` within `tol`.
+#' [lsa()] calls `lsa_ipf()` when `loops = FALSE` or `structural_zeros` is
+#' given, so it is needed directly only to inspect the expected table or to use
+#' it outside [lsa()].
 #'
-#' @param obs Numeric `K x K` matrix of observed counts.
-#' @param structure Numeric `K x K` 0/1 matrix. **Default
-#'   `matrix(1, K, K)`: every cell, including the diagonal, is
-#'   estimable -- self-transitions and every observed cell are kept.**
-#'   A `0` marks a cell as a structural zero (forbidden), a `1` marks
-#'   it as estimable. Pass an explicit pattern (e.g. `1 - diag(K)`)
-#'   only when you want to *opt out* of specific cells because the
-#'   coding scheme makes them impossible by construction.
-#' @param tol Numeric. Convergence tolerance on marginal differences.
-#'   Default `1e-8`.
-#' @param max_iter Integer. Maximum number of row+column scaling
-#'   passes. Default `200L`.
+#' @param obs Square numeric matrix of observed transition counts.
+#' @param structure Square 0/1 matrix of the same size: `0` marks a
+#'   structural zero, `1` an estimable cell. Default `NULL`: every cell is
+#'   estimable, which gives the ordinary independence table.
+#' @param tol Convergence tolerance on the largest difference between
+#'   fitted and observed totals (default `1e-8`).
+#' @param max_iter Maximum number of row-and-column passes (default `200`).
 #'
-#' @return A plain list (no class) with elements:
-#' \describe{
-#'   \item{fit}{The fitted `K x K` expected-frequency matrix.}
-#'   \item{iterations}{Number of row+column passes used.}
-#'   \item{converged}{Logical scalar: whether convergence was reached
-#'     within `max_iter`.}
-#'   \item{max_margin_diff}{Maximum absolute difference between observed
-#'     and fitted marginals at termination.}
-#' }
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and one of:
+#' * `lagdynamics_bad_input`: `obs` contains missing, infinite or negative
+#'   values.
+#' * `lagdynamics_ipf_infeasible`: a row or column has observed
+#'   transitions but every one of its cells is a structural zero.
+#'
+#' @return A list with the fitted `K x K` expected-count matrix (`fit`), the
+#'   number of passes used (`iterations`), whether the totals converged
+#'   within `max_iter` (`converged`), and the largest remaining difference
+#'   between fitted and observed totals (`max_margin_diff`).
 #'
 #' @examples
 #' obs <- matrix(c(0, 4, 6,
@@ -51,29 +54,32 @@
 #' # Every cell estimable: the ordinary independence table
 #' lsa_ipf(obs)
 #'
-#' # Diagonal forbidden: the empty self-transition cells become structural
-#' # zeros and the fit keeps the observed row and column totals
+#' # Self-transitions forbidden: zero expected counts on the diagonal,
+#' # observed row and column totals kept
 #' lsa_ipf(obs, structure = 1 - diag(3))
 #'
 #' @references
-#' Wickens, T. D. (1989). \emph{Multiway contingency tables analysis
-#' for the social sciences}, pp. 107-112. Lawrence Erlbaum.
+#' Wickens, T. D. (1989). \emph{Multiway contingency tables analysis for
+#' the social sciences} (pp. 107-112). Lawrence Erlbaum.
+#'
+#' @seealso [lsa()] and its `loops` and `structural_zeros` arguments.
 #'
 #' @export
 lsa_ipf <- function(obs, structure = NULL, tol = 1e-8, max_iter = 200L) {
   stopifnot(
-    is.matrix(obs), is.numeric(obs),
-    nrow(obs) == ncol(obs), nrow(obs) >= 2L
+    "`obs` must be a square numeric matrix with at least 2 rows" =
+      is.matrix(obs) && is.numeric(obs) && nrow(obs) == ncol(obs) &&
+      nrow(obs) >= 2L
   )
   # IPF is defined for a non-negative finite count table. NA/Inf would
   # propagate into the scaling passes and return a converged-looking but
   # meaningless fit; negative "counts" are outside the model entirely.
   if (anyNA(obs) || !all(is.finite(obs))) {
-    stop("`obs` must contain only finite counts (no NA, NaN, or Inf).",
+    .lsa_stop("`obs` must contain only finite counts (no NA, NaN, or Inf).",
          call. = FALSE)
   }
   if (any(obs < 0)) {
-    stop("`obs` must be a non-negative count matrix.", call. = FALSE)
+    .lsa_stop("`obs` must be a non-negative count matrix.", call. = FALSE)
   }
   K <- nrow(obs)
   # No structural zeros by default. Self-transitions are kept; the
@@ -81,19 +87,20 @@ lsa_ipf <- function(obs, structure = NULL, tol = 1e-8, max_iter = 200L) {
   # self-transitions must pass structure = 1 - diag(K) explicitly.
   if (is.null(structure)) structure <- matrix(1L, K, K)
   stopifnot(
-    is.matrix(structure), nrow(structure) == K, ncol(structure) == K,
-    all(structure %in% c(0, 1))
+    "`structure` must be a K x K matrix of 0/1 values" =
+      is.matrix(structure) && nrow(structure) == K && ncol(structure) == K &&
+      all(structure %in% c(0, 1))
   )
   rt <- rowSums(obs)
   ct <- colSums(obs)
   # Sanity: if a row has total > 0 but no estimable cell in it, IPF cannot
   # converge. Same for columns.
   if (any(rt > 0 & rowSums(structure) == 0)) {
-    stop("IPF infeasible: a row has positive marginal but no estimable cells.",
+    .lsa_stop(class = "ipf_infeasible", "IPF infeasible: a row has positive marginal but no estimable cells.",
          call. = FALSE)
   }
   if (any(ct > 0 & colSums(structure) == 0)) {
-    stop("IPF infeasible: a column has positive marginal but no estimable cells.",
+    .lsa_stop(class = "ipf_infeasible", "IPF infeasible: a column has positive marginal but no estimable cells.",
          call. = FALSE)
   }
 

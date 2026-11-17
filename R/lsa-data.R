@@ -3,75 +3,72 @@
 # object. Centralizing input handling here means engines, bootstrap,
 # permutation, and plotting all see the same simple structure.
 
-#' Canonicalize Sequence Input for Lag Sequential Analysis
+#' Convert sequence input to the canonical form used by lag sequential analysis
 #'
-#' Coerces a wide variety of user input shapes into a single canonical
-#' representation used by every downstream lagdynamics function (engines,
-#' bootstrap, permutation, grouping, plotting).
+#' @description
+#' `lsa_data()` converts the forms in which sequence data usually arrive into
+#' the canonical representation used by lag sequential analysis, and it is what
+#' [lsa()] calls on its input. A lag sequential analysis needs, for every
+#' sequence, the ordered list of coded events, and a common set of state labels
+#' across sequences. Transitions are counted within sequences only, so the
+#' boundaries between sequences must be kept.
 #'
-#' Accepted input forms:
+#' Accepted forms are:
+#' * an atomic vector of codes (one sequence);
+#' * a list of vectors (several sequences);
+#' * a wide matrix or data frame, one row per sequence and one column per
+#'   ordered time point;
+#' * a square numeric matrix of transition counts, row `i` and column `j`
+#'   holding the count of `i -> j` (any square numeric matrix is read this
+#'   way, so pass square integer-coded sequences as a data frame);
+#' * a sequence object: a `tna` or `group_tna` model with its data, a
+#'   `tna_seq_data`, `tna_data` or `nestimate_data` object, a
+#'   \pkg{Nestimate} `netobject`, or a \pkg{TraMineR} `stslist`.
 #'
-#' - An atomic vector of integer or character codes -- treated as a
-#'   single sequence.
-#' - A list of atomic vectors -- treated as multiple independent
-#'   sequences; transitions are not counted across sequence boundaries.
-#' - A wide matrix or data.frame with rows = sequences, columns =
-#'   ordered time points. Missing values (`NA`) and empty strings are
-#'   treated as missingness, not as a state: they are dropped wherever
-#'   they occur in a row and the surrounding events close up, so no
-#'   transition is counted into or out of a gap. To model missingness
-#'   as its own state, recode it (e.g. `NA -> "missing"`) before
-#'   calling [lsa()].
-#' - A square numeric matrix of pre-computed transition counts. Row
-#'   `i`, column `j` is the count of `i -> j` transitions. In this case
-#'   `events` and `seq_id` are not available and downstream resampling
-#'   tools that need event-level data will error.
-#' - A sequence-bearing object: a `tna` or `group_tna` (sequences read
-#'   from its `data` slot), a `tna_seq_data` code matrix, a `tna_data` or
-#'   `nestimate_data` (its `sequence_data`), a `Nestimate` `netobject`
-#'   (its prepared sequence data), or a `TraMineR` `stslist`. The stored
-#'   event sequences are recovered and analysed.
-#'   A `tna` built from a bare matrix (no retained sequences) errors,
-#'   because transition *counts* cannot be recovered from probability
-#'   weights.
+#' `NA` and empty strings are treated as missing observations, not as a
+#' state: they are dropped wherever they occur and the surrounding events
+#' close up. To model missingness as a state, recode it (for example to
+#' `"missing"`) first. A transition-count matrix carries no sequences, so
+#' the functions that resample sequences ([bootstrap_lsa()],
+#' [permute_lsa()], [stability_lsa()], [reliability_lsa()],
+#' [compare_lsa()]) cannot be used on a fit built from it. Long event logs
+#' are read by [lsa()] through its `actor` and `action` arguments.
 #'
-#' @param x Sequence input. See Details.
-#' @param labels Optional character vector of label names for the
-#'   states. When `NULL`, labels are extracted from the data: unique
-#'   sorted values of character input, or `"Code 1", "Code 2", ...` for
-#'   integer input.
+#' @param x Sequence input in one of the forms listed above. An `lsa_data`
+#'   object is returned unchanged.
+#' @param labels Optional character vector of state names. Default `NULL`
+#'   takes the sorted distinct values of character input, the levels of a
+#'   factor, or `"Code 1"`, `"Code 2"`, ... for integer codes. When
+#'   supplied, character codes are matched to it by name and integer codes
+#'   index into it.
 #'
-#' @return An object of class `c("lsa_data", "list")` with elements:
-#' \describe{
-#'   \item{events}{Integer vector of event codes (1-indexed), or
-#'     `NULL` if input was a transition matrix.}
-#'   \item{seq_id}{Integer vector of sequence membership, same length
-#'     as `events`, or `NULL` if input was a transition matrix.}
-#'   \item{labels}{Character vector of state labels.}
-#'   \item{n_states}{Number of distinct states (`K`).}
-#'   \item{n_sequences}{Integer count of independent sequences.}
-#'   \item{n_events}{Total number of events across all sequences.}
-#'   \item{transitions_per_seq}{Integer vector: number of transitions
-#'     each sequence contributes at lag 1.}
-#'   \item{source}{One of `"events"`, `"transitions"` -- flags whether
-#'     event-level data is available.}
-#'   \item{obs_input}{If `source = "transitions"`, the original `K x K`
-#'     count matrix. Otherwise `NULL`.}
-#' }
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`:
+#' an unsupported input type, no usable events, invalid counts in a
+#' transition matrix, invalid integer codes, or codes that do not match
+#' `labels`.
+#'
+#' @return An object of class `c("lsa_data", "list")`. Print it for the
+#'   input source, the number of states, sequences, events and lag-1
+#'   transitions; read the events with `as.data.frame()` (one row per
+#'   event, or per cell for a transition matrix). The object stores the
+#'   integer-coded events and their sequence membership (`NULL` for a
+#'   transition matrix), the state labels, the counts of states,
+#'   sequences and events, and the source (`"events"` or `"transitions"`).
 #'
 #' @examples
-#' # Single character sequence
-#' lsa_data(c("a", "b", "a", "c", "b"))
+#' lsa_data(engagement)
 #'
-#' # Multiple sequences: no transition is counted across the boundary
+#' # Several sequences: no transition is counted across the boundary
 #' lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
 #'
-#' # Pre-computed transition matrix (source = "transitions")
-#' tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
-#'              dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
-#' lsa_data(tm)
+#' # A transition-count matrix
+#' counts <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
+#'                  dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+#' lsa_data(counts)
 #'
-#' @seealso [lsa_transitions()], [lsa()]
+#' @seealso [as.data.frame.lsa_data()] for the event table;
+#'   [lsa_transitions()] for transition counts; [lsa()].
 #'
 #' @export
 lsa_data <- function(x, labels = NULL) {
@@ -117,12 +114,12 @@ lsa_data <- function(x, labels = NULL) {
   if (is.matrix(x) || is.data.frame(x)) {
     nr <- nrow(x)
     if (is.null(nr)) {
-      stop("Unable to determine row count of input.", call. = FALSE)
+      .lsa_stop("Unable to determine row count of input.", call. = FALSE)
     }
     out <- lapply(seq_len(nr), function(i) .clean_sequence(unlist(x[i, ])))
     return(out[vapply(out, length, integer(1)) > 0L])
   }
-  stop(sprintf(
+  .lsa_stop(sprintf(
     "Unsupported input type: %s. Provide a vector, list of vectors, ",
     paste(class(x), collapse = "/")
   ), "wide matrix/data.frame, or square transition matrix.",
@@ -142,12 +139,12 @@ lsa_data <- function(x, labels = NULL) {
 # Build canonical lsa_data from a list of cleaned sequences.
 .lsa_data_from_sequences <- function(seqs, labels = NULL) {
   if (length(seqs) == 0L) {
-    stop("No usable sequences in input (all empty after NA removal).",
+    .lsa_stop("No usable sequences in input (all empty after NA removal).",
          call. = FALSE)
   }
   flat <- unlist(seqs)
   if (length(flat) == 0L) {
-    stop("Input contains zero events.", call. = FALSE)
+    .lsa_stop("Input contains zero events.", call. = FALSE)
   }
   resolved <- .resolve_and_match(flat, labels)
   events_int <- resolved$events_int
@@ -179,11 +176,11 @@ lsa_data <- function(x, labels = NULL) {
   # plausible-looking but invalid fit (NaN expecteds, all-NA residuals,
   # a tablewise test that spuriously reports perfect independence).
   if (anyNA(m) || !all(is.finite(m))) {
-    stop("Transition matrix must contain only finite counts ",
+    .lsa_stop("Transition matrix must contain only finite counts ",
          "(no NA, NaN, or Inf).", call. = FALSE)
   }
   if (any(m < 0)) {
-    stop("Transition matrix must be non-negative.", call. = FALSE)
+    .lsa_stop("Transition matrix must be non-negative.", call. = FALSE)
   }
   K <- nrow(m)
   dn <- dimnames(m)
@@ -197,7 +194,7 @@ lsa_data <- function(x, labels = NULL) {
   if (is.null(labels)) {
     labels <- default_labels
   } else if (length(labels) != K) {
-    stop(sprintf("labels has length %d but transition matrix is %d x %d.",
+    .lsa_stop(sprintf("labels has length %d but transition matrix is %d x %d.",
                  length(labels), K, K), call. = FALSE)
   }
   rownames(m) <- colnames(m) <- as.character(labels)
@@ -223,18 +220,18 @@ lsa_data <- function(x, labels = NULL) {
 # (1.9 -> 1, 2.8 -> 2), relabelling the sequence into a different one
 # than the user supplied.
 .whole_event_codes <- function(flat) {
-  if (anyNA(flat)) stop("Integer events contain NA.", call. = FALSE)
+  if (anyNA(flat)) .lsa_stop("Integer events contain NA.", call. = FALSE)
   if (!all(is.finite(flat))) {
-    stop("Event codes must be finite (no NaN or Inf).", call. = FALSE)
+    .lsa_stop("Event codes must be finite (no NaN or Inf).", call. = FALSE)
   }
   if (!isTRUE(all(flat == floor(flat)))) {
-    stop("Numeric event codes must be whole numbers; fractional values ",
+    .lsa_stop("Numeric event codes must be whole numbers; fractional values ",
          "such as 1.9 are not valid category codes. Pass character ",
          "labels instead if these are not integer codes.", call. = FALSE)
   }
   ints <- as.integer(flat)
   if (min(ints) < 1L) {
-    stop("Integer event codes must be >= 1.", call. = FALSE)
+    .lsa_stop("Integer event codes must be >= 1.", call. = FALSE)
   }
   ints
 }
@@ -247,12 +244,12 @@ lsa_data <- function(x, labels = NULL) {
   if (!is.null(labels)) {
     if (!is.character(labels)) labels <- as.character(labels)
     if (anyDuplicated(labels)) {
-      stop("`labels` must be unique.", call. = FALSE)
+      .lsa_stop("`labels` must be unique.", call. = FALSE)
     }
     if (is.numeric(flat) || is.integer(flat) || is.logical(flat)) {
       ints <- .whole_event_codes(flat)
       if (max(ints) > length(labels)) {
-        stop(sprintf(
+        .lsa_stop(sprintf(
           "Maximum event code %d exceeds `labels` length %d.",
           max(ints), length(labels)
         ), call. = FALSE)
@@ -262,7 +259,7 @@ lsa_data <- function(x, labels = NULL) {
     ints <- match(as.character(flat), labels)
     if (anyNA(ints)) {
       bad <- unique(as.character(flat)[is.na(ints)])
-      stop(sprintf("Some events do not match supplied labels: %s",
+      .lsa_stop(sprintf("Some events do not match supplied labels: %s",
                    paste(sprintf("'%s'", bad), collapse = ", ")),
            call. = FALSE)
     }
@@ -280,31 +277,37 @@ lsa_data <- function(x, labels = NULL) {
     K <- max(ints)
     return(list(labels = paste("Code", seq_len(K)), events_int = ints))
   }
-  stop(sprintf("Unsupported event vector type: %s",
+  .lsa_stop(sprintf("Unsupported event vector type: %s",
                paste(class(flat), collapse = "/")), call. = FALSE)
 }
 
-#' Tidy the Canonical Sequence Object
+#' Read the events of canonical sequence data as a table
 #'
-#' Returns the canonical `lsa_data` as a tidy data frame: one row per
-#' event (`seq_id`, within-sequence `index`, `state`) for event-level
-#' input, or one row per `from`/`to`/`count` cell for transition-matrix
-#' input.
-#'
-#' `print()` shows the input source, the number of states, sequences,
-#' events and lag-1 transitions.
+#' @description
+#' `as.data.frame()` returns the canonical sequence data from [lsa_data()],
+#' every event with its sequence and position, as a tidy table, which shows how
+#' the input was read: which rows became sequences, where missing values were
+#' dropped, and which labels were assigned. For input given as a
+#' transition-count matrix, it returns one row per cell instead. `print()` shows
+#' the input source, the number of states, sequences, events and lag-1
+#' transitions.
 #'
 #' @param x An `lsa_data` object from [lsa_data()].
-#' @param row.names,optional,... Standard [as.data.frame()] arguments
-#'   (unused; present for method consistency).
+#' @param row.names,optional,... Ignored; present for consistency with the
+#'   generic.
+#'
 #' @return `as.data.frame()`: a `data.frame` with one row per event and
-#'   columns `seq_id`, `index`, `state` (event-level input), or one row
-#'   per cell and columns `from`, `to`, `count` (transition-matrix
-#'   input). `print()`: `x`, invisibly.
+#'   the columns `seq_id`, `index` (position within the sequence) and
+#'   `state`; or, for transition-matrix input, one row per cell and the
+#'   columns `from`, `to` and `count`. `print()` returns `x` invisibly.
+#'
 #' @examples
-#' d <- lsa_data(c("a", "b", "a", "c", "b"))
+#' d <- lsa_data(list(c("a", "b", NA, "a"), c("b", "c")))
 #' d
 #' as.data.frame(d)
+#'
+#' @seealso [lsa_data()], [lsa_transitions()]
+#'
 #' @export
 as.data.frame.lsa_data <- function(x, row.names = NULL, optional = FALSE,
                                    ...) {

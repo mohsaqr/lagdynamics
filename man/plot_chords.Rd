@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-chords.R
 \name{plot_chords}
 \alias{plot_chords}
-\title{Circular (Chord) Diagram of an LSA Fit}
+\title{Plot a chord diagram of transitions}
 \usage{
 plot_chords(
   fit,
@@ -18,63 +18,70 @@ plot_chords(
 \arguments{
 \item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
 
-\item{compare}{Optional second \code{lsa} fit. When supplied, ribbon colour
-is \code{colour(fit) - colour(compare)} (a signed difference on the
-diverging scale). The two fits must share the same states. Default
-\code{NULL}.}
+\item{compare}{Optional second \code{lsa} fit with the same states; ribbons
+are then coloured by \code{fit} minus \code{compare}. Default \code{NULL}.}
 
-\item{width}{Which non-negative quantity sets ribbon width: \code{"count"}
-(default, transition frequency) or \code{"prob"} (row-conditional
-probability).}
+\item{width}{Ribbon width: \code{"count"} (default) or \code{"prob"}.}
 
-\item{color}{Which quantity fills the ribbons: \code{"residuals"} (default,
-signed adjusted residual, diverging), \code{"lift"}, \code{"prob"}, or
-\code{"count"}. Non-residual metrics use a sequential scale unless
-\code{compare} makes them a signed difference.}
+\item{color}{Ribbon colour: \code{"residuals"} (default), \code{"lift"}, \code{"prob"}
+or \code{"count"}.}
 
-\item{significant}{Logical. Keep only significant transitions (drops
-the others' ribbons). Ignored when \code{compare} is set. Default \code{FALSE}.}
+\item{significant}{Draw only transitions whose residual p-value is
+below the fit's \code{alpha} (default \code{FALSE}); ignored with \code{compare}.}
 
-\item{self_loops}{Logical. Draw self-transition ribbons. Default
-\code{TRUE}.}
+\item{self_loops}{Draw self-transitions (default \code{TRUE}).}
 
-\item{alpha}{Ribbon fill opacity. Default \code{0.6}.}
+\item{alpha}{Ribbon opacity (default \code{0.6}).}
 
-\item{...}{Passed to \code{\link[cograph:plot_chord]{cograph::plot_chord()}} (e.g. \code{ticks},
-\code{segment_width}, \code{label_size}, \code{title}).}
+\item{...}{Passed to \code{\link[cograph:plot_chord]{cograph::plot_chord()}}, for example \code{ticks},
+\code{segment_width}, \code{label_size} or \code{title}.}
 }
 \value{
-Invisibly, the list returned by \code{\link[cograph:plot_chord]{cograph::plot_chord()}}
-(\code{segments} and \code{chords} data frames). Drawn as a side effect.
+The value of \code{\link[cograph:plot_chord]{cograph::plot_chord()}} (the drawn segments and
+chords), invisibly; the plot is drawn on the current device.
 }
 \description{
-Draws the transition structure as a chord diagram via
-\code{\link[cograph:plot_chord]{cograph::plot_chord()}}: states are arcs on an outer ring and each
-transition is a curved ribbon whose \strong{width} is its frequency (or
-probability) and whose \strong{fill colour} is its adjusted residual
-(warm = over-represented, cool = avoided). Supply a second fit as
-\code{compare} to fill each ribbon by the \emph{difference} in the colour metric
-between the two fits.
-}
-\details{
-This is the circular companion to the \code{\link[=plot.lsa]{plot.lsa()}} heatmap and the
-\code{\link[=plot_transitions]{plot_transitions()}} network; the drawing is delegated to \code{cograph}.
-}
-\examples{
-fit <- lsa(group_regulation)
-plot_chords(fit)                          # ribbons filled by residual
-plot_chords(fit, width = "prob")          # width = probability
-plot_chords(fit, significant = TRUE, ticks = TRUE)
+\code{plot_chords()} draws the transitions of a fit as a chord diagram with
+\pkg{cograph}: the states are arcs around a circle and each transition is a
+ribbon from its source arc to its target arc. The width of a ribbon shows how
+much of the traffic the transition carries, and its colour can show whether
+the transition is more or less frequent than independence predicts, so the
+diagram shows where the transitions out of each state go, and which of the
+frequent routes are also over-represented.
 
-# Compare two groups: ribbon colour = difference in residuals.
+Ribbon width is the count (default) or the transition probability; ribbon
+colour is the adjusted residual on a diverging scale (red over-represented,
+blue avoided), or the lift, probability or count on a sequential scale. With
+\code{compare}, a second fit on the same states, each ribbon is coloured by the
+difference between the two fits in the colour quantity, which shows where two
+groups differ.
+
+The same display is \code{plot(fit, type = "chord")}. For the full table use
+the residual heatmap of \code{\link[=plot.lsa]{plot.lsa()}}; for a network layout,
+\code{\link[=plot_transitions]{plot_transitions()}}; for a test of group differences,
+\code{\link[=compare_lsa]{compare_lsa()}}.
+}
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and
+\code{lagdynamics_incompatible_fits} when \code{fit} and \code{compare} have different
+states.
+}
+
+\examples{
+fit <- lsa(engagement)
+plot_chords(fit)
+plot_chords(fit, width = "prob", self_loops = FALSE)
+
+# Ribbons coloured by the difference between two groups
 high <- lsa(subset(group_regulation_long, Achiever == "High"),
             actor = "Actor", action = "Action", time = "Time")
-low  <- lsa(subset(group_regulation_long, Achiever == "Low"),
-            actor = "Actor", action = "Action", time = "Time")
+low <- lsa(subset(group_regulation_long, Achiever == "Low"),
+           actor = "Actor", action = "Action", time = "Time")
 plot_chords(high, compare = low)
 
 }
 \seealso{
-\code{\link[=plot.lsa]{plot.lsa()}} (heatmap), \code{\link[=plot_transitions]{plot_transitions()}} (network),
-\code{\link[=transitions]{transitions()}}
+\code{\link[=plot.lsa]{plot.lsa()}}, \code{\link[=plot_transitions]{plot_transitions()}}, \code{\link[=plot_polar]{plot_polar()}},
+\code{\link[=compare_lsa]{compare_lsa()}}
 }

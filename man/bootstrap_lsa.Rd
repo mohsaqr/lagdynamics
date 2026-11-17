@@ -2,7 +2,7 @@
 % Please edit documentation in R/bootstrap_lsa.R
 \name{bootstrap_lsa}
 \alias{bootstrap_lsa}
-\title{Bootstrap Confidence Intervals for an LSA Fit}
+\title{Estimate bootstrap confidence intervals for transitions}
 \usage{
 bootstrap_lsa(
   fit,
@@ -18,121 +18,129 @@ bootstrap_lsa(
 )
 }
 \arguments{
-\item{fit}{An \code{lsa} object returned by \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, built from sequences (not from a
+transition matrix).}
 
-\item{R}{Integer. Number of bootstrap replicates. Default \code{1000}.}
+\item{R}{Number of bootstrap resamples. Default \code{1000}.}
 
-\item{level}{Character. Resampling unit: \code{"auto"} (default) picks
-\code{"sequence"} when the fit has more than one sequence and \code{"event"}
-otherwise; \code{"sequence"} resamples whole sequences with replacement;
-\code{"event"} runs a stationary block bootstrap on the event stream.}
+\item{level}{Resampling unit: \code{"auto"} (default; \code{"sequence"} when the
+fit has two or more sequences, \code{"event"} otherwise), \code{"sequence"}
+(whole sequences with replacement) or \code{"event"} (stationary block
+bootstrap of the event stream). A single sequence always uses
+\code{"event"}, with a warning.}
 
-\item{block_length}{For event-level bootstrap, mean geometric
-block length. Default \code{NULL} -> \code{ceiling(sqrt(T))}.}
+\item{block_length}{Mean block length for \code{level = "event"}. Default
+\code{NULL}, the square root of the number of events, rounded up.}
 
-\item{level_alpha}{Numeric. Confidence level for percentile
-intervals. Default \code{0.95}.}
+\item{level_alpha}{Confidence level of the percentile intervals.
+Default \code{0.95}.}
 
-\item{indices}{Optional integer matrix of replay indices, one row
-per resample (row \code{b} is used for resample \code{b}). For sequence-level
-bootstrap it must be \verb{R x S} with each entry a sequence index in
-\verb{1..S}. For event-level bootstrap it is \verb{R x T} with each entry an
-event position in \verb{1..T} (the fully expanded positions, not block
-starts). When supplied, replaces internal RNG and enables
-bit-identical reproducibility across runs. Dimensions and ranges
-are validated. See Details.}
+\item{indices}{Optional matrix of resampling indices to replay, one row
+per resample: \code{R} x number of sequences (sequence indices) for
+\code{level = "sequence"}, or \code{R} x number of events (event positions) for
+\code{level = "event"}. Default \code{NULL} draws them at random.}
 
-\item{parallel}{Logical. Use multi-core resampling. Default
-\code{FALSE}. Requires base R only (\code{parallel} package).}
+\item{parallel}{Run the resamples on several cores. Default \code{FALSE}.}
 
-\item{n_cores}{Integer. Worker count when \code{parallel = TRUE}.
-Default \code{NULL} -> \code{parallel::detectCores() - 1}.}
+\item{n_cores}{Number of cores when \code{parallel = TRUE}. Default \code{NULL},
+all cores but one.}
 
-\item{verbose}{Logical. Print progress every 100 replicates.
-Default \code{FALSE}.}
+\item{verbose}{Report progress every 100 resamples. Default \code{FALSE}.}
 
-\item{...}{Reserved for future use.}
+\item{...}{Not used.}
 }
 \value{
-An object of class \code{c("lsa_bootstrap", "list")}. Read the
-per-edge table with \code{\link[=transitions]{transitions()}}; see \link{lsa-inference-methods} for
-\code{print()} and \code{as.data.frame()}. Elements:
-\describe{
-\item{edges}{Tidy data frame, one row per \code{from -> to} cell:
-\code{from}, \code{to}, \code{observed} (observed count); \code{count_mean},
-\code{count_se}, \code{count_ci_low}, \code{count_ci_high};
-\code{adj_res_observed}, \code{adj_res_mean}, \code{adj_res_se},
-\code{adj_res_ci_low}, \code{adj_res_ci_high}, the two-sided bootstrap
-p-value \code{adj_res_p_boot}, and \code{adj_res_stable} (\code{TRUE} when the
-residual interval excludes zero); \code{prob_observed}, \code{prob_mean},
-\code{prob_ci_low}, \code{prob_ci_high}; and \code{yules_q_observed},
-\code{yules_q_mean}, \code{yules_q_ci_low}, \code{yules_q_ci_high}.}
-\item{boot_obs, boot_adj_res, boot_prob, boot_yulesq}{\verb{R x K^2}
-numeric matrices of the per-replicate counts, adjusted residuals,
-transition probabilities and Yule's Q (cells in \code{as.vector(obs)}
-order).}
-\item{R, level, level_alpha, indices_used}{Recipe metadata;
-\code{indices_used} is the replay matrix accepted by \code{indices}.}
-\item{fit}{The original fit.}
+An object of class \code{c("lsa_bootstrap", "list")}. Read it with
+\code{\link[=transitions]{transitions()}}, which returns a data frame with one row per
+transition (\code{from -> to} pair) and the columns:
+\itemize{
+\item \code{from}, \code{to}: source and target state.
+\item \code{observed}: the observed count; \code{count_mean}, \code{count_se},
+\code{count_ci_low}, \code{count_ci_high}: its bootstrap mean, standard
+error and interval.
+\item \code{adj_res_observed}, \code{adj_res_mean}, \code{adj_res_se}, \code{adj_res_ci_low},
+\code{adj_res_ci_high}: the same for the adjusted residual;
+\code{adj_res_p_boot}: two-sided bootstrap p-value of the residual;
+\code{adj_res_stable}: \code{TRUE} when the residual interval excludes zero.
+\item \code{prob_observed}, \code{prob_mean}, \code{prob_ci_low}, \code{prob_ci_high}: the
+transition probability.
+\item \code{yules_q_observed}, \code{yules_q_mean}, \code{yules_q_ci_low},
+\code{yules_q_ci_high}: Yule's Q.
 }
+
+\code{transitions(x, significant = TRUE)} keeps the transitions with
+\code{adj_res_stable = TRUE}; \code{sort = "strength"} orders by the absolute
+observed residual. \code{print()} shows the settings and the number of
+stable transitions (see \link{lsa-inference-methods}); \code{\link[=plot_forest]{plot_forest()}}
+draws the intervals. The object also stores the per-resample
+matrices, the settings, the resampling indices used (which can be
+passed back as \code{indices}) and the original fit.
 }
 \description{
-Non-parametric bootstrap for any LSA fit produced by \code{\link[=lsa]{lsa()}}.
-Resamples the underlying sequence data (whole sequences when more
-than one is available; geometric-block stationary bootstrap on
-events otherwise), refits the engine on each resample using the
-immutable recipe stored in \code{fit$params}, and aggregates per-edge
-statistics into a tidy data frame.
+\code{bootstrap_lsa()} estimates bootstrap confidence intervals for the
+transitions of a fit from \code{\link[=lsa]{lsa()}}: it resamples the sequences behind the fit
+and refits it with the same engine, lag, alternative, significance level and
+structural zeros. The non-parametric bootstrap (Efron, 1979) estimates how
+much the count, transition probability, adjusted residual and Yule's Q of
+each transition, all estimated from one sample of sequences, would vary over
+repeated samples from the same population: it draws many resamples of the
+data, refits the model on each, and uses the spread of the refitted values as
+the sampling distribution. A transition whose residual interval excludes zero
+is over- or under-represented in a way that survives resampling, not only in
+the sample at hand.
+
+With two or more sequences, whole sequences are drawn with replacement, which
+keeps the dependence between events of one sequence intact. A single sequence
+is resampled with the stationary block bootstrap (Politis & Romano, 1994),
+which draws blocks of consecutive events of random length. For every
+transition it returns the bootstrap mean, standard error and percentile
+interval of the count, the transition probability, the adjusted residual and
+Yule's Q, a two-sided bootstrap p-value for the residual, and a flag for
+transitions whose residual interval excludes zero.
+
+For an interval on transition probabilities without resampling, use
+\code{\link[=certainty_lsa]{certainty_lsa()}}; it is exact under a Dirichlet-Multinomial model but
+ignores dependence between the transitions of one sequence. For a
+p-value against the null hypothesis of no sequential structure, use
+\code{\link[=permute_lsa]{permute_lsa()}}; for the share of subsamples in which a transition
+stays significant, use \code{\link[=stability_lsa]{stability_lsa()}}.
 }
-\details{
-\strong{Sequence-level resampling (default for multi-sequence input).}
-Each resample draws \code{S} sequence indices with replacement from
-\code{seq_len(S)} and rebuilds the multi-sequence input as the
-corresponding list of event vectors. Preserves within-sequence
-structure.
+\section{Conditions}{
 
-\strong{Event-level resampling (single-sequence input).} Implements
-the stationary block bootstrap of Politis & Romano (1994). Block
-length is geometric with mean \code{block_length}; resampled blocks
-wrap around the event stream and are concatenated until total
-length equals the original \code{T}.
-
-\strong{Reproducibility hook.} Supply \code{indices} as an \verb{R x S} integer
-matrix of sequence indices (sequence-level) or an \verb{R x T} matrix of
-event positions (event-level) to deterministically replay the
-bootstrap across sessions, processes, or languages. The event-level
-matrix holds the fully expanded resampled positions, i.e. the same
-form produced internally, so a captured \code{indices_used} can be fed
-straight back in.
-
-\strong{NA handling.} Per-cell summary statistics (\code{mean}, \code{se},
-\code{ci_low}, \code{ci_high}, \code{p_boot}) are computed with \code{na.rm = TRUE},
-so replicates that produced \code{NA} for a given cell (for example
-structural-zero cells, or cells whose row marginal collapsed to
-zero in the resampled data) are excluded from that cell's
-summary. The summary therefore reflects only the finite
-replicates; cells whose every replicate was \code{NA} come back as
-\code{NA} themselves.
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_needs_events}: the fit was built from a transition
+matrix, so there are no sequences to resample.
+\item \code{lagdynamics_bad_input}: \code{indices} is not a matrix of whole numbers
+with at least \code{R} rows, the expected number of columns and values in
+range, or \code{block_length} is not a single number of at least 1.
 }
+}
+
 \examples{
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 bs <- bootstrap_lsa(fit, R = 100)
 bs
-transitions(bs, significant = TRUE)
+transitions(bs, significant = TRUE, sort = "strength")
 \donttest{
-# A full analysis uses more replicates
-transitions(bootstrap_lsa(fit, R = 1000), sort = "strength")
+# A full analysis uses more resamples
+bootstrap_lsa(fit, R = 1000) |>
+  transitions(sort = "strength") |>
+  head()
 }
 
 }
 \references{
-Efron, B. (1979). Bootstrap methods: another look at the
-jackknife. \emph{Annals of Statistics}, 7(1), 1-26.
+Efron, B. (1979). Bootstrap methods: Another look at the jackknife.
+\emph{The Annals of Statistics, 7}(1), 1-26.
 
 Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap.
-\emph{Journal of the American Statistical Association}, 89(428),
+\emph{Journal of the American Statistical Association, 89}(428),
 1303-1313.
 }
 \seealso{
-\code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}
+\code{\link[=transitions]{transitions()}} to read the result; \code{\link[=plot_forest]{plot_forest()}} to draw
+the intervals; \code{\link[=certainty_lsa]{certainty_lsa()}} for analytic intervals;
+\code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}} and \code{\link[=reliability_lsa]{reliability_lsa()}} for other
+checks of a fit; \code{\link[=compare_lsa]{compare_lsa()}} to compare groups.
 }

@@ -1,0 +1,302 @@
+---
+title: "Case study: regulation in high and low achieving groups"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Case study: regulation in high and low achieving groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+Students who learn together have to regulate their joint work: they plan,
+monitor progress, build consensus, discuss, manage the emotional climate and
+adapt when something fails. Socially shared regulation is a sequence of such
+acts, and its quality lies less in how often each act occurs than in what
+follows what. Planning that leads to monitoring is a different process from
+planning that leads to more planning. A comparison of high and low achieving
+students therefore asks whether the two groups order their regulation
+differently, not only whether they use different acts.
+
+Lag sequential analysis gives the per-transition answer. Within each group,
+it tests every ordered pair of acts against the frequency expected if the
+next act did not depend on the current one (Bakeman & Quera, 2011). Between
+groups, `compare_lsa()` asks whether a transition's departure from
+independence differs more than a random relabelling of the students would
+produce, and `bayes_compare_lsa()` estimates how large the difference in
+transition probability is. This case study sets up the sequences, describes
+the regulation transitions of each achievement group, locates the
+transitions where the groups differ and checks those differences with a
+Bayesian comparison.
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+`group_regulation_long` is a long event log of coded regulation acts in
+collaborative learning, the long companion of the `group_regulation`
+sequence data, taken from the tna package. Each row is one act.
+
+- **Student:** `Actor` — 2,000 students; each student's acts form one
+  sequence.
+- **Achievement group:** `Achiever` — `High` or `Low`, the grouping variable
+  of the comparison.
+- **Collaboration group:** `Group` — 200 groups of students who work
+  together.
+- **Course:** `Course` — `A`, `B` or `C`.
+- **Time stamp:** `Time` — date and clock time of the act; orders the acts
+  within a student.
+- **Act:** `Action` — one of nine regulation acts: `adapt`, `cohesion`,
+  `consensus`, `coregulate`, `discuss`, `emotion`, `monitor`, `plan`,
+  `synthesis`.
+
+```{r data}
+head(group_regulation_long)
+with(group_regulation_long, table(Action))
+with(group_regulation_long, table(Course, Achiever))
+```
+
+The 27,533 acts are dominated by `consensus` (6,797) and `plan` (6,623);
+`adapt` (554) and `synthesis` (729) are the rarest. The course table carries
+an important constraint for interpretation: course `A` holds only high
+achievers and course `C` only low achievers, and only course `B` holds both.
+Achievement and course are therefore largely confounded, and every
+difference between the groups below is also, in part, a difference between
+courses.
+
+```{r nesting}
+aggregate(cbind(students = Actor, achievement_levels = Achiever) ~ Group,
+          data = group_regulation_long,
+          FUN = \(x) length(unique(x))) |>
+  summary()
+```
+
+Every collaboration group has 10 students, all with the same achievement
+level. Students are nested in collaboration groups, and the 1,000 students in
+each achievement group come from 100 collaboration groups.
+
+## How are the sequences built?
+
+In a long log, a sequence is defined by the columns that bound it. With
+`actor = "Actor"`, each student's acts form a sequence, ordered by `Time`.
+When a time column is given, `lsa()` also starts a new sequence whenever two
+consecutive acts of a student are more than `time_threshold` seconds apart
+(900 seconds, 15 minutes, by default). The largest gap between consecutive
+acts of each student shows whether that rule splits anything here.
+
+```{r gaps}
+aggregate(cbind(largest_gap_s = as.numeric(Time)) ~ Actor,
+          data = group_regulation_long,
+          FUN = \(x) max(diff(sort(x)))) |>
+  summary()
+```
+
+No student has a gap longer than 500 seconds, so the default threshold keeps
+each student's acts in one sequence. A shorter threshold would cut through
+the ordinary pace of the work.
+
+```{r sessions}
+lsa(group_regulation_long, actor = "Actor", action = "Action",
+    time = "Time") |>
+  summary() |>
+  as.data.frame()
+lsa(group_regulation_long, actor = "Actor", action = "Action",
+    time = "Time", time_threshold = 300) |>
+  summary() |>
+  as.data.frame()
+```
+
+With the default threshold the log yields 2,000 sequences, one per student,
+and 25,533 transitions. A 300-second threshold splits the same log into
+12,305 sequences and keeps only 15,228 transitions, because every
+transition across a gap is dropped. Gaps of up to
+about eight minutes between the acts of a student working in a group are part of
+one session, not a break between sessions, so the analysis keeps the
+default.
+
+## Which transitions characterise each group?
+
+`group = "Achiever"` fits one model per achievement group. Both fits share
+the same nine states, so their tables are directly comparable.
+
+```{r group-fit}
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+summary(g)
+```
+
+Each group contributes 1,000 sequences; the high achievers have 12,721
+transitions and the low achievers 12,812. In both groups the independence
+model fails (G² = 6,147 and 7,715 on 64 degrees of freedom), and 66 and 67 of
+the 81 transitions are significant. With more than 12,000 transitions per
+group almost every cell is significant, so the comparison of the groups
+rests on the size of the effects rather than on the significance flags. The
+frequent over-represented transitions, those observed at least 400 times, are
+the backbone of each group's regulation.
+
+```{r backbone}
+transitions(g, direction = "over", min_count = 400, sort = "strength")
+```
+
+Both groups share a common core. `emotion` to `cohesion` is the strongest
+transition in both (z = 40.6 for high and 41.7 for low achievers, lift 4.43
+and 5.32): an emotional expression is followed by an act of group cohesion.
+`consensus` leads to `coregulate` and to `plan` in both groups, and `plan`
+persists in both. The groups differ in what surrounds this core. Among the
+high achievers, `cohesion` leads on to `consensus` (z = 19.1), `discuss`
+leads to `consensus` (z = 17.0), `consensus` returns to `discuss`
+(z = 14.3) and `plan` leads to `emotion` (z = 11.9); none of these reaches
+400 observations with a positive residual among the low achievers. The low
+achievers' backbone has one transition the high achievers' lacks, `discuss`
+persisting (z = 9.5), and a stronger persistence of `plan` (1,356
+transitions, z = 23.9, against 948 and z = 14.4). The high achievers'
+regulation moves between discussion, consensus and cohesion; the low
+achievers' stays longer within planning and within discussion.
+
+## Where do the groups differ?
+
+`compare_lsa()` tests the groups transition by transition. Its default
+measure is the log odds ratio of each transition, a measure of the departure
+from independence that does not grow with the number of transitions. The
+test permutes the achievement label of whole students, R = 1,000 times, and
+compares each observed difference with its permutation distribution.
+Transitions with fewer than 5 pooled observations are not tested, and the
+p-values are adjusted for the number of transitions tested with the
+Benjamini-Hochberg false discovery rate procedure (`adjust = "BH"`).
+
+```{r compare}
+set.seed(2026)
+cmp <- compare_lsa(g, R = 1000, adjust = "BH")
+cmp
+as.data.frame(cmp, what = "global")
+```
+
+The omnibus test, the sum of squared differences across all transitions,
+gives p = 0.001, the smallest value 1,000 permutations can produce: the two
+transition structures differ. 78 of the 81 transitions are tested and 39 of
+them differ after the adjustment. The strongest differences:
+
+```{r compare-edges}
+transitions(cmp, significant = TRUE, sort = "strength") |> head(12)
+```
+
+`diff` is the log odds ratio of the high achievers minus that of the low
+achievers. The largest differences involve the rare acts `synthesis` and
+`adapt`, which is where low achievers avoid transitions much more strongly.
+`cohesion` to `adapt` has a log odds ratio of -0.79 among high achievers and
+-3.92 among low achievers (difference 3.13); `emotion` to `synthesis` and
+`plan` to `synthesis` are avoided by both groups but far more by the low
+achievers (differences 2.90 and 2.81). In the other direction, low achievers
+move from `discuss` to `adapt` more than high achievers do (difference -1.24),
+and they avoid the moves from `synthesis` to `monitor` and to `coregulate`
+far less (log odds ratios -0.97 and -0.32, against -3.23 and -1.73). The picture is that high achievers reach
+synthesis from more points of the process, while low achievers adapt and
+monitor after discussion and synthesis.
+
+The largest differences sit in rare transitions. The frequent transitions,
+which carry most of the regulation, are better seen in a back-to-back barrel
+plot of the twelve most frequent transitions.
+
+```{r barrel, fig.height = 6}
+plot(cmp, top_n = 12)
+```
+
+Each row is one transition; the high achievers' bar runs to the left and the
+low achievers' to the right. Bar length is the transition probability, bar
+colour the group's log odds ratio (blue above independence, red below), the
+number at the end of each bar the observed count, and the central chip the
+BH-adjusted p-value of the difference, starred when significant. A dark
+border marks the group with the higher value when the difference is large.
+Seven of the twelve frequent transitions differ. `discuss` to `consensus` and
+`consensus` to `discuss` have long blue bars on the high achievers' side and
+short, near-white bars on the low achievers' side: discussion and consensus
+alternate among high achievers and not among low achievers. On the low
+achievers' side, `plan` to `plan`, `discuss` to `discuss` and `discuss` to
+`synthesis` are the longer bars. `emotion` to `cohesion`, the strongest
+transition in both groups, does not differ.
+
+## A Bayesian check
+
+The permutation test compares log odds ratios. `bayes_compare_lsa()`
+compares the transition probabilities themselves. It places a Dirichlet
+posterior on each row of each group's table, draws from the posterior of the
+difference in each transition probability and reports its 95% credible
+interval. A transition is flagged as credibly different when the interval
+excludes zero, the difference exceeds 0.01 and the interval bound nearest zero
+exceeds 0.001. The `p_adj` column holds the
+Bayesian two-sided p-values, also Benjamini-Hochberg adjusted
+(`adjust = "BH"`); the flag itself is set by the credible interval.
+
+```{r bayes}
+bc <- bayes_compare_lsa(g, adjust = "BH", seed = 2026)
+as.data.frame(bc, what = "global")
+transitions(bc, significant = TRUE, sort = "strength") |> head(10)
+```
+
+38 of the 81 transition probabilities differ credibly. The largest
+difference is `discuss` to `consensus`: 42.4% of the high achievers'
+discussion acts are followed by consensus, against 21.4% of the low
+achievers', a difference of 0.210 with a 95% credible interval of 0.181 to
+0.238. High achievers also move from `synthesis` to `consensus` more often
+(difference 0.186) and from `synthesis` to `plan` (0.118), while low
+achievers move from `synthesis` to `adapt` (difference -0.16) and from
+`discuss` to `adapt` (-0.096) more often.
+
+The two comparisons answer different questions and agree where they
+overlap. `discuss` to `adapt` and `synthesis` to `plan` differ on both
+scales, in the same direction. `discuss` to `consensus` has the largest
+probability difference and a significant log odds ratio difference that is
+not among the twelve largest, because the log odds ratio discounts the high
+base rate of `consensus`. Transitions among rare acts, such as `cohesion` to
+`adapt`, have the largest log odds ratio differences but probability
+differences too small to be flagged by the Bayesian comparison. Both tests treat each student as independent, and the next
+section returns to that assumption.
+
+## What the analysis shows
+
+- The log yields one sequence per student; no student pauses for more than
+  500 seconds, so the 15-minute session threshold splits nothing.
+- High and low achievers share a regulation core: `emotion` to `cohesion`,
+  `consensus` to `coregulate` and to `plan`, and persistent planning.
+- The transition structures differ (omnibus permutation p = 0.001), with 39
+  of 78 tested transitions differing after Benjamini-Hochberg adjustment and
+  38 of 81 transition probabilities differing credibly.
+- High achievers alternate between discussion and consensus and move from
+  synthesis to consensus and planning; low achievers move from discussion
+  and synthesis to adaptation and stay longer in planning and discussion.
+- The largest differences in log odds ratio involve the rare acts
+  `synthesis` and `adapt`; the largest differences in probability involve
+  the frequent move from `discuss` to `consensus`.
+
+The design limits what these differences mean. Achievement is confounded
+with course: courses `A` and `C` each hold a single achievement level, so a
+course effect cannot be separated from an achievement effect in these data.
+A comparison restricted to course `B` would separate them. Students are also
+nested in collaboration groups of 10 that share their interaction, while
+both comparisons treat the 2,000 students as independent units. Within-group
+dependence makes the p-values and credible intervals narrower than they
+should be, so the differences near the significance threshold deserve less
+weight than the large ones. Finally, the models are first order and pool all
+acts of a student: they describe what follows what, not how the process
+changes over a session. For the comparison methods themselves, see
+[the group comparison article](group-comparison.html); for building
+sequences from logs, see [the event logs guide](event-logs.html).
+
+## References
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

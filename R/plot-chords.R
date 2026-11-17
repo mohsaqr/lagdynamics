@@ -46,57 +46,64 @@
   out
 }
 
-#' Circular (Chord) Diagram of an LSA Fit
+#' Plot a chord diagram of transitions
 #'
-#' Draws the transition structure as a chord diagram via
-#' [cograph::plot_chord()]: states are arcs on an outer ring and each
-#' transition is a curved ribbon whose **width** is its frequency (or
-#' probability) and whose **fill colour** is its adjusted residual
-#' (warm = over-represented, cool = avoided). Supply a second fit as
-#' `compare` to fill each ribbon by the *difference* in the colour metric
-#' between the two fits.
+#' @description
+#' `plot_chords()` draws the transitions of a fit as a chord diagram with
+#' \pkg{cograph}: the states are arcs around a circle and each transition is a
+#' ribbon from its source arc to its target arc. The width of a ribbon shows how
+#' much of the traffic the transition carries, and its colour can show whether
+#' the transition is more or less frequent than independence predicts, so the
+#' diagram shows where the transitions out of each state go, and which of the
+#' frequent routes are also over-represented.
 #'
-#' This is the circular companion to the [plot.lsa()] heatmap and the
-#' [plot_transitions()] network; the drawing is delegated to `cograph`.
+#' Ribbon width is the count (default) or the transition probability; ribbon
+#' colour is the adjusted residual on a diverging scale (red over-represented,
+#' blue avoided), or the lift, probability or count on a sequential scale. With
+#' `compare`, a second fit on the same states, each ribbon is coloured by the
+#' difference between the two fits in the colour quantity, which shows where two
+#' groups differ.
+#'
+#' The same display is `plot(fit, type = "chord")`. For the full table use
+#' the residual heatmap of [plot.lsa()]; for a network layout,
+#' [plot_transitions()]; for a test of group differences,
+#' [compare_lsa()].
 #'
 #' @param fit An `lsa` fit from [lsa()].
-#' @param compare Optional second `lsa` fit. When supplied, ribbon colour
-#'   is `colour(fit) - colour(compare)` (a signed difference on the
-#'   diverging scale). The two fits must share the same states. Default
-#'   `NULL`.
-#' @param width Which non-negative quantity sets ribbon width: `"count"`
-#'   (default, transition frequency) or `"prob"` (row-conditional
-#'   probability).
-#' @param color Which quantity fills the ribbons: `"residuals"` (default,
-#'   signed adjusted residual, diverging), `"lift"`, `"prob"`, or
-#'   `"count"`. Non-residual metrics use a sequential scale unless
-#'   `compare` makes them a signed difference.
-#' @param significant Logical. Keep only significant transitions (drops
-#'   the others' ribbons). Ignored when `compare` is set. Default `FALSE`.
-#' @param self_loops Logical. Draw self-transition ribbons. Default
-#'   `TRUE`.
-#' @param alpha Ribbon fill opacity. Default `0.6`.
-#' @param ... Passed to [cograph::plot_chord()] (e.g. `ticks`,
-#'   `segment_width`, `label_size`, `title`).
+#' @param compare Optional second `lsa` fit with the same states; ribbons
+#'   are then coloured by `fit` minus `compare`. Default `NULL`.
+#' @param width Ribbon width: `"count"` (default) or `"prob"`.
+#' @param color Ribbon colour: `"residuals"` (default), `"lift"`, `"prob"`
+#'   or `"count"`.
+#' @param significant Draw only transitions whose residual p-value is
+#'   below the fit's `alpha` (default `FALSE`); ignored with `compare`.
+#' @param self_loops Draw self-transitions (default `TRUE`).
+#' @param alpha Ribbon opacity (default `0.6`).
+#' @param ... Passed to [cograph::plot_chord()], for example `ticks`,
+#'   `segment_width`, `label_size` or `title`.
 #'
-#' @return Invisibly, the list returned by [cograph::plot_chord()]
-#'   (`segments` and `chords` data frames). Drawn as a side effect.
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and
+#' `lagdynamics_incompatible_fits` when `fit` and `compare` have different
+#' states.
+#'
+#' @return The value of [cograph::plot_chord()] (the drawn segments and
+#'   chords), invisibly; the plot is drawn on the current device.
 #'
 #' @examples
-#' fit <- lsa(group_regulation)
-#' plot_chords(fit)                          # ribbons filled by residual
-#' plot_chords(fit, width = "prob")          # width = probability
-#' plot_chords(fit, significant = TRUE, ticks = TRUE)
+#' fit <- lsa(engagement)
+#' plot_chords(fit)
+#' plot_chords(fit, width = "prob", self_loops = FALSE)
 #'
-#' # Compare two groups: ribbon colour = difference in residuals.
+#' # Ribbons coloured by the difference between two groups
 #' high <- lsa(subset(group_regulation_long, Achiever == "High"),
 #'             actor = "Actor", action = "Action", time = "Time")
-#' low  <- lsa(subset(group_regulation_long, Achiever == "Low"),
-#'             actor = "Actor", action = "Action", time = "Time")
+#' low <- lsa(subset(group_regulation_long, Achiever == "Low"),
+#'            actor = "Actor", action = "Action", time = "Time")
 #' plot_chords(high, compare = low)
 #'
-#' @seealso [plot.lsa()] (heatmap), [plot_transitions()] (network),
-#'   [transitions()]
+#' @seealso [plot.lsa()], [plot_transitions()], [plot_polar()],
+#'   [compare_lsa()]
 #'
 #' @export
 plot_chords <- function(fit, compare = NULL,
@@ -104,11 +111,11 @@ plot_chords <- function(fit, compare = NULL,
                         color = c("residuals", "lift", "prob", "count"),
                         significant = FALSE, self_loops = TRUE,
                         alpha = 0.6, ...) {
-  stopifnot(inherits(fit, "lsa"))
+  stopifnot("`fit` must be an `lsa` fit from lsa()" = inherits(fit, "lsa"))
   width <- match.arg(width)
   color <- match.arg(color)
   if (!requireNamespace("cograph", quietly = TRUE)) {
-    stop("Package 'cograph' is required for plot_chords(). ",
+    .lsa_stop(class = "missing_package", "Package 'cograph' is required for plot_chords(). ",
          "Install with install.packages('cograph').", call. = FALSE)
   }
 
@@ -120,9 +127,10 @@ plot_chords <- function(fit, compare = NULL,
   Cv <- .lsa_weight_matrix(fit, ckey, positive_residuals_only = FALSE)
   diverging <- color == "residuals"
   if (!is.null(compare)) {
-    stopifnot(inherits(compare, "lsa"))
+    stopifnot("`compare` must be an `lsa` fit from lsa()" =
+                inherits(compare, "lsa"))
     if (!setequal(rownames(fit$obs), rownames(compare$obs))) {
-      stop("`fit` and `compare` must have the same states.", call. = FALSE)
+      .lsa_stop(class = "incompatible_fits", "`fit` and `compare` must have the same states.", call. = FALSE)
     }
     ord <- match(rownames(W), rownames(compare$obs))
     Cv <- Cv - .lsa_weight_matrix(compare, ckey,

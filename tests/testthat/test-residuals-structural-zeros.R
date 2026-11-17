@@ -35,7 +35,7 @@ test_that("structural-zero cells have non-estimable (NA) residuals", {
   set.seed(12L)
   seq300 <- sample(c("a", "b", "c", "d"), 300, replace = TRUE)
   S <- 1 - diag(4)              # forbid self-transitions
-  fit <- lsa(seq300, engine = "classical", structural_zeros = S)
+  fit <- lsa_forbidden_counts(seq300, engine = "classical", structural_zeros = S)
   expect_true(all(is.na(diag(fit$adj_res))))
   expect_true(all(diag(fit$exp) == 0))
   # p-values on those cells must also be NA, not 1.
@@ -48,7 +48,7 @@ test_that("expected freqs under structural zeros match IPF directly", {
   set.seed(13L)
   seq300 <- sample(c("a", "b", "c", "d"), 300, replace = TRUE)
   S <- 1 - diag(4)
-  fit <- lsa(seq300, engine = "classical", structural_zeros = S)
+  fit <- lsa_forbidden_counts(seq300, engine = "classical", structural_zeros = S)
   ipf <- lsa_ipf(fit$obs, structure = S)
   expect_equal(unname(fit$exp), unname(ipf$fit), tolerance = 1e-8)
 })
@@ -57,7 +57,7 @@ test_that("structural-zero marginals match observed marginals", {
   set.seed(14L)
   seq300 <- sample(c("a", "b", "c"), 300, replace = TRUE)
   S <- 1 - diag(3)
-  fit <- lsa(seq300, engine = "classical", structural_zeros = S)
+  fit <- lsa_forbidden_counts(seq300, engine = "classical", structural_zeros = S)
   expect_equal(rowSums(fit$exp), rowSums(fit$obs),
                tolerance = 1e-6, ignore_attr = TRUE)
   expect_equal(colSums(fit$exp), colSums(fit$obs),
@@ -69,7 +69,7 @@ test_that("structural-zero residuals have correct sign", {
   set.seed(15L)
   seq500 <- sample(c("a", "b", "c", "d"), 500, replace = TRUE)
   S <- 1 - diag(4)
-  fit <- lsa(seq500, engine = "classical", structural_zeros = S)
+  fit <- lsa_forbidden_counts(seq500, engine = "classical", structural_zeros = S)
   # Compare signs in off-diagonal cells only.
   off <- S == 1
   signs_obs_minus_exp <- sign(fit$obs[off] - fit$exp[off])
@@ -83,7 +83,7 @@ test_that("structural-zero LR test uses correct df (non-degenerate)", {
   set.seed(16L)
   seq200 <- sample(c("a", "b", "c", "d"), 200, replace = TRUE)
   S <- 1 - diag(4)               # 4 structural zeros, no degeneracy
-  fit <- lsa(seq200, engine = "classical", structural_zeros = S)
+  fit <- lsa_forbidden_counts(seq200, engine = "classical", structural_zeros = S)
   K <- 4L
   s_zeros <- sum(S == 0)
   # For a non-degenerate pattern the rank-based formula reduces to

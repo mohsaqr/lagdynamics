@@ -4,7 +4,7 @@
 \alias{tests}
 \alias{tests.lsa}
 \alias{tests.lsa_group}
-\title{Tablewise Independence Tests of an LSA Fit (Tidy)}
+\title{Read the tablewise tests of independence of a fit}
 \usage{
 tests(fit)
 
@@ -13,23 +13,36 @@ tests(fit)
 \method{tests}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
 \code{lsa(..., group = )}.}
 }
 \value{
-A \code{data.frame}, one row per test, with columns \code{test}
-(\code{"lrx2"} / \code{"x2"}), \code{statistic}, \code{df}, \code{p}. Tests the engine did
-not compute are omitted. A grouped fit gains a leading \code{group}
+A \code{data.frame} with one row per test and the columns \code{test}
+(\code{"lrx2"} for the likelihood-ratio test, \code{"x2"} for Pearson's test),
+\code{statistic}, \code{df} and \code{p}. A grouped fit gains a leading \code{group}
 column.
 }
 \description{
-The global tests of independence (likelihood-ratio G^2 and Pearson
-chi-square) as a one-row-per-test \code{data.frame}.
+\code{tests()} returns the tablewise tests of independence of a fit, one row per
+test. They test whether the table as a whole departs from independence:
+whether the state at one time carries any information about the state \code{lag}
+events later (Bakeman & Quera, 1995). The likelihood-ratio statistic
+\eqn{G^2} and the Pearson \eqn{\chi^2} statistic test this omnibus hypothesis
+against a chi-square distribution, and are read before individual transitions
+are interpreted.
+
+The tests are computed by the classical engine; the other built-in engines
+test cells only, and \code{tests()} then returns a table with no rows.
 }
 \examples{
-tests(lsa(group_regulation))
+tests(lsa(engagement))
 
 }
+\references{
+Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+}
 \seealso{
-\code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}}
+\code{\link[=transitions]{transitions()}} for the cell-wise tests; \code{\link[=nodes]{nodes()}};
+\link{lsa-methods} for \code{summary()}.
 }

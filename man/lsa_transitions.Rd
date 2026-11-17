@@ -4,7 +4,7 @@
 \alias{lsa_transitions}
 \alias{print.lsa_transitions}
 \alias{as.data.frame.lsa_transitions}
-\title{Tidy Transition Counts at a Given Lag}
+\title{Count transitions at a given lag}
 \usage{
 lsa_transitions(x, lag = 1)
 
@@ -13,57 +13,52 @@ lsa_transitions(x, lag = 1)
 \method{as.data.frame}{lsa_transitions}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
-\item{x}{Either an \link{lsa_data} object or any input accepted by
-\code{\link[=lsa_data]{lsa_data()}} (which will be coerced).}
+\item{x}{An \code{\link[=lsa_data]{lsa_data()}} object or any input it accepts.}
 
-\item{lag}{Integer. The lag at which to count transitions; default
-\code{1}. A positive lag counts successors (\code{from} at \code{t}, \code{to} at
-\code{t + lag}), a negative lag counts predecessors, and \code{0} pairs each
-event with itself (a degenerate diagonal). Must be a single finite
-whole number.}
+\item{lag}{Integer lag (default \code{1}). Positive lags count successors,
+negative lags predecessors. Input given as a transition-count matrix
+supports \code{lag = 1} only.}
 
-\item{row.names, optional, ...}{Ignored by the \code{print()} and
-\code{as.data.frame()} methods; present for consistency with the generics.}
+\item{row.names, optional, ...}{Ignored; present for consistency with the
+generics.}
 }
 \value{
-An object of class \code{c("lsa_transitions", "list")} with
-elements:
-\describe{
-\item{obs}{The \verb{K x K} observed transition count matrix with
-\code{dimnames} set to the labels.}
-\item{row_totals}{Length-\code{K} vector \code{rowSums(obs)}.}
-\item{col_totals}{Length-\code{K} vector \code{colSums(obs)}.}
-\item{n_transitions}{Scalar \code{sum(obs)}.}
-\item{lag}{The lag used.}
-\item{labels}{Character vector of state labels.}
-\item{edges}{Tidy long-format data.frame with one row per
-\verb{(from, to)} cell containing columns \code{from}, \code{to}, \code{lag},
-\code{count}, \code{row_total}, \code{col_total}, \code{n_transitions}.}
-}
-\code{print()} shows the lag, the number of states and transitions and the
-count matrix, and returns \code{x} invisibly. \code{as.data.frame()} returns the
-\code{edges} table: one row per \code{from -> to} cell with the columns listed
-above.
+An object of class \code{c("lsa_transitions", "list")}. \code{print()}
+shows the lag, the number of states and transitions and the count
+matrix, and returns \code{x} invisibly. \code{as.data.frame()} returns one row
+per \code{from -> to} pair with the columns \code{from}, \code{to}, \code{lag}, \code{count},
+\code{row_total}, \code{col_total} and \code{n_transitions}.
 }
 \description{
-Computes the \verb{K x K} transition count matrix from canonical lag
-sequential data, optionally returning a tidy long-format edge table
-alongside the matrix.
+\code{lsa_transitions()} counts the transitions at a given lag and returns the
+table of observed transitions with its row and column totals: for each pair
+of states, how often the second occurs \code{lag} events after the first. This
+table is the starting point of every lag sequential analysis. At lag 1 it
+records immediate succession; at larger lags it records what tends to follow
+a state two or more events later, and at negative lags what tends to precede
+it. Transitions are counted within sequences only; no transition spans the
+boundary between two sequences.
+
+The count involves no model or test; \code{\link[=lsa]{lsa()}} adds the expected counts,
+residuals and the other statistics. Use \code{lsa_transitions()} to inspect the
+raw counts, or to check how many transitions a lag leaves before fitting.
 }
-\details{
-Transitions are counted within sequences only; no transition spans a
-sequence boundary. For input that was supplied as a pre-computed
-transition matrix (\code{source = "transitions"} on the \code{lsa_data}
-object), the input matrix is returned at lag 1 and an error is
-raised for any other lag.
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}:
+a lag other than 1 for a transition-count matrix, or input that
+\code{\link[=lsa_data]{lsa_data()}} rejects.
 }
+
 \examples{
-d <- lsa_data(c("a", "b", "a", "c", "b", "a"))
-tx <- lsa_transitions(d, lag = 1)
+tx <- lsa_transitions(engagement)
 tx
 as.data.frame(tx)
 
+# What precedes each state
+lsa_transitions(engagement, lag = -1)
+
 }
 \seealso{
-\code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa]{lsa()}}
+\code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa]{lsa()}}, \code{\link[=lsa_lags]{lsa_lags()}}
 }

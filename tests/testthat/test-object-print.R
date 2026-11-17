@@ -27,7 +27,7 @@ test_that("print.lsa shows header, independence test, and inits bars", {
   expect_match(out, "Lag Sequential Analysis")
   expect_match(out, "independence: G")
   expect_match(out, "Initial states:")
-  expect_match(out, "█")   # the bar glyph
+  expect_match(out, .lsa_glyph("\u2588", "#"))   # the bar glyph
   expect_identical(withVisible(print(fit))$visible, FALSE)
 })
 
@@ -37,11 +37,13 @@ test_that("print.lsa omits the initial-states block for matrix fits", {
   expect_false(grepl("Initial states", out))
 })
 
-test_that("summary.lsa adds node-activity bars and the full matrices", {
+test_that("print.summary.lsa shows the overview and the state activity", {
   fit <- lsa(engagement, engine = "classical")
-  out <- paste(capture.output(summary(fit)), collapse = "\n")
-  expect_match(out, "Node activity")
-  expect_match(out, "█")                    # bar glyph in the node section
-  expect_match(out, "Adjusted residuals")   # full matrices still shown
-  expect_identical(withVisible(summary(fit))$visible, FALSE)
+  out <- paste(capture.output(print(summary(fit))), collapse = "\n")
+  expect_match(out, "Lag sequential analysis: classical engine, lag 1")
+  expect_match(out, "State activity")
+  expect_match(out, "136 sequences")
+  # summary() itself prints nothing: the object prints only when shown.
+  expect_silent(s <- summary(fit))
+  expect_identical(withVisible(summary(fit))$visible, TRUE)
 })

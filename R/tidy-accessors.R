@@ -2,24 +2,34 @@
 # fit first and returns a tidy data.frame, matching transitions(fit).
 # Pure base R; collision-free names (no overlap with tna / Nestimate).
 
-#' Nodes of an LSA Fit (Tidy)
+#' Read the states of a lag sequential analysis fit
 #'
-#' The states and their incoming / outgoing transition totals, as a
-#' tidy `data.frame` (one row per state).
+#' @description
+#' `nodes()` returns the states of a lag sequential analysis fit, one row per
+#' state with its total outgoing and incoming transition counts. In a lag
+#' transition network the states are the nodes, and how often a state is left
+#' and how often it is entered describe its place in the process: a state with
+#' many outgoing but few incoming transitions tends to open episodes, one with
+#' the reverse tends to close them. The marginal totals also set the expected
+#' counts against which every transition is tested.
 #'
-#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#' The shares of all transitions and the initial-state probability are in
+#' `as.data.frame(summary(fit), what = "nodes")`; the per-transition table is
+#' [transitions()].
+#'
+#' @param fit An `lsa` fit from [lsa()], or a grouped fit from
 #'   `lsa(..., group = )`.
 #'
-#' @return A `data.frame`, one row per state, with columns `state` (the
-#'   state name, matching the `from`/`to` endpoints of [transitions()]),
-#'   `outgoing`, and `incoming` (its total out- and in-transition
-#'   counts). A grouped fit gains a leading `group` column (one row per
-#'   group and state).
+#' @return A `data.frame` with one row per state and the columns `state`
+#'   (matching the `from` and `to` names of [transitions()]), `outgoing`
+#'   and `incoming`. A grouped fit gives one row per group and state, with
+#'   a leading `group` column.
 #'
 #' @examples
-#' nodes(lsa(group_regulation))
+#' nodes(lsa(engagement))
 #'
-#' @seealso [transitions()], [tests()]
+#' @seealso [transitions()], [initial()], [tests()], [lsa-methods] for
+#'   `summary()`.
 #'
 #' @export
 nodes <- function(fit) UseMethod("nodes")
@@ -38,23 +48,37 @@ nodes.lsa <- function(fit) {
 #' @export
 nodes.lsa_group <- function(fit) .bind_group_edges(fit, nodes)
 
-#' Tablewise Independence Tests of an LSA Fit (Tidy)
+#' Read the tablewise tests of independence of a fit
 #'
-#' The global tests of independence (likelihood-ratio G^2 and Pearson
-#' chi-square) as a one-row-per-test `data.frame`.
+#' @description
+#' `tests()` returns the tablewise tests of independence of a fit, one row per
+#' test. They test whether the table as a whole departs from independence:
+#' whether the state at one time carries any information about the state `lag`
+#' events later (Bakeman & Quera, 1995). The likelihood-ratio statistic
+#' \eqn{G^2} and the Pearson \eqn{\chi^2} statistic test this omnibus hypothesis
+#' against a chi-square distribution, and are read before individual transitions
+#' are interpreted.
 #'
-#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#' The tests are computed by the classical engine; the other built-in engines
+#' test cells only, and `tests()` then returns a table with no rows.
+#'
+#' @param fit An `lsa` fit from [lsa()], or a grouped fit from
 #'   `lsa(..., group = )`.
 #'
-#' @return A `data.frame`, one row per test, with columns `test`
-#'   (`"lrx2"` / `"x2"`), `statistic`, `df`, `p`. Tests the engine did
-#'   not compute are omitted. A grouped fit gains a leading `group`
+#' @return A `data.frame` with one row per test and the columns `test`
+#'   (`"lrx2"` for the likelihood-ratio test, `"x2"` for Pearson's test),
+#'   `statistic`, `df` and `p`. A grouped fit gains a leading `group`
 #'   column.
 #'
 #' @examples
-#' tests(lsa(group_regulation))
+#' tests(lsa(engagement))
 #'
-#' @seealso [transitions()], [nodes()]
+#' @references
+#' Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+#' Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+#'
+#' @seealso [transitions()] for the cell-wise tests; [nodes()];
+#'   [lsa-methods] for `summary()`.
 #'
 #' @export
 tests <- function(fit) UseMethod("tests")
@@ -82,26 +106,35 @@ tests.lsa <- function(fit) {
 #' @export
 tests.lsa_group <- function(fit) .bind_group_edges(fit, tests)
 
-#' Transition-Probability Matrix of an LSA Fit
+#' Read the transition probabilities of a fit
 #'
-#' The row-stochastic transition-probability matrix \eqn{P(\text{to} \mid
-#' \text{from})}: each row holds the distribution over next states out of
-#' a state, so the entries in a row sum to 1 (up to structural zeros).
-#' This is the transition-probability matrix a Transition Network Analysis
-#' reads; pair it with [initial()] for the initial-state probabilities.
+#' @description
+#' `transition_probabilities()` returns the transition probabilities of a fit,
+#' one row per ordered pair of states. The transition probability
+#' \eqn{P(\text{to} \mid \text{from})} is the share of the transitions leaving a
+#' state that go to each other state, so the probabilities out of one state sum
+#' to 1. They describe where the process goes next, regardless of chance
+#' expectation; the adjusted residuals of [transitions()] say which of these
+#' moves are more or less frequent than independence predicts. Together with the
+#' initial-state probabilities of [initial()], they are the parameters of the
+#' first-order Markov model read by Transition Network Analysis.
 #'
-#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#' A cell declared a structural zero has probability 0, as does every cell of a
+#' state that is never left.
+#'
+#' @param fit An `lsa` fit from [lsa()], or a grouped fit from
 #'   `lsa(..., group = )`.
 #'
-#' @return A square numeric matrix with `from` states in rows and `to`
-#'   states in columns. For an `lsa_group`, a named list of such matrices,
-#'   one per group.
+#' @return A `data.frame` with one row per `from -> to` pair (`K^2` rows
+#'   for `K` states, ordered by `from` and then `to`) and the columns
+#'   `from`, `to` and `prob`. A grouped fit stacks the groups under a
+#'   leading `group` column.
 #'
 #' @examples
-#' transition_probabilities(lsa(group_regulation))
+#' transition_probabilities(lsa(engagement))
 #'
-#' @seealso [initial()] (initial-state probabilities), [transitions()]
-#'   (the tidy per-edge view), [nodes()]
+#' @seealso [initial()] for the initial-state probabilities;
+#'   [transitions()], which also carries `prob`; [lsa_to_tna()].
 #'
 #' @export
 transition_probabilities <- function(fit) UseMethod("transition_probabilities")
@@ -109,34 +142,48 @@ transition_probabilities <- function(fit) UseMethod("transition_probabilities")
 #' @rdname transition_probabilities
 #' @export
 transition_probabilities.lsa <- function(fit) {
-  .lsa_weight_matrix(fit, "prob")
+  P <- .lsa_weight_matrix(fit, "prob")
+  labels <- rownames(P)
+  K <- length(labels)
+  # Row-major (from, then to): P is stored column-major, so read t(P).
+  data.frame(
+    from = rep(labels, each = K),
+    to   = rep(labels, times = K),
+    prob = as.vector(t(P)),
+    stringsAsFactors = FALSE,
+    row.names = NULL
+  )
 }
 
 #' @rdname transition_probabilities
 #' @export
 transition_probabilities.lsa_group <- function(fit) {
-  stats::setNames(lapply(fit, transition_probabilities), names(fit))
+  .bind_group_edges(fit, transition_probabilities)
 }
 
-#' Initial-State Distribution of an LSA Fit (Tidy)
+#' Read the initial-state distribution of a fit
 #'
-#' The proportion of sequences starting in each state, as a tidy
-#' `data.frame`. These are the initial-state probabilities (init P) that
-#' complement the transition-probability matrix from
+#' @description
+#' `initial()` returns the initial-state distribution of a fit, one row per
+#' state: the proportion of sequences that begin in each state. It describes how
+#' episodes open, which the transition table cannot show, and it completes the
+#' description of the process as a first-order Markov chain together with
 #' [transition_probabilities()].
 #'
-#' @param fit An `lsa` fit from [lsa()], or an `lsa_group` from
+#' A fit built from a transition-count matrix has no sequences and so no initial
+#' states; the table then has no rows.
+#'
+#' @param fit An `lsa` fit from [lsa()], or a grouped fit from
 #'   `lsa(..., group = )`.
 #'
-#' @return A `data.frame`, one row per state, with columns `state`,
-#'   `init_prob`; zero rows when the fit came from a transition matrix
-#'   (no initial states). A grouped fit gains a leading `group`
+#' @return A `data.frame` with one row per state and the columns `state`
+#'   and `init_prob` (summing to 1). A grouped fit gains a leading `group`
 #'   column.
 #'
 #' @examples
-#' initial(lsa(group_regulation))
+#' initial(lsa(engagement))
 #'
-#' @seealso [transitions()], [nodes()]
+#' @seealso [transition_probabilities()], [nodes()], [transitions()]
 #'
 #' @export
 initial <- function(fit) UseMethod("initial")

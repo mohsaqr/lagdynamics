@@ -2,51 +2,79 @@
 % Please edit documentation in R/engine-registry.R
 \name{register_lsa_engine}
 \alias{register_lsa_engine}
-\title{Register a Lag Sequential Analysis Engine}
+\title{Register a lag sequential analysis engine}
 \usage{
 register_lsa_engine(name, fn, description, requires = character())
 }
 \arguments{
-\item{name}{Character scalar. The engine's identifier as used in
-\code{lsa(engine = name)}.}
+\item{name}{Name of the engine, used as \code{lsa(engine = name)}.}
 
-\item{fn}{A function. \code{\link[=lsa]{lsa()}} calls it with \code{transitions} (the
-\code{lsa_transitions} object produced by \code{\link[=lsa_transitions]{lsa_transitions()}}),
-\code{structural_zeros} (\code{NULL} or a \verb{K x K} 0/1 matrix), \code{alternative},
-\code{n_events} (\code{NULL} for transition-matrix input), and any engine
-parameters supplied through \code{params} or \code{...} of \code{\link[=lsa]{lsa()}}, so it
-should accept \code{transitions} and \code{...}.
-Must return a named list with at least the matrix elements \code{obs},
-\code{exp}, \code{prob}, \code{adj_res}, and \code{p} (each \verb{K x K}). Additional \verb{K x K}
-matrices are preserved as engine-specific edge statistics.}
+\item{fn}{The engine function. It is called with \code{transitions} (the
+\code{\link[=lsa_transitions]{lsa_transitions()}} object), \code{structural_zeros} (\code{NULL} or a \verb{K x K}
+0/1 matrix), \code{alternative}, \code{n_events} (\code{NULL} for transition-matrix
+input) and any engine parameters given to \code{\link[=lsa]{lsa()}}, so it should accept
+\code{transitions} and \code{...}. It must return a named list holding at least
+the \verb{K x K} matrices \code{obs}, \code{exp}, \code{prob}, \code{adj_res} and \code{p}; further
+\verb{K x K} matrices become extra columns of \code{\link[=transitions]{transitions()}}.}
 
-\item{description}{Character scalar. One-line human-readable
-description shown by \code{\link[=list_lsa_engines]{list_lsa_engines()}}.}
+\item{description}{One-line description shown by \code{\link[=list_lsa_engines]{list_lsa_engines()}}.}
 
-\item{requires}{Character vector. Names of packages the engine
-depends on. Empty by default.}
+\item{requires}{Names of packages the engine needs (default none);
+\code{\link[=lsa]{lsa()}} checks that they are installed before fitting.}
 }
 \value{
-Invisibly returns \code{name} (a character scalar).
+\code{name}, invisibly.
 }
 \description{
-Adds a new engine to the lagdynamics registry so it can be referenced by
-name via \code{lsa(..., engine = "<name>")}. Built-in engines
-(\code{"classical"}, \code{"two_cell"}, \code{"bidirectional"},
-\code{"parallel_dominance"}, \code{"nonparallel_dominance"}) are registered
-automatically when the package loads.
+\code{register_lsa_engine()} adds a lag sequential analysis engine under a name,
+after which \code{lsa(data, engine = name)} fits it; the fit is read, resampled
+and plotted like any other. An engine is the part of a lag sequential
+analysis that turns a table of observed transitions into expected counts and
+cell-wise tests. The built-in engines implement the classical analysis of
+Bakeman and Quera (1995), a two-cell test, Sackett's (1979) bidirectional
+test, and the parallel and non-parallel dominance tests (Wampold, 1984).
+Other tests of the same table, such as a different residual or a model-based
+expectation, can be added as engines and then used with every function of the
+package.
+
+Re-registering a name replaces the engine for the session. The built-in
+engines are registered when the package loads.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}
+when \code{fn} has no \code{transitions} argument.
+}
+
 \examples{
-my_engine <- function(transitions, ...) {
-  get_lsa_engine("classical")$fn(transitions, ...)
+# An engine that tests Pearson residuals under independence
+pearson_engine <- function(transitions, ...) {
+  obs <- transitions$obs
+  expected <- outer(rowSums(obs), colSums(obs)) / sum(obs)
+  residual <- (obs - expected) / sqrt(expected)
+  list(obs = obs, exp = expected, prob = obs / rowSums(obs),
+       adj_res = residual, p = 2 * stats::pnorm(-abs(residual)))
 }
-register_lsa_engine("my_classical", my_engine, "Classical test alias")
-fit <- lsa(engagement, engine = "my_classical")
-unregister_lsa_engine("my_classical")
-fit
+register_lsa_engine("pearson", pearson_engine,
+                    description = "Pearson residuals under independence")
+list_lsa_engines()
+fit <- lsa(engagement, engine = "pearson")
+transitions(fit, significant = TRUE)
+unregister_lsa_engine("pearson")
 
 }
+\references{
+Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+\emph{Handbook of infant development} (pp. 623-649). Wiley.
+
+Wampold, B. E. (1984). Tests of dominance in sequential categorical
+data. \emph{Psychological Bulletin, 96}(2), 424-429.
+}
 \seealso{
-\code{\link[=get_lsa_engine]{get_lsa_engine()}}, \code{\link[=list_lsa_engines]{list_lsa_engines()}},
+\code{\link[=list_lsa_engines]{list_lsa_engines()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}},
 \code{\link[=unregister_lsa_engine]{unregister_lsa_engine()}}, \code{\link[=lsa]{lsa()}}
 }

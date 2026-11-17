@@ -1,0 +1,353 @@
+---
+title: "A complete workflow"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{A complete workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+Lag sequential analysis (LSA) asks whether one event follows another more
+often, or less often, than it would if the events of a sequence were
+independent of each other (Bakeman & Gottman, 1997; Bakeman & Quera, 2011).
+For every ordered pair of states it compares the observed count of the
+transition with the count expected from the marginal frequencies of the two
+states, and expresses the difference as an adjusted residual: a positive
+residual marks a transition the process favours, a negative residual marks a
+transition the process avoids.
+
+A finding from LSA is a claim, and each kind of claim needs its own evidence.
+A descriptive claim ("disengaged students tend to stay disengaged") rests on
+the fitted transition table. A claim about a single transition adds an
+interval for it. A claim about the whole network adds a check that the
+network reproduces in independent halves of the data. A claim that two groups
+differ needs a test of the difference. This guide runs that chain from end to
+end on the bundled data: it fits a model to weekly engagement states, reads
+and draws the result, adds uncertainty evidence, then fits one model per
+achievement group from a raw event log and tests where the groups differ.
+The method itself is introduced in [the LSA vignette](lsa.html); the full
+confirmatory battery is in [the confirmatory vignette](confirmatory.html).
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+The first part of the guide uses `engagement`, a wide data frame with one row
+per student and one column per week of a course.
+
+- **Sequence:** each row is one student; 138 rows, of which 2 are empty.
+- **Time point:** the 15 columns, in course order.
+- **State:** the weekly engagement state, `Active`, `Average`, or
+  `Disengaged`. A missing cell means no record that week.
+
+```{r data}
+head(engagement)
+```
+
+The second part uses `group_regulation_long`, an event log of collaborative
+learning with one coded regulation action per row.
+
+- **Actor:** `Actor`, the student who acted; 2,000 actors.
+- **Action:** `Action`, one of nine regulation codes (`adapt`, `cohesion`,
+  `consensus`, `coregulate`, `discuss`, `emotion`, `monitor`, `plan`,
+  `synthesis`).
+- **Time:** `Time`, the time stamp that orders the actions.
+- **Group:** `Achiever`, `High` or `Low` achievement, fixed for each actor.
+
+```{r data-long}
+head(group_regulation_long)
+```
+
+## Fit the model
+
+`lsa()` turns the rows into sequences, counts every lag-1 transition,
+computes the counts expected under independence, and tests each cell. The
+print method gives the size of the data, the tablewise independence test,
+and the strongest favoured transitions.
+
+```{r fit}
+fit <- lsa(engagement)
+fit
+```
+
+The model rests on 1,734 transitions from 136 sequences: the two empty rows
+contribute nothing. The likelihood-ratio test of independence is
+G² = 618.3 on 4 degrees of freedom, so the weekly states are far from
+independent of the previous week's state. Seven of the nine transitions
+depart from chance, and the three favoured ones are the three self-transitions:
+`Active -> Active` (z = 21.7), `Disengaged -> Disengaged` (z = 15.4), and
+`Average -> Average` (z = 12.5). Engagement is persistent.
+
+## Overview of the fit
+
+`summary()` returns the same overview as one table row, and the `nodes`
+table describes the states: how many transitions leave and enter each
+state, their shares, and the share of sequences that start in it.
+
+```{r summary}
+as.data.frame(summary(fit))
+as.data.frame(summary(fit), what = "nodes")
+```
+
+`Average` carries the largest share of activity (0.433 of outgoing
+transitions), `Disengaged` the smallest (0.187). A quarter of the students
+(0.250) start the course disengaged, against 0.382 who start active.
+
+## Which transitions depart from chance
+
+`transitions()` returns one row per transition, with the observed and
+expected counts, the transition probability, the adjusted residual and its
+p-value, and effect sizes (Yule's Q, kappa, lift). `sort = "strength"`
+orders the rows by the absolute residual; `significant = TRUE` would keep
+only the transitions significant at `alpha = 0.05`.
+
+```{r transitions}
+transitions(fit, sort = "strength")
+```
+
+Four of the six moves between different states are avoided. The strongest
+avoidance is `Average -> Active` (z = -12.9, Yule's Q = -0.601), followed
+closely by `Active -> Disengaged` (z = -12.6): an active student almost never
+drops to disengagement in one week (23 observed against 121 expected,
+probability 0.035). The remaining two moves, `Disengaged -> Average`
+(z = -1.74, p = 0.083) and `Average -> Disengaged` (z = 0.18, p = 0.86),
+occur about as often as chance predicts. The probability column is the
+transition probability that a transition network displays; the residual and
+Yule's Q say whether that probability is larger or smaller than chance.
+
+## Display the model
+
+A residual heatmap shows the residual of every cell: rows are the current
+state, columns the next state, and the colour gives the sign and size of the
+departure from chance.
+
+```{r heatmap}
+plot(fit)
+```
+
+The three red cells are the self-transitions and the blue cells the avoided
+moves between states, which is the persistence reported above in one
+display. The rows are ordered by how many transitions leave each state, so
+the self-transitions do not form a visual diagonal.
+
+A transition network draws the same process with edges weighted by
+transition probability, the form used in transition network analysis. It
+answers a different question: where the process tends to go next, rather
+than which moves are surprising.
+
+```{r network-tna}
+plot(fit, type = "network", weights = "tna")
+```
+
+The two displays answer different questions, and they part ways on
+`Disengaged -> Average`: with a probability of 0.397 it is one of the
+heaviest edges in the transition network, yet its residual is not
+significant, because `Average` is common enough that chance alone predicts
+a move of that size.
+Every display is covered in [the plotting guide](plotting.html).
+
+## How precise are the transition probabilities
+
+`certainty_lsa()` gives analytic credible intervals for each transition
+probability from a Dirichlet-multinomial posterior, and marks an edge as
+stable when its residual keeps its sign across the interval.
+
+```{r certainty}
+cert <- certainty_lsa(fit)
+cert
+transitions(cert, sort = "strength")
+```
+
+Seven of the nine probabilities are certain. The probability of the
+strongest edge, `Active -> Active`, lies between 0.661 and 0.731 with 95%
+credibility. The two uncertain ones are the two rarest transitions,
+`Active -> Disengaged` (23 observations, interval 0.023 to 0.051) and
+`Disengaged -> Active` (39 observations): their intervals are wide relative
+to the probability itself, so the posterior does not stay within 75% to 125%
+of the observed value. Their residuals are strongly negative all the same;
+the uncertainty concerns the size of a small probability, not the
+avoidance.
+
+## Do the residuals hold when sequences are resampled
+
+`bootstrap_lsa()` resamples whole sequences with replacement, refits the
+model on each resample, and reports a percentile interval for every
+statistic (Efron, 1979). Resampling sequences keeps each student's
+transitions together, so the interval reflects variation between students.
+The seed makes the resamples reproducible.
+
+```{r bootstrap}
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 1000)
+boot
+transitions(boot, significant = TRUE, sort = "strength") |> head(5)
+```
+
+Seven of the nine residuals are stable across 1,000 resamples of students,
+and every interval shown excludes zero by a wide margin: the residual of
+`Active -> Disengaged` stays between -14.7 and -10.4, so the avoidance of
+that move holds across students even though its probability is small. The
+persistence findings and the avoided moves are therefore not produced by a
+few unusual students.
+
+## Is the whole network reproducible
+
+`reliability_lsa()` splits the sequences into two random halves, fits the
+model to each half, and correlates the two sets of edge weights. A high
+split-half correlation means the network as a whole would be recovered from
+a different sample of the same size.
+
+```{r reliability}
+rel <- reliability_lsa(fit, R = 100)
+rel
+```
+
+Across 100 random splits the two halves agree closely: the mean split-half
+correlation is 0.961, with a 95% interval from 0.890 to 0.993, and no split
+failed. The engagement network is reproducible at this sample size.
+
+## From an event log to sequences
+
+Process data usually arrives as an event log rather than as wide sequences.
+`lsa()` builds the sequences itself when the columns are named: `actor`
+identifies the sequence, `action` is the state, and `time` orders the
+events. A new sequence also starts whenever two consecutive events of an
+actor are more than `time_threshold` seconds apart (900 by default). The
+column grammar and its options are covered in
+[the event-log guide](event-logs.html).
+
+```{r log-fit}
+fit_log <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+               time = "Time")
+fit_log
+```
+
+The 27,533 actions form 2,000 sequences, one per actor, and 25,533
+transitions. Seventy-two of the 81 transitions depart from chance. The
+strongest favoured transition is `emotion -> cohesion` (z = 58.2), followed
+by `discuss -> synthesis` (z = 48.0).
+
+## One model per group
+
+Naming a grouping column with `group` fits one model per group under the same
+set of states. The grouping column must be constant within each sequence.
+
+```{r group-fit}
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+summary(gfit)
+```
+
+Each group contributes 1,000 sequences: 12,721 transitions for the
+high achievers and 12,812 for the low achievers. Both tables reject
+independence, and the groups have a similar number of significant
+transitions (66 and 67). Every reading verb returns a leading `group`
+column for a grouped fit.
+
+```{r group-read}
+transitions(gfit, significant = TRUE, sort = "strength") |> head(6)
+```
+
+The strongest residual in the high achievers is `emotion -> cohesion`
+(z = 40.6). The question of the next section is whether any transition is
+stronger in one group than in the other.
+
+## Do the groups differ
+
+`compare_lsa()` tests the difference between the groups edge by edge. The
+statistic is the difference in the log odds ratio of each transition
+between the groups; its null distribution comes from permuting the group
+labels of whole sequences, `R` times. With many edges tested at once, the
+p-values are corrected for multiplicity: `adjust = "BH"` applies the
+Benjamini-Hochberg false discovery rate correction, and the `significant`
+column below refers to the adjusted p-values (`p_adj`). The package default
+is no adjustment, so the argument is passed explicitly.
+
+```{r compare}
+set.seed(2026)
+cmp <- compare_lsa(gfit, R = 1000, adjust = "BH")
+cmp
+as.data.frame(cmp, what = "global")
+```
+
+The omnibus test rejects the hypothesis that the two groups share one
+transition structure (statistic 79.5, p = 0.000999). That p-value is
+1 / (R + 1), the smallest value 1,000 permutations can give, so the
+difference is at least as extreme as the permutation null allows. Of the 78
+edges with enough observations to test (the default `min_count = 5`), 39
+differ after the Benjamini-Hochberg correction. Sorting by the size of the
+difference shows the largest ones.
+
+```{r compare-edges}
+transitions(cmp, significant = TRUE, sort = "strength") |> head(8)
+```
+
+The `diff` column is the high-achiever log odds ratio minus the
+low-achiever one. The largest difference is `cohesion -> adapt` (3.13): the
+move is avoided in both groups but far more strongly by the low achievers
+(-3.921 against -0.794). Three of the next differences end in `synthesis`
+(`emotion`, `plan`, and `cohesion -> synthesis`), each avoided much more
+strongly by the low achievers. The negative differences run the other way:
+`synthesis -> monitor` (-2.25) is avoided more strongly by the high
+achievers.
+
+A comparison barrel plot shows the two groups side by side for the most
+frequent transitions: the high achievers' transition probability runs to
+the left and the low achievers' to the right, the bar labels give the
+counts, the fill gives the log odds ratio, and the centre carries the
+adjusted p-value of the difference.
+
+```{r barrel, fig.height = 5.5}
+plot(cmp)
+```
+
+Seven of the twelve most frequent transitions differ between the groups.
+The high achievers move between discussion and consensus far more often
+(`discuss -> consensus`: 851 against 418 observations; `consensus ->
+discuss`: 789 against 401), while the low achievers more often follow
+discussion with synthesis (`discuss -> synthesis`: 344 against 213). The
+backbone transition `consensus -> plan` is equally frequent in both groups
+(p = 0.104).
+
+## When to use which
+
+| Claim | Evidence | Call |
+|---|---|---|
+| The process is not memoryless | Tablewise G² test | `lsa()`, `tests()` |
+| This transition is favoured or avoided | Adjusted residual | `transitions(fit, significant = TRUE)` |
+| The transition probability is known to this precision | Credible interval | `certainty_lsa()` |
+| The residual holds across students | Sequence bootstrap | `bootstrap_lsa()` |
+| The network would reproduce in new data | Split-half correlation | `reliability_lsa()` |
+| The groups differ on this transition | Permutation test, BH-adjusted | `compare_lsa(adjust = "BH")` |
+
+Descriptive claims use the fitted tables and the displays. A claim about one
+edge adds an interval, a claim about the whole network adds reliability, and
+a claim about groups adds the permutation comparison with the multiplicity
+correction stated.
+
+## References
+
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
+introduction to sequential analysis* (2nd ed.). Cambridge University Press.
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Efron, B. (1979). Bootstrap methods: Another look at the jackknife. *The
+Annals of Statistics*, 7(1), 1-26.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

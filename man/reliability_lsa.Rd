@@ -6,7 +6,7 @@
 \alias{reliability_lsa.lsa_group}
 \alias{print.lsa_reliability_group}
 \alias{print.lsa_reliability}
-\title{Split-Half Reliability for an LSA Fit}
+\title{Estimate the split-half reliability of a lag transition network}
 \usage{
 reliability_lsa(fit, ...)
 
@@ -28,66 +28,90 @@ reliability_lsa(fit, ...)
 \method{print}{lsa_reliability}(x, ...)
 }
 \arguments{
-\item{fit}{An \code{lsa} object returned by \code{\link[=lsa]{lsa()}}, or an \code{lsa_group}
-from \code{lsa(..., group = )}. Must be built from event-level data
-(sequences), not from a pre-computed transition matrix.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
+\code{lsa(..., group = )}, built from at least two sequences (not from a
+transition matrix).}
 
-\item{...}{For the \code{lsa_group} method, the arguments above, passed to
-each group's fit; otherwise reserved (and ignored by \code{print()}).}
+\item{...}{For a grouped fit, the arguments above, passed on to each
+group; otherwise not used.}
 
-\item{R}{Integer. Number of split-half replicates. Default \code{100}.}
+\item{R}{Number of random splits. Default \code{100}.}
 
-\item{weights}{Character. Which edge matrix to correlate across
-halves: \code{"prob"} (default), \code{"count"}, or \code{"adj_res"}.}
+\item{weights}{Transition values correlated between the halves:
+\code{"prob"} (default, transition probabilities), \code{"count"} or
+\code{"adj_res"} (adjusted residuals).}
 
-\item{method}{Character. Correlation method: \code{"pearson"} (default)
-or \code{"spearman"}.}
+\item{method}{Correlation: \code{"pearson"} (default) or \code{"spearman"}.}
 
-\item{parallel}{Logical. Use multi-core resampling. Default \code{FALSE}.}
+\item{parallel}{Run the splits on several cores. Default \code{FALSE}.}
 
-\item{n_cores}{Integer. Worker count when \code{parallel = TRUE}.}
+\item{n_cores}{Number of cores when \code{parallel = TRUE}. Default \code{NULL},
+all cores but one.}
 
-\item{verbose}{Logical. Print progress every 100 replicates.}
+\item{verbose}{Report progress every 100 splits. Default \code{FALSE}.}
 
-\item{x}{An \code{lsa_reliability} or \code{lsa_reliability_group} object
-(\code{print()} methods).}
+\item{x}{An \code{lsa_reliability} or \code{lsa_reliability_group} object, for
+the \code{print()} methods.}
 }
 \value{
-An object of class \code{c("lsa_reliability", "list")}. \code{print()}
-shows the mean split-half correlation with its spread and interval and
-returns \code{x} invisibly; \link[=as.data.frame.lsa_reliability]{as.data.frame()}
-gives the per-replicate correlations. Elements:
-\describe{
-\item{correlations}{Numeric vector of length \code{R}: the split-half
-correlation of each replicate.}
-\item{mean, sd}{Mean and standard deviation of the finite
-replicate correlations.}
-\item{ci_low, ci_high}{Empirical 2.5\% and 97.5\% quantiles.}
-\item{R, weights, method, n_sequences}{Recipe metadata.}
-\item{fit}{Reference to the original fit.}
-}
-For an \code{lsa_group}, a named list of these, one per group, of class
-\code{c("lsa_reliability_group", "list")}.
+An object of class \code{c("lsa_reliability", "list")}. Read it with
+\link[=as.data.frame.lsa_reliability]{as.data.frame()}:
+\code{as.data.frame(x)} gives one row per split with its correlation
+(\code{NA} for a failed replicate), and \code{as.data.frame(x, what = "summary")} one row with the settings, the number of failed
+replicates \code{n_failed}, and the \code{mean}, \code{sd}, \code{ci_low} and \code{ci_high}
+of the correlations. \code{print()} shows the same summary and returns
+\code{x} invisibly. For a grouped fit, an object of class
+\code{c("lsa_reliability_group", "list")} with one result per group, whose
+tables gain a leading \code{group} column.
 }
 \description{
-Estimates the reliability of an LSA network by repeated random
-split-half resampling of sequences. Each replicate draws two
-disjoint halves of the sequences without replacement, refits the
-engine on each half, and computes the correlation between the two
-half-network edge-weight vectors. Returns the distribution of
-replicate correlations plus a point summary.
+\code{reliability_lsa()} estimates the split-half reliability of a lag transition
+network from one data set. A lag transition network is reliable when two
+independent samples of the same population give similar networks. Split-half
+reliability follows the resampling approach that Epskamp, Borsboom and Fried
+(2018) describe for the accuracy of psychological networks: the sequences are
+divided at random into two halves, a network is estimated on each half, and
+the two networks are compared transition by transition. A high correlation
+between the halves means that the structure of the network does not depend on
+which sequences happened to be sampled.
+
+The random split is repeated \code{R} times. Each split assigns half of the
+sequences to one half and the rest to the other, refits the model on each
+with the same engine and settings, and correlates the two halves' transition
+probabilities, counts or adjusted residuals over all transitions.
+\code{reliability_lsa()} reports the mean, standard deviation and 95\% interval
+(2.5\% and 97.5\% quantiles) of the split-half correlations, and the number of
+failed replicates, in which a half had no transitions or a half's values did
+not vary. A grouped fit gives one result per group.
+
+Reliability describes the network as a whole. For the precision of
+each transition use \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} or \code{\link[=certainty_lsa]{certainty_lsa()}}; for
+whether each transition stays significant when sequences are dropped,
+use \code{\link[=stability_lsa]{stability_lsa()}}.
 }
-\details{
-For a grouped fit (\code{lsa_group}), reliability is estimated separately
-within each group and the per-group \code{lsa_reliability} objects are
-returned in an \code{lsa_reliability_group} container.
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_needs_events}: the fit was built from a transition
+matrix, so there are no sequences to split.
+\item \code{lagdynamics_bad_input}: the fit has fewer than two sequences.
 }
+}
+
 \examples{
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 rel <- reliability_lsa(fit, R = 50)
 rel
+as.data.frame(rel, what = "summary")
+
+# One result per group
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+reliability_lsa(g, R = 20) |>
+  as.data.frame(what = "summary")
 \donttest{
-# A full analysis uses more split-half replicates
+# A full analysis uses more splits
 reliability_lsa(fit, R = 500)
 }
 
@@ -98,5 +122,7 @@ psychological networks and their accuracy: A tutorial paper.
 \emph{Behavior Research Methods, 50}(1), 195-212.
 }
 \seealso{
-\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}
+\code{\link[=as.data.frame.lsa_reliability]{as.data.frame.lsa_reliability()}} to read the result;
+\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=certainty_lsa]{certainty_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}} and
+\code{\link[=permute_lsa]{permute_lsa()}} for transition-level checks.
 }

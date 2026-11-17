@@ -1,0 +1,325 @@
+---
+title: "Case study: the dynamics of course engagement"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Case study: the dynamics of course engagement}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+Engagement in a course is not a fixed trait. A student who is active in one
+week may be average in the next and disengaged after that, and the value of
+an engagement measure for teaching lies largely in what it says about the
+weeks that follow. Two questions matter most. How persistent is each state:
+once a student is disengaged, how likely is the student to stay so? And which
+moves between states are more or less common than the overall frequency of
+the states would predict: do disengaged students return to active engagement
+directly, or only through an intermediate state?
+
+Lag sequential analysis answers both. For every ordered pair of states it
+compares the observed number of transitions with the number expected if the
+next state did not depend on the current one, and it expresses the
+difference as an adjusted residual (Bakeman & Quera, 2011; Haberman, 1973).
+A positive residual marks a transition that occurs more often than the base
+rates of its two states predict, a negative residual one that is avoided.
+This case study asks how persistent each engagement state is, which
+transitions are over- or under-represented, whether the structure holds when
+the states are two and three weeks apart, and how certain and how stable the
+key transitions are.
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+`engagement` is a synthetic data set of weekly engagement states, derived
+from the `trajectories` example of the Nestimate package. It is in wide
+format, one row per student and one column per week.
+
+- **Sequence:** one row, one student.
+- **Time:** the 15 columns, weeks 1 to 15, in order.
+- **State:** `Active`, `Average` or `Disengaged`; `NA` marks a week without
+  an observation.
+
+```{r data}
+dim(engagement)
+table(unlist(engagement), useNA = "ifany")
+table(observed_weeks = rowSums(!is.na(engagement)))
+```
+
+The 138 rows hold 1,870 observed weeks and 200 missing ones. Two rows are
+empty and contribute nothing, 118 students are observed in all 15 weeks, and
+the remaining 18 between 1 and 14 weeks. `Average` is the most frequent state
+(813 weeks), followed by `Active` (703) and `Disengaged` (354). Missing weeks
+are dropped and no transition is counted into or out of them.
+
+`lsa()` reads the wide frame directly and fits the classical lag-1 model.
+
+```{r fit}
+fit <- lsa(engagement)
+as.data.frame(summary(fit))
+```
+
+The fit uses 136 sequences, 1,870 events and 1,734 week-to-week transitions.
+The likelihood-ratio test of independence gives G² = 618 on 4 degrees of
+freedom (p < 1e-100): next week's state depends strongly on this week's, and
+7 of the 9 transitions depart significantly from independence.
+
+## How persistent is each state?
+
+Persistence is the probability of staying in a state from one week to the
+next, the diagonal of the transition-probability table.
+
+```{r probabilities}
+transition_probabilities(fit)
+```
+
+`Active` is the most persistent state: 69.8% of active weeks are followed by
+another active week. `Average` persists with probability 0.610 and
+`Disengaged` with 0.483. The probabilities alone mislead about disengagement,
+because `Disengaged` is the rarest state. The residual of each self-transition
+measures persistence against what the base rates predict.
+
+```{r persistence}
+transitions(fit, direction = "over", sort = "strength")
+```
+
+All three self-transitions are over-represented, and no transition between
+two different states is. `Active` to `Active` has the largest residual
+(z = 21.7, 459 observed against 247 expected), but `Disengaged` to
+`Disengaged` has the largest lift: it occurs 2.62 times as often as expected
+(157 against 60), compared with 1.86 for `Active` and 1.39 for `Average`.
+Relative to how rare it is, disengagement is the stickiest state. Yule's Q,
+which does not grow with sample size, ranks the same way: 0.828 for `Active`,
+0.754 for `Disengaged` and 0.553 for `Average`.
+
+## Which transitions are over- or under-represented?
+
+The under-represented transitions are the moves that students avoid.
+
+```{r avoided}
+transitions(fit, direction = "under", sort = "strength")
+```
+
+Four of the six moves between different states are avoided. The strongest
+avoidance is `Average` to `Active` (z = -12.9), followed by `Active` to
+`Disengaged` (z = -12.6): only 23 active weeks, 3.5%, are followed by a
+disengaged week, against 121 expected (lift 0.19, Yule's Q = -0.826).
+`Disengaged` to `Active` is avoided as well (39 observed, 122 expected).
+The two moves through `Average`, `Disengaged` to `Average`
+(z = -1.74, p = 0.083) and `Average` to `Disengaged` (z = 0.18, p = 0.86),
+occur about as often as chance predicts.
+
+The structure is therefore a graded one. Students rarely jump between the
+two extreme states in either direction; when they leave an extreme state,
+they pass through `Average`, and the moves into and out of `Average` from
+`Disengaged` are neither favoured nor avoided. A residual heatmap shows the
+whole table at once.
+
+```{r heatmap, fig.height = 4}
+plot(fit)
+```
+
+Each tile is one transition, the current state in rows and the next state in
+columns, labelled and coloured by its adjusted residual on a diverging scale:
+red above expectation, blue below. The three red tiles are the persistence of
+each state; the blue tiles between `Active` and `Disengaged` are the avoided
+jumps between the extremes; the two near-white tiles, `Average` to
+`Disengaged` (0.18) and `Disengaged` to `Average` (-1.74), are the
+transitions at chance level.
+
+## Is the structure the same at lags 2 and 3?
+
+A lag-1 pattern can hide a different pattern over longer intervals: a
+student may avoid moving from `Active` to `Disengaged` in one week but drift
+there over two or three. `lsa_lags()` fits the same model at several lags,
+pairing each week with the week one, two and three steps later.
+
+```{r lags}
+lags <- lsa_lags(engagement, lags = 1:3)
+lags
+```
+
+The number of significant transitions rises from 7 of 9 at lag 1 to 8 of 9
+at lags 2 and 3. `lag_profile()` follows one transition across the lags.
+The first two profiles are the persistence of the extreme states.
+
+```{r lag-persistence}
+lag_profile(lags, from = "Active", to = "Active")
+lag_profile(lags, from = "Disengaged", to = "Disengaged")
+```
+
+Active engagement decays slowly: the probability of being active three weeks
+after an active week is still 0.631 (z = 16.0). Disengagement holds for two
+weeks (0.483 at lag 1, 0.497 at lag 2) and then falls to 0.363 at lag 3,
+with the residual dropping from 15.2 to 8.6. Both states remain strongly
+over-represented at lag 3.
+
+```{r lag-crossing}
+lag_profile(lags, from = "Active", to = "Disengaged")
+lag_profile(lags, from = "Disengaged", to = "Active")
+```
+
+The avoided jumps between the extremes stay avoided at every lag. The share
+of active weeks followed by disengagement rises from 3.5% at lag 1 to 6.2% at
+lag 3, and the share of disengaged weeks followed by activity from 12.0% to
+14.4%, but all six residuals are below -8.6. The two moves through
+`Average` are the only unstable part of the structure.
+
+```{r lag-average}
+lag_profile(lags, from = "Average", to = "Disengaged")
+lag_profile(lags, from = "Disengaged", to = "Average")
+```
+
+Their residuals lie between -2.38 and 2.52 and change sign across the lags;
+each reaches p < 0.05 at one lag only. With 1,734 transitions, residuals of
+this size are near the significance threshold, and the significance flag
+flips with small changes in the counts. These are the transitions that
+change the count of significant cells from 7 to 8; the rest of the structure
+is the same at all three lags.
+
+## How certain are the key transitions?
+
+A residual from a single fit says nothing about how much it would vary in
+another sample of students. `bootstrap_lsa()` resamples whole students with
+replacement, which keeps each student's weeks together, refits the model and
+returns percentile intervals for every transition. The analysis uses
+R = 1,000 resamples.
+
+```{r bootstrap}
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 1000)
+boot
+transitions(boot, significant = TRUE, sort = "strength")
+```
+
+The same 7 transitions are significant in the resamples as in the fit. The
+95% interval of the residual excludes zero for every one of them, and every
+interval is far from zero: the closest is `Active` to `Average`, whose
+upper bound is -8.21. The persistence of disengagement has the widest
+interval (11.1 to 19.0), because it depends on a few students who stay
+disengaged for many weeks. The probability intervals make the same point on
+the probability scale: staying disengaged has probability 0.483 with a 95%
+interval of 0.385 to 0.564.
+
+A circular forest plot draws the residual interval of every transition.
+
+```{r forest, fig.height = 5}
+plot_forest(boot)
+```
+
+Each spoke is one transition and spans its bootstrap interval, the square
+marks the observed residual and the dashed ring is zero. The intervals are
+short relative to their distance from the ring: the three red
+(over-represented) and four blue (avoided) transitions lie well away from it,
+and the two grey ones, the moves between `Average` and `Disengaged`, sit on
+it.
+
+`certainty_lsa()` gives a closed-form answer to a narrower question: how
+precisely is each transition probability estimated, given the counts? It
+places a Dirichlet posterior on each row of the table and flags a transition
+as certain when its posterior stays within 25% of the observed probability.
+
+```{r certainty}
+certainty_lsa(fit) |> transitions(sort = "strength")
+```
+
+Seven of the nine probabilities are pinned to within 25%. The two that are
+not are the rare cross-extreme moves. `Active` to `Disengaged` has a 95%
+credible interval of 0.023 to 0.051 around 0.035, and `Disengaged` to
+`Active` one of 0.088 to 0.158 around 0.120. Both are certainly rare, and
+the residuals are certainly negative, but their exact probability is known
+only to within a factor of about two. Any claim of the form "one disengaged
+week in eight is followed by an active one" rests on these wider intervals.
+
+## How stable is the structure?
+
+Stability asks whether the significance pattern survives when part of the
+sample is removed. `stability_lsa()` draws R = 500 subsamples of 80% of the
+students without replacement, refits the model on each and records how
+often each transition stays significant.
+
+```{r stability}
+set.seed(2026)
+stab <- stability_lsa(fit, R = 500)
+stab
+transitions(stab, sort = "strength")
+```
+
+The 7 significant transitions are significant in every one of the 500
+subsamples (stability 1.000). `Disengaged` to `Average` is significant in a
+quarter of them and `Average` to `Disengaged` almost never, which matches
+their unstable behaviour across lags.
+
+`reliability_lsa()` splits the students at random into two halves, fits the
+model on each half and correlates the two tables of transition
+probabilities. It repeats the split R = 200 times.
+
+```{r reliability}
+set.seed(2026)
+rel <- reliability_lsa(fit, R = 200)
+as.data.frame(rel, what = "summary")
+```
+
+The mean split-half correlation is 0.968 with a 95% interval of 0.885 to
+0.996, and no replicate failed. Two disjoint halves of 68 students each
+reproduce nearly the same transition table.
+
+## What the analysis shows
+
+- Engagement is persistent. Each state is more likely to be followed by
+  itself than its frequency predicts; `Active` persists with probability
+  0.698 and `Disengaged`, the rarest state, has the highest lift (2.62).
+- Students do not jump between the extremes. `Active` to `Disengaged` and
+  `Disengaged` to `Active` are strongly avoided at lags 1, 2 and 3. Moves
+  out of an extreme state run through `Average`.
+- The persistence of disengagement weakens after two weeks (probability
+  0.497 at lag 2, 0.363 at lag 3), while active engagement decays slowly
+  (0.631 at lag 3).
+- Every significant transition has a bootstrap interval (R = 1,000) that
+  excludes zero and is significant in all 500 subsamples, and split halves
+  of the students agree with a mean correlation of 0.968. The two moves between `Average` and
+  `Disengaged` are at chance level, and their significance flag is not
+  stable.
+
+The analysis has limits. The data are synthetic, so the results illustrate
+the method rather than describe real students. The model is first order and
+pools all students and all weeks: it assumes the same transition structure
+in week 2 and in week 14, and for every student. A student-level or
+week-level difference would need a grouped fit and a group comparison
+(see [the group comparison article](group-comparison.html)). The residuals
+and their tests treat transitions as independent; the bootstrap and the
+subsampling resample whole students and do not rely on that assumption,
+and they agree with the fit here. For the interpretation of residuals and
+the choice of lags, see [the lag sequential analysis article](lsa.html) and
+[the confirmatory article](confirmatory.html).
+
+## References
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Efron, B. (1979). Bootstrap methods: Another look at the jackknife.
+*Annals of Statistics, 7*(1), 1-26.
+
+Epskamp, S., Borsboom, D., & Fried, E. I. (2018). Estimating psychological
+networks and their accuracy: A tutorial paper. *Behavior Research Methods,
+50*(1), 195-212.
+
+Haberman, S. J. (1973). The analysis of residuals in cross-classified
+tables. *Biometrics, 29*, 205-220.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

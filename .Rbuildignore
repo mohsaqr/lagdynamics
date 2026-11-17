@@ -16,7 +16,7 @@
 ^data-raw/kg_logs\.xlsx$
 ^tmp$
 ^local_testing_and_equivalence$
-^Rplots\.pdf$
+(^|/)Rplots\.pdf$
 ^equivonly$
 ^CODE_REVIEW_TRANSITION_NETWORKS\.md$
 ^audit\.md$
@@ -25,3 +25,11 @@
 ^AGENTS?\.md$
 ^notes$
 ^\.claude$
+^vignettes/articles$
+^Project_docs$
+^\.mini-ci$
+^\.ci$
+^AGENT-NOTE.*\.md$
+^.*\.Rcheck$
+^lagdynamics_.*\.tar\.gz$
+^\.DS_Store$

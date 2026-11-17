@@ -2,51 +2,56 @@
 % Please edit documentation in R/ipf.R
 \name{lsa_ipf}
 \alias{lsa_ipf}
-\title{Iterative Proportional Fitting for Two-Way Tables with Structural Zeros}
+\title{Fit expected counts with structural zeros by iterative proportional fitting}
 \usage{
 lsa_ipf(obs, structure = NULL, tol = 1e-08, max_iter = 200L)
 }
 \arguments{
-\item{obs}{Numeric \verb{K x K} matrix of observed counts.}
+\item{obs}{Square numeric matrix of observed transition counts.}
 
-\item{structure}{Numeric \verb{K x K} 0/1 matrix. \strong{Default
-\code{matrix(1, K, K)}: every cell, including the diagonal, is
-estimable -- self-transitions and every observed cell are kept.}
-A \code{0} marks a cell as a structural zero (forbidden), a \code{1} marks
-it as estimable. Pass an explicit pattern (e.g. \code{1 - diag(K)})
-only when you want to \emph{opt out} of specific cells because the
-coding scheme makes them impossible by construction.}
+\item{structure}{Square 0/1 matrix of the same size: \code{0} marks a
+structural zero, \code{1} an estimable cell. Default \code{NULL}: every cell is
+estimable, which gives the ordinary independence table.}
 
-\item{tol}{Numeric. Convergence tolerance on marginal differences.
-Default \code{1e-8}.}
+\item{tol}{Convergence tolerance on the largest difference between
+fitted and observed totals (default \code{1e-8}).}
 
-\item{max_iter}{Integer. Maximum number of row+column scaling
-passes. Default \code{200L}.}
+\item{max_iter}{Maximum number of row-and-column passes (default \code{200}).}
 }
 \value{
-A plain list (no class) with elements:
-\describe{
-\item{fit}{The fitted \verb{K x K} expected-frequency matrix.}
-\item{iterations}{Number of row+column passes used.}
-\item{converged}{Logical scalar: whether convergence was reached
-within \code{max_iter}.}
-\item{max_margin_diff}{Maximum absolute difference between observed
-and fitted marginals at termination.}
-}
+A list with the fitted \verb{K x K} expected-count matrix (\code{fit}), the
+number of passes used (\code{iterations}), whether the totals converged
+within \code{max_iter} (\code{converged}), and the largest remaining difference
+between fitted and observed totals (\code{max_margin_diff}).
 }
 \description{
-Fits expected cell frequencies under the row + column independence
-model when some cells are constrained to be exactly zero
-(structural zeros). The fitted table has the same row and column
-marginals as \code{obs}, satisfies \code{E[i, j] = 0} wherever
-\code{structure[i, j] = 0}, and is the maximum likelihood estimate under
-the independence model restricted to the non-zero pattern.
+\code{lsa_ipf()} fits the expected counts of a count table with structural zeros
+by iterative proportional fitting. When some transitions cannot occur by
+construction (structural zeros, such as self-transitions in a coding scheme
+that merges repeated codes), the quasi-independence model fits expected
+counts that are zero in the forbidden cells and reproduce the observed row
+and column totals; it has no closed form and is found by iterative
+proportional fitting (Wickens, 1989), which rescales the rows and columns of
+the table in turn until both sets of totals match. Under ordinary
+independence, the expected count of a transition is the product of its row
+and column totals divided by the grand total, a formula that assigns expected
+counts to impossible cells.
+
+\code{\link[=lsa]{lsa()}} calls \code{lsa_ipf()} when \code{loops = FALSE} or \code{structural_zeros} is
+given, so it is needed directly only to inspect the expected table or to use
+it outside \code{\link[=lsa]{lsa()}}.
 }
-\details{
-Implementation follows Wickens (1989), pp. 107-112: alternately
-scale rows then columns of an initialized expected table until row
-and column marginals converge to those of \code{obs} within \code{tol}.
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_bad_input}: \code{obs} contains missing, infinite or negative
+values.
+\item \code{lagdynamics_ipf_infeasible}: a row or column has observed
+transitions but every one of its cells is a structural zero.
 }
+}
+
 \examples{
 obs <- matrix(c(0, 4, 6,
                 3, 0, 5,
@@ -54,12 +59,15 @@ obs <- matrix(c(0, 4, 6,
 # Every cell estimable: the ordinary independence table
 lsa_ipf(obs)
 
-# Diagonal forbidden: the empty self-transition cells become structural
-# zeros and the fit keeps the observed row and column totals
+# Self-transitions forbidden: zero expected counts on the diagonal,
+# observed row and column totals kept
 lsa_ipf(obs, structure = 1 - diag(3))
 
 }
 \references{
-Wickens, T. D. (1989). \emph{Multiway contingency tables analysis
-for the social sciences}, pp. 107-112. Lawrence Erlbaum.
+Wickens, T. D. (1989). \emph{Multiway contingency tables analysis for
+the social sciences} (pp. 107-112). Lawrence Erlbaum.
+}
+\seealso{
+\code{\link[=lsa]{lsa()}} and its \code{loops} and \code{structural_zeros} arguments.
 }

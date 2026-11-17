@@ -3,7 +3,7 @@
 \name{as.data.frame.lsa_data}
 \alias{as.data.frame.lsa_data}
 \alias{print.lsa_data}
-\title{Tidy the Canonical Sequence Object}
+\title{Read the events of canonical sequence data as a table}
 \usage{
 \method{as.data.frame}{lsa_data}(x, row.names = NULL, optional = FALSE, ...)
 
@@ -12,27 +12,30 @@
 \arguments{
 \item{x}{An \code{lsa_data} object from \code{\link[=lsa_data]{lsa_data()}}.}
 
-\item{row.names, optional, ...}{Standard \code{\link[=as.data.frame]{as.data.frame()}} arguments
-(unused; present for method consistency).}
+\item{row.names, optional, ...}{Ignored; present for consistency with the
+generic.}
 }
 \value{
 \code{as.data.frame()}: a \code{data.frame} with one row per event and
-columns \code{seq_id}, \code{index}, \code{state} (event-level input), or one row
-per cell and columns \code{from}, \code{to}, \code{count} (transition-matrix
-input). \code{print()}: \code{x}, invisibly.
+the columns \code{seq_id}, \code{index} (position within the sequence) and
+\code{state}; or, for transition-matrix input, one row per cell and the
+columns \code{from}, \code{to} and \code{count}. \code{print()} returns \code{x} invisibly.
 }
 \description{
-Returns the canonical \code{lsa_data} as a tidy data frame: one row per
-event (\code{seq_id}, within-sequence \code{index}, \code{state}) for event-level
-input, or one row per \code{from}/\code{to}/\code{count} cell for transition-matrix
-input.
-}
-\details{
-\code{print()} shows the input source, the number of states, sequences,
-events and lag-1 transitions.
+\code{as.data.frame()} returns the canonical sequence data from \code{\link[=lsa_data]{lsa_data()}},
+every event with its sequence and position, as a tidy table, which shows how
+the input was read: which rows became sequences, where missing values were
+dropped, and which labels were assigned. For input given as a
+transition-count matrix, it returns one row per cell instead. \code{print()} shows
+the input source, the number of states, sequences, events and lag-1
+transitions.
 }
 \examples{
-d <- lsa_data(c("a", "b", "a", "c", "b"))
+d <- lsa_data(list(c("a", "b", NA, "a"), c("b", "c")))
 d
 as.data.frame(d)
+
+}
+\seealso{
+\code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa_transitions]{lsa_transitions()}}
 }

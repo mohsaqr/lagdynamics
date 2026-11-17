@@ -1,0 +1,330 @@
+---
+title: "Lags and structural zeros"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Lags and structural zeros}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+A lag sequential model is defined by two choices that precede any test: the
+distance at which events are paired, and the set of transitions the model
+treats as possible. The lag $\ell$ fixes the pairing. At $\ell = 1$ each event
+is paired with the next one; at $\ell = 2$ with the one after that; at
+$\ell = -1$ with the one before it. Comparing lags tells whether a sequential
+dependency is immediate and short-lived or persists over several steps
+(Bakeman & Quera, 2011). The set of possible transitions fixes the reference
+model. Some transitions cannot occur by construction, the standard case being
+a coding scheme in which a state cannot follow itself. Those cells are
+*structural zeros*: they are empty because they are impossible, not because
+they are avoided, and the independence model has to be fitted to the
+remaining cells only. Expected counts then come from the quasi-independence
+model fitted by iterative proportional fitting (Wickens, 1989), and residuals
+use the design-matrix form of Christensen (1997).
+
+This guide covers both choices: single fits at a lag other than 1, negative
+lags, lag profiles with `lsa_lags()` and `lag_profile()`, and structural zeros
+declared with `loops = FALSE` or an explicit `structural_zeros` matrix. The
+basic model and its reading verbs are introduced in
+[the LSA vignette](lsa.html); the other engines, which do not support
+structural zeros, are described in [the engines guide](engines.html).
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+- **`engagement`**: weekly engagement states (`Active`, `Average`,
+  `Disengaged`) of 138 students over 15 weeks, one row per student. Two rows
+  are entirely missing, so fits use 136 sequences.
+- **`group_regulation`**: coded regulation actions in 2,000 collaborative
+  learning sessions, one row per session and one column per ordered time
+  point (`T1` to `T26`). Nine states: `adapt`, `cohesion`, `consensus`,
+  `coregulate`, `discuss`, `emotion`, `monitor`, `plan`, `synthesis`.
+
+Transitions are counted within a sequence only, at every lag: a pair never
+spans two students or two sessions.
+
+## A single fit at another lag
+
+The `lag` argument of `lsa()` sets the distance between the paired events.
+At lag 2 the model asks whether the state two weeks later depends on the
+current one.
+
+```{r lag-two}
+lsa(engagement, lag = 2)
+```
+
+The lag-2 table has 1,603 transitions against 1,734 at lag 1, because each
+sequence contributes one pair fewer. The dependency survives the extra week:
+eight of the nine cells depart from independence, and the three
+self-transitions remain the strongest over-represented cells (Active to
+Active, $z = 18.7$). A student's engagement two weeks ahead is still predicted
+by this week's state.
+
+## Predecessors: negative lags
+
+A negative lag pairs each event with an earlier one. At `lag = -1` the row
+`from -> to` counts how often an event in `from` was *preceded* by `to`, so
+the table answers the question "what came before this state?".
+
+```{r lag-minus-one}
+transitions(lsa(engagement, lag = -1))
+```
+
+The lag $-1$ table is the transpose of the lag 1 table. The row
+`Average -> Active` counts 176 events in `Average` preceded by `Active`,
+which are the same 176 pairs as `Active -> Average` at lag 1, with the same
+adjusted residual ($z = -11.3$). What changes is the conditioning of `prob`:
+at lag $-1$ it is the probability of the predecessor given the current state.
+Of all events in `Average`, 23.1% were preceded by `Active`; at lag 1 the
+same number appears as `prob_col`, the share of `Average` events that came
+from `Active`. Negative lags do not add new tests to a single fit; they
+re-express the table from the target's side, and they make a lag profile read
+symmetrically around the present event.
+
+## Lag profiles
+
+`lsa_lags()` fits the same model at several lags in one call. Its print
+method reports how many transitions are significant at each lag.
+
+```{r engagement-lags}
+engagement_lags <- lsa_lags(engagement, lags = c(-2, -1, 1, 2, 3))
+engagement_lags
+```
+
+Most of the table departs from independence at every lag from $-2$ to 3, so
+the engagement process has a long memory. The lag 0 fit is left out on
+purpose: at lag 0 each event is paired with itself, so the table is diagonal
+and every cell trivially departs from independence.
+
+`lag_profile()` follows a single transition across lags as a one-row-per-lag
+table.
+
+```{r active-profile}
+lag_profile(engagement, from = "Active", to = "Active", lags = 1:5)
+```
+
+Staying `Active` remains strongly over-represented five weeks ahead
+($z = 13.9$ at lag 5, against 21.7 at lag 1). The decline is gradual and not
+strictly monotone (16.0 at lag 3, 16.3 at lag 4). Engagement in this cohort
+is a durable state, not a week-to-week fluctuation.
+
+The `transitions()` verb reads the multi-lag result with the same filters as
+a single fit. The call below keeps the over-represented transitions at lags 1
+to 3, strongest first within each lag.
+
+```{r engagement-over}
+transitions(lsa_lags(engagement, lags = 1:3), direction = "over",
+            sort = "strength")
+```
+
+The self-transitions are the only over-represented cells at lags 1 and 2. At
+lag 3 one more cell appears, `Average -> Disengaged` ($z = 2.52$): an average
+week raises the chance of a disengaged week three weeks later, an effect that
+is absent at lag 1 ($z = 0.18$, shown above in transposed form as
+`Disengaged -> Average` at lag $-1$). Delayed effects of this kind are invisible to
+a lag 1 analysis.
+
+The collaborative regulation data behave differently.
+
+```{r regulation-lags}
+regulation_lags <- lsa_lags(group_regulation, lags = 1:3)
+regulation_lags
+lag_profile(regulation_lags, from = "emotion", to = "cohesion")
+lag_profile(regulation_lags, from = "plan", to = "consensus")
+```
+
+The number of significant transitions falls from 72 of 81 at lag 1 to 41 at
+lag 2 and 10 at lag 3. The sequential structure of these sessions is local:
+an action constrains the next action, much less the one after. The
+`emotion -> cohesion` transition, the strongest of the lag 1 table
+($z = 58.2$), turns slightly under-represented at lag 2 ($z = -2.35$) and is
+indistinguishable from independence at lag 3. `plan -> consensus` changes
+sign: over-represented at lag 1 ($z = 8.53$), under-represented at lag 2
+($z = -3.62$). A lag 1 network of these data describes immediate responses,
+not longer chains.
+
+A residual heatmap of the lag 2 fit shows which dependencies remain once the
+immediate response is skipped.
+
+```{r heatmap-lag-two, fig.height = 5}
+plot(lsa(group_regulation, lag = 2))
+```
+
+Two actions apart, `discuss -> adapt` ($z = 14.26$) and `plan -> plan`
+($z = 10.11$) are the strongest over-represented cells, and
+`consensus -> coregulate` is the most avoided ($z = -10.83$). The residuals
+are about a quarter of the size of the lag 1 residuals, which reach 58.2.
+
+## Declaring structural zeros
+
+Three cells of the `group_regulation` table are empty: `adapt -> adapt`,
+`adapt -> synthesis` and `synthesis -> synthesis`. Sorting the transitions by
+count puts them in the last three rows.
+
+```{r empty-cells}
+regulation_fit <- lsa(group_regulation)
+transitions(regulation_fit, sort = "count") |> tail(3)
+```
+
+Under ordinary independence each empty cell is a significant avoidance
+($z$ from $-3.32$ to $-4.31$), because the margins predict between 10.6 and
+17.6 transitions there. Whether that is a finding depends on the coding
+scheme. If these transitions are possible but never chosen, the residuals are
+the result. If the scheme makes them impossible, the residuals are an
+artefact, and the cells must be removed from the model rather than tested.
+
+The `structural_zeros` argument takes a $K \times K$ matrix with 0 for a
+forbidden cell and 1 for an estimable one. Rows and columns follow the state
+order that the fit reports (`nodes(regulation_fit)` lists it; states are
+sorted alphabetically). The matrix below is built from the names of the
+forbidden transitions.
+
+```{r structural-matrix}
+states <- c("adapt", "cohesion", "consensus", "coregulate", "discuss",
+            "emotion", "monitor", "plan", "synthesis")
+forbidden <- c("adapt -> adapt", "adapt -> synthesis",
+               "synthesis -> synthesis")
+allowed <- outer(states, states,
+                 \(from, to) 1 * !(paste(from, "->", to) %in% forbidden))
+allowed
+```
+
+Fitting with the matrix switches the classical engine to the
+quasi-independence model.
+
+```{r structural-fit}
+constrained_fit <- lsa(group_regulation, structural_zeros = allowed)
+constrained_fit
+tests(regulation_fit)
+tests(constrained_fit)
+transitions(constrained_fit, sort = "count") |> tail(3)
+```
+
+Three things change. First, the forbidden cells have an expected count of 0
+and no residual, p-value or lift, so they are no longer flagged: 69 of 81
+transitions are significant instead of 72. Second, the expected counts of the
+remaining cells are refitted so that the row and column totals are still
+matched with the forbidden cells empty, which moves the residuals of the
+other cells slightly (`emotion -> cohesion` goes from 58.2 to 58.3). Third, the tablewise test loses one degree of freedom per forbidden
+cell: $G^2$ falls from 13,204 on 64 df to 13,116 on 61 df. The substantive
+conclusions about the other 78 transitions do not change; the three avoidance
+"findings" are gone.
+
+The forbidden rows still show `yules_q` and `kappa` values ($-1$, with
+`kappa_p` below 0.001). These columns are computed from the observed counts
+of the full table and do not use the structural-zero model, so on a forbidden
+cell they carry no information and are ignored.
+
+## Forbidding self-transitions with `loops = FALSE`
+
+The most common structural-zero pattern is the diagonal. When a coding scheme
+merges consecutive identical codes, for example a dialogue coded turn by turn
+where a new code starts only when the act changes, a state can never follow
+itself. `loops = FALSE` declares the whole diagonal forbidden without building
+a matrix. The model assumes that these cells are empty in the data; when
+transitions do fall in a forbidden cell, `lsa()` warns with the condition
+`lagdynamics_structural_zero_counts`, because the margins would then include
+transitions the model declares impossible. Every
+state repeats in the bundled datasets (459 `Active -> Active` transitions in
+`engagement`), so they are not candidates for this model; the example uses a
+small count table of three dialogue acts with an empty diagonal, which
+`lsa()` accepts directly.
+
+```{r turns}
+turns <- matrix(c( 0, 34, 18,
+                  27,  0, 41,
+                  25, 30,  0),
+                nrow = 3, byrow = TRUE,
+                dimnames = list(c("Question", "Answer", "Feedback"),
+                                c("Question", "Answer", "Feedback")))
+turns
+```
+
+Fitted under ordinary independence, the empty diagonal distorts the whole
+table.
+
+```{r turns-independence}
+transitions(lsa(turns))
+tests(lsa(turns))
+```
+
+Eight of the nine cells are significant. The three empty diagonal cells are
+strongly "avoided" ($z$ from $-5.59$ to $-8.01$), and to keep the margins, the
+model spreads part of every margin over the diagonal and the off-diagonal expected counts fall below the observed ones, so five of the six real
+transitions appear over-represented. The tablewise test rejects independence
+($G^2 = 149$, df = 4). All of this follows from the coding rule, not from the
+dialogue.
+
+```{r turns-quasi}
+transitions(lsa(turns, loops = FALSE))
+tests(lsa(turns, loops = FALSE))
+```
+
+Under quasi-independence the diagonal is excluded and no transition is
+significant. With three states and a forbidden diagonal the model has a
+single degree of freedom, which is why all six residuals have the same size
+($|z| = 1.87$, $p = 0.062$): the one remaining question is whether the
+dialogue cycles in one direction. The signs give the answer the data lean
+towards, `Question -> Answer -> Feedback -> Question` more often than the
+reverse, but the tablewise test ($G^2 = 3.49$, df = 1, $p = 0.062$) does not
+support it at the 0.05 level. The independence fit reported a strong
+sequential structure; the correct model finds none.
+
+The expected counts of the quasi-independence model come from iterative
+proportional fitting, available on its own as `lsa_ipf()`. It takes a count
+matrix and a 0/1 structure matrix of the same shape.
+
+```{r ipf}
+lsa_ipf(turns, structure = 1 - diag(3))
+```
+
+The fitted table is the `expected` column of the `loops = FALSE` fit
+(31, 21, 30, 34, 22 and 37 off the diagonal, 0 on it): its row and column
+totals equal those of `turns` and its diagonal is 0. The fit converged in 22
+row-and-column passes. `loops = FALSE` and an explicit `structural_zeros`
+matrix combine: with both, the diagonal of the matrix is zeroed as well.
+
+## What changes with structural zeros
+
+| Quantity | Independence | Quasi-independence (structural zeros) |
+|---|---|---|
+| Expected count | $R_i C_j / N$ | IPF fit with forbidden cells fixed at 0, margins matched |
+| Residual | Haberman adjusted residual | Christensen residual $(O - E)/\sqrt{E(1 - h)}$, $h$ from the hat matrix of the row and column design |
+| Forbidden cell | tested like any other | `expected = 0`; `adj_res`, `p`, `lift` are `NA`; never significant |
+| Degrees of freedom | $(K - 1)^2$ | estimable cells minus rank of the design; $(K - 1)^2 - s$ for $s$ forbidden cells in a non-degenerate pattern |
+| `yules_q`, `kappa` | from observed counts | unchanged: still from observed counts, not part of the structural model |
+
+The two residual formulas coincide when no cell is forbidden. Structural
+zeros are supported by the classical engine only; the two-cell,
+bidirectional and dominance engines stop with an error of class
+`lagdynamics_unsupported_option`. Declare a structural zero only when the
+coding scheme rules a transition out. An empty cell that could have occurred
+is a result to report, not a cell to remove.
+
+## References
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Christensen, R. (1997). *Log-linear models and logistic regression* (2nd
+ed.). Springer.
+
+Wickens, T. D. (1989). *Multiway contingency tables analysis for the social
+sciences*. Lawrence Erlbaum.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

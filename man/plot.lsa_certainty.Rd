@@ -2,27 +2,33 @@
 % Please edit documentation in R/certainty_lsa.R
 \name{plot.lsa_certainty}
 \alias{plot.lsa_certainty}
-\title{Plot an Analytic-Certainty Result}
+\title{Plot credible intervals of transition probabilities}
 \usage{
 \method{plot}{lsa_certainty}(x, metric = "prob", ...)
 }
 \arguments{
-\item{x}{An \code{lsa_certainty} object.}
+\item{x}{An \code{lsa_certainty} object from \code{\link[=certainty_lsa]{certainty_lsa()}}.}
 
-\item{metric}{Which credible interval to draw. Default \code{"prob"}.}
+\item{metric}{Interval to draw. Default \code{"prob"}, the only interval a
+certainty result has.}
 
 \item{...}{Passed to \code{\link[=plot_forest]{plot_forest()}}.}
 }
 \value{
-A \code{ggplot} object (drawn when printed).
+A \code{ggplot} object, drawn when printed.
 }
 \description{
-Circular forest of the per-edge transition-probability credible
-intervals from \code{\link[=certainty_lsa]{certainty_lsa()}} (delegates to \code{\link[=plot_forest]{plot_forest()}} with
-\code{metric = "prob"}).
+\code{plot()} draws the result of \code{\link[=certainty_lsa]{certainty_lsa()}} as a circular forest plot: one
+spoke per transition, showing the observed transition probability and its
+credible interval, so the precisely and imprecisely estimated transitions can
+be seen side by side. The plot is drawn by \code{\link[=plot_forest]{plot_forest()}} with \code{metric = "prob"}; see that page for the layout and the arguments that can be passed
+through \code{...}.
 }
 \examples{
-fit <- lsa(group_regulation)
-cert <- certainty_lsa(fit)
+cert <- certainty_lsa(lsa(group_regulation))
 plot(cert)
+
+}
+\seealso{
+\code{\link[=certainty_lsa]{certainty_lsa()}}, \code{\link[=plot_forest]{plot_forest()}}.
 }

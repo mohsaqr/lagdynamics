@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot-polar.R
 \name{plot_polar}
 \alias{plot_polar}
-\title{Polar Sunburst of an LSA Fit}
+\title{Plot a polar sunburst of transitions}
 \usage{
 plot_polar(
   fit,
@@ -19,53 +19,63 @@ plot_polar(
 \arguments{
 \item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}.}
 
-\item{style}{\code{"rose"} (default, equal slots + bar height) or \code{"wedge"}
-(frequency-proportional wedge width).}
+\item{style}{\code{"rose"} (default) or \code{"wedge"}.}
 
-\item{fill}{Which quantity fills the bars/wedges: \code{"residuals"}
-(default, diverging), \code{"prob"}, or \code{"lift"}.}
+\item{fill}{Fill quantity: \code{"residuals"} (default), \code{"prob"} or
+\code{"lift"}.}
 
-\item{size}{For \code{style = "rose"}, which non-negative quantity sets bar
-height: \code{"count"} (default) or \code{"prob"}. Ignored for \code{"wedge"}.}
+\item{size}{For the rose style, bar height: \code{"count"} (default) or
+\code{"prob"}.}
 
-\item{significant}{Logical. Grey out non-significant cells (keeping
-their size). Default \code{FALSE}.}
+\item{significant}{Grey out transitions whose residual p-value is not
+below the fit's \code{alpha} (default \code{FALSE}).}
 
-\item{labels}{Which target cells to name: \code{"all"}, \code{"auto"}, or
-\code{"none"}. Default is \code{"all"} for \code{"rose"} (equal slots leave room)
-and \code{"auto"} for \code{"wedge"} (only wedges wide enough to fit a name).
-Source names are always shown.}
+\item{labels}{Which targets to name: \code{"all"}, \code{"auto"} (those with room)
+or \code{"none"}. Default \code{"all"} for the rose and \code{"auto"} for the wedge
+style. Source names are always shown.}
 
-\item{min_show}{For \code{style = "wedge"}, drop wedges whose frequency
-share of their source's outflow is below this fraction. Default
-\code{0.01}; \code{0} keeps all.}
+\item{min_show}{For the wedge style, drop wedges below this share of
+their source's outgoing transitions (default \code{0.01}).}
 
-\item{label_size}{Label text size. Default \code{3}.}
+\item{label_size}{Label text size (default \code{3}).}
 
-\item{...}{Ignored; accepted so \code{plot(fit, type = "sunburst", ...)}
-can forward arguments without error.}
+\item{...}{Ignored; allows \code{plot(fit, type = "sunburst", ...)}.}
 }
 \value{
-A \code{ggplot} object (drawn when printed).
+A \code{ggplot} object, drawn when printed.
 }
 \description{
-Draws the transition structure as a polar sunburst with the source
-states named along a large inner ring. Two styles: \code{"rose"} (default)
-gives every target an equal angular slot and encodes frequency as the
-radial \strong{bar height} (so nothing crams); \code{"wedge"} sizes each
-transition's angular \strong{width} by its frequency share (the classic
-look), omitting tiny wedges. Both fill by the adjusted residual (warm
-= over-represented, cool = avoided), sharing the \code{\link[=plot.lsa]{plot.lsa()}} heatmap
-colour scale.
+\code{plot_polar()} draws the transitions of a fit as a polar sunburst with
+\pkg{ggplot2}: the source states are arranged around an inner ring and,
+outside each source, the transitions leaving it. It reads like a set of pie
+charts joined into one figure: for every state, where the process goes next
+and how often, and, through the fill colour, which of these moves are more or
+less frequent than independence predicts.
+
+The sunburst has two styles. In the rose style (default) every target has a
+slot of equal angle within its source and the bar height shows the count or
+the probability, so that every target can be labelled. In the wedge style the
+angle of each wedge is the transition's share of its source's outgoing
+transitions, and very small wedges are dropped. The fill is the adjusted
+residual on the diverging scale of the residual heatmap (red
+over-represented, blue avoided), or the probability or lift.
+
+The same display is \code{plot(fit, type = "sunburst")}. For the full
+table use \code{\link[=plot.lsa]{plot.lsa()}}; for a network layout, \code{\link[=plot_transitions]{plot_transitions()}}; for
+ribbons between states, \code{\link[=plot_chords]{plot_chords()}}.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}
+when the fit has no transitions to draw.
+}
+
 \examples{
 fit <- lsa(group_regulation)
-plot_polar(fit)                          # rose: bars filled by residual
-plot_polar(fit, style = "wedge")         # classic frequency wedges
-plot_polar(fit, significant = TRUE)      # non-significant cells greyed
+plot_polar(fit)
+plot_polar(fit, style = "wedge", significant = TRUE)
 
 }
 \seealso{
-\code{\link[=plot.lsa]{plot.lsa()}} (heatmap), \code{\link[=plot_chords]{plot_chords()}} (chord),
-\code{\link[=plot_forest]{plot_forest()}} (bootstrap forest)
+\code{\link[=plot.lsa]{plot.lsa()}}, \code{\link[=plot_chords]{plot_chords()}}, \code{\link[=plot_transitions]{plot_transitions()}}
 }

@@ -3,7 +3,7 @@
 \name{plot.lsa_comparison}
 \alias{plot.lsa_comparison}
 \alias{plot.lsa_comparison_pairwise}
-\title{Plot a Group Comparison}
+\title{Plot a comparison of transitions between groups}
 \usage{
 \method{plot}{lsa_comparison}(
   x,
@@ -24,53 +24,59 @@
 )
 }
 \arguments{
-\item{x}{An \code{lsa_comparison} or \code{lsa_comparison_pairwise} object from
-\code{\link[=compare_lsa]{compare_lsa()}} (or the Bayesian equivalents from
-\code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}).}
+\item{x}{The result of \code{\link[=compare_lsa]{compare_lsa()}} or \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}.}
 
 \item{style}{\code{"barrel"} (default) or \code{"heatmap"}.}
 
-\item{value}{For \code{"barrel"}, the quantity mapped to bar length:
-\code{"prob"} (transition probability, default) or \code{"count"}.}
+\item{value}{For the barrel, bar length: \code{"prob"} (default) or
+\code{"count"}.}
 
-\item{rank}{For \code{"barrel"}, how to choose which transitions to show:
-\code{"frequency"} (default) ranks by pooled observed count -- the
-backbone transitions, which are mostly over-represented (blue);
-\code{"effect"} ranks by the strongest association in either group
-(\verb{|log OR|}, among tested cells), surfacing both over- (blue) and
-under-represented / avoided (red) transitions.}
+\item{rank}{For the barrel, which transitions to show: \code{"frequency"}
+(default, the most frequent overall) or \code{"effect"} (the strongest
+association, largest absolute log odds ratio, in either group).}
 
-\item{top_n}{For \code{"barrel"}, how many transitions to show (highest
-\code{rank} on top; for the pairwise object the ranking is shared across
-facets so they line up). Default \code{12}.}
+\item{top_n}{For the barrel, the number of transitions shown (default
+\code{12}); with several pairs the same transitions are shown in every
+facet.}
 
-\item{...}{Reserved.}
+\item{...}{Ignored.}
 }
 \value{
-A \code{ggplot} object (drawn when printed).
+A \code{ggplot} object, drawn when printed.
 }
 \description{
-Two views of a \code{\link[=compare_lsa]{compare_lsa()}} result. The default \code{"barrel"} is a
-back-to-back pyramid (one row per transition): the first group's bar
-runs left and the second's right, bar length is each group's
-transition probability, bar colour is each group's log odds ratio
-(blue = over-represented, red = avoided, following the vcd / mosaic
-convention), bar ends show the observed count, and the centre chip
-shows the difference p-value (bold and starred when significant). The
-bar of the group with the higher value gets a border that darkens with
-the size of the difference (faint = small, dark = large). For more
-than two groups, one
-barrel is drawn per pair via facets. The \code{"heatmap"} style draws the
-signed difference as a \verb{from x to} grid on the same diverging scale.
+\code{plot()} draws the result of \code{\link[=compare_lsa]{compare_lsa()}} or \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} as a
+barrel chart (default) or a heatmap. When the same states are observed in two
+or more groups, a comparison shows which transitions differ between them, by
+how much, and whether the difference is larger than chance, so a display of
+it has to show both the transitions themselves in each group and the test of
+their difference.
+
+The barrel is a back-to-back chart with one row per transition: the first
+group's bar runs to the left and the second's to the right, bar length is the
+transition probability (or count), bar colour is the log odds ratio of the
+transition within the group (blue over-represented, red avoided), and the
+centre shows the p-value of the difference, in bold when significant. The
+rows are the \code{top_n} most frequent transitions, or with \code{rank = "effect"}
+those with the strongest association in either group. The heatmap draws the
+difference between the groups as a grid of \code{from} by \code{to} states. With more
+than two groups, each pair is drawn as a facet.
+
+The tested differences are read as a table with \code{transitions(cmp)}.
+To colour the ribbons of a chord diagram by a group difference, see
+\code{\link[=plot_chords]{plot_chords()}}.
 }
 \examples{
-g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
-         time = "Time", group = "Achiever")
-cmp <- compare_lsa(g, R = 100)
-plot(cmp)                    # back-to-back barrel
-plot(cmp, style = "heatmap") # difference heatmap
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+set.seed(1)
+cmp <- compare_lsa(gfit, R = 100, adjust = "BH")
+plot(cmp)
+plot(cmp, rank = "effect")
+plot(cmp, style = "heatmap")
 
 }
 \seealso{
-\code{\link[=compare_lsa]{compare_lsa()}}, \code{\link[=plot.lsa]{plot.lsa()}}
+\code{\link[=compare_lsa]{compare_lsa()}}, \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}, \code{\link[=transitions]{transitions()}},
+\code{\link[=plot_chords]{plot_chords()}}
 }

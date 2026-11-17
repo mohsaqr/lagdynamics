@@ -5,17 +5,29 @@
 \alias{print.lsa_group}
 \alias{print.lsa}
 \alias{summary.lsa}
+\alias{print.summary.lsa}
+\alias{as.data.frame.summary.lsa}
 \alias{as.data.frame.lsa}
 \alias{as.data.frame.lsa_group}
 \alias{summary.lsa_group}
 \alias{nobs.lsa}
-\title{Print, Summarise and Tidy an LSA Fit}
+\title{Print, summarise and tidy a lag sequential analysis fit}
 \usage{
 \method{print}{lsa_group}(x, ...)
 
 \method{print}{lsa}(x, ...)
 
 \method{summary}{lsa}(object, ...)
+
+\method{print}{summary.lsa}(x, ...)
+
+\method{as.data.frame}{summary.lsa}(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  what = c("overview", "nodes"),
+  ...
+)
 
 \method{as.data.frame}{lsa}(x, row.names = NULL, optional = FALSE, ...)
 
@@ -26,55 +38,72 @@
 \method{nobs}{lsa}(object, ...)
 }
 \arguments{
-\item{x, object}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or (for the \code{lsa_group}
-methods) a grouped fit from \code{lsa(..., group = )}.}
+\item{x, object}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
+\code{lsa(..., group = )}. For \code{print()} and \code{as.data.frame()} on a
+summary, a \code{summary.lsa} object.}
 
 \item{...}{Ignored.}
 
-\item{row.names}{Optional row names for the returned data frame
-(\code{as.data.frame.lsa()} only); ignored by the grouped method.}
+\item{row.names}{Optional row names for the returned data frame;
+ignored by the grouped method.}
 
 \item{optional}{Ignored; present for consistency with the generic.}
+
+\item{what}{For \code{as.data.frame()} on a summary: \code{"overview"} (default,
+the one-row overview of the fit) or \code{"nodes"} (one row per state).}
 }
 \value{
 \itemize{
 \item \code{print()} returns \code{x} invisibly.
-\item \code{summary.lsa()} prints the extended view and returns, invisibly, a
-one-row \code{data.frame} with columns \code{engine}, \code{lag}, \code{n_states},
-\code{n_sequences}, \code{n_events}, \code{n_transitions}, \code{n_significant},
-\code{alpha}, \code{lrx2}, \code{lrx2_df}, \code{lrx2_p}, \code{x2}, \code{x2_df}, \code{x2_p}
-(\code{NA} where the engine computed no tablewise test or the input was a
-transition matrix).
-\item \code{summary.lsa_group()} returns that frame visibly with one row per
-group and a leading \code{group} column; it prints nothing else.
-\item \code{as.data.frame.lsa()} returns a \code{data.frame} with one row per
-\code{from -> to} cell: integer \code{from}/\code{to} ids, \code{from_label}, \code{to_label},
-the statistic columns of \code{\link[=transitions]{transitions()}}, and the protocol columns
-\code{edge} and \code{weight}. \code{as.data.frame.lsa_group()} stacks these with a
-leading \code{group} column.
+\item \code{summary()} on an \code{lsa} fit returns an object of class \code{summary.lsa}
+holding two tables. The overview has one row and the columns
+\code{engine}, \code{lag}, \code{n_states}, \code{n_sequences}, \code{n_events},
+\code{n_transitions}, \code{n_significant}, \code{alpha}, \code{lrx2}, \code{lrx2_df},
+\code{lrx2_p}, \code{x2}, \code{x2_df}, \code{x2_p} (\code{NA} where the engine computed no
+tablewise test or the input was a transition matrix). The node table
+has one row per state and the columns \code{state}, \code{outgoing},
+\code{incoming}, \code{out_share}, \code{in_share}, \code{init_prob}. Read them with
+\code{as.data.frame(s)} and \code{as.data.frame(s, what = "nodes")}.
+\item \code{summary()} on a grouped fit returns a \code{data.frame} with one row per
+group: a leading \code{group} column followed by the overview columns.
+\item \code{as.data.frame()} on an \code{lsa} fit returns a \code{data.frame} with one row
+per \code{from -> to} cell: integer \code{from} and \code{to} ids, \code{from_label},
+\code{to_label}, the statistic columns of \code{\link[=transitions]{transitions()}}, and the network
+columns \code{edge} and \code{weight}. On a grouped fit the tables are stacked
+under a leading \code{group} column.
+\item \code{as.data.frame()} on a summary returns the overview or the node table.
 \item \code{nobs()} returns a single number, the total transition count.
 }
 }
 \description{
-Methods for the objects returned by \code{\link[=lsa]{lsa()}}. \code{print()} gives a compact
-model overview: engine, sizes, the tablewise independence test, the
-strongest over-represented transitions, and the initial-state
-distribution. \code{summary()} prints that overview followed by the node
-activity and the observed, expected, probability and residual matrices,
-and returns a one-row tidy overview. \code{as.data.frame()} returns the full
-edge table, including the integer ids and \code{cograph_network} protocol
-columns that \code{\link[=transitions]{transitions()}} leaves out. \code{nobs()} is the number of
-transitions the model was fitted to.
-}
-\details{
-For reading results, prefer the verbs: \code{\link[=transitions]{transitions()}} for the
-per-transition table, \code{\link[=nodes]{nodes()}}, \code{\link[=tests]{tests()}} and \code{\link[=initial]{initial()}} for the
-other parts of the fit.
+\code{print()}, \code{summary()}, \code{as.data.frame()} and \code{nobs()} describe a fitted lag
+sequential analysis, an \code{lsa} object from \code{\link[=lsa]{lsa()}}. A fit has three levels of
+description: the model as a whole (its size and the tablewise test of
+independence), the states (how often each is left and entered, and how often
+a sequence starts in it), and the individual transitions. These methods give
+the first two levels; \code{\link[=transitions]{transitions()}} gives the third.
+
+\code{print()} shows a compact overview: the engine and lag, the numbers of
+states, transitions, events and sequences, the likelihood-ratio test of
+independence, the strongest over-represented transitions and the
+initial-state distribution. \code{summary()} returns a \code{summary.lsa} object
+holding two tables, a one-row overview of the fit and one row per state,
+which are read with \code{as.data.frame(summary(fit), what = )}. For a
+grouped fit, \code{summary()} returns one overview row per group.
+\code{as.data.frame()} on a fit returns the full edge table, including the
+integer state ids and the network columns that \code{\link[=transitions]{transitions()}} leaves
+out. \code{nobs()} is the number of transitions the model was fitted to.
+
+For the per-transition, per-state and per-test tables, prefer the
+reading verbs \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}}, \code{\link[=tests]{tests()}} and \code{\link[=initial]{initial()}}.
 }
 \examples{
 fit <- lsa(engagement)
-print(fit)
-summary(fit)
+fit
+s <- summary(fit)
+s
+as.data.frame(s)
+as.data.frame(s, what = "nodes")
 nobs(fit)
 head(as.data.frame(fit))
 
@@ -85,5 +114,6 @@ summary(gfit)
 
 }
 \seealso{
-\code{\link[=lsa]{lsa()}}, \code{\link[=transitions]{transitions()}}
+\code{\link[=lsa]{lsa()}}; \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}}, \code{\link[=tests]{tests()}} and \code{\link[=initial]{initial()}}
+for the reading verbs.
 }

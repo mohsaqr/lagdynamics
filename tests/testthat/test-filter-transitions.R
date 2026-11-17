@@ -48,7 +48,7 @@ test_that("transitions defaults to the fit's alpha", {
 })
 
 test_that("transitions(significant=) excludes NA p-values", {
-  fit <- lsa(engagement, engine = "classical",
+  fit <- lsa_forbidden_counts(engagement, engine = "classical",
              structural_zeros = 1 - diag(3))
   expect_false(any(is.na(transitions(fit, significant = TRUE)$p)))
 })

@@ -117,12 +117,13 @@ test_that("grouped reading verbs bind tidy group-prefixed frames", {
 
 # --- grouped transition probabilities ----------------------------------
 
-test_that("transition_probabilities.lsa_group returns one matrix per group", {
+test_that("transition_probabilities.lsa_group stacks groups in one frame", {
   fit <- lsa(engagement, group = make_group())
   tp <- transition_probabilities(fit)
-  expect_type(tp, "list")
-  expect_setequal(names(tp), c("high", "low"))
-  expect_true(all(vapply(tp, is.matrix, logical(1L))))
+  expect_s3_class(tp, "data.frame")
+  expect_identical(names(tp), c("group", "from", "to", "prob"))
+  expect_setequal(unique(tp$group), c("high", "low"))
+  expect_equal(nrow(tp), 2L * 3L^2)
 })
 
 # --- grouped reliability ------------------------------------------------

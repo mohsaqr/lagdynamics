@@ -1,0 +1,376 @@
+---
+title: "Engines: classical, two-cell, bidirectional and dominance tests"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Engines: classical, two-cell, bidirectional and dominance tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+Lag sequential analysis starts from one table: the counts $O_{ij}$ of how
+often state $i$ was followed by state $j$ at a given lag. Several classical
+tests can be computed from that table, and they answer different questions.
+The classical test asks whether a directed transition $i \to j$ occurs more or
+less often than the base rates of $i$ and $j$ predict (Bakeman & Quera, 2011).
+The two-cell test asks the same question through the odds ratio of a
+$2 \times 2$ collapse (Bakeman & Gottman, 1997). The bidirectional test drops
+direction and asks whether the pair $\{i, j\}$ co-occurs more than expected.
+The two dominance tests ask whether, within the pair, $i \to j$ outnumbers
+$j \to i$ (Sackett, 1979; Wampold, 1984).
+
+In `lagdynamics` each of these tests is an *engine*: a function that takes the
+transition table and returns per-cell statistics. Every engine is reached
+through `lsa(data, engine = )` or through a wrapper with the engine fixed
+(`lsa_classical()`, `lsa_two_cell()`, `lsa_bidirectional()`,
+`lsa_parallel_dominance()`, `lsa_nonparallel_dominance()`), and every fit is
+read with the same verbs: `transitions()`, `tests()`, `plot()`. This guide
+gives, for each engine, the statistic, the null hypothesis, the columns it
+adds to `transitions()`, and the question it answers. It then fits all five on
+the same data, shows where they agree and where they part ways, and ends with
+how to register an engine of your own. The model and its reading verbs are
+introduced in [the LSA vignette](lsa.html); structural zeros, which only the
+classical engine supports, are covered in
+[the lags and structural zeros guide](lags-structural-zeros.html).
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+Two bundled datasets are used.
+
+- **`engagement`**: weekly engagement states of 138 students over 15 weeks,
+  one row per student (wide format). States: `Active`, `Average`,
+  `Disengaged`. Two rows are entirely missing, so fits use 136 sequences.
+  With three states each table has nine cells, small enough to print in full.
+- **`group_regulation`**: coded regulation actions in 2,000 collaborative
+  learning sessions, one row per group session and one column per ordered
+  time point (`T1` to `T26`, shorter sessions padded with `NA`). Nine
+  states: `adapt`, `cohesion`, `consensus`, `coregulate`, `discuss`,
+  `emotion`, `monitor`, `plan`, `synthesis`. Used to compare the engines on a
+  larger table.
+
+The registry lists the engines available in the session.
+
+```{r registry}
+list_lsa_engines()
+```
+
+The five built-in engines are registered when the package loads. Any engine
+added with `register_lsa_engine()` appears in the same table.
+
+## Classical: adjusted residuals under independence
+
+The classical engine tests each directed cell against sequential
+independence. With row totals $R_i$, column totals $C_j$ and $N$ transitions,
+the expected count and the adjusted residual (Haberman, 1973) are
+
+$$E_{ij} = \frac{R_i C_j}{N}, \qquad
+z_{ij} = \frac{O_{ij} - E_{ij}}{\sqrt{E_{ij}\,(1 - R_i/N)\,(1 - C_j/N)}}.$$
+
+The null for each cell is that the next state does not depend on the current
+one; $z_{ij}$ is referred to the standard normal. Alongside the residual, the
+engine reports Yule's $Q = (ad - bc)/(ad + bc)$ from the $2 \times 2$
+collapse of the cell ($a = O_{ij}$, $b = R_i - O_{ij}$, $c = C_j - O_{ij}$,
+$d = N - R_i - C_j + O_{ij}$), Wampold's unidirectional kappa with its own $z$
+and $p$ (computed from event totals rather than transition totals), and the
+tablewise likelihood-ratio $G^2 = 2\sum O \log(O/E)$ and Pearson $X^2$ tests
+with $(K-1)^2$ degrees of freedom. It is the only engine that supports
+structural zeros.
+
+```{r classical}
+fit_classical <- lsa_classical(engagement)
+fit_classical
+transitions(fit_classical)
+tests(fit_classical)
+```
+
+Seven of the nine transitions depart from independence. The three
+self-transitions are the over-represented cells (Active to Active,
+$z = 21.7$, 459 observed against 247 expected), and every move between
+`Active` and the other two states is under-represented. The two transitions
+out of `Disengaged` into `Average` and out of `Average` into `Disengaged` are
+the only ones consistent with independence ($z = -1.74$ and $z = 0.18$). The
+tablewise test rejects independence for the table as a whole
+($G^2 = 618$, df = 4). The answer to the classical question is that weekly
+engagement is sticky: students tend to stay where they are, and direct moves
+between `Active` and `Disengaged` are rare (23 and 39 transitions against
+expectations of 121 and 122).
+
+## Two-cell: the log odds ratio
+
+The two-cell engine collapses each cell into the same $2 \times 2$ table
+($a, b, c, d$ above) and tests the odds ratio $OR = ad/(bc)$ with a Wald test
+on its logarithm:
+
+$$z_{ij} = \frac{\log OR_{ij}}{\sqrt{1/a + 1/b + 1/c + 1/d}}.$$
+
+When any of the four counts is zero, 0.5 is added to all four (the
+Haldane-Anscombe correction; the amount is the engine parameter
+`continuity`). The null is $OR = 1$: being in state $i$ does not change the
+odds that the next state is $j$. The residual column `adj_res` holds this Wald
+$z$, and the engine appends `odds_ratio`, `log_or` and `log_or_se`. Kappa is
+not computed and there is no tablewise test.
+
+```{r two-cell}
+transitions(lsa_two_cell(engagement))
+```
+
+The two-cell test flags the same seven transitions as the classical test, with
+the same signs, and its Yule's Q column is identical because both engines
+compute $Q$ from the same collapse. The $z$ values are close but not equal
+(Active to Active: 20.3 against 21.7) because the Wald statistic uses the
+standard error of the log odds ratio rather than the expected-count variance.
+The engine earns its place through its effect size: an odds ratio of 10.6 for
+Active to Active says that an active week multiplies the odds of another
+active week by more than ten, and an odds ratio of 0.095 for Active to
+Disengaged says that an active week cuts the odds of a disengaged one by about
+a factor of ten.
+
+## Bidirectional: the unordered pair
+
+The bidirectional engine asks whether two states follow each other in either
+order more often than expected. It symmetrises the table, $W = O + O^\top$,
+and computes adjusted residuals on $W$ with symmetric margins
+$R^W_i = \sum_j W_{ij}$:
+
+$$E^W_{ij} = \frac{R^W_i R^W_j}{N_W}, \qquad
+z_{ij} = \frac{W_{ij} - E^W_{ij}}{\sqrt{E^W_{ij}\,(1 - R^W_i/N_W)\,(1 - R^W_j/N_W)}}.$$
+
+The statistic is symmetric, so the rows $i \to j$ and $j \to i$ carry the
+same `adj_res` and `p`; the fit is marked undirected. A diagonal cell of $W$
+is twice the self-transition count. The engine appends `symmetric_obs`
+($W_{ij}$) and `symmetric_exp` ($E^W_{ij}$); `expected` also holds
+$E^W_{ij}$. The `count`, `prob`, `lift` and `sign` columns are computed from
+the directed counts, so the bidirectional result is read from `adj_res`,
+`symmetric_obs` and `symmetric_exp`, not from `lift` or `sign`.
+
+```{r bidirectional}
+transitions(lsa_bidirectional(engagement))
+```
+
+The pair `Active`/`Disengaged` occurs 62 times in either order against 243
+expected ($z = -16.3$), and the pair `Active`/`Average` 329 times against 571
+($z = -17.1$). The pair `Average`/`Disengaged` is not distinguishable from
+independence ($z = -1.11$). The bidirectional reading agrees with the
+classical one but compresses it: the classical engine needed two cells to
+say that `Active` and `Disengaged` avoid each other, the bidirectional engine
+says it once.
+
+## Dominance: which direction wins within a pair
+
+The dominance engines take each pair of states and ask whether one direction
+outnumbers the other. Both use the difference $D_{ij} = O_{ij} - O_{ji}$ and
+differ in its standard error. The parallel-dominance engine scales by the
+counts expected under independence,
+
+$$z_{ij} = \frac{O_{ij} - O_{ji}}{\sqrt{E_{ij} + E_{ji}}},$$
+
+and the non-parallel-dominance engine scales by the observed pair total,
+
+$$z_{ij} = \frac{O_{ij} - O_{ji}}{\sqrt{O_{ij} + O_{ji}}},$$
+
+which is the normal approximation to the exact test of
+$O_{ij} \sim \text{Binomial}(O_{ij} + O_{ji}, 1/2)$; that exact p-value is
+also returned. The null is symmetry within the pair: $i \to j$ and $j \to i$
+are equally likely. The statistic is antisymmetric ($z_{ij} = -z_{ji}$) and a
+self-transition has no direction, so the diagonal is $z = 0$, $p = 1$. Both
+engines put the dominance $z$ in `adj_res` and append `dominance` ($D_{ij}$);
+the parallel engine adds `dominance_se`, the non-parallel engine adds
+`pair_totals` and `binomial_p`. The `expected`, `lift` and `sign` columns
+still describe the independence model, not the dominance test.
+
+```{r parallel}
+transitions(lsa_parallel_dominance(engagement))
+```
+
+No pair has a dominant direction under the parallel test. The largest count
+difference is between `Active` and `Average` ($D = 23$, $z = 0.96$): students
+move from `Active` down to `Average` 176 times and back up 153 times, a
+difference well within chance.
+
+```{r nonparallel}
+transitions(lsa_nonparallel_dominance(engagement))
+```
+
+The non-parallel test flags one pair: `Disengaged` to `Active` outnumbers
+`Active` to `Disengaged`, 39 against 23 ($D = 16$, $z = 2.03$, $p = 0.042$).
+The two dominance tests differ here because the pair is rare. Under
+independence the pair would occur 243 times, so the parallel standard error is
+$\sqrt{243} = 15.6$; it actually occurs 62 times, so the non-parallel standard
+error is $\sqrt{62} = 7.87$. The exact binomial p-value for the same pair is
+0.056, above 0.05, while the `significant` column follows the normal $p$.
+With a pair total of 62 the exact test is the one to report, and it does not
+support a dominant direction: direct jumps between `Active` and `Disengaged`
+run upward somewhat more often than downward, but not reliably so.
+
+## Where the engines agree and disagree
+
+On the larger `group_regulation` table the engines can be compared on the
+transitions they rank first. The classical and two-cell engines are printed
+first.
+
+```{r gr-classical}
+fit_gr <- lsa_classical(group_regulation)
+transitions(fit_gr, significant = TRUE, sort = "strength") |> head(6)
+transitions(lsa_two_cell(group_regulation), significant = TRUE,
+            sort = "strength") |> head(6)
+```
+
+Both engines rank `emotion -> cohesion` first (classical $z = 58.2$, two-cell
+$z = 48.0$) and agree on the sign of every listed cell, but their orderings
+differ below the top: the classical engine puts `synthesis -> adapt` third and
+`discuss -> plan` fourth, the two-cell engine puts `consensus -> coregulate`
+third and `consensus -> consensus` fourth. The Wald $z$ falls furthest below
+the adjusted residual for the most lopsided cells: `discuss -> synthesis`
+(odds ratio 26.5) drops from 48.0 to 33.3 and `synthesis -> adapt` from 38.8
+to 28.2, while `consensus -> coregulate` (odds ratio 4.66) moves only from
+35.3 to 32.9. The classical $z$ is the statistic to rank by; the odds ratio is
+the effect size to report next to it.
+
+The bidirectional engine ranks pairs, so its top rows come in mirrored
+pairs.
+
+```{r gr-bidirectional}
+transitions(lsa_bidirectional(group_regulation), significant = TRUE,
+            sort = "strength") |> head(6)
+```
+
+The strongest bidirectional result is a self-transition: `consensus` follows
+itself far less often than independence predicts ($z = -50.2$). The pair
+`emotion`/`cohesion` follows ($z = 42.2$), with 923 transitions one way and
+196 the other. The pair `plan`/`discuss` is avoided in both directions
+($z = -41.3$). The bidirectional view hides the fact that `emotion -> cohesion`
+is the dominant direction of the pair, which is the question the dominance
+engines answer.
+
+```{r gr-dominance}
+transitions(lsa_parallel_dominance(group_regulation), direction = "over",
+            sort = "strength") |> head(5)
+transitions(lsa_nonparallel_dominance(group_regulation), direction = "over",
+            sort = "strength") |> head(5)
+```
+
+With `direction = "over"`, each pair appears once, in its dominant direction.
+The parallel test ranks `emotion -> cohesion` first ($D = 727$, $z = 37.5$)
+and the non-parallel test ranks `cohesion -> consensus` first ($D = 750$,
+$z = 24.5$). Both sets point the same way: the turn-taking of these groups
+runs from emotion to cohesion, from cohesion to consensus, from consensus to
+coregulation, and from discussion to synthesis, much more than the reverse.
+The two tests disagree on order because the parallel standard error is large
+for pairs that independence expects often and small for pairs it expects
+rarely, which promotes `synthesis -> adapt` ($D = 153$, $z = 29.3$, all 153
+transitions of the pair in one direction) to third place.
+
+A residual heatmap of the classical fit and of the parallel-dominance fit
+shows the difference in what the two engines test. The classical map has its
+strongest cells wherever a transition is common or rare relative to the base
+rates; the dominance map is antisymmetric, with each over-represented cell
+mirrored by an under-represented one across the diagonal.
+
+```{r heatmap-classical, fig.height = 5}
+plot(fit_gr)
+```
+
+```{r heatmap-dominance, fig.height = 5}
+plot(lsa_parallel_dominance(group_regulation))
+```
+
+The dominance map mirrors itself: `consensus -> coregulate` is $+29.03$ and
+`coregulate -> consensus` is $-29.03$, and the diagonal is 0. The cells that
+dominate are not the cells that are most over-represented: `consensus -> plan`
+is the fifth largest positive cell of the classical map (32.58) but only 12.93 in
+the dominance map, because `plan -> consensus` is common too. The three grey
+cells in both maps are transitions with no observed count, which the heatmap
+leaves blank.
+
+## Writing your own engine
+
+The registry is open. An engine is a function that accepts `transitions`
+(the `lsa_transitions` object of counts) and `...`, and returns a named list
+with at least the $K \times K$ matrices `obs`, `exp`, `prob`, `adj_res` and
+`p`. Any further $K \times K$ matrix it returns becomes an extra column of
+`transitions()`. The example below defines Pearson residuals,
+$(O - E)/\sqrt{E}$, which omit the margin correction of the adjusted residual.
+
+```{r custom-engine}
+pearson_engine <- function(transitions, ...) {
+  obs <- transitions$obs
+  expected <- outer(rowSums(obs), colSums(obs)) / sum(obs)
+  residual <- (obs - expected) / sqrt(expected)
+  list(obs = obs, exp = expected, prob = obs / rowSums(obs),
+       adj_res = residual, p = 2 * stats::pnorm(-abs(residual)))
+}
+register_lsa_engine("pearson", pearson_engine,
+                    description = "Pearson residuals under independence")
+list_lsa_engines()
+transitions(lsa(engagement, engine = "pearson"), significant = TRUE)
+```
+
+The Pearson engine flags the same seven transitions as the classical engine,
+with smaller values (Active to Active: 13.5 against 21.7), because the
+adjusted residual divides by the smaller standard deviation that accounts for
+the fixed margins. The Pearson residual is not standard normal under the null
+and understates departures; it is shown here as a template, not as an
+alternative to the classical engine. Columns the engine did not return, such
+as Yule's Q and kappa, are `NA`. An engine stays registered for the session;
+remove it with `unregister_lsa_engine()`.
+
+```{r unregister}
+unregister_lsa_engine("pearson")
+```
+
+## Which engine to use
+
+| Question | Engine | Statistic in `adj_res` | Extra columns |
+|---|---|---|---|
+| Does $i \to j$ occur more or less than base rates predict? | `classical` | adjusted residual | kappa, `kappa_z`, `kappa_p`; tablewise tests |
+| How large is that association, as an odds ratio? | `two_cell` | Wald $z$ of $\log OR$ | `odds_ratio`, `log_or`, `log_or_se` |
+| Do $i$ and $j$ follow each other, in either order, more than expected? | `bidirectional` | adjusted residual of $O + O^\top$ | `symmetric_obs`, `symmetric_exp` |
+| Within a pair, does one direction outnumber the other? (common pairs) | `parallel_dominance` | $D/\sqrt{E_{ij}+E_{ji}}$ | `dominance`, `dominance_se` |
+| The same, for rare pairs | `nonparallel_dominance` | $D/\sqrt{O_{ij}+O_{ji}}$ | `dominance`, `pair_totals`, `binomial_p` |
+
+The classical engine is the default and the one every inference verb
+(bootstrap, permutation, group comparison) is built around; start there. Add
+the two-cell engine when an effect size on the odds scale is needed for
+reporting. Use the bidirectional engine when the coding does not fix
+direction (two partners whose turns alternate) or when the question is about
+pairing rather than sequence. Use a dominance engine when the question is
+about direction within a pair, as in who leads and who follows; prefer the
+non-parallel engine and its exact `binomial_p` when pair totals are small.
+Only the classical engine supports structural zeros (`loops = FALSE` or a
+`structural_zeros` matrix); the others stop with an error of class
+`lagdynamics_unsupported_option`.
+
+## References
+
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An introduction
+to sequential analysis* (2nd ed.). Cambridge University Press.
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Haberman, S. J. (1973). The analysis of residuals in cross-classified tables.
+*Biometrics, 29*, 205-220.
+
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+*Handbook of infant development* (pp. 623-649). Wiley.
+
+Wampold, B. E. (1984). Tests of dominance in sequential categorical data.
+*Psychological Bulletin, 96*(2), 424-429.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

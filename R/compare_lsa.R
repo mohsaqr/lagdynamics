@@ -14,124 +14,132 @@
 # comparisons (lsa_comparison_pairwise), with the multiple-comparison
 # correction applied once across the whole family of per-edge p-values.
 
-#' Compare Groups' Transition Structures
+#' Compare transition structures between groups with a permutation test
 #'
-#' Permutation test for whether groups produce different LSA transition
-#' structures. For each pair of groups it pools their sequences,
-#' repeatedly reassigns the group label of whole sequences (preserving
-#' the original group sizes), refits each pseudo-group, and builds a
-#' permutation distribution of the per-edge difference in the chosen
-#' `measure`. The two-sided p-value is
-#' `(1 + #{ |diff_perm| >= |diff_obs| }) / (1 + R)` (Phipson & Smyth
-#' 2010). A single omnibus test of overall difference is reported from
-#' the same permutations.
+#' @description
+#' `compare_lsa()` tests whether groups of sequences (high and low achievers,
+#' courses, conditions) differ in their transition structure, transition by
+#' transition and as a whole, with a permutation test. Groups can differ in
+#' which transitions they over- or under-produce. The permutation test checks
+#' whether an observed difference between groups is larger than would arise if
+#' group membership were unrelated to the sequences: the group labels of whole
+#' sequences are shuffled many times, the models are refitted, and the observed
+#' difference is set against the differences produced by the shuffles. Because
+#' whole sequences are permuted, the dependence between events of one sequence
+#' is kept and only the link between group and transition structure is tested.
 #'
-#' With exactly two groups a single comparison is returned. With more
-#' than two groups every pairwise comparison is run and the requested
-#' `adjust` correction is applied **once across the whole family** of
-#' per-edge p-values (and separately across the per-pair omnibus tests),
-#' giving family-wise control rather than per-pair control.
+#' For each transition, `compare_lsa()` compares a per-group measure, by default
+#' the log odds ratio of the transition against all other transitions, which
+#' does not grow with the number of transitions observed, so groups of different
+#' sizes can be compared. Each transition gets the group difference, a
+#' permutation p-value (Phipson & Smyth, 2010) and an adjusted p-value;
+#' transitions too rare to be compared are left untested. An omnibus test of
+#' overall difference, the sum of squared differences over the tested
+#' transitions, is computed from the same permutations, in the spirit of the
+#' network comparison test of van Borkulo et al. (2023). With more than two
+#' groups every pair is compared and the `adjust` correction is applied once
+#' across the p-values of all pairs.
 #'
-#' @param x Either an `lsa_group` object (from `lsa(..., group = )`)
-#'   with two or more groups, or a single `lsa` fit for the first group.
-#' @param y When `x` is a single `lsa` fit, the second group's `lsa`
-#'   fit. Ignored (and must be `NULL`) when `x` is an `lsa_group`.
-#' @param R Integer. Number of label permutations per comparison.
-#'   Default `1000`.
-#' @param measure Character. The per-edge quantity compared between
-#'   groups. Default `"log_or"`: the per-cell log odds ratio of the 2x2
-#'   transition collapse (Haldane-Anscombe corrected on empty cells) --
-#'   an N-invariant LSA effect size, so the comparison reflects
-#'   behaviour rather than sample size. Other options: `"yules_q"`
-#'   (also N-invariant, but saturates at +/-1 on zero cells),
-#'   `"adj_res"` (adjusted residuals -- the LSA *test statistic*, which
-#'   scales with sqrt(N) and is therefore confounded by group size; a
-#'   message warns when groups differ in size), `"prob"` (transition
-#'   probabilities -- a raw rate, i.e. the TNA quantity, with no
-#'   independence baseline), `"count"`, or `"lift"` (observed /
-#'   expected).
-#' @param adjust Multiple-comparison correction; any method accepted by
-#'   [stats::p.adjust()] (e.g. `"holm"`, `"BH"`, `"bonferroni"`).
-#'   Default `"none"`. For more than two groups it is applied across the
-#'   pooled per-edge p-values of all pairs.
-#' @param min_count Integer. Minimum pooled observed count (group a +
-#'   group b) for a transition to be tested. Default `5`. Rarer cells
-#'   carry an unstable odds ratio and a near-degenerate permutation null
-#'   that produces spurious small p-values, so they get `p = NA` and are
-#'   excluded from the multiple-comparison family and the omnibus rather
-#'   than flagged significant. Set `0` to test every cell.
-#' @param parallel Logical. Use multi-core resampling. Default `FALSE`.
-#' @param n_cores Integer. Worker count when `parallel = TRUE`.
-#' @param verbose Logical. Print progress every 100 permutations.
-#' @param ... Reserved.
+#' The groups must share their states, engine, lag and structural zeros;
+#' fitting them together with `lsa(data, group = )` ensures this. For a
+#' Bayesian comparison of transition probabilities that reports the
+#' plausible size of each difference without resampling, use
+#' [bayes_compare_lsa()]. A difference between groups can also arise from
+#' a difference in their composition; check subgroups when such a
+#' confound is plausible.
 #'
-#' @details
-#' **NA handling.** Non-estimable cells (structural zeros, zero-margin
-#' rows in a permuted pseudo-group) carry `NA` in the measure matrix and
-#' are never coerced to zero. Such cells get `p_perm = NA` rather than a
-#' spurious significant flag, and the exceedance tally and omnibus
-#' statistic are computed with `na.rm = TRUE`, matching [permute_lsa()].
+#' @param x A grouped fit from `lsa(data, group = )` with two or more
+#'   groups, or the `lsa` fit of the first group.
+#' @param y The `lsa` fit of the second group when `x` is a single fit
+#'   (the groups are then labelled `"a"` and `"b"`). Default `NULL`.
+#' @param R Number of label permutations per comparison. Default `1000`.
+#' @param measure Per-transition measure compared between groups:
+#'   `"log_or"` (default; log odds ratio of the transition, with 0.5 added
+#'   to every cell of its 2 x 2 table when one cell is empty), `"yules_q"`
+#'   (also independent of sample size, but bounded at -1 and 1),
+#'   `"adj_res"` (adjusted residual; grows with the number of
+#'   transitions, so a message is shown when one group has more than 1.5
+#'   times the transitions of another), `"prob"` (transition probability),
+#'   `"count"` or `"lift"` (observed / expected count).
+#' @param adjust Multiple-comparison correction, any method of
+#'   [stats::p.adjust()] such as `"BH"`, `"holm"` or `"bonferroni"`.
+#'   Default `"none"`.
+#' @param min_count Minimum combined count of a transition in the two
+#'   groups for it to be tested. Default `5`; `0` tests every transition.
+#' @param parallel Run the permutations on several cores. Default `FALSE`.
+#' @param n_cores Number of cores when `parallel = TRUE`. Default `NULL`,
+#'   all cores but one.
+#' @param verbose Report progress. Default `FALSE`.
+#' @param ... Not used.
 #'
-#' **Interpretation caveats.** The odds ratio is non-collapsible: the
-#' per-group log odds ratios are group-specific departure-from-
-#' independence measures and should not be pooled across groups that
-#' have different marginal state distributions. As with any LSA, a
-#' between-group difference can also be driven by subgroup composition
-#' (Simpson's paradox); confirm with subgroup analysis when a confound
-#' is plausible.
+#' @return With two groups, an object of class
+#'   `c("lsa_comparison", "list")`; with more than two, an object of class
+#'   `c("lsa_comparison_pairwise", "list")`. Read the per-transition table
+#'   with [transitions()]: one row per transition (`from -> to` pair), and
+#'   for more than two groups one row per transition and pair of groups,
+#'   with the columns
+#'   * `group_a`, `group_b` (more than two groups only): the pair compared;
+#'   * `from`, `to`: source and target state;
+#'   * `<measure>_a`, `<measure>_b` (for example `log_or_a`): the measure
+#'     in each group;
+#'   * `diff`: the difference, group a minus group b;
+#'   * `p_perm`: permutation p-value (`NA` when not tested);
+#'   * `p_adj`: p-value after `adjust`;
+#'   * `significant`: `p_adj` below the `alpha` of the fits.
 #'
-#' @return For two groups, an object of class
-#'   `c("lsa_comparison", "list")` with:
-#' \describe{
-#'   \item{edges}{Tidy per-edge data frame: `from`, `to`, the measure in
-#'     each group (`<measure>_a`, `<measure>_b`), their difference
-#'     `diff` (= a - b), the permutation p-value `p_perm`, the adjusted
-#'     p-value `p_adj`, and a `significant` flag.}
-#'   \item{global}{Omnibus test list: `statistic` (observed sum of
-#'     squared edge differences), `p_value`, and `R`.}
-#'   \item{perm_diff}{`R x K^2` matrix of permuted edge differences.}
-#'   \item{measure, R, adjust, groups}{Call metadata; `groups` is the
-#'     length-two character vector of group labels (a, b).}
-#'   \item{fits}{The two original fits, named by group.}
-#' }
-#'   For more than two groups, an object of class
-#'   `c("lsa_comparison_pairwise", "list")` with:
-#' \describe{
-#'   \item{edges}{Tidy per-edge data frame across all pairs, prefixed by
-#'     `group_a`, `group_b`; `p_adj` and `significant` reflect the
-#'     family-wide correction.}
-#'   \item{global}{One row per pair: `group_a`, `group_b`, `statistic`,
-#'     `p_value`, and the across-pairs adjusted `p_adj`.}
-#'   \item{comparisons}{Named list of the underlying two-group
-#'     `lsa_comparison` objects (each fit with `adjust = "none"`), for
-#'     drill-down.}
-#'   \item{measure, R, adjust, groups}{Call metadata; `groups` lists all
-#'     group labels.}
-#' }
-#' Read the per-edge table with [transitions()]; `print()` shows the
-#' group labels, the number of significant edges and the omnibus test.
+#'   `transitions(x, significant = TRUE)` keeps the significant
+#'   transitions; `sort = "strength"` orders by the absolute difference.
+#'   The omnibus test is read with `as.data.frame(x, what = "global")`
+#'   (one row per pair of groups). `print()` shows the groups, the number
+#'   of significant transitions and the omnibus test (see
+#'   [as.data.frame.lsa_comparison()]); [plot()][plot.lsa_comparison]
+#'   draws the differences. The object also stores the permuted
+#'   differences, the settings and the group fits.
+#'
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and one of:
+#' * `lagdynamics_needs_events`: a fit was built from a transition matrix,
+#'   so there are no sequences to permute.
+#' * `lagdynamics_incompatible_fits`: the groups differ in their states,
+#'   engine, lag or structural zeros.
+#' * `lagdynamics_bad_input`: `adjust` is not a method of
+#'   [stats::p.adjust()]; `x` is neither a grouped fit nor an `lsa` fit
+#'   with a second fit in `y`; `y` is given together with a grouped fit;
+#'   or the grouped fit has fewer than two groups.
 #'
 #' @examples
 #' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
 #'          time = "Time", group = "Achiever")
-#' cmp <- compare_lsa(g, R = 100)
+#' cmp <- compare_lsa(g, R = 100, adjust = "BH")
 #' cmp
-#' transitions(cmp, significant = TRUE, sort = "strength")
+#' transitions(cmp, significant = TRUE, sort = "strength") |> head()
+#' as.data.frame(cmp, what = "global")
 #' \donttest{
-#' # A full analysis uses more label permutations
+#' # A full analysis uses more permutations
 #' compare_lsa(g, R = 1000, adjust = "BH")
+#'
+#' # Three courses: every pair, corrected across all pairs
+#' courses <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'                time = "Time", group = "Course")
+#' compare_lsa(courses, R = 100, adjust = "BH") |>
+#'   as.data.frame(what = "global")
 #' }
 #'
 #' @references
-#' Phipson, B., & Smyth, G. K. (2010). Permutation p-values should
-#' never be zero: calculating exact p-values when permutations are
-#' randomly drawn. \emph{Statistical Applications in Genetics and
-#' Molecular Biology}, 9(1), Article 39.
+#' Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never
+#' be zero: Calculating exact p-values when permutations are randomly
+#' drawn. \emph{Statistical Applications in Genetics and Molecular
+#' Biology, 9}(1), Article 39.
 #'
-#' van Borkulo, C. D., et al. (2022). Comparing network structures on
-#' three aspects: A permutation test. \emph{Psychological Methods}.
+#' van Borkulo, C. D., van Bork, R., Boschloo, L., Kossakowski, J. J.,
+#' Tio, P., Schoevers, R. A., Borsboom, D., & Waldorp, L. J. (2023).
+#' Comparing network structures on three aspects: A permutation test.
+#' \emph{Psychological Methods, 28}(6), 1273-1285.
 #'
-#' @seealso [permute_lsa()], [bootstrap_lsa()]
+#' @seealso [transitions()] and [as.data.frame.lsa_comparison()] to read
+#'   the result; [plot.lsa_comparison()] to draw it; [bayes_compare_lsa()]
+#'   for a Bayesian comparison; [permute_lsa()] to test one fit against
+#'   no sequential structure; [lsa()] with `group =` to fit the groups.
 #'
 #' @export
 compare_lsa <- function(x,
@@ -146,13 +154,19 @@ compare_lsa <- function(x,
                         verbose = FALSE,
                         ...) {
   measure <- match.arg(measure)
-  stopifnot(is.numeric(min_count), length(min_count) == 1L,
-            is.finite(min_count), min_count >= 0)
-  stopifnot(is.numeric(R), length(R) == 1L, is.finite(R),
-            R >= 1L, R == floor(R))
+  stopifnot(
+    "`min_count` must be a single number >= 0" =
+      is.numeric(min_count) && length(min_count) == 1L &&
+      is.finite(min_count) && min_count >= 0
+  )
+  stopifnot(
+    "`R` must be a single whole number >= 1" =
+      is.numeric(R) && length(R) == 1L && is.finite(R) && R >= 1L &&
+      R == floor(R)
+  )
   R <- as.integer(R)
   if (!adjust %in% stats::p.adjust.methods) {
-    stop(sprintf("`adjust` must be one of: %s.",
+    .lsa_stop(sprintf("`adjust` must be one of: %s.",
                  paste(stats::p.adjust.methods, collapse = ", ")),
          call. = FALSE)
   }
@@ -393,11 +407,11 @@ compare_lsa <- function(x,
 .compare_resolve <- function(x, y) {
   if (inherits(x, "lsa_group")) {
     if (!is.null(y)) {
-      stop("When `x` is an lsa_group, leave `y = NULL`: the groups are ",
+      .lsa_stop("When `x` is an lsa_group, leave `y = NULL`: the groups are ",
            "taken from `x`.", call. = FALSE)
     }
     if (length(x) < 2L) {
-      stop("compare_lsa() needs at least two groups; the lsa_group has ",
+      .lsa_stop("compare_lsa() needs at least two groups; the lsa_group has ",
            length(x), ".", call. = FALSE)
     }
     nm <- names(x)
@@ -407,7 +421,7 @@ compare_lsa <- function(x,
     return(list(fits = fits, names = nm))
   }
   if (!inherits(x, "lsa") || !inherits(y, "lsa")) {
-    stop("Supply either an `lsa_group` as `x`, or two `lsa` fits as `x` ",
+    .lsa_stop("Supply either an `lsa_group` as `x`, or two `lsa` fits as `x` ",
          "and `y`.", call. = FALSE)
   }
   list(fits = list(x, y), names = c("a", "b"))
@@ -419,7 +433,7 @@ compare_lsa <- function(x,
   ref <- fits[[1L]]
   for (f in fits) {
     if (identical(f$data$source, "transitions")) {
-      stop("compare_lsa() requires event-level input. A fit built from ",
+      .lsa_stop(class = "needs_events", "compare_lsa() requires event-level input. A fit built from ",
            "a pre-computed transition matrix cannot be permuted.",
            call. = FALSE)
     }
@@ -427,20 +441,20 @@ compare_lsa <- function(x,
   for (k in seq_along(fits)[-1L]) {
     f <- fits[[k]]
     if (!identical(ref$data$labels, f$data$labels)) {
-      stop("All groups must share the same state set (labels). Fit them ",
+      .lsa_stop(class = "incompatible_fits", "All groups must share the same state set (labels). Fit them ",
            "together with lsa(..., group = ) so labels are aligned.",
            call. = FALSE)
     }
     if (!identical(ref$params$engine, f$params$engine)) {
-      stop(sprintf("Engine mismatch: '%s' vs '%s'.",
+      .lsa_stop(class = "incompatible_fits", sprintf("Engine mismatch: '%s' vs '%s'.",
                    ref$params$engine, f$params$engine), call. = FALSE)
     }
     if (!identical(ref$params$lag, f$params$lag)) {
-      stop(sprintf("Lag mismatch: %s vs %s.",
+      .lsa_stop(class = "incompatible_fits", sprintf("Lag mismatch: %s vs %s.",
                    ref$params$lag, f$params$lag), call. = FALSE)
     }
     if (!identical(ref$params$structural_zeros, f$params$structural_zeros)) {
-      stop("Groups declare different structural zeros.", call. = FALSE)
+      .lsa_stop(class = "incompatible_fits", "Groups declare different structural zeros.", call. = FALSE)
     }
   }
   invisible(TRUE)
@@ -497,36 +511,86 @@ compare_lsa <- function(x,
   lor
 }
 
-#' Tidy a Group Comparison
+#' Read the tables of a group comparison
 #'
-#' Returns the per-edge comparison table, the same table
-#' [transitions()] reads, as a plain data frame. `print()` shows the
-#' header summary (groups, measure, significant edges, omnibus test).
+#' @description
+#' `as.data.frame()` returns the tables of a group comparison from
+#' [compare_lsa()] or [bayes_compare_lsa()] as a plain data frame, and `print()`
+#' shows a short summary of the comparison. A comparison holds two tables,
+#' chosen with `what`: the comparison of every transition and the omnibus result
+#' for the structure as a whole. The per-transition table is the one
+#' [transitions()] reads; use [transitions()] when you want to keep only the
+#' significant transitions or order them by the size of the difference.
 #'
-#' @param x An `lsa_comparison` or `lsa_comparison_pairwise` object.
-#' @param row.names,optional,... Standard [as.data.frame()] arguments
-#'   (unused; present for method consistency).
-#' @return `as.data.frame()`: the per-edge data frame described under
-#'   *Value* in [compare_lsa()] (one row per transition; for a pairwise
-#'   object one row per transition and pair, with leading `group_a`,
-#'   `group_b`). `print()`: `x`, invisibly.
+#' @param x A comparison from [compare_lsa()] or [bayes_compare_lsa()]
+#'   (class `lsa_comparison` or `lsa_comparison_pairwise`).
+#' @param what `"edges"` (default): one row per transition. `"global"`:
+#'   the omnibus result, one row per pair of groups.
+#' @param row.names,optional Not used; present for consistency with the
+#'   generic.
+#' @param ... Not used.
+#'
+#' @return `as.data.frame()` returns a data frame.
+#'   * `what = "edges"`: one row per transition (and per pair of groups
+#'     when more than two groups were compared, with leading `group_a`,
+#'     `group_b` columns); the columns are listed under *Value* in
+#'     [compare_lsa()] and [bayes_compare_lsa()].
+#'   * `what = "global"`: one row per pair of groups with `group_a`,
+#'     `group_b` and, for [compare_lsa()], the omnibus `statistic` (sum of
+#'     squared differences), its permutation `p_value` and either the
+#'     number of permutations `R` (two groups) or the across-pairs
+#'     adjusted `p_adj` (more than two groups); for [bayes_compare_lsa()],
+#'     `n_credible`, the number of credibly different transitions.
+#'
+#'   `print()` returns `x` invisibly.
+#'
 #' @examples
 #' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
 #'          time = "Time", group = "Achiever")
-#' cmp <- compare_lsa(g, R = 50)
+#' cmp <- compare_lsa(g, R = 50, adjust = "BH")
 #' cmp
+#' as.data.frame(cmp, what = "global")
 #' head(as.data.frame(cmp))
+#'
+#' @seealso [compare_lsa()], [bayes_compare_lsa()], [transitions()].
+#'
 #' @export
 as.data.frame.lsa_comparison <- function(x, row.names = NULL,
-                                         optional = FALSE, ...) {
-  x$edges
+                                         optional = FALSE,
+                                         what = c("edges", "global"), ...) {
+  what <- match.arg(what)
+  if (identical(what, "edges")) return(x$edges)
+  .comparison_global_df(x)
 }
 
 #' @rdname as.data.frame.lsa_comparison
 #' @export
 as.data.frame.lsa_comparison_pairwise <- function(x, row.names = NULL,
-                                                  optional = FALSE, ...) {
-  x$edges
+                                                  optional = FALSE,
+                                                  what = c("edges", "global"),
+                                                  ...) {
+  what <- match.arg(what)
+  if (identical(what, "edges")) return(x$edges)
+  .comparison_global_df(x)
+}
+
+# The omnibus table of a comparison as one row per pair of groups. A
+# two-group result stores it as a list of scalars; a pairwise result
+# already stores a data frame.
+.comparison_global_df <- function(x) {
+  g <- x$global
+  if (is.data.frame(g)) {
+    out <- g
+  } else {
+    out <- data.frame(g, stringsAsFactors = FALSE)
+    if (!"group_a" %in% names(out)) {
+      out <- cbind(data.frame(group_a = x$groups[1L],
+                              group_b = x$groups[2L],
+                              stringsAsFactors = FALSE), out)
+    }
+  }
+  rownames(out) <- NULL
+  out
 }
 
 #' @rdname as.data.frame.lsa_comparison

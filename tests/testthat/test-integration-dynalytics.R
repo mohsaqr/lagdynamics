@@ -6,9 +6,9 @@ test_that("the Dynalytics evidence surface is available from one fit", {
   expect_s3_class(nodes(fit), "data.frame")
   expect_s3_class(tests(fit), "data.frame")
   expect_s3_class(initial(fit), "data.frame")
-  fit_summary <- NULL
-  capture.output(fit_summary <- summary(fit))
-  expect_s3_class(fit_summary, "data.frame")
+  fit_summary <- summary(fit)
+  expect_s3_class(fit_summary, "summary.lsa")
+  expect_s3_class(as.data.frame(fit_summary), "data.frame")
   expect_true(any(transitions(fit)$significant))
 
   expect_s3_class(certainty_lsa(fit), "lsa_certainty")

@@ -35,47 +35,56 @@
 # Larger inner circle (shared by both styles): empty centre + source band.
 .lsa_polar_geom <- list(src_in = 0.34, src_out = 0.50, ring0 = 0.54, ring1 = 1)
 
-#' Polar Sunburst of an LSA Fit
+#' Plot a polar sunburst of transitions
 #'
-#' Draws the transition structure as a polar sunburst with the source
-#' states named along a large inner ring. Two styles: `"rose"` (default)
-#' gives every target an equal angular slot and encodes frequency as the
-#' radial **bar height** (so nothing crams); `"wedge"` sizes each
-#' transition's angular **width** by its frequency share (the classic
-#' look), omitting tiny wedges. Both fill by the adjusted residual (warm
-#' = over-represented, cool = avoided), sharing the [plot.lsa()] heatmap
-#' colour scale.
+#' @description
+#' `plot_polar()` draws the transitions of a fit as a polar sunburst with
+#' \pkg{ggplot2}: the source states are arranged around an inner ring and,
+#' outside each source, the transitions leaving it. It reads like a set of pie
+#' charts joined into one figure: for every state, where the process goes next
+#' and how often, and, through the fill colour, which of these moves are more or
+#' less frequent than independence predicts.
+#'
+#' The sunburst has two styles. In the rose style (default) every target has a
+#' slot of equal angle within its source and the bar height shows the count or
+#' the probability, so that every target can be labelled. In the wedge style the
+#' angle of each wedge is the transition's share of its source's outgoing
+#' transitions, and very small wedges are dropped. The fill is the adjusted
+#' residual on the diverging scale of the residual heatmap (red
+#' over-represented, blue avoided), or the probability or lift.
+#'
+#' The same display is `plot(fit, type = "sunburst")`. For the full
+#' table use [plot.lsa()]; for a network layout, [plot_transitions()]; for
+#' ribbons between states, [plot_chords()].
 #'
 #' @param fit An `lsa` fit from [lsa()].
-#' @param style `"rose"` (default, equal slots + bar height) or `"wedge"`
-#'   (frequency-proportional wedge width).
-#' @param fill Which quantity fills the bars/wedges: `"residuals"`
-#'   (default, diverging), `"prob"`, or `"lift"`.
-#' @param size For `style = "rose"`, which non-negative quantity sets bar
-#'   height: `"count"` (default) or `"prob"`. Ignored for `"wedge"`.
-#' @param significant Logical. Grey out non-significant cells (keeping
-#'   their size). Default `FALSE`.
-#' @param labels Which target cells to name: `"all"`, `"auto"`, or
-#'   `"none"`. Default is `"all"` for `"rose"` (equal slots leave room)
-#'   and `"auto"` for `"wedge"` (only wedges wide enough to fit a name).
-#'   Source names are always shown.
-#' @param min_show For `style = "wedge"`, drop wedges whose frequency
-#'   share of their source's outflow is below this fraction. Default
-#'   `0.01`; `0` keeps all.
-#' @param label_size Label text size. Default `3`.
-#' @param ... Ignored; accepted so `plot(fit, type = "sunburst", ...)`
-#'   can forward arguments without error.
+#' @param style `"rose"` (default) or `"wedge"`.
+#' @param fill Fill quantity: `"residuals"` (default), `"prob"` or
+#'   `"lift"`.
+#' @param size For the rose style, bar height: `"count"` (default) or
+#'   `"prob"`.
+#' @param significant Grey out transitions whose residual p-value is not
+#'   below the fit's `alpha` (default `FALSE`).
+#' @param labels Which targets to name: `"all"`, `"auto"` (those with room)
+#'   or `"none"`. Default `"all"` for the rose and `"auto"` for the wedge
+#'   style. Source names are always shown.
+#' @param min_show For the wedge style, drop wedges below this share of
+#'   their source's outgoing transitions (default `0.01`).
+#' @param label_size Label text size (default `3`).
+#' @param ... Ignored; allows `plot(fit, type = "sunburst", ...)`.
 #'
-#' @return A `ggplot` object (drawn when printed).
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`
+#' when the fit has no transitions to draw.
+#'
+#' @return A `ggplot` object, drawn when printed.
 #'
 #' @examples
 #' fit <- lsa(group_regulation)
-#' plot_polar(fit)                          # rose: bars filled by residual
-#' plot_polar(fit, style = "wedge")         # classic frequency wedges
-#' plot_polar(fit, significant = TRUE)      # non-significant cells greyed
+#' plot_polar(fit)
+#' plot_polar(fit, style = "wedge", significant = TRUE)
 #'
-#' @seealso [plot.lsa()] (heatmap), [plot_chords()] (chord),
-#'   [plot_forest()] (bootstrap forest)
+#' @seealso [plot.lsa()], [plot_chords()], [plot_transitions()]
 #'
 #' @export
 plot_polar <- function(fit, style = c("rose", "wedge"),
@@ -83,13 +92,13 @@ plot_polar <- function(fit, style = c("rose", "wedge"),
                        size = c("count", "prob"), significant = FALSE,
                        labels = c("all", "auto", "none"),
                        min_show = 0.01, label_size = 3, ...) {
-  stopifnot(inherits(fit, "lsa"))
+  stopifnot("`fit` must be an `lsa` fit from lsa()" = inherits(fit, "lsa"))
   style <- match.arg(style)
   fill <- match.arg(fill); size <- match.arg(size)
   labels <- if (missing(labels)) (if (style == "rose") "all" else "auto")
             else match.arg(labels)
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required for plot_polar(). ",
+    .lsa_stop(class = "missing_package", "Package 'ggplot2' is required for plot_polar(). ",
          "Install with install.packages('ggplot2').", call. = FALSE)
   }
   diverging <- fill == "residuals"
@@ -167,11 +176,11 @@ plot_polar <- function(fit, style = c("rose", "wedge"),
   fbase <- c(residuals = "adjusted residuals", prob = "transition probabilities",
              lift = "lift")[[fill]]
   sub <- if (style == "rose") {
-    sprintf("%s engine, lag %d \u00b7 equal slots \u00b7 bar height = %s, fill = %s",
-            fit$method, fit$params$lag, size, legname)
+    .lsa_ascii(sprintf("%s engine, lag %d \u00b7 equal slots \u00b7 bar height = %s, fill = %s",
+            fit$method, fit$params$lag, size, legname))
   } else {
-    sprintf("%s engine, lag %d \u00b7 sector = source volume, wedge width = frequency, fill = %s",
-            fit$method, fit$params$lag, legname)
+    .lsa_ascii(sprintf("%s engine, lag %d \u00b7 sector = source volume, wedge width = frequency, fill = %s",
+            fit$method, fit$params$lag, legname))
   }
   gg + ggplot2::labs(title = sprintf("Transition sunburst - %s", fbase),
                      subtitle = sub)
@@ -183,7 +192,7 @@ plot_polar <- function(fit, style = c("rose", "wedge"),
   sizemat <- switch(size, count = fit$obs, prob = fit$prob)
   gmax <- max(sizemat[is.finite(sizemat) & sizemat > 0], na.rm = TRUE)
   if (!is.finite(gmax) || gmax <= 0) {
-    stop("Fit has no transitions to draw.", call. = FALSE)
+    .lsa_stop("Fit has no transitions to draw.", call. = FALSE)
   }
   gap <- 0.05
   sector_sz <- (2 * pi - gap * K) / K
@@ -226,7 +235,7 @@ plot_polar <- function(fit, style = c("rose", "wedge"),
   obs <- fit$obs
   out_vol <- rowSums(obs)
   out_vol[!is.finite(out_vol) | out_vol < 0] <- 0
-  if (sum(out_vol) <= 0) stop("Fit has no outgoing transitions to draw.",
+  if (sum(out_vol) <= 0) .lsa_stop("Fit has no outgoing transitions to draw.",
                               call. = FALSE)
   gap <- 0.05
   sector_sz <- out_vol / sum(out_vol) * (2 * pi - gap * K)

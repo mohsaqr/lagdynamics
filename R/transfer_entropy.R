@@ -1,66 +1,80 @@
-#' Directed transfer entropy for categorical sequences (experimental)
+#' Estimate directed transfer entropy between categorical sequences
 #'
 #' @description
-#' **Experimental.** Transfer entropy (Schreiber, 2000) measures *directed*
-#' predictive coupling: how much knowing the source's past reduces uncertainty
-#' about the target's future, **beyond what the target's own past already
-#' explains**. Because it conditions on the target's own history, transfer
-#' entropy is immune to the autocorrelation confound that inflates plain lagged
-#' association when a process has strong momentum.
+#' `transfer_entropy()` (**experimental**) estimates directed transfer entropy
+#' between categorical sequences. Transfer entropy (Schreiber, 2000) measures
+#' directed predictive information: how much knowing the past of a source series
+#' reduces uncertainty about the future of a target series, beyond what the
+#' target's own past already tells. Because it conditions on the target's
+#' history, it is not inflated when a state merely tends to persist, which
+#' inflates lagged association measures for processes with strong momentum.
+#' Transfer entropy is unsigned: a large value means strong directed dependence,
+#' which may make the target more or less likely. Read it alongside the signed
+#' residuals and Yule's Q of [transitions()].
 #'
-#' Unlike [lsa()]'s Yule's Q / adjusted residuals, transfer entropy is
-#' **sign-blind**: a large value means "strong directed predictive structure",
-#' which may be *facilitating* or *suppressing*. Read it alongside the signed
-#' measures from [transitions()] to interpret direction of effect.
+#' It works in two modes. With one set of sequences (`y = NULL`), it treats each
+#' state as an indicator series (in the state or not) and returns the transfer
+#' entropy from every state to every other state, a directed information-flow
+#' network among the states. With very few states the indicator series of the
+#' other states carry nearly the same information, so several pairs can share a
+#' value; the bivariate mode avoids this. With two aligned sets of sequences
+#' (`x` and `y`), it returns the transfer entropy between the two series in both
+#' directions, using their full alphabets.
 #'
-#' Two modes:
-#' * **State-flow network** (default, `y = NULL`): given categorical
-#'   sequences, returns directed transfer entropy between every ordered pair of
-#'   states, via a binary occupancy decomposition. Note: with very few states
-#'   the non-target source channels become redundant; prefer the bivariate mode
-#'   or a larger alphabet when that matters.
-#' * **Bivariate** (`y` supplied): full-alphabet transfer entropy between two
-#'   aligned categorical series, in both directions.
+#' Transfer entropy is in bits. The surrogate test (default) shuffles the
+#' source to build a null distribution, which gives a p-value and an
+#' effective transfer entropy with the average surrogate value subtracted.
+#' For the classical test of sequential dependence use [lsa()].
 #'
-#' @param x Categorical sequence data: a vector (one sequence), or a matrix /
-#'   data.frame with one sequence per row and one time-step per column
-#'   (`NA`-padded), exactly the shape [lsa()] consumes.
-#' @param y Optional second series, same shape as `x`, for bivariate transfer
-#'   entropy. When `NULL`, the directed state-flow network of `x` is returned.
-#' @param lag Integer >= 1. Prediction horizon: the target's future is taken
-#'   `lag` steps ahead. Default `1`.
-#' @param history Integer >= 1. Order of the target's own history conditioned
-#'   on (and combined into a composite symbol). Default `1`.
-#' @param test `"surrogate"` (default) runs a source-permutation null to give a
-#'   p-value and the bias-corrected *effective* transfer entropy; `"none"`
-#'   skips it.
-#' @param R Integer. Number of surrogate permutations. Default `199`.
-#' @param normalize Logical. Add `te_normalised`, transfer entropy as a share
-#'   of the target's leftover uncertainty `H(future | history)`, in `[0, 1]`.
-#'   Default `TRUE`.
-#' @param seed Optional integer seed for the surrogate test.
+#' @param x Categorical sequences: a vector (one sequence) or a matrix or
+#'   data frame with one sequence per row and one time point per column,
+#'   padded with `NA`, as accepted by [lsa()].
+#' @param y Optional second set of sequences of the same shape as `x`, for
+#'   the bivariate mode. Default `NULL` (state-flow network of `x`).
+#' @param lag Prediction horizon, an integer of at least 1 (default `1`).
+#' @param history Number of past steps of the target conditioned on, an
+#'   integer of at least 1 (default `1`).
+#' @param test `"surrogate"` (default) for the surrogate test, or
+#'   `"none"`.
+#' @param R Number of surrogates (default `199`).
+#' @param normalize Add `te_normalised`, transfer entropy as a share of the
+#'   target's remaining uncertainty given its own history, in `[0, 1]`
+#'   (default `TRUE`).
+#' @param seed Optional seed for the surrogate test (default `NULL`). The
+#'   session's random number state is restored on exit.
 #'
-#' @return A tidy `data.frame`, one row per ordered pair, with columns
-#'   `from`, `to`, `te` (bits), `te_effective` (surrogate-debiased; only
-#'   when `test = "surrogate"`), `te_normalised` (0-1; only when
-#'   `normalize = TRUE`), `p` (surrogate p-value; only when
-#'   `test = "surrogate"`), and `n` (pooled transitions used). Rows are
-#'   ordered by descending `te`.
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`
+#' when `lag`, `history` or `R` is not a positive whole number, or when `x`
+#' and `y` are not aligned (different numbers of sequences or different
+#' lengths within a sequence).
 #'
-#' @references Schreiber, T. (2000). Measuring information transfer.
-#'   *Physical Review Letters*, 85(2), 461-464.
+#' @return A `data.frame` with one row per ordered pair (`from`, `to`) and
+#'   the columns `te` (bits), `te_effective` (with `test = "surrogate"`),
+#'   `te_normalised` (with `normalize = TRUE`), `p` (with `test =
+#'   "surrogate"`) and `n` (number of transitions used), sorted by
+#'   decreasing `te`. In the state-flow mode there is one row per ordered
+#'   pair of distinct states; in the bivariate mode two rows, named after
+#'   the arguments.
+#'
+#' @references
+#' Schreiber, T. (2000). Measuring information transfer. \emph{Physical
+#' Review Letters, 85}(2), 461-464.
 #'
 #' @examples
-#' # Directed information-flow network over engagement states
+#' # Information flow among the engagement states
 #' transfer_entropy(engagement, test = "none")
 #'
-#' # With the surrogate test (a real analysis uses the default R = 199)
+#' # With the surrogate test (an analysis would use more surrogates)
 #' transfer_entropy(engagement, R = 19, seed = 1)
 #'
-#' # Bivariate transfer entropy between two aligned series
-#' a <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")
-#' b <- c("low", "low", "low", "high", "high", "low", "high", "high")
-#' transfer_entropy(a, b, test = "none")
+#' # Between two aligned series
+#' mood <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")
+#' effort <- c("low", "low", "low", "high", "high", "low", "high", "high")
+#' transfer_entropy(mood, effort, test = "none")
+#'
+#' @seealso [lsa()], [transitions()], [lsa_lags()]
+#'
 #' @export
 transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
                              test = c("surrogate", "none"), R = 199L,
@@ -69,7 +83,13 @@ transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
   .te_check_integer(lag, "lag")
   .te_check_integer(history, "history")
   .te_check_integer(R, "R")
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    stopifnot("`seed` must be a single number" =
+                is.numeric(seed) && length(seed) == 1L)
+    old_seed <- .lsa_get_seed()
+    on.exit(.lsa_restore_seed(old_seed), add = TRUE)
+    set.seed(seed)
+  }
   lag <- as.integer(lag); history <- as.integer(history); R <- as.integer(R)
 
   x_list <- .te_as_seq_list(x)
@@ -113,7 +133,7 @@ transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
 .te_check_integer <- function(x, name) {
   if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
       x < 1 || x != floor(x)) {
-    stop(sprintf("`%s` must be a single finite integer >= 1.", name),
+    .lsa_stop(sprintf("`%s` must be a single finite integer >= 1.", name),
          call. = FALSE)
   }
   invisible(TRUE)
@@ -121,13 +141,13 @@ transfer_entropy <- function(x, y = NULL, lag = 1L, history = 1L,
 
 .te_validate_aligned <- function(x_list, y_list) {
   if (length(x_list) != length(y_list)) {
-    stop("`x` and `y` must contain the same number of aligned sequences.",
+    .lsa_stop("`x` and `y` must contain the same number of aligned sequences.",
          call. = FALSE)
   }
   lx <- lengths(x_list)
   ly <- lengths(y_list)
   if (!identical(lx, ly)) {
-    stop("`x` and `y` must have the same length within every aligned sequence.",
+    .lsa_stop("`x` and `y` must have the same length within every aligned sequence.",
          call. = FALSE)
   }
   invisible(TRUE)

@@ -41,7 +41,7 @@
     # $sequence_data.
     sd <- x$sequence_data
     if (is.null(sd)) {
-      stop("This ", class(x)[1L], " object has no $sequence_data.",
+      .lsa_stop("This ", class(x)[1L], " object has no $sequence_data.",
            call. = FALSE)
     }
     return(.as_sequence_list(sd))
@@ -49,13 +49,13 @@
   if (inherits(x, "netobject")) {
     d <- x$data
     if (is.null(d) || !is.data.frame(d)) {
-      stop("This netobject has no wide sequence data in $data.",
+      .lsa_stop("This netobject has no wide sequence data in $data.",
            call. = FALSE)
     }
     return(.as_sequence_list(d))
   }
   if (inherits(x, "stslist"))       return(.seqs_from_stslist(x))
-  stop("Unsupported sequence object: ",
+  .lsa_stop("Unsupported sequence object: ",
        paste(class(x), collapse = "/"), call. = FALSE)
 }
 
@@ -67,7 +67,7 @@
 .seqs_from_tna <- function(x) {
   d <- x$data
   if (is.null(d)) {
-    stop("This tna object carries no sequence data (it was built from ",
+    .lsa_stop("This tna object carries no sequence data (it was built from ",
          "a matrix, so its weights are probabilities, not counts). ",
          "lsa() needs the original sequences: rebuild the tna from ",
          "sequence data, or pass the sequences to lsa() directly.",

@@ -4,7 +4,7 @@
 \alias{bayes_compare_lsa}
 \alias{print.lsa_bayes}
 \alias{print.lsa_bayes_pairwise}
-\title{Bayesian Comparison of Group Transition Structures (Dirichlet-Multinomial)}
+\title{Compare transition probabilities between groups with a Bayesian model}
 \usage{
 bayes_compare_lsa(
   x,
@@ -23,80 +23,131 @@ bayes_compare_lsa(
 \method{print}{lsa_bayes_pairwise}(x, ...)
 }
 \arguments{
-\item{x}{An \code{lsa_bayes} or \code{lsa_bayes_pairwise} object (\code{print()}
-methods; for the comparison function itself \code{x} is the input
-described above).}
+\item{x}{A grouped fit from \code{lsa(data, group = )} with two or more
+groups, or the \code{lsa} fit of the first group. For the \code{print()}
+methods, the comparison result.}
 
-\item{y}{The second group's \code{lsa} fit when \code{x} is a single fit;
-otherwise \code{NULL}.}
+\item{y}{The \code{lsa} fit of the second group when \code{x} is a single fit
+(the groups are then labelled \code{"a"} and \code{"b"}). Default \code{NULL}.}
 
-\item{prior}{Numeric > 0. Dirichlet prior concentration added to every
-cell. Default \code{0.5} (Jeffreys). Use \code{1} for a uniform (Laplace) prior.}
+\item{prior}{Dirichlet concentration added to every cell. Default
+\code{0.5} (the Jeffreys prior); \code{1} gives a uniform prior.}
 
-\item{draws}{Integer. Monte Carlo posterior draws for the credible
-intervals. Default \code{10000}.}
+\item{draws}{Number of Monte Carlo draws for the credible intervals.
+Default \code{10000}.}
 
-\item{ci}{Numeric in (0, 1). Credible-interval mass. Default \code{0.95}.}
+\item{ci}{Credible-interval level. Default \code{0.95}.}
 
-\item{mean_threshold, bound_threshold}{An edge is flagged credibly
-different only if its credible interval excludes zero, \verb{|posterior mean diff|} exceeds \code{mean_threshold} (default \code{0.01}), and the
-credible bound nearest zero exceeds \code{bound_threshold} (default
-\code{0.001}). The thresholds guard against differences that are detectable
-but negligibly small.}
+\item{mean_threshold}{Minimum absolute posterior mean difference for a
+transition to be credibly different. Default \code{0.01}.}
+
+\item{bound_threshold}{Minimum distance from zero of the interval end
+nearest zero. Default \code{0.001}.}
 
 \item{adjust}{Multiple-comparison correction applied to the two-sided
-Bayesian p across edges (and family-wide across pairs); any method of
-\code{\link[stats:p.adjust]{stats::p.adjust()}}. Default \code{"none"}.}
+Bayesian p-value \code{2 * (1 - pd)} across transitions (and across all
+pairs for more than two groups); any method of \code{\link[stats:p.adjust]{stats::p.adjust()}}.
+Default \code{"none"}. It changes the \code{p_adj} column only: the
+\code{significant} flag is decided by the credible interval and the
+thresholds.}
 
-\item{seed}{Optional integer for reproducible credible intervals.}
+\item{seed}{Optional seed for the Monte Carlo draws. Default \code{NULL}.
+The session's random number state is restored on exit.}
 
-\item{...}{Ignored by the \code{print()} methods.}
+\item{...}{Not used.}
 }
 \value{
-For two groups, class \code{c("lsa_bayes", "lsa_comparison", "list")}
-with an \code{edges} data frame (\code{from}, \code{to}, \code{prob_a}, \code{prob_b}, \code{diff},
-\code{ci_low}, \code{ci_high}, \code{pd}, \code{effect_size}, \code{p_value}, \code{p_adj},
-\code{significant}), the two \code{fits}, and the Bayesian settings. For more
-than two groups, an all-pairwise \code{c("lsa_bayes_pairwise", "lsa_comparison_pairwise", "list")} whose \code{edges} table gains leading
-\code{group_a}, \code{group_b} columns. Read the per-edge table with
-\code{\link[=transitions]{transitions()}}; \code{print()} shows the number of credibly different
-edges and returns \code{x} invisibly.
+With two groups, an object of class
+\code{c("lsa_bayes", "lsa_comparison", "list")}; with more than two, an
+object of class \code{c("lsa_bayes_pairwise", "lsa_comparison_pairwise", "list")}. Read the per-transition table with \code{\link[=transitions]{transitions()}}: one row
+per transition (\code{from -> to} pair), and for more than two groups one
+row per transition and pair of groups, with the columns
+\itemize{
+\item \code{group_a}, \code{group_b} (more than two groups only): the pair compared;
+\item \code{from}, \code{to}: source and target state;
+\item \code{prob_a}, \code{prob_b}: posterior mean transition probability in each
+group;
+\item \code{diff}: \code{prob_a - prob_b}; \code{ci_low}, \code{ci_high}: its credible
+interval;
+\item \code{pd}: probability of direction; \code{effect_size}: \code{diff} divided by
+its posterior standard deviation;
+\item \code{p_value}: \code{2 * (1 - pd)} (\code{NA} for transitions that cannot be
+estimated); \code{p_adj}: after \code{adjust};
+\item \code{significant}: credibly different.
+}
+
+\code{transitions(x, significant = TRUE)} keeps the credibly different
+transitions; \code{sort = "strength"} orders by the absolute difference.
+\code{as.data.frame(x, what = "global")} gives the number of credibly
+different transitions per pair of groups (see
+\code{\link[=as.data.frame.lsa_comparison]{as.data.frame.lsa_comparison()}}); \link[=plot.lsa_comparison]{plot()}
+draws the differences. \code{print()} shows the settings and the number
+of credibly different transitions and returns \code{x} invisibly.
 }
 \description{
-Closed-form Bayesian alternative to \code{\link[=compare_lsa]{compare_lsa()}} for comparing the
-transition structures of two (or, pairwise, more) groups. Each state's
-outgoing transitions are modelled as Dirichlet-Multinomial with a
-Jeffreys prior, so each transition probability is marginally Beta. The
-per-edge posterior mean difference \code{prob_a - prob_b} is exact; a
-credible interval, the probability of direction \code{pd}, and a two-sided
-Bayesian p-equivalent \code{2 * (1 - pd)} come from a Monte Carlo draw on the
-Beta marginals.
-}
-\details{
-This complements \code{\link[=compare_lsa]{compare_lsa()}}: the permutation test asks whether a
-difference is more extreme than chance; the Bayesian comparison asks for
-the plausible range of the true difference and how precisely it is
-estimated. An edge whose source state is rarely visited gets a wide
-credible interval even when its row-normalised probability looks
-decisive.
+\code{bayes_compare_lsa()} compares the transition probabilities of groups with a
+Bayesian model: given the counts, it estimates the plausible range of the
+true difference between two groups' transition probabilities and how
+precisely that difference is estimated. Under a Dirichlet-Multinomial model
+the outgoing transitions of each state are a multinomial draw whose
+probabilities have a Dirichlet posterior, so each transition probability has
+a Beta posterior in each group. A transition whose source state is rarely
+visited gets a wide interval, even when its estimated probabilities look far
+apart. A permutation test (\code{\link[=compare_lsa]{compare_lsa()}}) instead tests whether a group
+difference is larger than chance.
 
-The result carries class \code{c("lsa_bayes", "lsa_comparison")} (and the
-pairwise object \code{c("lsa_bayes_pairwise", "lsa_comparison_pairwise")}),
-so \link[=plot.lsa_comparison]{plot()} (barrel / heatmap), \code{\link[=transitions]{transitions()}}
-and \code{\link[=as.data.frame]{as.data.frame()}} work as for a permutation comparison.
+For every transition, \code{bayes_compare_lsa()} computes the posterior mean
+difference of the transition probability between two groups (exact), its
+credible interval and the probability of direction (the posterior probability
+of the more probable sign of the difference), both from Monte Carlo draws of
+the Beta posteriors, and a standardised effect size. A transition is credibly
+different when its credible interval excludes zero, the absolute mean
+difference exceeds \code{mean_threshold}, and the interval end nearest zero lies
+further from zero than \code{bound_threshold}; the thresholds keep detectable but
+negligible differences out. With more than two groups every pair is compared.
+No resampling of sequences is involved, so the comparison is fast.
+
+The model treats transitions as independent draws and compares
+transition probabilities only. For a test that respects the dependence
+between events of one sequence, or that compares adjusted residuals or
+odds ratios, use \code{\link[=compare_lsa]{compare_lsa()}}. For the posterior of one group's
+transition probabilities, use \code{\link[=certainty_lsa]{certainty_lsa()}}.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_needs_events}: a fit was built from a transition matrix.
+\item \code{lagdynamics_incompatible_fits}: the groups differ in their states,
+engine, lag or structural zeros.
+\item \code{lagdynamics_bad_input}: \code{adjust} is not a method of
+\code{\link[stats:p.adjust]{stats::p.adjust()}}; \code{x} is neither a grouped fit nor an \code{lsa} fit
+with a second fit in \code{y}; \code{y} is given together with a grouped fit;
+or the grouped fit has fewer than two groups.
+}
+}
+
 \examples{
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
-bc <- bayes_compare_lsa(g, seed = 1)
+bc <- bayes_compare_lsa(g, adjust = "BH", seed = 1)
 bc
-transitions(bc, significant = TRUE, sort = "strength")
+transitions(bc, significant = TRUE, sort = "strength") |> head()
+
+# Three courses: every pair
+courses <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+               time = "Time", group = "Course")
+bayes_compare_lsa(courses, draws = 2000, seed = 1) |>
+  as.data.frame(what = "global")
 
 }
 \references{
-Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
-Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
+Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes
+resource engagement: A Bayesian differential network analysis.
+TNA Workshop 2026.
 }
 \seealso{
-\code{\link[=compare_lsa]{compare_lsa()}}, \code{\link[=certainty_lsa]{certainty_lsa()}}
+\code{\link[=transitions]{transitions()}} and \code{\link[=as.data.frame.lsa_comparison]{as.data.frame.lsa_comparison()}} to read
+the result; \code{\link[=plot.lsa_comparison]{plot.lsa_comparison()}} to draw it; \code{\link[=compare_lsa]{compare_lsa()}} for
+the permutation test; \code{\link[=certainty_lsa]{certainty_lsa()}} for one group's posterior.
 }

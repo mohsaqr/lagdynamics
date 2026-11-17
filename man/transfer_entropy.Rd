@@ -2,7 +2,7 @@
 % Please edit documentation in R/transfer_entropy.R
 \name{transfer_entropy}
 \alias{transfer_entropy}
-\title{Directed transfer entropy for categorical sequences (experimental)}
+\title{Estimate directed transfer entropy between categorical sequences}
 \usage{
 transfer_entropy(
   x,
@@ -16,76 +16,89 @@ transfer_entropy(
 )
 }
 \arguments{
-\item{x}{Categorical sequence data: a vector (one sequence), or a matrix /
-data.frame with one sequence per row and one time-step per column
-(\code{NA}-padded), exactly the shape \code{\link[=lsa]{lsa()}} consumes.}
+\item{x}{Categorical sequences: a vector (one sequence) or a matrix or
+data frame with one sequence per row and one time point per column,
+padded with \code{NA}, as accepted by \code{\link[=lsa]{lsa()}}.}
 
-\item{y}{Optional second series, same shape as \code{x}, for bivariate transfer
-entropy. When \code{NULL}, the directed state-flow network of \code{x} is returned.}
+\item{y}{Optional second set of sequences of the same shape as \code{x}, for
+the bivariate mode. Default \code{NULL} (state-flow network of \code{x}).}
 
-\item{lag}{Integer >= 1. Prediction horizon: the target's future is taken
-\code{lag} steps ahead. Default \code{1}.}
+\item{lag}{Prediction horizon, an integer of at least 1 (default \code{1}).}
 
-\item{history}{Integer >= 1. Order of the target's own history conditioned
-on (and combined into a composite symbol). Default \code{1}.}
+\item{history}{Number of past steps of the target conditioned on, an
+integer of at least 1 (default \code{1}).}
 
-\item{test}{\code{"surrogate"} (default) runs a source-permutation null to give a
-p-value and the bias-corrected \emph{effective} transfer entropy; \code{"none"}
-skips it.}
+\item{test}{\code{"surrogate"} (default) for the surrogate test, or
+\code{"none"}.}
 
-\item{R}{Integer. Number of surrogate permutations. Default \code{199}.}
+\item{R}{Number of surrogates (default \code{199}).}
 
-\item{normalize}{Logical. Add \code{te_normalised}, transfer entropy as a share
-of the target's leftover uncertainty \code{H(future | history)}, in \verb{[0, 1]}.
-Default \code{TRUE}.}
+\item{normalize}{Add \code{te_normalised}, transfer entropy as a share of the
+target's remaining uncertainty given its own history, in \verb{[0, 1]}
+(default \code{TRUE}).}
 
-\item{seed}{Optional integer seed for the surrogate test.}
+\item{seed}{Optional seed for the surrogate test (default \code{NULL}). The
+session's random number state is restored on exit.}
 }
 \value{
-A tidy \code{data.frame}, one row per ordered pair, with columns
-\code{from}, \code{to}, \code{te} (bits), \code{te_effective} (surrogate-debiased; only
-when \code{test = "surrogate"}), \code{te_normalised} (0-1; only when
-\code{normalize = TRUE}), \code{p} (surrogate p-value; only when
-\code{test = "surrogate"}), and \code{n} (pooled transitions used). Rows are
-ordered by descending \code{te}.
+A \code{data.frame} with one row per ordered pair (\code{from}, \code{to}) and
+the columns \code{te} (bits), \code{te_effective} (with \code{test = "surrogate"}),
+\code{te_normalised} (with \code{normalize = TRUE}), \code{p} (with \code{test = "surrogate"}) and \code{n} (number of transitions used), sorted by
+decreasing \code{te}. In the state-flow mode there is one row per ordered
+pair of distinct states; in the bivariate mode two rows, named after
+the arguments.
 }
 \description{
-\strong{Experimental.} Transfer entropy (Schreiber, 2000) measures \emph{directed}
-predictive coupling: how much knowing the source's past reduces uncertainty
-about the target's future, \strong{beyond what the target's own past already
-explains}. Because it conditions on the target's own history, transfer
-entropy is immune to the autocorrelation confound that inflates plain lagged
-association when a process has strong momentum.
+\code{transfer_entropy()} (\strong{experimental}) estimates directed transfer entropy
+between categorical sequences. Transfer entropy (Schreiber, 2000) measures
+directed predictive information: how much knowing the past of a source series
+reduces uncertainty about the future of a target series, beyond what the
+target's own past already tells. Because it conditions on the target's
+history, it is not inflated when a state merely tends to persist, which
+inflates lagged association measures for processes with strong momentum.
+Transfer entropy is unsigned: a large value means strong directed dependence,
+which may make the target more or less likely. Read it alongside the signed
+residuals and Yule's Q of \code{\link[=transitions]{transitions()}}.
 
-Unlike \code{\link[=lsa]{lsa()}}'s Yule's Q / adjusted residuals, transfer entropy is
-\strong{sign-blind}: a large value means "strong directed predictive structure",
-which may be \emph{facilitating} or \emph{suppressing}. Read it alongside the signed
-measures from \code{\link[=transitions]{transitions()}} to interpret direction of effect.
+It works in two modes. With one set of sequences (\code{y = NULL}), it treats each
+state as an indicator series (in the state or not) and returns the transfer
+entropy from every state to every other state, a directed information-flow
+network among the states. With very few states the indicator series of the
+other states carry nearly the same information, so several pairs can share a
+value; the bivariate mode avoids this. With two aligned sets of sequences
+(\code{x} and \code{y}), it returns the transfer entropy between the two series in both
+directions, using their full alphabets.
 
-Two modes:
-\itemize{
-\item \strong{State-flow network} (default, \code{y = NULL}): given categorical
-sequences, returns directed transfer entropy between every ordered pair of
-states, via a binary occupancy decomposition. Note: with very few states
-the non-target source channels become redundant; prefer the bivariate mode
-or a larger alphabet when that matters.
-\item \strong{Bivariate} (\code{y} supplied): full-alphabet transfer entropy between two
-aligned categorical series, in both directions.
+Transfer entropy is in bits. The surrogate test (default) shuffles the
+source to build a null distribution, which gives a p-value and an
+effective transfer entropy with the average surrogate value subtracted.
+For the classical test of sequential dependence use \code{\link[=lsa]{lsa()}}.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}
+when \code{lag}, \code{history} or \code{R} is not a positive whole number, or when \code{x}
+and \code{y} are not aligned (different numbers of sequences or different
+lengths within a sequence).
 }
+
 \examples{
-# Directed information-flow network over engagement states
+# Information flow among the engagement states
 transfer_entropy(engagement, test = "none")
 
-# With the surrogate test (a real analysis uses the default R = 199)
+# With the surrogate test (an analysis would use more surrogates)
 transfer_entropy(engagement, R = 19, seed = 1)
 
-# Bivariate transfer entropy between two aligned series
-a <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")
-b <- c("low", "low", "low", "high", "high", "low", "high", "high")
-transfer_entropy(a, b, test = "none")
+# Between two aligned series
+mood <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")
+effort <- c("low", "low", "low", "high", "high", "low", "high", "high")
+transfer_entropy(mood, effort, test = "none")
+
 }
 \references{
-Schreiber, T. (2000). Measuring information transfer.
-\emph{Physical Review Letters}, 85(2), 461-464.
+Schreiber, T. (2000). Measuring information transfer. \emph{Physical
+Review Letters, 85}(2), 461-464.
+}
+\seealso{
+\code{\link[=lsa]{lsa()}}, \code{\link[=transitions]{transitions()}}, \code{\link[=lsa_lags]{lsa_lags()}}
 }

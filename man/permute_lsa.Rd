@@ -2,7 +2,7 @@
 % Please edit documentation in R/permute_lsa.R
 \name{permute_lsa}
 \alias{permute_lsa}
-\title{Permutation Test for an LSA Fit}
+\title{Test transitions against no sequential structure by permutation}
 \usage{
 permute_lsa(
   fit,
@@ -16,79 +16,104 @@ permute_lsa(
 )
 }
 \arguments{
-\item{fit}{An \code{lsa} object returned by \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, built from sequences (not from a
+transition matrix).}
 
-\item{R}{Integer. Number of permutations. Default \code{1000}.}
+\item{R}{Number of permutations. Default \code{1000}.}
 
-\item{within_sequence}{Logical. When \code{TRUE} (default for
-multi-sequence input), each sequence is shuffled independently;
-when \code{FALSE}, the whole event stream is shuffled across
-sequence boundaries.}
+\item{within_sequence}{Shuffle events within each sequence (\code{TRUE},
+default) or across the whole event stream (\code{FALSE}). A single
+sequence is always shuffled as a whole, with a warning when
+\code{within_sequence = TRUE}.}
 
-\item{shuffles}{Optional list of length \code{R}, each element an
-integer permutation of \code{seq_len(n_events)}. When supplied,
-replaces internal RNG.}
+\item{shuffles}{Optional list of at least \code{R} permutations of
+\code{seq_len(n_events)} to replay instead of random shuffles. Default
+\code{NULL}.}
 
-\item{parallel}{Logical. Use multi-core resampling. Default
+\item{parallel}{Run the permutations on several cores. Default
 \code{FALSE}.}
 
-\item{n_cores}{Integer. Worker count when \code{parallel = TRUE}.}
+\item{n_cores}{Number of cores when \code{parallel = TRUE}. Default \code{NULL},
+all cores but one.}
 
-\item{verbose}{Logical. Print progress every 100 replicates.}
+\item{verbose}{Report progress every 100 permutations. Default \code{FALSE}.}
 
-\item{...}{Reserved.}
+\item{...}{Not used.}
 }
 \value{
-An object of class \code{c("lsa_permutation", "list")}. Read the
-per-edge table with \code{\link[=transitions]{transitions()}}; see \link{lsa-inference-methods} for
-\code{print()} and \code{as.data.frame()}. Elements:
-\describe{
-\item{edges}{Tidy data frame, one row per \code{from -> to} cell:
-\code{from}, \code{to}, \code{observed_count}, \code{observed_adj_res}, the empirical
-permutation p-value \code{p_perm}, and \code{significant}
-(\code{p_perm < alpha} of the fit).}
-\item{perm_adj_res}{\verb{R x K^2} numeric matrix of permuted
-residuals (cells in \code{as.vector(adj_res)} order).}
-\item{R, within_sequence}{Recipe metadata.}
-\item{fit}{Reference to the original fit.}
-}
+An object of class \code{c("lsa_permutation", "list")}. Read it with
+\code{\link[=transitions]{transitions()}}, which returns a data frame with one row per
+transition (\code{from -> to} pair) and the columns \code{from}, \code{to},
+\code{observed_count}, \code{observed_adj_res}, \code{p_perm} (permutation p-value;
+\code{NA} for transitions that cannot be estimated, such as structural
+zeros) and \code{significant} (\code{p_perm} below the fit's \code{alpha}).
+\code{transitions(x, significant = TRUE)} keeps the significant
+transitions; \code{sort = "strength"} orders by the absolute observed
+residual. \code{print()} shows the settings and the number of significant
+transitions (see \link{lsa-inference-methods}). The object also stores the
+permuted residuals, the settings and the original fit.
 }
 \description{
-Empirical null-distribution p-values for every cell of an LSA
-transition matrix. Repeatedly shuffles the input event vector
-(within sequence boundaries) and recomputes the engine's residual
-matrix, producing a permutation distribution for each cell. The
-two-sided p-value is \verb{(1 + #\{ |stat_perm| >= |stat_obs| \}) / (1 + R)}
-(Phipson & Smyth 2010).
+\code{permute_lsa()} tests every transition of a fit from \code{\link[=lsa]{lsa()}} against no
+sequential structure by permutation: whether the transition is over- or
+under-represented beyond what the same events in a random order would give,
+keeping the frequency of every state fixed. The adjusted residual of a
+transition is otherwise tested against a normal reference distribution, which
+holds only approximately, for large counts and independent transitions. A
+permutation test builds the reference distribution from the data instead: if
+the order of events carried no information, shuffling the events would
+produce residuals as large as the observed ones.
+
+The events of the fit are shuffled many times, by default within each
+sequence so that every sequence keeps its own length and state frequencies;
+the model is refitted with the same engine and settings, and the adjusted
+residual of every transition is recorded. The two-sided permutation p-value
+of a transition is the share of shuffles whose residual is at least as large
+in absolute value as the observed one, counted so that it is never zero
+(Phipson & Smyth, 2010). A transition is significant when its p-value is
+below the \code{alpha} of the fit.
+
+The p-values are not corrected for the number of transitions tested.
+For intervals on the residuals and other statistics, use
+\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}; for the share of subsamples in which a transition
+stays significant, use \code{\link[=stability_lsa]{stability_lsa()}}. To test whether groups
+differ, use \code{\link[=compare_lsa]{compare_lsa()}}.
 }
-\details{
-\strong{NA handling.} The exceedance count that drives \code{p_perm} is
-computed with \code{na.rm = TRUE}, so replicates that produced \code{NA}
-for a cell (structural-zero cells, zero-margin cells in the
-permuted table) are excluded from that cell's tally rather than
-counted as either an exceedance or a non-exceedance.
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_needs_events}: the fit was built from a transition
+matrix, so there are no events to shuffle.
+\item \code{lagdynamics_bad_input}: \code{shuffles} is not a list of at least \code{R}
+permutations of \code{seq_len(n_events)}.
 }
+}
+
 \examples{
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 pm <- permute_lsa(fit, R = 100)
 pm
-transitions(pm, significant = TRUE)
+transitions(pm, significant = TRUE, sort = "strength")
 \donttest{
 # A full analysis uses more permutations
-transitions(permute_lsa(fit, R = 1000), sort = "strength")
+permute_lsa(fit, R = 1000) |>
+  transitions(sort = "strength")
 }
 
 }
 \references{
-Castellan, N. J. (1992). Shuffling arrays: appearances may be
-deceiving. \emph{Behavior Research Methods, Instruments, &
-Computers}, 24(1), 72-77.
+Castellan, N. J. (1992). Shuffling arrays: Appearances may be
+deceiving. \emph{Behavior Research Methods, Instruments, & Computers,
+24}(1), 72-77.
 
-Phipson, B., & Smyth, G. K. (2010). Permutation p-values should
-never be zero: calculating exact p-values when permutations are
-randomly drawn. \emph{Statistical Applications in Genetics and
-Molecular Biology}, 9(1), Article 39.
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never
+be zero: Calculating exact p-values when permutations are randomly
+drawn. \emph{Statistical Applications in Genetics and Molecular
+Biology, 9}(1), Article 39.
 }
 \seealso{
-\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}
+\code{\link[=transitions]{transitions()}} to read the result; \code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
+\code{\link[=stability_lsa]{stability_lsa()}} and \code{\link[=reliability_lsa]{reliability_lsa()}} for other checks of a fit;
+\code{\link[=compare_lsa]{compare_lsa()}} to compare groups.
 }

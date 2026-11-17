@@ -9,46 +9,64 @@
 # Heatmaps are owned here; only the transition NETWORK is delegated to
 # cograph::splot() (see plot_transitions()).
 
-#' Plot an LSA Fit
+#' Plot a lag sequential analysis fit
 #'
-#' One entry point for every view of a fit; pick it with `type`:
-#' `"heatmap"` (default, the `from x to` residual heatmap), `"network"`
-#' (transition network via [cograph::splot()]), `"chord"` (chord diagram
-#' via [cograph::plot_chord()]), or `"sunburst"` (polar rose). Extra
-#' arguments are forwarded to the chosen view's worker
-#' ([plot_transitions()], [plot_chords()], [plot_polar()]); see those for
-#' view-specific options.
+#' @description
+#' `plot()` draws a lag sequential analysis fit as a residual heatmap, a lag
+#' transition network, a chord diagram or a polar sunburst, chosen with `type`;
+#' each display suits a different question. A residual heatmap lays out the full
+#' table of antecedent by consequent states, coloured by the adjusted residual,
+#' and shows at a glance which transitions are over-represented and which are
+#' avoided. A lag transition network draws the states as nodes and the
+#' transitions as directed edges, which shows the paths the process takes. A
+#' chord diagram shows how the transitions out of each state are shared among
+#' the targets, and a polar sunburst shows the same per-source breakdown on a
+#' ring.
 #'
-#' @param x An `lsa` fit from [lsa()], or an `lsa_group` from
-#'   `lsa(..., group = )` (one figure per group).
-#' @param type Which view to draw: `"heatmap"` (default), `"network"`,
-#'   `"chord"`, or `"sunburst"`.
-#' @param ... Forwarded to the chosen view. For `"heatmap"`: `which`
-#'   (`"residuals"` (default), `"prob"`, `"count"`, `"expected"`). For
-#'   `"network"`: `weights` (`"tna"` for the probability-weighted TNA
-#'   network). For `"chord"`: `width`, `color`. For `"sunburst"`:
-#'   `style`, `fill`.
+#' The heatmap (default) shows the adjusted residuals, with significant cells in
+#' bold; `which` switches it to transition probabilities, observed counts or
+#' expected counts. The other types are drawn by [plot_transitions()],
+#' [plot_chords()] and [plot_polar()], whose arguments can be passed through
+#' `...`. A grouped fit is drawn once per group, or in one figure with `combined
+#' = TRUE`.
 #'
-#' @return A `ggplot` object for `"heatmap"` and `"sunburst"`; the
-#'   (invisible) `cograph` object for `"network"` and `"chord"`. Drawn
-#'   when printed. For an `lsa_group`, the per-group figures are drawn and
-#'   returned invisibly as a list, one element per group.
+#' For the uncertainty of the residuals use [plot_forest()] on a
+#' bootstrap; for differences between groups, `plot()` on the result of
+#' [compare_lsa()] (see [plot.lsa_comparison()]).
+#'
+#' @param x An `lsa` fit from [lsa()], or a grouped fit from
+#'   `lsa(..., group = )`.
+#' @param type `"heatmap"` (default), `"network"`, `"chord"` or
+#'   `"sunburst"`.
+#' @param ... Passed to the chosen display. For `"heatmap"`: `which`, one
+#'   of `"residuals"` (default), `"prob"`, `"count"` or `"expected"`. For
+#'   the other types, the arguments of [plot_transitions()],
+#'   [plot_chords()] or [plot_polar()].
+#'
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`
+#' when the fit holds no finite values of the quantity requested for the
+#' heatmap.
+#'
+#' @return For `"heatmap"` and `"sunburst"`, a `ggplot` object, drawn when
+#'   printed. For `"network"` and `"chord"`, the value of
+#'   [plot_transitions()] or [plot_chords()], invisibly, with the plot drawn
+#'   on the current device. For a grouped fit, a list with one such value
+#'   per group, invisibly, after drawing.
 #'
 #' @examples
-#' fit <- lsa(group_regulation)
-#' plot(fit)                     # residual heatmap (default)
-#' plot(fit, which = "prob")     # heatmap of probabilities
-#' plot(fit, type = "network")   # transition network
-#' plot(fit, type = "network", weights = "tna")  # TNA probability network
-#' plot(fit, type = "chord")     # chord diagram
-#' plot(fit, type = "sunburst")  # polar sunburst
+#' fit <- lsa(engagement)
+#' plot(fit)
+#' plot(fit, which = "prob")
+#' plot(fit, type = "network")
+#' plot(fit, type = "chord")
 #'
 #' gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
 #'             time = "Time", group = "Achiever")
-#' plot(gfit, combined = TRUE)   # one heatmap per group, tiled
+#' plot(gfit, combined = TRUE)
 #'
 #' @seealso [plot_transitions()], [plot_chords()], [plot_polar()],
-#'   [plot_forest()], [transitions()]
+#'   [plot_forest()], [plot.lsa_comparison()], [transitions()]
 #'
 #' @export
 plot.lsa <- function(x, type = c("heatmap", "network", "chord", "sunburst"),
@@ -62,9 +80,8 @@ plot.lsa <- function(x, type = c("heatmap", "network", "chord", "sunburst"),
 }
 
 #' @rdname plot.lsa
-#' @param combined Logical, for a grouped fit only. `FALSE` (default)
-#'   draws each group as its own full-size figure; `TRUE` tiles all
-#'   groups into a single figure (compact, but cramped for many groups).
+#' @param combined For a grouped fit: `FALSE` (default) draws one figure
+#'   per group; `TRUE` tiles the groups in one figure.
 #' @export
 plot.lsa_group <- function(x, type = c("heatmap", "network", "chord",
                                        "sunburst"), combined = FALSE, ...) {
@@ -72,7 +89,7 @@ plot.lsa_group <- function(x, type = c("heatmap", "network", "chord",
   groups <- names(x)
   is_gg <- type %in% c("heatmap", "sunburst")
   if (is_gg && !requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required to plot this type.", call. = FALSE)
+    .lsa_stop(class = "missing_package", "Package 'ggplot2' is required to plot this type.", call. = FALSE)
   }
 
   if (!isTRUE(combined)) {
@@ -123,14 +140,14 @@ plot.lsa_group <- function(x, type = c("heatmap", "network", "chord",
                      ...) {
   which <- match.arg(which)
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required for plot.lsa(). ",
+    .lsa_stop(class = "missing_package", "Package 'ggplot2' is required for plot.lsa(). ",
          "Install with install.packages('ggplot2').", call. = FALSE)
   }
   col <- switch(which, residuals = "adj_res", prob = "prob",
                 count = "count", expected = "expected")
   e <- x$edges
   if (!col %in% names(e) || all(!is.finite(e[[col]]))) {
-    stop("This fit has no '", which, "' values to plot.", call. = FALSE)
+    .lsa_stop("This fit has no '", which, "' values to plot.", call. = FALSE)
   }
   e$.val <- e[[col]]
 
@@ -161,11 +178,11 @@ plot.lsa_group <- function(x, type = c("heatmap", "network", "chord",
   titles <- c(residuals = "Adjusted residuals",
               prob = "Transition probabilities",
               count = "Observed counts", expected = "Expected counts")
-  caps <- c(residuals = "warm over-represented, cool avoided; significant cells bold",
+  caps <- c(residuals = "warm over-represented, cool avoided; strongest significant cell of each row bold",
             prob = "P(to | from); modal next state bold",
             count = "modal next state bold", expected = "modal next state bold")
-  sub <- sprintf("%s engine, lag %d \u00b7 %d transitions \u00b7 %s",
-                 x$method, x$params$lag, sum(x$obs), caps[[which]])
+  sub <- .lsa_ascii(sprintf("%s engine, lag %d \u00b7 %d transitions \u00b7 %s",
+                 x$method, x$params$lag, sum(x$obs), caps[[which]]))
 
   gg <- ggplot2::ggplot(
     e, ggplot2::aes(x = .data$.to, y = .data$.from, fill = .data$.val)

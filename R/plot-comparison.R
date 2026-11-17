@@ -22,48 +22,55 @@
 .cmp_mid  <- "#F7F7F7"   # near-white      -> at expectation
 .cmp_high <- "#4A6FE3"   # periwinkle blue -> positive residual (over-represented)
 
-#' Plot a Group Comparison
+#' Plot a comparison of transitions between groups
 #'
-#' Two views of a [compare_lsa()] result. The default `"barrel"` is a
-#' back-to-back pyramid (one row per transition): the first group's bar
-#' runs left and the second's right, bar length is each group's
-#' transition probability, bar colour is each group's log odds ratio
-#' (blue = over-represented, red = avoided, following the vcd / mosaic
-#' convention), bar ends show the observed count, and the centre chip
-#' shows the difference p-value (bold and starred when significant). The
-#' bar of the group with the higher value gets a border that darkens with
-#' the size of the difference (faint = small, dark = large). For more
-#' than two groups, one
-#' barrel is drawn per pair via facets. The `"heatmap"` style draws the
-#' signed difference as a `from x to` grid on the same diverging scale.
+#' @description
+#' `plot()` draws the result of [compare_lsa()] or [bayes_compare_lsa()] as a
+#' barrel chart (default) or a heatmap. When the same states are observed in two
+#' or more groups, a comparison shows which transitions differ between them, by
+#' how much, and whether the difference is larger than chance, so a display of
+#' it has to show both the transitions themselves in each group and the test of
+#' their difference.
 #'
-#' @param x An `lsa_comparison` or `lsa_comparison_pairwise` object from
-#'   [compare_lsa()] (or the Bayesian equivalents from
-#'   [bayes_compare_lsa()]).
+#' The barrel is a back-to-back chart with one row per transition: the first
+#' group's bar runs to the left and the second's to the right, bar length is the
+#' transition probability (or count), bar colour is the log odds ratio of the
+#' transition within the group (blue over-represented, red avoided), and the
+#' centre shows the p-value of the difference, in bold when significant. The
+#' rows are the `top_n` most frequent transitions, or with `rank = "effect"`
+#' those with the strongest association in either group. The heatmap draws the
+#' difference between the groups as a grid of `from` by `to` states. With more
+#' than two groups, each pair is drawn as a facet.
+#'
+#' The tested differences are read as a table with `transitions(cmp)`.
+#' To colour the ribbons of a chord diagram by a group difference, see
+#' [plot_chords()].
+#'
+#' @param x The result of [compare_lsa()] or [bayes_compare_lsa()].
 #' @param style `"barrel"` (default) or `"heatmap"`.
-#' @param value For `"barrel"`, the quantity mapped to bar length:
-#'   `"prob"` (transition probability, default) or `"count"`.
-#' @param rank For `"barrel"`, how to choose which transitions to show:
-#'   `"frequency"` (default) ranks by pooled observed count -- the
-#'   backbone transitions, which are mostly over-represented (blue);
-#'   `"effect"` ranks by the strongest association in either group
-#'   (`|log OR|`, among tested cells), surfacing both over- (blue) and
-#'   under-represented / avoided (red) transitions.
-#' @param top_n For `"barrel"`, how many transitions to show (highest
-#'   `rank` on top; for the pairwise object the ranking is shared across
-#'   facets so they line up). Default `12`.
-#' @param ... Reserved.
+#' @param value For the barrel, bar length: `"prob"` (default) or
+#'   `"count"`.
+#' @param rank For the barrel, which transitions to show: `"frequency"`
+#'   (default, the most frequent overall) or `"effect"` (the strongest
+#'   association, largest absolute log odds ratio, in either group).
+#' @param top_n For the barrel, the number of transitions shown (default
+#'   `12`); with several pairs the same transitions are shown in every
+#'   facet.
+#' @param ... Ignored.
 #'
-#' @return A `ggplot` object (drawn when printed).
+#' @return A `ggplot` object, drawn when printed.
 #'
 #' @examples
-#' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
-#'          time = "Time", group = "Achiever")
-#' cmp <- compare_lsa(g, R = 100)
-#' plot(cmp)                    # back-to-back barrel
-#' plot(cmp, style = "heatmap") # difference heatmap
+#' gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'             time = "Time", group = "Achiever")
+#' set.seed(1)
+#' cmp <- compare_lsa(gfit, R = 100, adjust = "BH")
+#' plot(cmp)
+#' plot(cmp, rank = "effect")
+#' plot(cmp, style = "heatmap")
 #'
-#' @seealso [compare_lsa()], [plot.lsa()]
+#' @seealso [compare_lsa()], [bayes_compare_lsa()], [transitions()],
+#'   [plot_chords()]
 #'
 #' @export
 plot.lsa_comparison <- function(x, style = c("barrel", "heatmap"),
@@ -80,11 +87,11 @@ plot.lsa_comparison <- function(x, style = c("barrel", "heatmap"),
     e$.sig  <- !is.na(e$significant) & e$significant
     ga <- x$groups[1L]; gb <- x$groups[2L]
     nsig <- sum(e$.sig, na.rm = TRUE)
-    sub <- sprintf(
+    sub <- .lsa_ascii(sprintf(
       paste0("%s difference \u00b7 %d permutations \u00b7 %d significant edges ",
              "(adjust = %s)\nblue = %s higher, red = %s higher; ",
              "significant cells bold"),
-      x$measure, x$R, nsig, x$adjust, ga, gb)
+      x$measure, x$R, nsig, x$adjust, ga, gb))
     return(.plot_compare_heatmap(
       e, labels, title = sprintf("Group difference: %s vs %s", ga, gb),
       subtitle = sub))
@@ -110,12 +117,12 @@ plot.lsa_comparison <- function(x, style = c("barrel", "heatmap"),
   gutter <- .barrel_gutter(one$max_len)
 
   nsig <- sum(sel$edges$significant, na.rm = TRUE)
-  sub <- sprintf(
+  sub <- .lsa_ascii(sprintf(
     paste0("bar length = %s \u00b7 fill = log odds ratio \u00b7 centre = ",
            "difference p (adjust = %s)\n%s  <<    ",
            ">>  %s \u00b7 %d of %d shown significant \u00b7 rows by %s"),
     .barrel_value_name(value), x$adjust, ga, gb, nsig, nrow(sel$edges),
-    rank)
+    rank))
 
   .barrel_plot(one$rect, one$p, sel$labels, sel$y_breaks, gutter,
                value, title = sprintf("Transition comparison: %s vs %s",
@@ -141,11 +148,11 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
     e$.pair <- factor(paste0(e$group_a, " - ", e$group_b),
                       levels = pair_levels)
     nsig <- sum(e$.sig, na.rm = TRUE)
-    sub <- sprintf(
+    sub <- .lsa_ascii(sprintf(
       paste0("%s difference \u00b7 %d permutations/pair \u00b7 %d significant ",
              "edges (adjust = %s, family-wide)\nblue = first group ",
              "higher, red = second higher; significant cells bold"),
-      x$measure, x$R, nsig, x$adjust)
+      x$measure, x$R, nsig, x$adjust))
     return(.plot_compare_heatmap(e, labels,
       title = "Pairwise group differences", subtitle = sub,
       facet = ".pair"))
@@ -204,11 +211,11 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
                                       numeric(1))))
 
   nsig <- sum(x$edges$significant, na.rm = TRUE)
-  sub <- sprintf(
+  sub <- .lsa_ascii(sprintf(
     paste0("bar length = %s \u00b7 fill = log odds ratio \u00b7 centre = ",
            "difference p (adjust = %s, family-wide)\nleft = first group, ",
            "right = second group of each pair \u00b7 %d significant"),
-    .barrel_value_name(value), x$adjust, nsig)
+    .barrel_value_name(value), x$adjust, nsig))
 
   .barrel_plot(rect, pdf, labels_y, shared$y, gutter, value,
                title = "Pairwise transition comparison",
@@ -303,7 +310,7 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
 .barrel_plot <- function(rect, p, labels_y, y_breaks, gutter, value,
                          title, subtitle, facet) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required to plot a comparison. ",
+    .lsa_stop(class = "missing_package", "Package 'ggplot2' is required to plot a comparison. ",
          "Install with install.packages('ggplot2').", call. = FALSE)
   }
   left <- rect$side == "left"
@@ -366,7 +373,7 @@ plot.lsa_comparison_pairwise <- function(x, style = c("barrel", "heatmap"),
 .plot_compare_heatmap <- function(e, labels, title, subtitle,
                                   facet = NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Package 'ggplot2' is required to plot a comparison. ",
+    .lsa_stop(class = "missing_package", "Package 'ggplot2' is required to plot a comparison. ",
          "Install with install.packages('ggplot2').", call. = FALSE)
   }
   e$.from <- factor(e$from, levels = rev(labels))

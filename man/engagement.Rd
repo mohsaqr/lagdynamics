@@ -3,40 +3,39 @@
 \docType{data}
 \name{engagement}
 \alias{engagement}
-\title{Student Engagement Trajectories}
+\title{Engagement states of students over time}
 \format{
-A data frame with 138 rows and 15 character columns.
+A data frame with 138 rows (students) and 15 character columns
+named \code{1} to \code{15} (time points, in order). Values are \code{"Active"},
+\code{"Average"}, \code{"Disengaged"} or \code{NA}.
 }
 \source{
-Derived from the \code{trajectories} matrix in the \code{Nestimate}
-package (\url{https://github.com/mohsaqr/Nestimate}), which is
-MIT-licensed and produced by Saqr and collaborators as a synthetic
-engagement trajectory example. The state values are preserved and
-stored here as a data frame for compatibility with sequence-data
-tooling.
+Derived from the synthetic \code{trajectories} example data of the
+\pkg{Nestimate} package (\url{https://github.com/mohsaqr/Nestimate}, MIT
+license), with the states kept and the matrix stored as a data frame.
 }
 \usage{
 engagement
 }
 \description{
-Wide-format categorical sequence data: 138 students observed over 15
-weekly time points. Each row is one student; each column is a
-week. Entries are the student's engagement state for that week,
-one of \code{"Active"}, \code{"Average"}, \code{"Disengaged"}, or \code{NA} for missing
-weeks.
-}
-\details{
-This is a standard small-K, multi-sequence example for lag
-sequential analysis: K = 3 states and 136 non-empty sequences (two
-rows are entirely missing), with a mean observed length of about 14
-weeks. It exercises the wide-data input path of
-\code{\link[=lsa_data]{lsa_data()}} and produces a stable transition pattern with clear
-adjusted-residual signals.
+\code{engagement} is a coded dataset, in wide format, of engagement: 138 students,
+each observed at 15 ordered time points and coded at each as \code{Active},
+\code{Average} or \code{Disengaged}. Missing time points are \code{NA}. Two students have no
+observation at all, so a fit reports 136 sequences; the remaining sequences
+have on average about 14 observed states.
+
+With three states and many short sequences, the data show the typical
+pattern of a lag sequential analysis: each state tends to persist, and
+moves between \code{Active} and \code{Disengaged} are rare. They are the main
+example of the help pages.
 }
 \examples{
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 fit
 transitions(fit, significant = TRUE)
 
+}
+\seealso{
+\link{group_regulation} for a larger set of sequences; \code{\link[=lsa]{lsa()}}.
 }
 \keyword{datasets}

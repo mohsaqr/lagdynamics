@@ -2,66 +2,63 @@
 # `inst/REFERENCES.md` §1. The implementation uses tabulate() on a
 # row-major linearized pair index — no for-loops.
 
-#' Tidy Transition Counts at a Given Lag
+#' Count transitions at a given lag
 #'
-#' Computes the `K x K` transition count matrix from canonical lag
-#' sequential data, optionally returning a tidy long-format edge table
-#' alongside the matrix.
+#' @description
+#' `lsa_transitions()` counts the transitions at a given lag and returns the
+#' table of observed transitions with its row and column totals: for each pair
+#' of states, how often the second occurs `lag` events after the first. This
+#' table is the starting point of every lag sequential analysis. At lag 1 it
+#' records immediate succession; at larger lags it records what tends to follow
+#' a state two or more events later, and at negative lags what tends to precede
+#' it. Transitions are counted within sequences only; no transition spans the
+#' boundary between two sequences.
 #'
-#' Transitions are counted within sequences only; no transition spans a
-#' sequence boundary. For input that was supplied as a pre-computed
-#' transition matrix (`source = "transitions"` on the `lsa_data`
-#' object), the input matrix is returned at lag 1 and an error is
-#' raised for any other lag.
+#' The count involves no model or test; [lsa()] adds the expected counts,
+#' residuals and the other statistics. Use `lsa_transitions()` to inspect the
+#' raw counts, or to check how many transitions a lag leaves before fitting.
 #'
-#' @param x Either an [lsa_data] object or any input accepted by
-#'   [lsa_data()] (which will be coerced).
-#' @param lag Integer. The lag at which to count transitions; default
-#'   `1`. A positive lag counts successors (`from` at `t`, `to` at
-#'   `t + lag`), a negative lag counts predecessors, and `0` pairs each
-#'   event with itself (a degenerate diagonal). Must be a single finite
-#'   whole number.
-#' @param row.names,optional,... Ignored by the `print()` and
-#'   `as.data.frame()` methods; present for consistency with the generics.
+#' @param x An [lsa_data()] object or any input it accepts.
+#' @param lag Integer lag (default `1`). Positive lags count successors,
+#'   negative lags predecessors. Input given as a transition-count matrix
+#'   supports `lag = 1` only.
+#' @param row.names,optional,... Ignored; present for consistency with the
+#'   generics.
 #'
-#' @return An object of class `c("lsa_transitions", "list")` with
-#'   elements:
-#' \describe{
-#'   \item{obs}{The `K x K` observed transition count matrix with
-#'     `dimnames` set to the labels.}
-#'   \item{row_totals}{Length-`K` vector `rowSums(obs)`.}
-#'   \item{col_totals}{Length-`K` vector `colSums(obs)`.}
-#'   \item{n_transitions}{Scalar `sum(obs)`.}
-#'   \item{lag}{The lag used.}
-#'   \item{labels}{Character vector of state labels.}
-#'   \item{edges}{Tidy long-format data.frame with one row per
-#'     `(from, to)` cell containing columns `from`, `to`, `lag`,
-#'     `count`, `row_total`, `col_total`, `n_transitions`.}
-#' }
-#' `print()` shows the lag, the number of states and transitions and the
-#' count matrix, and returns `x` invisibly. `as.data.frame()` returns the
-#' `edges` table: one row per `from -> to` cell with the columns listed
-#' above.
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`:
+#' a lag other than 1 for a transition-count matrix, or input that
+#' [lsa_data()] rejects.
+#'
+#' @return An object of class `c("lsa_transitions", "list")`. `print()`
+#'   shows the lag, the number of states and transitions and the count
+#'   matrix, and returns `x` invisibly. `as.data.frame()` returns one row
+#'   per `from -> to` pair with the columns `from`, `to`, `lag`, `count`,
+#'   `row_total`, `col_total` and `n_transitions`.
 #'
 #' @examples
-#' d <- lsa_data(c("a", "b", "a", "c", "b", "a"))
-#' tx <- lsa_transitions(d, lag = 1)
+#' tx <- lsa_transitions(engagement)
 #' tx
 #' as.data.frame(tx)
 #'
-#' @seealso [lsa_data()], [lsa()]
+#' # What precedes each state
+#' lsa_transitions(engagement, lag = -1)
+#'
+#' @seealso [lsa_data()], [lsa()], [lsa_lags()]
 #'
 #' @export
 lsa_transitions <- function(x, lag = 1) {
   if (!inherits(x, "lsa_data")) x <- lsa_data(x)
   stopifnot(
-    is.numeric(lag), length(lag) == 1L, is.finite(lag), lag == round(lag)
+    "`lag` must be a single whole number" =
+      is.numeric(lag) && length(lag) == 1L && is.finite(lag) &&
+      lag == round(lag)
   )
   lag <- as.integer(lag)
 
   if (identical(x$source, "transitions")) {
     if (lag != 1L) {
-      stop("Pre-computed transition matrix input only supports lag = 1.",
+      .lsa_stop("Pre-computed transition matrix input only supports lag = 1.",
            call. = FALSE)
     }
     obs <- x$obs_input

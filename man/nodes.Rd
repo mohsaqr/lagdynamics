@@ -4,7 +4,7 @@
 \alias{nodes}
 \alias{nodes.lsa}
 \alias{nodes.lsa_group}
-\title{Nodes of an LSA Fit (Tidy)}
+\title{Read the states of a lag sequential analysis fit}
 \usage{
 nodes(fit)
 
@@ -13,24 +13,33 @@ nodes(fit)
 \method{nodes}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
 \code{lsa(..., group = )}.}
 }
 \value{
-A \code{data.frame}, one row per state, with columns \code{state} (the
-state name, matching the \code{from}/\code{to} endpoints of \code{\link[=transitions]{transitions()}}),
-\code{outgoing}, and \code{incoming} (its total out- and in-transition
-counts). A grouped fit gains a leading \code{group} column (one row per
-group and state).
+A \code{data.frame} with one row per state and the columns \code{state}
+(matching the \code{from} and \code{to} names of \code{\link[=transitions]{transitions()}}), \code{outgoing}
+and \code{incoming}. A grouped fit gives one row per group and state, with
+a leading \code{group} column.
 }
 \description{
-The states and their incoming / outgoing transition totals, as a
-tidy \code{data.frame} (one row per state).
+\code{nodes()} returns the states of a lag sequential analysis fit, one row per
+state with its total outgoing and incoming transition counts. In a lag
+transition network the states are the nodes, and how often a state is left
+and how often it is entered describe its place in the process: a state with
+many outgoing but few incoming transitions tends to open episodes, one with
+the reverse tends to close them. The marginal totals also set the expected
+counts against which every transition is tested.
+
+The shares of all transitions and the initial-state probability are in
+\code{as.data.frame(summary(fit), what = "nodes")}; the per-transition table is
+\code{\link[=transitions]{transitions()}}.
 }
 \examples{
-nodes(lsa(group_regulation))
+nodes(lsa(engagement))
 
 }
 \seealso{
-\code{\link[=transitions]{transitions()}}, \code{\link[=tests]{tests()}}
+\code{\link[=transitions]{transitions()}}, \code{\link[=initial]{initial()}}, \code{\link[=tests]{tests()}}, \link{lsa-methods} for
+\code{summary()}.
 }

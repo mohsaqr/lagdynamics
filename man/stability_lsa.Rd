@@ -2,7 +2,7 @@
 % Please edit documentation in R/stability_lsa.R
 \name{stability_lsa}
 \alias{stability_lsa}
-\title{Case-Drop Stability for an LSA Fit}
+\title{Assess the case-drop stability of significant transitions}
 \usage{
 stability_lsa(
   fit,
@@ -16,58 +16,84 @@ stability_lsa(
 )
 }
 \arguments{
-\item{fit}{An \code{lsa} object returned by \code{\link[=lsa]{lsa()}}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, built from sequences (not from a
+transition matrix).}
 
-\item{R}{Integer. Number of subsamples. Default \code{500}.}
+\item{R}{Number of subsets. Default \code{500}.}
 
-\item{proportion}{Numeric in (0, 1). Fraction of cases retained
-per subsample. Default \code{0.8}.}
+\item{proportion}{Share of the sequences kept in each subset, between
+0 and 1. Default \code{0.8}.}
 
-\item{min_stable}{Numeric in (0, 1). Stability threshold for
-the \code{stable} flag in the output edge frame. Default \code{0.95}.}
+\item{min_stable}{Share of subsets in which a transition must be
+significant to be flagged stable, greater than 0 and at most 1.
+Default \code{0.95}.}
 
-\item{parallel}{Logical. Use multi-core resampling. Default
-\code{FALSE}.}
+\item{parallel}{Run the subsets on several cores. Default \code{FALSE}.}
 
-\item{n_cores}{Integer. Worker count when \code{parallel = TRUE}.}
+\item{n_cores}{Number of cores when \code{parallel = TRUE}. Default \code{NULL},
+all cores but one.}
 
-\item{verbose}{Logical. Print progress every 100 replicates.}
+\item{verbose}{Report progress every 100 subsets. Default \code{FALSE}.}
 
-\item{...}{Reserved.}
+\item{...}{Not used.}
 }
 \value{
-An object of class \code{c("lsa_stability", "list")}. Read the
-per-edge table with \code{\link[=transitions]{transitions()}}; see \link{lsa-inference-methods} for
-\code{print()} and \code{as.data.frame()}. Elements:
-\describe{
-\item{edges}{Tidy data frame, one row per \code{from -> to} cell: \code{from},
-\code{to}, \code{observed_sig}
-(whether the cell was significant in the original fit),
-\code{stability} (fraction of subsamples in which the cell was
-significant), and \code{stable} (\code{stability >= min_stable}).}
-\item{stability_matrix}{\verb{R x K^2} 0/1 matrix recording per-cell
-significance across replicates.}
-\item{R, proportion, min_stable}{Recipe metadata.}
-\item{fit}{Reference to the original fit.}
-}
+An object of class \code{c("lsa_stability", "list")}. Read it with
+\code{\link[=transitions]{transitions()}}, which returns a data frame with one row per
+transition (\code{from -> to} pair) and the columns \code{from}, \code{to},
+\code{observed_sig} (significant in the full fit), \code{stability} (share of
+subsets in which it was significant) and \code{stable}
+(\code{stability >= min_stable}). \code{transitions(x, significant = TRUE)}
+keeps the stable transitions; \code{sort = "strength"} orders by
+stability. \code{print()} shows the settings, the number of failed
+replicates and the number of stable transitions (see
+\link{lsa-inference-methods}). The object also stores the per-subset
+significance decisions, the settings and the original fit.
 }
 \description{
-Resamples the underlying sequence data \strong{without} replacement at
-a specified retention proportion, refits the engine on each
-subsample, and records which edges remain significant at the
-recipe's alpha threshold. Returns a per-edge "stability"
-proportion: the fraction of subsamples in which the edge was
-significant. Edges with stability >= \code{min_stable} (default
-\code{0.95}) are flagged as robust.
+\code{stability_lsa()} assesses the case-drop stability of the significant
+transitions of a fit from \code{\link[=lsa]{lsa()}}: whether a transition's significance
+survives when part of the data is left out, since a transition found
+significant in the full data may owe its significance to a few sequences. It
+follows the case-dropping approach that Epskamp, Borsboom and Fried (2018)
+describe for the stability of psychological networks: subsets of the cases
+are drawn without replacement, the model is refitted on each, and the share
+of subsets in which a transition is significant measures how much its
+significance depends on the particular cases sampled.
+
+\code{R} subsets are drawn, each keeping a share \code{proportion} of the sequences
+(or, for a single sequence, a run of consecutive events of that share of its
+length); the model is refitted with the same engine and settings, and whether
+each transition is significant at the fit's \code{alpha} is recorded. A
+transition's stability is the share of subsets in which it was significant;
+it is flagged stable when that share reaches \code{min_stable}. Replicates in
+which a subset contained no transitions are reported as failed and count as
+not significant.
+
+Stability concerns the significance decision, in either direction,
+not the size of the effect. For intervals on the statistics use
+\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}; for a p-value against no sequential structure use
+\code{\link[=permute_lsa]{permute_lsa()}}; for the agreement of the whole network between halves
+of the data use \code{\link[=reliability_lsa]{reliability_lsa()}}.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_needs_events}: the fit was built from a transition
+matrix, so there are no sequences to drop.
+}
+}
+
 \examples{
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 st <- stability_lsa(fit, R = 100)
 st
 transitions(st, significant = TRUE)
 \donttest{
-# A full analysis uses more subsamples
-transitions(stability_lsa(fit, R = 500), sort = "strength")
+# A full analysis uses more subsets
+stability_lsa(fit, R = 500, proportion = 0.5) |>
+  transitions(sort = "strength")
 }
 
 }
@@ -77,5 +103,6 @@ psychological networks and their accuracy: A tutorial paper.
 \emph{Behavior Research Methods, 50}(1), 195-212.
 }
 \seealso{
-\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}
+\code{\link[=transitions]{transitions()}} to read the result; \code{\link[=bootstrap_lsa]{bootstrap_lsa()}},
+\code{\link[=permute_lsa]{permute_lsa()}} and \code{\link[=reliability_lsa]{reliability_lsa()}} for other checks of a fit.
 }

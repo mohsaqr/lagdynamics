@@ -11,10 +11,11 @@
                                   alternative = c("two.sided", "greater", "less"),
                                   n_events = NULL,
                                   ...) {
-  stopifnot(inherits(transitions, "lsa_transitions"))
+  stopifnot("`transitions` must be an `lsa_transitions` object" =
+              inherits(transitions, "lsa_transitions"))
   alternative <- match.arg(alternative)
   if (!is.null(structural_zeros)) {
-    stop("Engine 'bidirectional' does not support structural_zeros. ",
+    .lsa_stop(class = "unsupported_option", "Engine 'bidirectional' does not support structural_zeros. ",
          "Use engine = 'classical' for structural-zero handling.",
          call. = FALSE)
   }
@@ -22,7 +23,7 @@
   obs <- transitions$obs
   K   <- nrow(obs)
   N   <- transitions$n_transitions
-  if (N == 0) stop("No transitions in input.", call. = FALSE)
+  if (N == 0) .lsa_stop(class = "no_transitions", "No transitions in input.", call. = FALSE)
 
   # Symmetrize. W is symmetric by construction; rowSums(W) = colSums(W) =
   # rowSums(O) + colSums(O) at each code (the marginal "incidence"

@@ -27,12 +27,15 @@
                              n_events = NULL,
                              continuity = 0.5,
                              ...) {
-  stopifnot(inherits(transitions, "lsa_transitions"))
+  stopifnot("`transitions` must be an `lsa_transitions` object" =
+              inherits(transitions, "lsa_transitions"))
   alternative <- match.arg(alternative)
-  stopifnot(is.numeric(continuity), length(continuity) == 1L,
-            continuity >= 0)
+  stopifnot(
+    "`continuity` must be a single number >= 0" =
+      is.numeric(continuity) && length(continuity) == 1L && continuity >= 0
+  )
   if (!is.null(structural_zeros)) {
-    stop("Engine 'two_cell' does not support structural_zeros. ",
+    .lsa_stop(class = "unsupported_option", "Engine 'two_cell' does not support structural_zeros. ",
          "Use engine = 'classical' for structural-zero handling.",
          call. = FALSE)
   }
@@ -42,7 +45,7 @@
   R   <- rowSums(obs)
   C   <- colSums(obs)
   N   <- transitions$n_transitions
-  if (N == 0) stop("No transitions in input.", call. = FALSE)
+  if (N == 0) .lsa_stop(class = "no_transitions", "No transitions in input.", call. = FALSE)
 
   exp_mat <- outer(R, C) / N
   prob    <- .row_normalize(obs, R)

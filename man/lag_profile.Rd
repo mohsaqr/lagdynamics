@@ -2,35 +2,52 @@
 % Please edit documentation in R/lsa-lags.R
 \name{lag_profile}
 \alias{lag_profile}
-\title{Lag Profile of a Single Transition}
+\title{Trace one transition across lags}
 \usage{
 lag_profile(x, from, to, lags = 1:3, ...)
 }
 \arguments{
-\item{x}{Sequence input (any form accepted by \code{\link[=lsa]{lsa()}}) or an existing
-\code{\link[=lsa_lags]{lsa_lags()}} object.}
+\item{x}{Sequences in any form accepted by \code{\link[=lsa]{lsa()}}, or an \code{\link[=lsa_lags]{lsa_lags()}}
+result.}
 
-\item{from, to}{State labels of the transition to profile.}
+\item{from, to}{State names of the transition.}
 
-\item{lags}{Integer vector of lags. Default \code{1:3}. Ignored when \code{x}
-is already an \code{lsa_lags} object.}
+\item{lags}{Integer vector of lags (default \code{1:3}); ignored when \code{x} is
+an \code{lsa_lags} result.}
 
 \item{...}{Passed to \code{\link[=lsa_lags]{lsa_lags()}} when \code{x} is raw data.}
 }
 \value{
-A tidy \code{data.frame}, one row per lag, with columns \code{lag},
-\code{from}, \code{to}, \code{count}, \code{prob}, \code{adj_res}, \code{p}, and \code{significant}.
+A \code{data.frame} with one row per lag and the columns \code{lag},
+\code{from}, \code{to}, \code{count}, \code{prob}, \code{adj_res}, \code{p} and \code{significant}.
 }
 \description{
-How one \code{from -> to} transition behaves across lags, as a tidy
-one-row-per-lag data frame. A clean shortcut for "track this
-transition over lags 1, 2, 3, ...".
+\code{lag_profile()} traces one \code{from -> to} transition across lags, one row per
+lag with the count, the transition probability, the adjusted residual and its
+p-value. This lag profile shows how the association between two states
+changes with the distance between them: whether a transition that is
+over-represented at lag 1 persists, decays or reverses at lags 2, 3 and
+beyond (Sackett, 1979). For example, it shows whether disengagement is still
+unlikely several time points after an active one, or only at the next.
+
+\code{lag_profile()} fits the lags itself from raw data, or reads an existing
+\code{\link[=lsa_lags]{lsa_lags()}} result.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}
+when \code{from} or \code{to} is not a state of the data.
+}
+
 \examples{
-lag_profile(group_regulation, from = "plan", to = "consensus",
-            lags = 1:3)
+lag_profile(engagement, from = "Active", to = "Disengaged", lags = 1:4)
 
 }
+\references{
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+\emph{Handbook of infant development} (pp. 623-649). Wiley.
+}
 \seealso{
-\code{\link[=lsa_lags]{lsa_lags()}}
+\code{\link[=lsa_lags]{lsa_lags()}}, \code{\link[=transitions]{transitions()}}
 }

@@ -12,65 +12,83 @@
 # "lsa_bootstrap")) so plot_forest(), as.data.frame() and the tidy
 # workflow apply unchanged.
 
-#' Analytic Certainty of Transition Edges (Dirichlet-Multinomial)
+#' Compute the analytic certainty of transition probabilities
 #'
-#' Closed-form Bayesian alternative to [bootstrap_lsa()] for the
-#' transition-probability edges of an `lsa` fit. Each state's outgoing
-#' transitions are modelled as Dirichlet-Multinomial: with a Jeffreys
-#' prior the posterior for a row is `Dirichlet(count + prior)`, so each
-#' edge probability is marginally `Beta(a, b)` and its posterior mean,
-#' standard deviation, credible interval and stability decision are
-#' available analytically. No resampling, so it runs in microseconds.
+#' @description
+#' `certainty_lsa()` computes the analytic certainty of every transition
+#' probability of a fit from [lsa()]: how precisely the data pin down each
+#' transition probability, and which transitions are estimated precisely enough
+#' to be called certain. Under a Dirichlet-Multinomial model the outgoing
+#' transitions of each state are a multinomial draw whose probabilities have a
+#' Dirichlet posterior, so each transition probability has a Beta posterior with
+#' a closed-form mean, standard deviation and credible interval. A transition
+#' probability estimated from counts is uncertain in proportion to how often its
+#' source state was visited: a probability of 0.5 from 4 departures is far less
+#' certain than the same value from 400.
 #'
-#' The result carries class `c("lsa_certainty", "lsa_bootstrap")` and an
-#' `edges` table with the columns [plot_forest()] and [transitions()]
-#' expect, so it is a drop-in for a bootstrap result (use
-#' `metric = "prob"`).
+#' The posterior is computed with a Jeffreys prior by default and needs no
+#' resampling. Each transition gets its posterior mean, standard deviation and
+#' credible interval, and a posterior tail probability that decides whether it
+#' is certain. With `inference = "stability"` a transition is certain when its
+#' posterior stays within a band around the observed probability (by default 75%
+#' to 125% of it); with `inference = "threshold"` it is certain when its
+#' posterior lies above a minimum probability. A grouped fit gives one result
+#' per group.
 #'
-#' **Certainty vs bootstrap.** Both answer "how precisely is this edge
-#' pinned down?". They agree on homogeneous data. The Dirichlet posterior
-#' treats transitions as independent, so on strongly heterogeneous data (a
-#' mixture of latent classes with long sequences) it reports *more*
-#' certainty than the sequence bootstrap -- prefer [bootstrap_lsa()] then.
+#' The model treats the transitions as independent draws. When sequences
+#' differ strongly from one another (for example, a mixture of latent
+#' groups with long sequences) it reports more certainty than the data
+#' support; use [bootstrap_lsa()], which resamples whole sequences, in
+#' that case. To compare two groups' transition probabilities with the
+#' same model, use [bayes_compare_lsa()].
 #'
-#' @param fit An `lsa` fit from [lsa()], or an `lsa_group`.
-#' @param prior Numeric > 0. Dirichlet prior concentration added to every
-#'   cell. Default `0.5` (the Jeffreys prior).
-#' @param level_alpha Numeric in (0, 1). Credible-interval level. Default
-#'   `0.95` (a 95% interval), matching [bootstrap_lsa()].
-#' @param inference `"stability"` (default) flags an edge whose posterior
-#'   keeps it within a multiplicative `consistency_range` of its observed
-#'   probability; `"threshold"` flags an edge whose posterior mass lies
-#'   above `edge_threshold`.
-#' @param consistency_range Length-2 multiplicative bounds for stability
-#'   inference. Default `c(0.75, 1.25)`.
-#' @param edge_threshold Numeric or `NULL`. Fixed threshold for
-#'   `inference = "threshold"`; `NULL` uses the 0.10 quantile of
-#'   non-zero edge probabilities.
-#' @param x An `lsa_certainty` or `lsa_certainty_group` object (`print()`
-#'   and `as.data.frame()` methods).
-#' @param row.names,optional,... Ignored by the methods; present for
-#'   consistency with the generics.
+#' @param fit An `lsa` fit from [lsa()], or a grouped fit from
+#'   `lsa(..., group = )`.
+#' @param prior Dirichlet concentration added to every cell. Default
+#'   `0.5` (the Jeffreys prior).
+#' @param level_alpha Credible-interval level. Default `0.95`. The
+#'   certainty decision uses `1 - level_alpha` as its threshold.
+#' @param inference `"stability"` (default): a transition is certain when
+#'   little posterior mass lies outside `consistency_range` times its
+#'   observed probability. `"threshold"`: certain when little posterior
+#'   mass lies below `edge_threshold`.
+#' @param consistency_range Two multipliers of the observed probability
+#'   that bound the band for `inference = "stability"`. Default
+#'   `c(0.75, 1.25)`.
+#' @param edge_threshold Minimum probability for
+#'   `inference = "threshold"`. Default `NULL`, the 10% quantile of the
+#'   non-zero transition probabilities.
+#' @param x An `lsa_certainty` or `lsa_certainty_group` object, for the
+#'   `print()` and `as.data.frame()` methods.
+#' @param row.names,optional Not used; present for consistency with the
+#'   generic.
+#' @param ... Not used.
 #'
-#' @return An object of class `c("lsa_certainty", "lsa_bootstrap", "list")`
-#'   with an `edges` data frame (`from`, `to`, `prob_observed`,
-#'   `prob_mean`, `prob_se`, `prob_ci_low`, `prob_ci_high`, `p_value`,
-#'   `stable`, plus `adj_res_observed`/`adj_res_stable` for plotting), the
-#'   posterior matrices (`mean`, `sd`, `ci_lower`, `ci_upper`), and call
-#'   metadata (`prior`, `level_alpha`, `inference`, ...). Read the
-#'   per-edge table with [transitions()]. For an `lsa_group`, a named
-#'   list of these, one per group (class `lsa_certainty_group`), whose
-#'   `as.data.frame()` stacks the group tables with a leading `group`
-#'   column. `print()` shows a header summary (the number of certain
-#'   edges) and returns `x` invisibly.
+#' @return An object of class `c("lsa_certainty", "lsa_bootstrap",
+#'   "list")`. Read it with [transitions()], which returns a data frame
+#'   with one row per transition (`from -> to` pair) and the columns
+#'   `from`, `to`, `observed` (count), `prob_observed`, `prob_mean`
+#'   (posterior mean), `prob_se` (posterior standard deviation),
+#'   `prob_ci_low`, `prob_ci_high` (credible interval), `p_value`
+#'   (posterior mass outside the band, or below the threshold), `stable`
+#'   (certain), and `adj_res_observed`, `adj_res_stable` (the fit's
+#'   adjusted residual and a copy of `stable`, used by [plot_forest()]).
+#'   Transitions that cannot be estimated (a source state never left, or a
+#'   structural zero) are `NA` and never certain.
+#'   `transitions(x, significant = TRUE)` keeps the certain transitions.
+#'
+#'   For a grouped fit, an object of class `lsa_certainty_group`, a list
+#'   with one `lsa_certainty` per group; `as.data.frame()` stacks their
+#'   tables with a leading `group` column. `print()` shows the settings
+#'   and the number of certain transitions and returns `x` invisibly.
 #'
 #' @examples
-#' fit  <- lsa(engagement)
+#' fit <- lsa(engagement)
 #' cert <- certainty_lsa(fit)
 #' cert
 #' transitions(cert, significant = TRUE)
 #'
-#' # One certainty table per group
+#' # One table per group
 #' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
 #'          time = "Time", group = "Achiever")
 #' gcert <- certainty_lsa(g)
@@ -78,10 +96,14 @@
 #' head(as.data.frame(gcert))
 #'
 #' @references
-#' Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
-#' Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
+#' Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes
+#' resource engagement: A Bayesian differential network analysis.
+#' TNA Workshop 2026.
 #'
-#' @seealso [bootstrap_lsa()], [stability_lsa()], [plot_forest()]
+#' @seealso [transitions()] to read the result; [plot.lsa_certainty()] and
+#'   [plot_forest()] to draw it; [bootstrap_lsa()] for resampling
+#'   intervals; [bayes_compare_lsa()] to compare groups under the same
+#'   model.
 #'
 #' @export
 certainty_lsa <- function(fit,
@@ -91,12 +113,17 @@ certainty_lsa <- function(fit,
                           consistency_range = c(0.75, 1.25),
                           edge_threshold = NULL) {
   inference <- match.arg(inference)
-  stopifnot(is.numeric(prior), length(prior) == 1L, is.finite(prior),
-            prior > 0,
-            is.numeric(level_alpha), length(level_alpha) == 1L,
-            level_alpha > 0, level_alpha < 1,
-            is.numeric(consistency_range), length(consistency_range) == 2L,
-            all(consistency_range > 0))
+  stopifnot(
+    "`prior` must be a single positive number" =
+      is.numeric(prior) && length(prior) == 1L && is.finite(prior) &&
+      prior > 0,
+    "`level_alpha` must be a single number in (0, 1)" =
+      is.numeric(level_alpha) && length(level_alpha) == 1L &&
+      level_alpha > 0 && level_alpha < 1,
+    "`consistency_range` must be two positive numbers" =
+      is.numeric(consistency_range) && length(consistency_range) == 2L &&
+      all(consistency_range > 0)
+  )
 
   if (inherits(fit, "lsa_group")) {
     out <- lapply(fit, certainty_lsa, prior = prior,
@@ -105,7 +132,7 @@ certainty_lsa <- function(fit,
                   edge_threshold = edge_threshold)
     return(structure(out, class = c("lsa_certainty_group", "list")))
   }
-  stopifnot(inherits(fit, "lsa"))
+  stopifnot("`fit` must be an `lsa` fit from lsa()" = inherits(fit, "lsa"))
 
   counts <- fit$obs
   labels <- rownames(counts)
@@ -207,20 +234,29 @@ print.lsa_certainty <- function(x, ...) {
   invisible(x)
 }
 
-#' Plot an Analytic-Certainty Result
+#' Plot credible intervals of transition probabilities
 #'
-#' Circular forest of the per-edge transition-probability credible
-#' intervals from [certainty_lsa()] (delegates to [plot_forest()] with
-#' `metric = "prob"`).
+#' @description
+#' `plot()` draws the result of [certainty_lsa()] as a circular forest plot: one
+#' spoke per transition, showing the observed transition probability and its
+#' credible interval, so the precisely and imprecisely estimated transitions can
+#' be seen side by side. The plot is drawn by [plot_forest()] with `metric =
+#' "prob"`; see that page for the layout and the arguments that can be passed
+#' through `...`.
 #'
-#' @param x An `lsa_certainty` object.
-#' @param metric Which credible interval to draw. Default `"prob"`.
+#' @param x An `lsa_certainty` object from [certainty_lsa()].
+#' @param metric Interval to draw. Default `"prob"`, the only interval a
+#'   certainty result has.
 #' @param ... Passed to [plot_forest()].
-#' @return A `ggplot` object (drawn when printed).
+#'
+#' @return A `ggplot` object, drawn when printed.
+#'
 #' @examples
-#' fit <- lsa(group_regulation)
-#' cert <- certainty_lsa(fit)
+#' cert <- certainty_lsa(lsa(group_regulation))
 #' plot(cert)
+#'
+#' @seealso [certainty_lsa()], [plot_forest()].
+#'
 #' @export
 plot.lsa_certainty <- function(x, metric = "prob", ...) {
   plot_forest(x, metric = metric, ...)

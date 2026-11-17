@@ -3,44 +3,54 @@
 \docType{data}
 \name{ai_long}
 \alias{ai_long}
-\title{Human-AI Vibe Coding Interaction Events}
+\title{Coded AI behaviours in human-AI programming sessions}
 \format{
-A \code{data.frame} with 8,551 rows and 9 columns:
+A data frame with 8,551 rows (coded events) and 9 columns:
 \describe{
-\item{message_id}{Integer message identifier.}
-\item{project}{Project identifier.}
-\item{session_id}{Session identifier.}
-\item{timestamp}{Unix timestamp in seconds.}
-\item{session_date}{Session date as \code{YYYY-MM-DD}.}
-\item{code}{Fine-grained AI behaviour code.}
-\item{cluster}{Broader AI behaviour cluster.}
-\item{code_order}{Order of multiple codes within the same message.}
-\item{order_in_session}{Event order within session.}
+\item{\code{message_id}}{Integer. Identifier of the assistant message.}
+\item{\code{project}}{Character. Project identifier (34 projects).}
+\item{\code{session_id}}{Character. Session identifier (428 sessions,
+each within one project).}
+\item{\code{timestamp}}{Integer. Unix time in seconds.}
+\item{\code{session_date}}{Character. Session date as \code{YYYY-MM-DD}.}
+\item{\code{code}}{Character. AI behaviour code (8 values).}
+\item{\code{cluster}}{Character. Behaviour cluster (3 values).}
+\item{\code{code_order}}{Integer. Position of the code within its
+message.}
+\item{\code{order_in_session}}{Integer. Position of the event within its
+session.}
 }
 }
 \source{
-Derived without modification from \code{Nestimate::ai_long}
-(\code{Nestimate} version 0.7.7, MIT license).
+Taken without modification from \code{Nestimate::ai_long}
+(\pkg{Nestimate} 0.7.7, MIT license).
 }
 \usage{
 ai_long
 }
 \description{
-A long-format event log of coded AI-side behaviours in human-AI vibe
-coding sessions. Each row is one coded AI event, with project/session
-identifiers, ordering variables, a fine-grained AI behaviour code, and a
-broader behaviour cluster. It is useful for demonstrating \code{\link[=lsa]{lsa()}}'s
-long-format event-log import path.
-}
-\details{
-The eight AI behaviour codes are \code{Ask}, \code{Delegate}, \code{Execute}, \code{Explain},
-\code{Investigate}, \code{Plan}, \code{Repair}, and \code{Report}. The three clusters are
-\code{Action}, \code{Communication}, and \code{Repair}.
+\code{ai_long} is a coded dataset, in long format, of the behaviours of an AI
+coding assistant in "vibe-coding" sessions, in which a person builds software
+by instructing the assistant in natural language. Each row is one coded AI
+behaviour, with the project and session it belongs to and its position in the
+session. A single assistant message can carry several codes, which are
+ordered within the message.
+
+The log contains 8,551 coded events in 428 sessions from 34 projects.
+Eight behaviour codes are grouped into three clusters: \code{Action}
+(\code{Delegate}, \code{Execute}, \code{Investigate}), \code{Communication} (\code{Ask},
+\code{Explain}, \code{Report}) and \code{Repair} (\code{Plan}, \code{Repair}). With \code{session = "session_id"}, \code{action = "code"} and \code{order = "order_in_session"},
+\code{\link[=lsa]{lsa()}} reads each session as one sequence and tests which behaviour
+tends to follow which.
 }
 \examples{
-fit <- lsa(ai_long, session = "session_id",
-           action = "code", order = "order_in_session")
-transitions(fit, significant = TRUE)
+fit <- lsa(ai_long, session = "session_id", action = "code",
+           order = "order_in_session")
+transitions(fit, direction = "over", sort = "strength")
 
+}
+\seealso{
+\code{\link[=lsa]{lsa()}} and its long-format arguments; \link{group_regulation_long}
+for another event log.
 }
 \keyword{datasets}

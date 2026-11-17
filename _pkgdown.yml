@@ -1,4 +1,5 @@
 url: https://pak.dynasite.org/lagdynamics/
+
 template:
   bootstrap: 5
 
@@ -8,14 +9,121 @@ authors:
   Sonsoles López-Pernas:
     href: https://sonsoles.me
 
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+
+reference:
+- title: Overview
+  contents:
+  - lagdynamics-package
+
+- title: Fitting models
+  desc: Lag sequential analysis of sequences or event logs at one lag or at
+    several, with a choice of engine.
+  contents:
+  - lsa
+  - lsa_lags
+
+- title: Preparing data
+  desc: Canonical sequence data, transition counts and expected counts under
+    structural zeros.
+  contents:
+  - lsa_data
+  - as.data.frame.lsa_data
+  - lsa_transitions
+  - lsa_ipf
+
+- title: Reading results
+  desc: Tidy tables of a fitted model, one row per transition, state or test.
+  contents:
+  - transitions
+  - nodes
+  - tests
+  - initial
+  - transition_probabilities
+  - lag_profile
+  - lsa-methods
+
+- title: Evaluating transitions
+  desc: Uncertainty, stability, reliability and a permutation null for the
+    transitions of a fit.
+  contents:
+  - bootstrap_lsa
+  - certainty_lsa
+  - stability_lsa
+  - reliability_lsa
+  - as.data.frame.lsa_reliability
+  - permute_lsa
+  - lsa-inference-methods
+
+- title: Comparing groups
+  desc: Transition-level differences between groups by permutation or by a
+    Bayesian Dirichlet-multinomial contrast.
+  contents:
+  - compare_lsa
+  - bayes_compare_lsa
+  - as.data.frame.lsa_comparison
+
+- title: Plots
+  desc: Residual heatmaps, lag transition networks, chord diagrams, sunbursts,
+    uncertainty forests and comparison plots.
+  contents:
+  - plot.lsa
+  - plot_transitions
+  - plot_chords
+  - plot_polar
+  - plot_forest
+  - plot.lsa_certainty
+  - plot.lsa_comparison
+
+- title: Beyond LSA
+  desc: Directed information transfer between states, and hand-off to
+    transition network analysis.
+  contents:
+  - transfer_entropy
+  - lsa_to_tna
+
+- title: Engines
+  desc: The registry of test engines, open to user-defined engines.
+  contents:
+  - list_lsa_engines
+  - get_lsa_engine
+  - register_lsa_engine
+  - unregister_lsa_engine
+
+- title: Data
+  desc: Engagement states, collaborative regulation and human-AI programming
+    sessions.
+  contents:
+  - engagement
+  - group_regulation
+  - group_regulation_long
+  - ai_long
+
 articles:
 - title: Vignettes
-  navbar: ~
+  navbar: Vignettes
   contents:
-  - intro
-  - lagdynamics
-  - interop
-  - workflow
+  - lsa
   - lag-transition-networks
   - confirmatory
-  - plotting
+  - group-comparison
+
+- title: Guides
+  navbar: Guides
+  contents:
+  - articles/workflow
+  - articles/event-logs
+  - articles/engines
+  - articles/lags-structural-zeros
+  - articles/plotting
+  - articles/transfer-entropy
+
+- title: Case studies
+  navbar: Case studies
+  contents:
+  - articles/case-engagement
+  - articles/case-group-regulation
+  - articles/case-ai

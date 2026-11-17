@@ -2,31 +2,53 @@
 # tna remains optional: lagdynamics loads without it, and this bridge
 # errors informatively if the user calls it without tna installed.
 
-#' Convert an lsa Fit to a tna Network
+#' Convert a lag sequential analysis fit to a transition network for tna
 #'
-#' Convert an `lsa` fit to a `tna`-class network object usable by the
-#' `tna` package's centrality, pruning, community, and bootstrap routines.
+#' @description
+#' `lsa_to_tna()` converts a lag sequential analysis fit to a transition network
+#' for the \pkg{tna} package: a `tna` network from an `lsa` fit, or a
+#' `group_tna` from a grouped fit, so that a network found by LSA can be
+#' analysed with the network tools of \pkg{tna}. Lag sequential analysis and
+#' Transition Network Analysis (TNA) read the same transitions from two angles.
+#' LSA tests which transitions are more or less frequent than independence
+#' predicts; TNA treats the transition probabilities as a weighted network and
+#' studies its structure with centralities, communities, cliques and
+#' resampling-based pruning.
 #'
-#' This function is deliberately named `lsa_to_tna()`, not `as_tna()`,
-#' to avoid overlapping export names with sibling packages.
+#' The edge weights are chosen by `weights`: the transition probabilities (the
+#' TNA model), the counts, the positive adjusted residuals (the
+#' over-representation network) or the lift. With probabilities or counts the
+#' network also carries the initial-state probabilities and the sequences, so
+#' the resampling functions of \pkg{tna} can be used on it. With residuals or
+#' lift it carries neither, because \pkg{tna} would re-estimate probabilities
+#' from the sequences; resample with [bootstrap_lsa()] instead.
 #'
-#' @param x An `lsa` fit from [lsa()], or an `lsa_group` from
+#' @param x An `lsa` fit from [lsa()], or a grouped fit from
 #'   `lsa(..., group = )`.
-#' @param weights Character. Which matrix to expose as the tna edge
-#'   weights. One of `"prob"` (row-normalised probabilities, default),
-#'   `"count"` (raw observed counts), `"adj_res"` (adjusted residuals,
-#'   over-representation network), or `"lift"` (observed / expected
-#'   association strength).
-#' @param ... Method-specific arguments.
+#' @param weights Edge weights: `"prob"` (default, transition
+#'   probabilities), `"count"` (observed counts), `"adj_res"` (adjusted
+#'   residuals, negative values set to 0) or `"lift"` (observed over
+#'   expected counts).
+#' @param ... Passed between methods.
 #'
-#' @return For an `lsa` fit, a `tna` object with `weights`, `inits`,
-#'   `labels`, and, when available, `data` slots. For an `lsa_group`, a
-#'   `group_tna` object.
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and
+#' `lagdynamics_missing_package` when \pkg{tna} is not installed. With
+#' `weights = "adj_res"` or `"lift"` and a fit that has sequences, a
+#' warning of class `lagdynamics_tna_no_data` notes that the network
+#' carries no sequence data.
+#'
+#' @return A `tna` object (for an `lsa` fit) or a `group_tna` object (one
+#'   `tna` per group, for a grouped fit), read with the functions of the
+#'   \pkg{tna} package.
 #'
 #' @examplesIf requireNamespace("tna", quietly = TRUE)
 #' fit <- lsa(engagement)
 #' net <- lsa_to_tna(fit, weights = "prob")
 #' tna::centralities(net)
+#'
+#' @seealso [transition_probabilities()] and [initial()] for the same
+#'   parameters as tidy tables; [lsa()].
 #'
 #' @export
 lsa_to_tna <- function(x, ...) UseMethod("lsa_to_tna")
@@ -38,7 +60,7 @@ lsa_to_tna.lsa <- function(x,
                            ...) {
   weights <- match.arg(weights)
   if (!requireNamespace("tna", quietly = TRUE)) {
-    stop("Package 'tna' is required for lsa_to_tna(). ",
+    .lsa_stop(class = "missing_package", "Package 'tna' is required for lsa_to_tna(). ",
          "Install with install.packages('tna').", call. = FALSE)
   }
 
@@ -48,12 +70,13 @@ lsa_to_tna.lsa <- function(x,
   seqdata <- if (resampleable) .lsa_seqdata_matrix(x) else NULL
 
   if (!resampleable && !is.null(.lsa_seqdata_matrix(x))) {
-    warning("lsa_to_tna(weights = '", weights, "') omits the $data slot: ",
-            "tna's sequence-resampling verbs would re-estimate a ",
-            "probability network, not the '", weights, "' scale in ",
-            "$weights. Use weights = 'prob' or 'count' for resampling, ",
-            "or resample with lagdynamics instead.",
-            call. = FALSE)
+    warning(warningCondition(paste0(
+      "lsa_to_tna(weights = '", weights, "') returns no sequence data: ",
+      "tna's sequence-resampling verbs would re-estimate a probability ",
+      "network, not the '", weights, "' scale of the weights. Use ",
+      "weights = 'prob' or 'count' for resampling, or resample with ",
+      "lagdynamics instead."),
+      class = "lagdynamics_tna_no_data", call = NULL))
   }
 
   structure(
@@ -73,12 +96,17 @@ lsa_to_tna.lsa_group <- function(x,
                                  ...) {
   weights <- match.arg(weights)
   if (!requireNamespace("tna", quietly = TRUE)) {
-    stop("Package 'tna' is required for lsa_to_tna(). ",
+    .lsa_stop(class = "missing_package", "Package 'tna' is required for lsa_to_tna(). ",
          "Install with install.packages('tna').", call. = FALSE)
   }
   nets <- lapply(x, function(f) lsa_to_tna(f, weights = weights, ...))
   structure(nets, levels = names(x), class = "group_tna")
 }
+
+# Okabe-Ito palette (colour-blind safe), recycled for the state colours
+# that tna expects on its sequence data.
+.lsa_okabe_ito <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
+                    "#D55E00", "#CC79A7", "#999999", "#000000")
 
 # Rebuild tna's sequence-data matrix from an lsa fit. Returns NULL for
 # transition-matrix fits because no event-level sequences are available.
@@ -96,5 +124,5 @@ lsa_to_tna.lsa_group <- function(x,
             class = c("tna_seq_data", "matrix", "array"),
             alphabet = d$labels,
             labels = d$labels,
-            colors = grDevices::rainbow(length(d$labels)))
+            colors = rep_len(.lsa_okabe_ito, length(d$labels)))
 }

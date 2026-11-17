@@ -13,8 +13,11 @@
 # shared. as.data.frame() is the class's own tidy view, so this stays a thin
 # filter over it.
 .inference_transitions <- function(x, significant, sort, flag, strength) {
-  stopifnot(is.logical(significant), length(significant) == 1L,
-            !is.na(significant))
+  stopifnot(
+    "`significant` must be TRUE or FALSE" =
+      is.logical(significant) && length(significant) == 1L &&
+      !is.na(significant)
+  )
   sort <- match.arg(sort, c("none", "strength"))
   e <- as.data.frame(x)
   if (isTRUE(significant)) {

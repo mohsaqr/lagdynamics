@@ -47,7 +47,7 @@ test_that("loops = FALSE makes the diagonal non-estimable and never certain", {
   set.seed(9L)
   seqs <- split(sample(c("a", "b", "c"), 600L, replace = TRUE),
                 rep(seq_len(30L), each = 20L))
-  cert <- certainty_lsa(lsa(seqs, loops = FALSE))
+  cert <- certainty_lsa(lsa_forbidden_counts(seqs, loops = FALSE))
   diag_rows <- cert$edges$from == cert$edges$to
   expect_true(all(is.na(cert$edges$prob_mean[diag_rows])))
   expect_false(any(cert$edges$stable[diag_rows]))

@@ -1,28 +1,30 @@
-#' Collaborative Learning Self-Regulation Sequences
+#' Regulation actions in collaborative learning, as sequences
 #'
-#' A wide-format dataset of group regulation during collaborative
-#' learning: each row is one group's session, each column an ordered
-#' time point, and each cell a coded regulation action. Shorter sessions
-#' are padded with `NA`. It is the flagship example for the package
-#' vignette: 9 states over 2,000 sequences gives a realistically rich
-#' transition network.
+#' @description
+#' `group_regulation` is a coded dataset, in wide format, of regulation during
+#' collaborative learning: each row is one sequence of coded actions and each
+#' column an ordered position. The nine actions are `adapt`, `cohesion`,
+#' `consensus`, `coregulate`, `discuss`, `emotion`, `monitor`, `plan` and
+#' `synthesis`. Sequences are 2 to 26 actions long; shorter sequences are padded
+#' with `NA`.
 #'
-#' The nine coded actions are `adapt`, `cohesion`, `consensus`,
-#' `coregulate`, `discuss`, `emotion`, `monitor`, `plan`, and
-#' `synthesis`.
+#' With nine states and 2,000 sequences, the data give a dense transition
+#' table in which most transitions depart from independence, and they are
+#' used to show lag transition networks and group comparisons. The same
+#' actions are available as an event log in [group_regulation_long].
 #'
-#' @format A `data.frame` with 2,000 rows (sequences) and 26 columns
-#'   (ordered time points `T1` to `T26`), character-coded.
+#' @format A data frame with 2,000 rows (sequences) and 26 character
+#'   columns `T1` to `T26` (positions, in order).
 #'
-#' @source Identical in content to `tna::group_regulation` (`tna`
-#'   package, MIT license).
+#' @source Identical to `tna::group_regulation` (\pkg{tna} package, MIT
+#'   license).
 #'
-#' @seealso [group_regulation_long] (the long event log of the same
-#'   actions)
+#' @seealso [group_regulation_long] for the event log; [engagement];
+#'   [lsa()].
 #'
 #' @examples
 #' fit <- lsa(group_regulation)
-#' transitions(fit, significant = TRUE)
+#' transitions(fit, direction = "over", sort = "strength") |> head()
 #'
 #' @keywords datasets
 "group_regulation"

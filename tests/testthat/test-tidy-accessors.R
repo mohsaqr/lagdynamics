@@ -26,19 +26,21 @@ test_that("initial() is a tidy state/init_prob frame; empty for matrix fits", {
   expect_equal(nrow(initial(mfit)), 0L)
 })
 
-test_that("summary(fit) returns a tidy one-row frame and still prints", {
+test_that("summary(fit) returns a summary object with tidy tables", {
   fit <- lsa(engagement, engine = "classical")
-  expect_output(s <- summary(fit), "Lag Sequential Analysis")  # prints
-  expect_s3_class(s, "data.frame")
-  expect_equal(nrow(s), 1L)
+  s <- summary(fit)
+  expect_s3_class(s, "summary.lsa")
+  o <- as.data.frame(s)
+  expect_s3_class(o, "data.frame")
+  expect_equal(nrow(o), 1L)
   expect_true(all(c("engine", "n_transitions", "n_significant",
-                    "lrx2", "x2") %in% names(s)))
-  expect_identical(withVisible(summary(fit))$visible, FALSE)
+                    "lrx2", "x2") %in% names(o)))
+  expect_identical(withVisible(summary(fit))$visible, TRUE)
 })
 
 test_that("summary() is one tidy row per fit, one row per group", {
   fit <- lsa(engagement, engine = "classical")
-  expect_equal(nrow(summary(fit)), 1L)
+  expect_equal(nrow(as.data.frame(summary(fit), what = "overview")), 1L)
   g <- lsa(engagement, group = rep(c("a", "b"), length.out = 136))
   fs <- summary(g)                       # grouped summary; no fit_summary()
   expect_s3_class(fs, "data.frame")

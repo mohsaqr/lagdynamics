@@ -3,7 +3,7 @@
 \name{plot_forest}
 \alias{plot_forest}
 \alias{plot.lsa_bootstrap}
-\title{Circular Bootstrap Forest of an LSA Fit}
+\title{Plot a circular forest of bootstrap confidence intervals}
 \usage{
 plot_forest(
   boot,
@@ -16,51 +16,66 @@ plot_forest(
 \method{plot}{lsa_bootstrap}(x, ...)
 }
 \arguments{
-\item{boot}{An \code{lsa_bootstrap} object from \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} (or an
-\code{lsa_certainty} object from \code{\link[=certainty_lsa]{certainty_lsa()}}).}
+\item{boot}{A bootstrap result from \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}.}
 
-\item{metric}{Which bootstrapped quantity to plot: \code{"residuals"}
-(default, adjusted residual), \code{"count"}, \code{"prob"}, or \code{"yules_q"}.}
+\item{metric}{Interval to draw: \code{"residuals"} (default), \code{"count"},
+\code{"prob"} or \code{"yules_q"}.}
 
-\item{n_top}{Optional integer: keep only the \code{n_top} edges with the
-largest absolute estimate (the rest are dropped). Default \code{NULL}
-(all edges).}
+\item{n_top}{Keep only the \code{n_top} transitions with the largest absolute
+estimate. Default \code{NULL} (all).}
 
-\item{show_nonsig}{Logical. Draw non-significant edges (grey). Default
-\code{TRUE}; set \code{FALSE} to keep only significant transitions.}
+\item{show_nonsig}{Draw transitions whose residual is not stable, in
+grey (default \code{TRUE}).}
 
-\item{label_size}{Edge-label text size. Default \code{2.6}.}
+\item{label_size}{Size of the transition labels (default \code{2.6}).}
 
-\item{x}{An \code{lsa_bootstrap} object (for the \code{plot()} method).}
+\item{x}{A bootstrap result from \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, for \code{plot()}.}
 
-\item{...}{Passed to \code{\link[=plot_forest]{plot_forest()}} (e.g. \code{metric}, \code{n_top}).}
+\item{...}{Passed to \code{plot_forest()}, for example \code{metric} or \code{n_top}.}
 }
 \value{
-A \code{ggplot} object (drawn when printed); \code{plot()} on an
-\code{lsa_bootstrap} returns the same object.
+A \code{ggplot} object, drawn when printed. \code{plot()} on a bootstrap
+result returns the same object.
 }
 \description{
-Draws a radial forest of a \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} result: each transition
-is a spoke around a ring, spanning its bootstrap confidence interval,
-with a square at the observed estimate and a dashed reference ring at
-the null. Spokes whose adjusted residual is significant across
-resamples are coloured by direction (warm = over-represented, cool =
-avoided); non-significant ones are grey. A \code{\link[=certainty_lsa]{certainty_lsa()}} result
-works too, with \code{metric = "prob"}.
+\code{plot_forest()} draws the bootstrap confidence intervals of a fit's
+transitions as a circular forest plot, one spoke per transition: the spoke
+spans the bootstrap confidence interval, a square marks the observed
+estimate, and a dashed ring marks the null value. A forest plot shows an
+estimate and its confidence interval for each of many quantities, so that
+their size and precision can be compared at once; here the quantities are the
+transitions, and the plot shows which transitions keep their direction across
+resamples of the sequences and how precisely each is estimated.
+
+Transitions whose adjusted residual is stable across resamples are coloured
+by direction (red over-represented, blue avoided) and the others are grey.
+The interval can be that of the adjusted residual (default), the count, the
+transition probability or Yule's Q. \code{plot()} on a bootstrap result draws the
+same display.
+
+The intervals come from \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}; read them as a table with
+\code{transitions(boot)}. For analytic intervals of the transition
+probabilities, see \code{\link[=certainty_lsa]{certainty_lsa()}} and its plot method.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and \code{lagdynamics_bad_input}
+when the bootstrap holds no interval for \code{metric}, or when no
+transition is left to draw.
+}
+
 \examples{
-b <- bootstrap_lsa(lsa(engagement), R = 100)
-plot_forest(b)                       # residual CIs, circular
-plot(b)                              # the same view
+set.seed(1)
+boot <- bootstrap_lsa(lsa(engagement), R = 100)
+plot_forest(boot)
+plot(boot, metric = "prob")
 \donttest{
-fit <- lsa(group_regulation)
-b <- bootstrap_lsa(fit, R = 500)
-plot_forest(b, metric = "prob")      # probability CIs
-plot_forest(b, show_nonsig = FALSE)  # significant transitions only
+boot9 <- bootstrap_lsa(lsa(group_regulation), R = 500)
+plot_forest(boot9, n_top = 20, show_nonsig = FALSE)
 }
 
 }
 \seealso{
-\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=plot.lsa]{plot.lsa()}} (heatmap),
-\code{\link[=plot_polar]{plot_polar()}} (sunburst)
+\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=transitions]{transitions()}}, \code{\link[=plot.lsa]{plot.lsa()}},
+\code{\link[=certainty_lsa]{certainty_lsa()}}
 }

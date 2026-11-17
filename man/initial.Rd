@@ -4,7 +4,7 @@
 \alias{initial}
 \alias{initial.lsa}
 \alias{initial.lsa_group}
-\title{Initial-State Distribution of an LSA Fit (Tidy)}
+\title{Read the initial-state distribution of a fit}
 \usage{
 initial(fit)
 
@@ -13,25 +13,28 @@ initial(fit)
 \method{initial}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
 \code{lsa(..., group = )}.}
 }
 \value{
-A \code{data.frame}, one row per state, with columns \code{state},
-\code{init_prob}; zero rows when the fit came from a transition matrix
-(no initial states). A grouped fit gains a leading \code{group}
+A \code{data.frame} with one row per state and the columns \code{state}
+and \code{init_prob} (summing to 1). A grouped fit gains a leading \code{group}
 column.
 }
 \description{
-The proportion of sequences starting in each state, as a tidy
-\code{data.frame}. These are the initial-state probabilities (init P) that
-complement the transition-probability matrix from
+\code{initial()} returns the initial-state distribution of a fit, one row per
+state: the proportion of sequences that begin in each state. It describes how
+episodes open, which the transition table cannot show, and it completes the
+description of the process as a first-order Markov chain together with
 \code{\link[=transition_probabilities]{transition_probabilities()}}.
+
+A fit built from a transition-count matrix has no sequences and so no initial
+states; the table then has no rows.
 }
 \examples{
-initial(lsa(group_regulation))
+initial(lsa(engagement))
 
 }
 \seealso{
-\code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}}
+\code{\link[=transition_probabilities]{transition_probabilities()}}, \code{\link[=nodes]{nodes()}}, \code{\link[=transitions]{transitions()}}
 }

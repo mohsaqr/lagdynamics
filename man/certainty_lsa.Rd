@@ -5,7 +5,7 @@
 \alias{print.lsa_certainty}
 \alias{as.data.frame.lsa_certainty_group}
 \alias{print.lsa_certainty_group}
-\title{Analytic Certainty of Transition Edges (Dirichlet-Multinomial)}
+\title{Compute the analytic certainty of transition probabilities}
 \usage{
 certainty_lsa(
   fit,
@@ -23,73 +23,89 @@ certainty_lsa(
 \method{print}{lsa_certainty_group}(x, ...)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group}.}
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
+\code{lsa(..., group = )}.}
 
-\item{prior}{Numeric > 0. Dirichlet prior concentration added to every
-cell. Default \code{0.5} (the Jeffreys prior).}
+\item{prior}{Dirichlet concentration added to every cell. Default
+\code{0.5} (the Jeffreys prior).}
 
-\item{level_alpha}{Numeric in (0, 1). Credible-interval level. Default
-\code{0.95} (a 95\% interval), matching \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}.}
+\item{level_alpha}{Credible-interval level. Default \code{0.95}. The
+certainty decision uses \code{1 - level_alpha} as its threshold.}
 
-\item{inference}{\code{"stability"} (default) flags an edge whose posterior
-keeps it within a multiplicative \code{consistency_range} of its observed
-probability; \code{"threshold"} flags an edge whose posterior mass lies
-above \code{edge_threshold}.}
+\item{inference}{\code{"stability"} (default): a transition is certain when
+little posterior mass lies outside \code{consistency_range} times its
+observed probability. \code{"threshold"}: certain when little posterior
+mass lies below \code{edge_threshold}.}
 
-\item{consistency_range}{Length-2 multiplicative bounds for stability
-inference. Default \code{c(0.75, 1.25)}.}
+\item{consistency_range}{Two multipliers of the observed probability
+that bound the band for \code{inference = "stability"}. Default
+\code{c(0.75, 1.25)}.}
 
-\item{edge_threshold}{Numeric or \code{NULL}. Fixed threshold for
-\code{inference = "threshold"}; \code{NULL} uses the 0.10 quantile of
-non-zero edge probabilities.}
+\item{edge_threshold}{Minimum probability for
+\code{inference = "threshold"}. Default \code{NULL}, the 10\% quantile of the
+non-zero transition probabilities.}
 
-\item{x}{An \code{lsa_certainty} or \code{lsa_certainty_group} object (\code{print()}
-and \code{as.data.frame()} methods).}
+\item{x}{An \code{lsa_certainty} or \code{lsa_certainty_group} object, for the
+\code{print()} and \code{as.data.frame()} methods.}
 
-\item{row.names, optional, ...}{Ignored by the methods; present for
-consistency with the generics.}
+\item{...}{Not used.}
+
+\item{row.names, optional}{Not used; present for consistency with the
+generic.}
 }
 \value{
-An object of class \code{c("lsa_certainty", "lsa_bootstrap", "list")}
-with an \code{edges} data frame (\code{from}, \code{to}, \code{prob_observed},
-\code{prob_mean}, \code{prob_se}, \code{prob_ci_low}, \code{prob_ci_high}, \code{p_value},
-\code{stable}, plus \code{adj_res_observed}/\code{adj_res_stable} for plotting), the
-posterior matrices (\code{mean}, \code{sd}, \code{ci_lower}, \code{ci_upper}), and call
-metadata (\code{prior}, \code{level_alpha}, \code{inference}, ...). Read the
-per-edge table with \code{\link[=transitions]{transitions()}}. For an \code{lsa_group}, a named
-list of these, one per group (class \code{lsa_certainty_group}), whose
-\code{as.data.frame()} stacks the group tables with a leading \code{group}
-column. \code{print()} shows a header summary (the number of certain
-edges) and returns \code{x} invisibly.
+An object of class \code{c("lsa_certainty", "lsa_bootstrap", "list")}. Read it with \code{\link[=transitions]{transitions()}}, which returns a data frame
+with one row per transition (\code{from -> to} pair) and the columns
+\code{from}, \code{to}, \code{observed} (count), \code{prob_observed}, \code{prob_mean}
+(posterior mean), \code{prob_se} (posterior standard deviation),
+\code{prob_ci_low}, \code{prob_ci_high} (credible interval), \code{p_value}
+(posterior mass outside the band, or below the threshold), \code{stable}
+(certain), and \code{adj_res_observed}, \code{adj_res_stable} (the fit's
+adjusted residual and a copy of \code{stable}, used by \code{\link[=plot_forest]{plot_forest()}}).
+Transitions that cannot be estimated (a source state never left, or a
+structural zero) are \code{NA} and never certain.
+\code{transitions(x, significant = TRUE)} keeps the certain transitions.
+
+For a grouped fit, an object of class \code{lsa_certainty_group}, a list
+with one \code{lsa_certainty} per group; \code{as.data.frame()} stacks their
+tables with a leading \code{group} column. \code{print()} shows the settings
+and the number of certain transitions and returns \code{x} invisibly.
 }
 \description{
-Closed-form Bayesian alternative to \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} for the
-transition-probability edges of an \code{lsa} fit. Each state's outgoing
-transitions are modelled as Dirichlet-Multinomial: with a Jeffreys
-prior the posterior for a row is \code{Dirichlet(count + prior)}, so each
-edge probability is marginally \code{Beta(a, b)} and its posterior mean,
-standard deviation, credible interval and stability decision are
-available analytically. No resampling, so it runs in microseconds.
-}
-\details{
-The result carries class \code{c("lsa_certainty", "lsa_bootstrap")} and an
-\code{edges} table with the columns \code{\link[=plot_forest]{plot_forest()}} and \code{\link[=transitions]{transitions()}}
-expect, so it is a drop-in for a bootstrap result (use
-\code{metric = "prob"}).
+\code{certainty_lsa()} computes the analytic certainty of every transition
+probability of a fit from \code{\link[=lsa]{lsa()}}: how precisely the data pin down each
+transition probability, and which transitions are estimated precisely enough
+to be called certain. Under a Dirichlet-Multinomial model the outgoing
+transitions of each state are a multinomial draw whose probabilities have a
+Dirichlet posterior, so each transition probability has a Beta posterior with
+a closed-form mean, standard deviation and credible interval. A transition
+probability estimated from counts is uncertain in proportion to how often its
+source state was visited: a probability of 0.5 from 4 departures is far less
+certain than the same value from 400.
 
-\strong{Certainty vs bootstrap.} Both answer "how precisely is this edge
-pinned down?". They agree on homogeneous data. The Dirichlet posterior
-treats transitions as independent, so on strongly heterogeneous data (a
-mixture of latent classes with long sequences) it reports \emph{more}
-certainty than the sequence bootstrap -- prefer \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} then.
+The posterior is computed with a Jeffreys prior by default and needs no
+resampling. Each transition gets its posterior mean, standard deviation and
+credible interval, and a posterior tail probability that decides whether it
+is certain. With \code{inference = "stability"} a transition is certain when its
+posterior stays within a band around the observed probability (by default 75\%
+to 125\% of it); with \code{inference = "threshold"} it is certain when its
+posterior lies above a minimum probability. A grouped fit gives one result
+per group.
+
+The model treats the transitions as independent draws. When sequences
+differ strongly from one another (for example, a mixture of latent
+groups with long sequences) it reports more certainty than the data
+support; use \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, which resamples whole sequences, in
+that case. To compare two groups' transition probabilities with the
+same model, use \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}.
 }
 \examples{
-fit  <- lsa(engagement)
+fit <- lsa(engagement)
 cert <- certainty_lsa(fit)
 cert
 transitions(cert, significant = TRUE)
 
-# One certainty table per group
+# One table per group
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
 gcert <- certainty_lsa(g)
@@ -98,9 +114,13 @@ head(as.data.frame(gcert))
 
 }
 \references{
-Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
-Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
+Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes
+resource engagement: A Bayesian differential network analysis.
+TNA Workshop 2026.
 }
 \seealso{
-\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}}, \code{\link[=plot_forest]{plot_forest()}}
+\code{\link[=transitions]{transitions()}} to read the result; \code{\link[=plot.lsa_certainty]{plot.lsa_certainty()}} and
+\code{\link[=plot_forest]{plot_forest()}} to draw it; \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} for resampling
+intervals; \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} to compare groups under the same
+model.
 }

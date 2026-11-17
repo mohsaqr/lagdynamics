@@ -15,75 +15,118 @@
 # Returns an lsa_comparison-compatible object so the barrel / heatmap plots
 # and as.data.frame() apply unchanged.
 
-#' Bayesian Comparison of Group Transition Structures (Dirichlet-Multinomial)
+#' Compare transition probabilities between groups with a Bayesian model
 #'
-#' Closed-form Bayesian alternative to [compare_lsa()] for comparing the
-#' transition structures of two (or, pairwise, more) groups. Each state's
-#' outgoing transitions are modelled as Dirichlet-Multinomial with a
-#' Jeffreys prior, so each transition probability is marginally Beta. The
-#' per-edge posterior mean difference `prob_a - prob_b` is exact; a
-#' credible interval, the probability of direction `pd`, and a two-sided
-#' Bayesian p-equivalent `2 * (1 - pd)` come from a Monte Carlo draw on the
-#' Beta marginals.
+#' @description
+#' `bayes_compare_lsa()` compares the transition probabilities of groups with a
+#' Bayesian model: given the counts, it estimates the plausible range of the
+#' true difference between two groups' transition probabilities and how
+#' precisely that difference is estimated. Under a Dirichlet-Multinomial model
+#' the outgoing transitions of each state are a multinomial draw whose
+#' probabilities have a Dirichlet posterior, so each transition probability has
+#' a Beta posterior in each group. A transition whose source state is rarely
+#' visited gets a wide interval, even when its estimated probabilities look far
+#' apart. A permutation test ([compare_lsa()]) instead tests whether a group
+#' difference is larger than chance.
 #'
-#' This complements [compare_lsa()]: the permutation test asks whether a
-#' difference is more extreme than chance; the Bayesian comparison asks for
-#' the plausible range of the true difference and how precisely it is
-#' estimated. An edge whose source state is rarely visited gets a wide
-#' credible interval even when its row-normalised probability looks
-#' decisive.
+#' For every transition, `bayes_compare_lsa()` computes the posterior mean
+#' difference of the transition probability between two groups (exact), its
+#' credible interval and the probability of direction (the posterior probability
+#' of the more probable sign of the difference), both from Monte Carlo draws of
+#' the Beta posteriors, and a standardised effect size. A transition is credibly
+#' different when its credible interval excludes zero, the absolute mean
+#' difference exceeds `mean_threshold`, and the interval end nearest zero lies
+#' further from zero than `bound_threshold`; the thresholds keep detectable but
+#' negligible differences out. With more than two groups every pair is compared.
+#' No resampling of sequences is involved, so the comparison is fast.
 #'
-#' The result carries class `c("lsa_bayes", "lsa_comparison")` (and the
-#' pairwise object `c("lsa_bayes_pairwise", "lsa_comparison_pairwise")`),
-#' so [plot()][plot.lsa_comparison] (barrel / heatmap), [transitions()]
-#' and [as.data.frame()] work as for a permutation comparison.
+#' The model treats transitions as independent draws and compares
+#' transition probabilities only. For a test that respects the dependence
+#' between events of one sequence, or that compares adjusted residuals or
+#' odds ratios, use [compare_lsa()]. For the posterior of one group's
+#' transition probabilities, use [certainty_lsa()].
 #'
-#' @param x An `lsa_group` (two or more groups), or a single `lsa` fit for
-#'   the first group.
-#' @param y The second group's `lsa` fit when `x` is a single fit;
-#'   otherwise `NULL`.
-#' @param prior Numeric > 0. Dirichlet prior concentration added to every
-#'   cell. Default `0.5` (Jeffreys). Use `1` for a uniform (Laplace) prior.
-#' @param draws Integer. Monte Carlo posterior draws for the credible
-#'   intervals. Default `10000`.
-#' @param ci Numeric in (0, 1). Credible-interval mass. Default `0.95`.
-#' @param mean_threshold,bound_threshold An edge is flagged credibly
-#'   different only if its credible interval excludes zero, `|posterior
-#'   mean diff|` exceeds `mean_threshold` (default `0.01`), and the
-#'   credible bound nearest zero exceeds `bound_threshold` (default
-#'   `0.001`). The thresholds guard against differences that are detectable
-#'   but negligibly small.
+#' @param x A grouped fit from `lsa(data, group = )` with two or more
+#'   groups, or the `lsa` fit of the first group. For the `print()`
+#'   methods, the comparison result.
+#' @param y The `lsa` fit of the second group when `x` is a single fit
+#'   (the groups are then labelled `"a"` and `"b"`). Default `NULL`.
+#' @param prior Dirichlet concentration added to every cell. Default
+#'   `0.5` (the Jeffreys prior); `1` gives a uniform prior.
+#' @param draws Number of Monte Carlo draws for the credible intervals.
+#'   Default `10000`.
+#' @param ci Credible-interval level. Default `0.95`.
+#' @param mean_threshold Minimum absolute posterior mean difference for a
+#'   transition to be credibly different. Default `0.01`.
+#' @param bound_threshold Minimum distance from zero of the interval end
+#'   nearest zero. Default `0.001`.
 #' @param adjust Multiple-comparison correction applied to the two-sided
-#'   Bayesian p across edges (and family-wide across pairs); any method of
-#'   [stats::p.adjust()]. Default `"none"`.
-#' @param seed Optional integer for reproducible credible intervals.
-#' @param x An `lsa_bayes` or `lsa_bayes_pairwise` object (`print()`
-#'   methods; for the comparison function itself `x` is the input
-#'   described above).
-#' @param ... Ignored by the `print()` methods.
+#'   Bayesian p-value `2 * (1 - pd)` across transitions (and across all
+#'   pairs for more than two groups); any method of [stats::p.adjust()].
+#'   Default `"none"`. It changes the `p_adj` column only: the
+#'   `significant` flag is decided by the credible interval and the
+#'   thresholds.
+#' @param seed Optional seed for the Monte Carlo draws. Default `NULL`.
+#'   The session's random number state is restored on exit.
+#' @param ... Not used.
 #'
-#' @return For two groups, class `c("lsa_bayes", "lsa_comparison", "list")`
-#'   with an `edges` data frame (`from`, `to`, `prob_a`, `prob_b`, `diff`,
-#'   `ci_low`, `ci_high`, `pd`, `effect_size`, `p_value`, `p_adj`,
-#'   `significant`), the two `fits`, and the Bayesian settings. For more
-#'   than two groups, an all-pairwise `c("lsa_bayes_pairwise",
-#'   "lsa_comparison_pairwise", "list")` whose `edges` table gains leading
-#'   `group_a`, `group_b` columns. Read the per-edge table with
-#'   [transitions()]; `print()` shows the number of credibly different
-#'   edges and returns `x` invisibly.
+#' @return With two groups, an object of class
+#'   `c("lsa_bayes", "lsa_comparison", "list")`; with more than two, an
+#'   object of class `c("lsa_bayes_pairwise", "lsa_comparison_pairwise",
+#'   "list")`. Read the per-transition table with [transitions()]: one row
+#'   per transition (`from -> to` pair), and for more than two groups one
+#'   row per transition and pair of groups, with the columns
+#'   * `group_a`, `group_b` (more than two groups only): the pair compared;
+#'   * `from`, `to`: source and target state;
+#'   * `prob_a`, `prob_b`: posterior mean transition probability in each
+#'     group;
+#'   * `diff`: `prob_a - prob_b`; `ci_low`, `ci_high`: its credible
+#'     interval;
+#'   * `pd`: probability of direction; `effect_size`: `diff` divided by
+#'     its posterior standard deviation;
+#'   * `p_value`: `2 * (1 - pd)` (`NA` for transitions that cannot be
+#'     estimated); `p_adj`: after `adjust`;
+#'   * `significant`: credibly different.
+#'
+#'   `transitions(x, significant = TRUE)` keeps the credibly different
+#'   transitions; `sort = "strength"` orders by the absolute difference.
+#'   `as.data.frame(x, what = "global")` gives the number of credibly
+#'   different transitions per pair of groups (see
+#'   [as.data.frame.lsa_comparison()]); [plot()][plot.lsa_comparison]
+#'   draws the differences. `print()` shows the settings and the number
+#'   of credibly different transitions and returns `x` invisibly.
+#'
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and one of:
+#' * `lagdynamics_needs_events`: a fit was built from a transition matrix.
+#' * `lagdynamics_incompatible_fits`: the groups differ in their states,
+#'   engine, lag or structural zeros.
+#' * `lagdynamics_bad_input`: `adjust` is not a method of
+#'   [stats::p.adjust()]; `x` is neither a grouped fit nor an `lsa` fit
+#'   with a second fit in `y`; `y` is given together with a grouped fit;
+#'   or the grouped fit has fewer than two groups.
 #'
 #' @examples
 #' g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
 #'          time = "Time", group = "Achiever")
-#' bc <- bayes_compare_lsa(g, seed = 1)
+#' bc <- bayes_compare_lsa(g, adjust = "BH", seed = 1)
 #' bc
-#' transitions(bc, significant = TRUE, sort = "strength")
+#' transitions(bc, significant = TRUE, sort = "strength") |> head()
+#'
+#' # Three courses: every pair
+#' courses <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+#'                time = "Time", group = "Course")
+#' bayes_compare_lsa(courses, draws = 2000, seed = 1) |>
+#'   as.data.frame(what = "global")
 #'
 #' @references
-#' Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
-#' Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
+#' Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes
+#' resource engagement: A Bayesian differential network analysis.
+#' TNA Workshop 2026.
 #'
-#' @seealso [compare_lsa()], [certainty_lsa()]
+#' @seealso [transitions()] and [as.data.frame.lsa_comparison()] to read
+#'   the result; [plot.lsa_comparison()] to draw it; [compare_lsa()] for
+#'   the permutation test; [certainty_lsa()] for one group's posterior.
 #'
 #' @export
 bayes_compare_lsa <- function(x,
@@ -95,20 +138,31 @@ bayes_compare_lsa <- function(x,
                               bound_threshold = 0.001,
                               adjust = "none",
                               seed = NULL) {
-  stopifnot(is.numeric(prior), length(prior) == 1L, is.finite(prior),
-            prior > 0,
-            is.numeric(draws), length(draws) == 1L, draws >= 2,
-            is.numeric(ci), length(ci) == 1L, ci > 0, ci < 1,
-            is.numeric(mean_threshold), length(mean_threshold) == 1L,
-            is.numeric(bound_threshold), length(bound_threshold) == 1L)
+  stopifnot(
+    "`prior` must be a single positive number" =
+      is.numeric(prior) && length(prior) == 1L && is.finite(prior) &&
+      prior > 0,
+    "`draws` must be a single number >= 2" =
+      is.numeric(draws) && length(draws) == 1L && is.finite(draws) &&
+      draws >= 2,
+    "`ci` must be a single number in (0, 1)" =
+      is.numeric(ci) && length(ci) == 1L && is.finite(ci) && ci > 0 && ci < 1,
+    "`mean_threshold` must be a single number" =
+      is.numeric(mean_threshold) && length(mean_threshold) == 1L,
+    "`bound_threshold` must be a single number" =
+      is.numeric(bound_threshold) && length(bound_threshold) == 1L
+  )
   draws <- as.integer(draws)
   if (!adjust %in% stats::p.adjust.methods) {
-    stop(sprintf("`adjust` must be one of: %s.",
+    .lsa_stop(sprintf("`adjust` must be one of: %s.",
                  paste(stats::p.adjust.methods, collapse = ", ")),
          call. = FALSE)
   }
   if (!is.null(seed)) {
-    stopifnot(is.numeric(seed), length(seed) == 1L)
+    stopifnot("`seed` must be a single number" =
+                is.numeric(seed) && length(seed) == 1L)
+    old_seed <- .lsa_get_seed()
+    on.exit(.lsa_restore_seed(old_seed), add = TRUE)
     set.seed(seed)
   }
 

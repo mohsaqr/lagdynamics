@@ -3,38 +3,38 @@
 \docType{data}
 \name{group_regulation}
 \alias{group_regulation}
-\title{Collaborative Learning Self-Regulation Sequences}
+\title{Regulation actions in collaborative learning, as sequences}
 \format{
-A \code{data.frame} with 2,000 rows (sequences) and 26 columns
-(ordered time points \code{T1} to \code{T26}), character-coded.
+A data frame with 2,000 rows (sequences) and 26 character
+columns \code{T1} to \code{T26} (positions, in order).
 }
 \source{
-Identical in content to \code{tna::group_regulation} (\code{tna}
-package, MIT license).
+Identical to \code{tna::group_regulation} (\pkg{tna} package, MIT
+license).
 }
 \usage{
 group_regulation
 }
 \description{
-A wide-format dataset of group regulation during collaborative
-learning: each row is one group's session, each column an ordered
-time point, and each cell a coded regulation action. Shorter sessions
-are padded with \code{NA}. It is the flagship example for the package
-vignette: 9 states over 2,000 sequences gives a realistically rich
-transition network.
-}
-\details{
-The nine coded actions are \code{adapt}, \code{cohesion}, \code{consensus},
-\code{coregulate}, \code{discuss}, \code{emotion}, \code{monitor}, \code{plan}, and
-\code{synthesis}.
+\code{group_regulation} is a coded dataset, in wide format, of regulation during
+collaborative learning: each row is one sequence of coded actions and each
+column an ordered position. The nine actions are \code{adapt}, \code{cohesion},
+\code{consensus}, \code{coregulate}, \code{discuss}, \code{emotion}, \code{monitor}, \code{plan} and
+\code{synthesis}. Sequences are 2 to 26 actions long; shorter sequences are padded
+with \code{NA}.
+
+With nine states and 2,000 sequences, the data give a dense transition
+table in which most transitions depart from independence, and they are
+used to show lag transition networks and group comparisons. The same
+actions are available as an event log in \link{group_regulation_long}.
 }
 \examples{
 fit <- lsa(group_regulation)
-transitions(fit, significant = TRUE)
+transitions(fit, direction = "over", sort = "strength") |> head()
 
 }
 \seealso{
-\link{group_regulation_long} (the long event log of the same
-actions)
+\link{group_regulation_long} for the event log; \link{engagement};
+\code{\link[=lsa]{lsa()}}.
 }
 \keyword{datasets}

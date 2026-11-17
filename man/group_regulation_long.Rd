@@ -3,47 +3,53 @@
 \docType{data}
 \name{group_regulation_long}
 \alias{group_regulation_long}
-\title{Group Regulation Long Event Log}
+\title{Regulation actions in collaborative learning, as an event log}
 \format{
-A \code{data.frame} with 27,533 rows and 6 columns:
+A data frame with 27,533 rows (actions) and 6 columns:
 \describe{
-\item{Actor}{Integer student identifier (2,000 students).}
-\item{Achiever}{Achievement group, \code{High} or \code{Low}.}
-\item{Group}{Numeric collaboration-group identifier.}
-\item{Course}{Course identifier (\code{A}, \code{B}, or \code{C}).}
-\item{Time}{Event timestamp (\code{POSIXct}).}
-\item{Action}{The regulation action code.}
+\item{\code{Actor}}{Integer. Student identifier (2,000 students).}
+\item{\code{Achiever}}{Character. Achievement level, \code{High} or \code{Low}.}
+\item{\code{Group}}{Numeric. Collaboration group (200 groups).}
+\item{\code{Course}}{Character. Course, \code{A}, \code{B} or \code{C}.}
+\item{\code{Time}}{POSIXct. Time of the action.}
+\item{\code{Action}}{Character. Regulation action (9 values).}
 }
 }
 \source{
-Derived without modification from \code{tna::group_regulation_long}
-(\code{tna} package, MIT license).
+Taken without modification from \code{tna::group_regulation_long}
+(\pkg{tna} package, MIT license).
 }
 \usage{
 group_regulation_long
 }
 \description{
-A long-format event log of collaborative-learning regulation actions,
-one row per coded event. It is the long companion to the wide
-\link{group_regulation} sequence matrix: the same nine regulation actions,
-recorded here with actor, session, timing, and grouping columns so the
-package's long-format import, grouping, and between-group comparison
-paths can be demonstrated on a single realistic data set.
-}
-\details{
-The nine actions are \code{adapt}, \code{cohesion}, \code{consensus}, \code{coregulate},
-\code{discuss}, \code{emotion}, \code{monitor}, \code{plan}, and \code{synthesis}. The \code{Achiever}
-column (\code{High} / \code{Low}) is a recorded grouping variable suitable for
-between-group analysis.
+\code{group_regulation_long} is a coded dataset, in long format, of regulation
+during collaborative learning: each row is one coded action of one student,
+with the student's collaboration group, course and achievement level and the
+time of the action. It contains the nine actions of \link{group_regulation}
+(\code{adapt}, \code{cohesion}, \code{consensus}, \code{coregulate}, \code{discuss}, \code{emotion},
+\code{monitor}, \code{plan}, \code{synthesis}) and serves to show how \code{\link[=lsa]{lsa()}} reads an event
+log and fits and compares groups.
+
+The log holds 27,533 actions of 2,000 students in 200 collaboration
+groups of 10 students each. Achievement (\code{High} or \code{Low}, 1,000
+students each) is constant within a student, and the course (\code{A}, \code{B}
+or \code{C}) is constant within a group, so either can be passed to the
+\code{group} argument of \code{\link[=lsa]{lsa()}} for a between-group comparison.
 }
 \examples{
-fit <- lsa(group_regulation_long, actor = "Actor",
-           action = "Action", time = "Time")
-transitions(fit, significant = TRUE)
+fit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+           time = "Time")
+transitions(fit, direction = "over", sort = "strength") |> head()
+
+# One model per achievement level
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+summary(gfit)
 
 }
 \seealso{
-\link{group_regulation} (the wide sequence matrix of the same
-actions)
+\link{group_regulation} for the wide sequence table of the same
+actions; \code{\link[=lsa]{lsa()}}; \code{\link[=compare_lsa]{compare_lsa()}}.
 }
 \keyword{datasets}

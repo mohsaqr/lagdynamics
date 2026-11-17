@@ -1,109 +1,227 @@
-# lagdynamics
+---
+output: github_document
+---
 
-> Modern, tidy lag sequential analysis for categorical event sequences.
+<!-- README.md is generated from README.Rmd. Please edit that file and rebuild
+     from the repository root with:
+     Rscript -e 'pkgload::load_all(".", quiet = TRUE); knitr::knit("README.Rmd", "README.md")' -->
+
+
+
+# lagdynamics
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/lagdynamics)](https://CRAN.R-project.org/package=lagdynamics)
 [![R-CMD-check](https://github.com/mohsaqr/lagdynamics/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mohsaqr/lagdynamics/actions/workflows/R-CMD-check.yaml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![r-universe](https://mohsaqr.r-universe.dev/badges/lagdynamics)](https://mohsaqr.r-universe.dev/lagdynamics)
 <!-- badges: end -->
 
-Lag sequential analysis (LSA) is a statistical method for detecting temporal
-contingencies in categorical, time-ordered data. For every ordered pair of
-states, it tests whether one follows another at a given lag more — or less —
-often than expected under sequential independence, quantifying each contingency
-with the adjusted (standardized) residual of observed against expected
-transition frequencies. It is widely used to study how categorical processes
-unfold over time — in behavioral and dyadic interaction, conversation and group
-discourse, psychotherapy process research, human–computer interaction, and
-learning analytics — wherever the order of events, not merely their frequency,
-carries the meaning.
+## Vignettes and guides
 
-`lagdynamics` implements LSA as a modern, tidy workflow. A single `lsa()`
-constructor fits the classical and extended engine family — classical,
-two-cell, bidirectional, and parallel / non-parallel dominance — and every
-result is read through a verb that returns a one-row-per-observation
-`data.frame`. Its distinguishing commitment is evidence: each transition is
-treated as a *tested departure from independence*, backed by a confirmatory
-battery of bootstrap intervals, analytic Bayesian certainty, split-half
-reliability, case-drop stability, and permutation tests.
+**Vignettes**
 
-Beyond the classical test, the package adds multi-lag analysis, structural-zero
-constraints under quasi-independence, and grouped fits that estimate one model
-per group in a shared state space, with formal group comparison by permutation
-or Bayesian Dirichlet–Multinomial contrast. It is designed to interoperate
-across the sequence-analysis ecosystem: `lsa()` ingests long event logs, wide
-matrices, lists of sequences, and objects from `tna`, `Nestimate`, and
-`TraMineR`, while fitted objects carry a `cograph` network class and expose
-transition and initial probabilities for downstream tooling. A single `plot()`
-verb renders a fit as a residual heatmap, transition network, chord diagram, or
-polar sunburst, and a bootstrap or certainty result as an uncertainty forest.
+- [Lag sequential analysis](https://pak.dynasite.org/lagdynamics/articles/lsa.html)
+- [Lag transition networks](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.html)
+- [Evaluating transitions](https://pak.dynasite.org/lagdynamics/articles/confirmatory.html)
+- [Comparing groups](https://pak.dynasite.org/lagdynamics/articles/group-comparison.html)
+
+**Guides**
+
+- [A complete workflow](https://pak.dynasite.org/lagdynamics/articles/workflow.html)
+- [Event logs and interoperability](https://pak.dynasite.org/lagdynamics/articles/event-logs.html)
+- [Engines: classical, two-cell, bidirectional and dominance tests](https://pak.dynasite.org/lagdynamics/articles/engines.html)
+- [Lags and structural zeros](https://pak.dynasite.org/lagdynamics/articles/lags-structural-zeros.html)
+- [Plotting lag sequential models](https://pak.dynasite.org/lagdynamics/articles/plotting.html)
+- [Transfer entropy between states](https://pak.dynasite.org/lagdynamics/articles/transfer-entropy.html)
+
+**Case studies**
+
+- [The dynamics of course engagement](https://pak.dynasite.org/lagdynamics/articles/case-engagement.html)
+- [Regulation in high and low achieving groups](https://pak.dynasite.org/lagdynamics/articles/case-group-regulation.html)
+- [AI behaviour in vibe-coding sessions](https://pak.dynasite.org/lagdynamics/articles/case-ai.html)
+
+## Overview
+
+`lagdynamics` finds which events tend to follow which in categorical,
+time-ordered data: sequences of behaviours, dialogue moves, learning actions
+or other coded events. Lag sequential analysis (Sackett, 1979; Bakeman &
+Gottman, 1997) counts how often each state follows each other state at a
+given lag and tests every pair against the count expected if successive
+events were independent. The pairs that occur more or less often than
+expected form a lag transition network: a directed graph of the sequential
+contingencies in the data, which shows which actions tend to follow one
+another and which rarely do. Each transition can be assessed with bootstrap
+intervals, analytic Bayesian certainty, case-drop stability, split-half
+reliability and a permutation null, and groups can be compared by
+permutation or by a Bayesian Dirichlet-multinomial contrast.
+
+The model is fitted with one function, `lsa()`, from wide sequence data,
+lists of sequences or long event logs, with a choice of the classical test
+and four further engines (two-cell, bidirectional, and parallel and
+non-parallel dominance), multiple lags and structural zeros. Results are read
+as tidy data frames with `transitions()`, `nodes()`, `tests()`, `initial()`
+and `summary()`, drawn as residual heatmaps, lag transition networks, chord
+diagrams and sunbursts, and passed to the `tna` and `cograph` packages.
+
+## The method
+
+Events are pooled into a lagged contingency table whose cell
+$n_{ij}$ counts how often state $j$ occurs $\ell$ steps after state $i$,
+counting within sequences only. With row totals $n_{i+}$, column totals
+$n_{+j}$ and $N$ transitions, the expected count under independence of
+successive events is $e_{ij} = n_{i+} n_{+j} / N$, and the transitional
+probability is $p_{j \mid i} = n_{ij} / n_{i+}$. The departure of a cell from
+independence is measured by its adjusted residual (Haberman, 1973),
+
+$$
+z_{ij} = \frac{n_{ij} - e_{ij}}
+              {\sqrt{e_{ij}\,(1 - n_{i+}/N)\,(1 - n_{+j}/N)}},
+$$
+
+which is approximately standard normal under independence. A large positive
+$z_{ij}$ marks a transition that occurs more often than chance; a large
+negative one, a transition that is avoided. Yule's $Q$ gives the strength of
+the same association on a $-1$ to $1$ scale, and the tablewise likelihood-ratio
+test $G^2$ asks whether the table as a whole departs from independence. Cells
+that cannot occur by design (for example, self-transitions in coded turn
+taking) are declared as structural zeros, and the expected counts are then
+estimated by iterative proportional fitting under quasi-independence.
 
 ## Installation
 
-```r
-# From CRAN
+
+``` r
 install.packages("lagdynamics")
 
-# r-universe (pre-built binaries, no compiler needed)
-install.packages("lagdynamics",
-                 repos = c("https://mohsaqr.r-universe.dev",
-                           "https://cloud.r-project.org"))
-
 # development version
-# install.packages("remotes")
+install.packages("remotes")
 remotes::install_github("mohsaqr/lagdynamics")
 ```
 
-The analytical core depends only on base R; plotting adds `ggplot2` and
-`cograph`, which install automatically. Interoperability packages (`tna`,
-`Nestimate`) stay optional `Suggests`.
+## Example data
 
-## At a glance
+The package includes four datasets: `engagement` (engagement states of
+students over successive periods, in wide format), `group_regulation` (coded
+collaborative regulation in wide format), `group_regulation_long` (the same
+kind of data as a long event log with actor, achievement group and time stamp)
+and `ai_long` (coded AI behaviours in human-AI programming sessions, as a long
+event log).
 
-| Task | Functions |
-|---|---|
-| Fit a model | `lsa()`, `lsa_lags()`, `lag_profile()` |
-| Read results (tidy) | `transitions()`, `nodes()`, `tests()`, `initial()`, `summary()` |
-| Weigh the evidence | `bootstrap_lsa()`, `certainty_lsa()`, `permute_lsa()`, `stability_lsa()`, `reliability_lsa()` |
-| Compare groups | `compare_lsa()`, `bayes_compare_lsa()` |
-| Plot | `plot(fit, type = )`, `plot_transitions()`, `plot_chords()`, `plot_polar()`, `plot_forest()` |
-| Probabilities | `transition_probabilities()`, `initial()` |
-| Engines | `lsa(engine = )`, `register_lsa_engine()`, `list_lsa_engines()` |
-| Beyond LSA | `transfer_entropy()`, `lsa_to_tna()`, `lsa_ipf()` |
+## Fitting a model
 
-## Example
+`lsa()` fits the classical engine at lag 1 by default. The print method shows
+the size of the data, the tablewise test, the strongest over-represented
+transitions and the initial-state distribution.
 
-```r
+
+``` r
 library(lagdynamics)
 
-# 138 students' weekly engagement states (bundled data)
 fit <- lsa(engagement)
 fit
-
-transitions(fit, significant = TRUE)   # tidy table of tested transitions
-plot(fit, type = "network")            # residual transition network
-
-# quantify the evidence behind each edge
-boot <- bootstrap_lsa(fit, R = 1000)
-transitions(boot, significant = TRUE)  # edges whose residual CI excludes 0
-plot(boot)                             # circular bootstrap CI forest
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
+#>   3 states | 1734 transitions | 1870 events | 136 sequences
+#>   states: Active, Average, Disengaged
+#>   independence: G² = 618.3, df = 4, p <2e-16
+#> 
+#>   Significant transitions (p < 0.05): 7 of 9
+#>   strongest over-represented (of 3):
+#>     Active -> Active          z =  +21.7  ***
+#>     Disengaged -> Disengaged  z =  +15.4  ***
+#>     Average -> Average        z =  +12.5  ***
+#> 
+#>   Initial states:
+#>     Active     0.382  ████████████████████████
+#>     Average    0.368  ███████████████████████
+#>     Disengaged 0.250  ████████████████
 ```
 
-## Vignettes
+## Reading the transitions
 
-| Vignette | Topic |
-|---|---|
-| `vignette("lagdynamics")` | Get started: from raw rows to a fitted model, tidy tables, plots, and one uncertainty check |
-| `vignette("intro")` | Concepts: what LSA tests, the engine family, and the package map |
-| `vignette("interop")` | Interoperability with wide data, long logs, `tna`, `Nestimate`, and `cograph` |
-| `vignette("workflow")` | A complete analysis from sequences to a group comparison |
-| `vignette("confirmatory")` | The confirmatory testing battery: matching claims to evidence |
-| `vignette("lag-transition-networks")` | Lag transition networks |
-| `vignette("plotting")` | The full plotting gallery |
+`transitions()` returns one row per transition with the observed and expected
+counts, the transitional probability, the adjusted residual and its p-value,
+and Yule's $Q$. Arguments select and order rows.
 
-## License
 
-MIT © 2026 Mohammed Saqr
+``` r
+transitions(fit, significant = TRUE, sort = "strength")
+#>         from         to lag count expected  prob prob_col adj_res         p yules_q
+#> 1     Active     Active   1   459      247 0.698   0.7051    21.7 4.60e-104   0.828
+#> 2 Disengaged Disengaged   1   157       60 0.483   0.4906    15.4  1.90e-53   0.754
+#> 3    Average     Active   1   153      282 0.204   0.2350   -12.9  4.16e-38  -0.601
+#> 4     Active Disengaged   1    23      121 0.035   0.0719   -12.6  3.64e-36  -0.826
+#> 5    Average    Average   1   458      330 0.610   0.6003    12.5  1.35e-35   0.553
+#> 6     Active    Average   1   176      290 0.267   0.2307   -11.3  1.06e-29  -0.534
+#> 7 Disengaged     Active   1    39      122 0.120   0.0599   -10.5  5.11e-26  -0.698
+#>    kappa kappa_z  kappa_p  lift  sign significant
+#> 1  0.444   19.19 4.68e-82 1.858  over        TRUE
+#> 2  0.314   13.56 7.34e-42 2.618  over        TRUE
+#> 3 -0.499  -14.70 6.81e-49 0.543 under        TRUE
+#> 4 -0.827  -13.41 5.14e-41 0.189 under        TRUE
+#> 5  0.227    9.83 7.97e-23 1.386  over        TRUE
+#> 6 -0.424  -12.48 9.39e-36 0.608 under        TRUE
+#> 7 -0.707  -11.46 2.03e-30 0.320 under        TRUE
+```
+
+## Evaluating the transitions
+
+`bootstrap_lsa()` resamples sequences and gives a confidence interval for
+each transition's residual, probability and Yule's $Q$; `transitions(boot)`
+returns them as one row per transition.
+
+
+``` r
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 200)
+boot
+#> <lsa_bootstrap>
+#>   engine:        classical
+#>   level:         sequence
+#>   replicates:    200
+#>   CI level:      95%
+#>   stable edges:  7 of 9
+```
+
+## Plotting
+
+`plot()` draws a fit as a residual heatmap (the default), a lag transition
+network, a chord diagram or a sunburst.
+
+
+``` r
+plot(fit)
+```
+
+<div class="figure" style="text-align: center">
+<img src="man/figures/README-heatmap-1.png" alt="plot of chunk heatmap" width="100%" />
+<p class="caption">plot of chunk heatmap</p>
+</div>
+
+## Comparing groups
+
+With a long event log, `group` names a column, and one model is fitted per
+group on a shared set of states. `compare_lsa()` tests each transition's
+difference by permuting group labels; here the p-values are adjusted for
+multiplicity with the Benjamini-Hochberg method.
+
+
+``` r
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+set.seed(2026)
+cmp <- compare_lsa(gfit, R = 200, adjust = "BH")
+cmp
+#> <lsa_comparison>
+#>   groups:   High vs Low
+#>   measure:  log_or difference (High - Low)
+#>   R:        200 label permutations
+#>   edges:    39 significant of 78 tested (adjust = BH)
+#>   omnibus:  statistic = 79.48, p = 0.004975
+```
+
+## Authors and citation
+
+`lagdynamics` is written by [Mohammed Saqr](https://saqr.me) and
+[Sonsoles López-Pernas](https://sonsoles.me). To cite the package, run
+`citation("lagdynamics")`.
+
+

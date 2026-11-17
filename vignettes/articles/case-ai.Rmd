@@ -1,0 +1,293 @@
+---
+title: "Case study: AI behaviour in vibe-coding sessions"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Case study: AI behaviour in vibe-coding sessions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7,
+                      fig.height = 4.5, fig.align = "center", dpi = 96)
+old_options <- options(digits = 3, width = 90)
+```
+
+In vibe coding, a programmer describes what is wanted in natural language
+and an AI assistant writes, runs and revises the code. The assistant's side
+of such a session is a sequence of behaviours: it investigates the code base,
+plans, executes changes, explains, reports results, asks questions, delegates
+work and repairs what went wrong. How these behaviours are ordered says how
+the assistant works. An assistant that investigates before it plans and plans
+before it executes follows a different process from one that executes
+repeatedly and repairs afterwards. The order of repairs is of particular
+interest: a repair that follows execution suggests that the assistant
+corrects its own failed actions, a repair that follows a report or an
+explanation suggests that it corrects course after communicating with the
+programmer.
+
+Lag sequential analysis tests, for every ordered pair of behaviours, whether
+the second follows the first more or less often than the frequencies of the
+two behaviours predict (Bakeman & Quera, 2011). This case study asks what
+follows what among the eight behaviour codes, what the coarser cluster level
+adds, whether repair follows execution or reporting more than chance, and
+how certain and stable the key transitions are.
+
+```{r package}
+library(lagdynamics)
+```
+
+## Data
+
+`ai_long` is a long event log of coded AI behaviours in human-AI vibe-coding
+sessions, taken from the Nestimate package. Each row is one coded behaviour
+of the assistant.
+
+- **Session:** `session_id` — one working session, the sequence boundary;
+  sessions belong to a `project`.
+- **Order:** `order_in_session` — the position of the event in its session.
+- **Behaviour:** `code` — one of eight codes: `Ask`, `Delegate`, `Execute`,
+  `Explain`, `Investigate`, `Plan`, `Repair`, `Report`.
+- **Cluster:** `cluster` — the code's broader group: `Action`,
+  `Communication` or `Repair`.
+- **Message:** `message_id`, with `code_order` ordering several codes within
+  one message.
+
+```{r data}
+head(ai_long)
+with(ai_long, table(code, cluster))
+```
+
+The 8,551 events are dominated by `Execute` (3,258) and `Investigate`
+(2,317), followed by `Plan` (1,620). `Ask` (99), `Report` (181) and `Repair`
+(257) are rare. The cluster labels need care: the cluster called `Repair`
+contains the `Repair` code and also `Plan`, and `Plan` makes up 1,620 of its
+1,877 events. A transition into the `Repair` cluster is therefore mostly a
+transition into planning.
+
+```{r structure}
+with(ai_long, c(projects = length(unique(project)),
+                sessions = length(unique(session_id)),
+                messages = length(unique(message_id))))
+aggregate(cbind(events = order_in_session) ~ session_id, data = ai_long,
+          FUN = length) |>
+  summary()
+with(ai_long, table(codes_per_message = table(message_id)))
+```
+
+The events come from 428 sessions in 34 projects. Sessions range from 1 to
+138 coded events, with a median of 13. Of the 5,970 messages, 3,781 carry one
+code and the others two to six. Within a message the codes are ordered by
+`code_order` and follow each other in `order_in_session`, so some
+transitions are between two codes of the same message rather than between
+two messages. The analysis treats the coded order as the order of behaviour.
+
+## What follows what?
+
+`lsa()` reads the log in long format: `session` names the sequence
+boundary, `action` the coded behaviour and `order` the position, so no
+transition is counted across sessions.
+
+```{r fit}
+fit <- lsa(ai_long, session = "session_id", action = "code",
+           order = "order_in_session")
+fit
+```
+
+The fit has 8,123 transitions from 428 sessions. Independence is clearly
+rejected (G² = 2,168, df = 49), and 40 of the 64 transitions depart
+significantly from it. Sessions open with `Investigate` (71.5%) or
+`Delegate` (18.5%). The over-represented transitions are the assistant's
+working routines.
+
+```{r over}
+transitions(fit, direction = "over", sort = "strength") |> head(10)
+```
+
+The strongest routine is `Investigate` to `Plan`: 977 transitions against
+442 expected (z = 33.4); 43.7% of investigations are followed by a plan.
+`Delegate` to `Plan` follows (z = 18.1; 62.1% of delegations lead to a plan).
+`Execute` repeats itself (z = 16.1; 51.0% of executions are followed by
+another). Communication forms its own chain: a question is followed by an
+explanation (`Ask` to `Explain`, z = 16.4, lift 7.51) and an explanation by
+a report (`Explain` to `Report`, z = 14.0). `Plan` to `Execute` is
+over-represented as well (z = 6.29), completing the routine of investigating,
+planning and executing.
+
+```{r under}
+transitions(fit, direction = "under", sort = "strength") |> head(8)
+```
+
+The avoided transitions sharpen the routine. A plan is almost never followed
+by another plan (49 against 298 expected, z = -17.9): planning is a single
+step, not a loop. The assistant rarely executes straight after investigating
+(z = -16.6) and rarely returns to planning after executing (z = -14.5): it
+investigates, plans once, and then executes. `Repair` to `Plan` is almost
+absent (4 against 49.6 expected).
+
+A lag transition network shows the sixteen strongest residuals.
+
+```{r network, fig.height = 5}
+plot_transitions(fit, top = 16)
+```
+
+Each node is a behaviour and each arrow a transition, labelled with its
+adjusted residual. Blue arrows are over-represented and red arrows avoided;
+width grows with the size of the residual. Two clusters are visible. The
+action routine runs from `Investigate` and `Delegate` into `Plan`, with the
+thick blue arrow from `Investigate`, and from `Plan` to `Execute`, which
+loops on itself. The communication chain runs from `Ask` to `Explain` and on
+to `Report`. The red arrows mark the shortcuts the assistant avoids: from
+`Investigate` directly to `Execute`, from `Execute` back to `Plan` and from
+`Plan` to itself.
+
+## The cluster-level view
+
+The three clusters give a coarser description. The same call with
+`action = "cluster"` fits the cluster sequence.
+
+```{r cluster}
+fit_cluster <- lsa(ai_long, session = "session_id", action = "cluster",
+                   order = "order_in_session")
+transitions(fit_cluster, sort = "strength")
+```
+
+All 9 cluster transitions are significant. `Action` to `Repair` is the
+strongest (z = 20.6, 1,646 transitions), followed by `Communication`
+repeating itself (z = 16.8) and `Repair` to `Action` (z = 14.0), while
+`Repair` repeating itself is avoided (z = -18.5). Read with the cluster
+labels alone, this would describe an assistant that acts, repairs and acts
+again. The code-level fit shows what the clusters hide: `Action` to `Repair`
+is mostly `Investigate`, `Delegate` and `Execute` followed by `Plan`, and the
+avoided `Repair` loop reflects mainly the avoided `Plan` loop (49 plans
+followed by a plan, against 298 expected). The cluster level is a
+useful summary of the alternation between doing and planning, but a
+statement about repair needs the codes.
+
+## Does repair follow execution or reporting?
+
+The question is answered on the `Repair` code. `lsa_lags()` fits the model
+at lags 1 to 3, and `lag_profile()` follows the two candidate transitions.
+
+```{r lags}
+lags <- lsa_lags(ai_long, lags = 1:3, session = "session_id",
+                 action = "code", order = "order_in_session")
+lag_profile(lags, from = "Execute", to = "Repair")
+lag_profile(lags, from = "Report", to = "Repair")
+```
+
+Repair does not follow execution more than chance. 93 executions, 3.0%, are
+followed by a repair, close to the 97.8 expected (z = -0.62 at lag 1), and the residual stays between -1.6 and 0.5
+at lags 2 and 3. A report, by contrast, is followed by a repair in 8.6% of
+cases at lag 1 (14 transitions, z = 4.02, p < 0.001). The effect is
+confined to the next event: at lags 2 and 3 the share falls to 2.6% and
+4.2% and is not significant.
+
+The full set of transitions into `Repair` shows which other behaviours
+precede it.
+
+```{r into-repair}
+transitions(fit) |> subset(to == "Repair")
+```
+
+`Explain` to `Repair` is the strongest (42 transitions, z = 6.85, lift
+2.63), followed by `Report` to `Repair` (lift 2.73). `Investigate` to
+`Repair` is avoided (z = -4.36). Repair therefore follows the assistant's
+communication, an explanation or a report, and not its actions. A repair is
+in turn followed by an explanation (`Repair` to `Explain`, z = 7.01) or a
+question (`Repair` to `Ask`, z = 5.90), as the over-represented transitions
+above show. In these sessions repairs are embedded in the communication
+with the programmer, consistent with a correction prompted by what the
+programmer sees in the assistant's explanation or report.
+
+## How certain are the key transitions?
+
+`bootstrap_lsa()` resamples whole sessions with replacement, R = 1,000
+times, and returns percentile intervals for every transition.
+
+```{r bootstrap}
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 1000)
+boot
+transitions(boot, significant = TRUE, sort = "strength") |> head(6)
+```
+
+42 of the 64 transitions have a residual interval that excludes zero. The
+routines are certain: the residual of `Investigate` to `Plan` lies between
+30.6 and 36.1, and the probability of a plan after an investigation between
+0.408 and 0.467. The interval of `Ask` to `Explain` is the widest of the six
+(11.6 to 21.1) because questions are rare, but it is far from zero.
+
+```{r bootstrap-repair}
+transitions(boot) |> subset(to == "Repair")
+```
+
+`Explain` to `Repair` has a residual interval of 3.90 to 10.00 and `Report`
+to `Repair` one of 1.21 to 6.99; both exclude zero. `Execute` to `Repair`
+has an interval of -2.51 to 1.47, which contains zero and is centred close
+to it: there is no link between execution and repair to detect, rather than
+a link too uncertain to establish. The interval of `Report` to `Repair` is
+wide because it rests on 14 transitions, but its lower bound stays above 1.
+`Plan` to `Repair` is the weakest over-represented transition into `Repair`;
+its interval (0.05 to 4.03) barely excludes zero.
+
+Stability asks the same question by subsampling. `stability_lsa()` refits
+the model on R = 500 subsamples of 80% of the sessions.
+
+```{r stability}
+set.seed(2026)
+stab <- stability_lsa(fit, R = 500)
+stab
+transitions(stab) |> subset(to == "Repair")
+```
+
+32 of the 64 transitions are significant in at least 95% of the subsamples.
+`Explain` to `Repair` and `Investigate` to `Repair` are significant in all of
+them and `Report` to `Repair` in 98.4%, so it passes the 95% threshold.
+`Plan` to `Repair`, significant in the full fit at p = 0.046, is significant
+in only 35.4% of subsamples and should not be interpreted.
+
+## What the analysis shows
+
+- The assistant follows a routine of investigating, planning once and
+  executing: `Investigate` to `Plan` is the strongest transition
+  (z = 33.4), planning does not repeat (z = -17.9), and execution repeats
+  (z = 16.1).
+- Communication is a separate chain: questions lead to explanations and
+  explanations to reports.
+- At the cluster level, the alternation between `Action` and the `Repair`
+  cluster is mostly an alternation between action and planning, because the
+  `Repair` cluster is mostly `Plan`.
+- Repair does not follow execution more than chance (z = -0.62, bootstrap
+  interval containing zero). It follows explanations and reports, at lag 1
+  only, and is followed by further explanation or a question. The link from
+  reports rests on 14 transitions but is stable in 98.4% of subsamples.
+
+The analysis has limits. The data are coded behaviours of the assistant
+only; the programmer's turns between them are not in the log, so a
+transition from `Report` to `Repair` may pass through a programmer's reply
+that the analysis cannot see. Several codes of one message are ordered by
+the coding, not by time. The 428 sessions come from 34 projects, and the
+bootstrap and the subsampling treat sessions as independent, which ignores
+any similarity of sessions within a project. Finally, the model pools all
+sessions: a project or a phase of a session with a different routine would
+need a grouped fit (see [the group comparison article](group-comparison.html)).
+For the long-format arguments, see [the event logs guide](event-logs.html);
+for the network display, see
+[the lag transition networks article](lag-transition-networks.html).
+
+## References
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Efron, B. (1979). Bootstrap methods: Another look at the jackknife.
+*Annals of Statistics, 7*(1), 1-26.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```

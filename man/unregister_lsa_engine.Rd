@@ -2,27 +2,41 @@
 % Please edit documentation in R/engine-registry.R
 \name{unregister_lsa_engine}
 \alias{unregister_lsa_engine}
-\title{Remove a Registered LSA Engine}
+\title{Remove a registered engine}
 \usage{
 unregister_lsa_engine(name)
 }
 \arguments{
-\item{name}{Character scalar. The engine's identifier.}
+\item{name}{Name of the engine.}
 }
 \value{
-Invisibly \code{NULL}.
+\code{NULL}, invisibly.
 }
 \description{
-Remove a Registered LSA Engine
+\code{unregister_lsa_engine()} removes an engine from the registry for the rest of
+the session, so that \code{lsa(engine = name)} no longer finds it. It is mainly
+used to clean up an engine added with \code{\link[=register_lsa_engine]{register_lsa_engine()}}. A removed
+built-in engine returns when the package is loaded again.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and
+\code{lagdynamics_unknown_engine} when no engine is registered under \code{name}.
+}
+
 \examples{
-my_engine <- function(transitions, ...) {
-  get_lsa_engine("classical")$fn(transitions, ...)
+placeholder <- function(transitions, ...) {
+  obs <- transitions$obs
+  expected <- outer(rowSums(obs), colSums(obs)) / sum(obs)
+  list(obs = obs, exp = expected, prob = obs / rowSums(obs),
+       adj_res = obs * 0, p = obs * 0 + 1)
 }
-register_lsa_engine("temporary_engine", my_engine, "Temporary alias")
-unregister_lsa_engine("temporary_engine")
+register_lsa_engine("placeholder", placeholder,
+                    description = "Placeholder engine")
+unregister_lsa_engine("placeholder")
+list_lsa_engines()
 
 }
 \seealso{
-\code{\link[=register_lsa_engine]{register_lsa_engine()}}
+\code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=list_lsa_engines]{list_lsa_engines()}}
 }

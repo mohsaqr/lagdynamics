@@ -131,7 +131,7 @@ test_that("permute_lsa within_sequence=TRUE keeps disjoint alphabets disjoint", 
 
 test_that("permute_lsa never flags non-estimable (structural-zero) cells", {
   set.seed(1)
-  fit <- lsa(engagement, structural_zeros = 1 - diag(3))
+  fit <- lsa_forbidden_counts(engagement, structural_zeros = 1 - diag(3))
   # Diagonal is forbidden -> NA observed residual.
   expect_true(all(is.na(diag(fit$adj_res))))
   pm <- permute_lsa(fit, R = 50)

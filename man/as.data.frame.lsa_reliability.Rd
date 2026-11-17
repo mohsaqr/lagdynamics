@@ -3,35 +3,61 @@
 \name{as.data.frame.lsa_reliability}
 \alias{as.data.frame.lsa_reliability}
 \alias{as.data.frame.lsa_reliability_group}
-\title{Tidy the Per-Replicate Split-Half Correlations}
+\title{Read the tables of a split-half reliability result}
 \usage{
-\method{as.data.frame}{lsa_reliability}(x, row.names = NULL, optional = FALSE, ...)
+\method{as.data.frame}{lsa_reliability}(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  what = c("replicates", "summary"),
+  ...
+)
 
 \method{as.data.frame}{lsa_reliability_group}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
-\item{x}{An \code{lsa_reliability} (or \code{lsa_reliability_group}) object.}
+\item{x}{An \code{lsa_reliability} or \code{lsa_reliability_group} object from
+\code{\link[=reliability_lsa]{reliability_lsa()}}.}
 
-\item{row.names, optional, ...}{Ignored (method signature compatibility).}
+\item{row.names, optional}{Not used; present for consistency with the
+generic.}
+
+\item{what}{\code{"replicates"} (default): one row per split. \code{"summary"}:
+one row summarizing all splits.}
+
+\item{...}{For a grouped result, passed on to each group (use it for
+\code{what}); otherwise not used.}
 }
 \value{
-A \code{data.frame}, one row per replicate, with columns
-\code{replicate} and \code{correlation} (a grouped object gains a leading
-\code{group} column). \code{NA} correlations from degenerate splits are kept.
+A data frame.
+\itemize{
+\item \code{what = "replicates"}: one row per split, with \code{replicate} and
+\code{correlation}; a failed replicate (a half with no transitions, or
+no variation to correlate) is kept as \code{NA}.
+\item \code{what = "summary"}: one row with \code{weights}, \code{method}, \code{R},
+\code{n_failed}, \code{mean}, \code{sd}, \code{ci_low} and \code{ci_high} (2.5\% and 97.5\%
+quantiles of the finite correlations).
+}
+
+A grouped result gains a leading \code{group} column.
 }
 \description{
-Returns the split-half correlation of every replicate from
-\code{\link[=reliability_lsa]{reliability_lsa()}} as a tidy data frame.
+\code{as.data.frame()} returns the tables of a \code{\link[=reliability_lsa]{reliability_lsa()}} result, which
+holds the split-half correlation of every random split: these correlations,
+one row per split, or a one-row summary of their distribution, chosen with
+\code{what}. For a grouped result the tables of the groups are stacked.
 }
 \examples{
-fit <- lsa(engagement)
-rel <- reliability_lsa(fit, R = 20)
-rel
-as.data.frame(rel)
+rel <- reliability_lsa(lsa(engagement), R = 20)
+as.data.frame(rel) |> head()
+as.data.frame(rel, what = "summary")
 
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
 grel <- reliability_lsa(g, R = 10)
-grel
-head(as.data.frame(grel))
+as.data.frame(grel, what = "summary")
+
+}
+\seealso{
+\code{\link[=reliability_lsa]{reliability_lsa()}}.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/compare_lsa.R
 \name{compare_lsa}
 \alias{compare_lsa}
-\title{Compare Groups' Transition Structures}
+\title{Compare transition structures between groups with a permutation test}
 \usage{
 compare_lsa(
   x,
@@ -18,133 +18,146 @@ compare_lsa(
 )
 }
 \arguments{
-\item{x}{Either an \code{lsa_group} object (from \code{lsa(..., group = )})
-with two or more groups, or a single \code{lsa} fit for the first group.}
+\item{x}{A grouped fit from \code{lsa(data, group = )} with two or more
+groups, or the \code{lsa} fit of the first group.}
 
-\item{y}{When \code{x} is a single \code{lsa} fit, the second group's \code{lsa}
-fit. Ignored (and must be \code{NULL}) when \code{x} is an \code{lsa_group}.}
+\item{y}{The \code{lsa} fit of the second group when \code{x} is a single fit
+(the groups are then labelled \code{"a"} and \code{"b"}). Default \code{NULL}.}
 
-\item{R}{Integer. Number of label permutations per comparison.
-Default \code{1000}.}
+\item{R}{Number of label permutations per comparison. Default \code{1000}.}
 
-\item{measure}{Character. The per-edge quantity compared between
-groups. Default \code{"log_or"}: the per-cell log odds ratio of the 2x2
-transition collapse (Haldane-Anscombe corrected on empty cells) --
-an N-invariant LSA effect size, so the comparison reflects
-behaviour rather than sample size. Other options: \code{"yules_q"}
-(also N-invariant, but saturates at +/-1 on zero cells),
-\code{"adj_res"} (adjusted residuals -- the LSA \emph{test statistic}, which
-scales with sqrt(N) and is therefore confounded by group size; a
-message warns when groups differ in size), \code{"prob"} (transition
-probabilities -- a raw rate, i.e. the TNA quantity, with no
-independence baseline), \code{"count"}, or \code{"lift"} (observed /
-expected).}
+\item{measure}{Per-transition measure compared between groups:
+\code{"log_or"} (default; log odds ratio of the transition, with 0.5 added
+to every cell of its 2 x 2 table when one cell is empty), \code{"yules_q"}
+(also independent of sample size, but bounded at -1 and 1),
+\code{"adj_res"} (adjusted residual; grows with the number of
+transitions, so a message is shown when one group has more than 1.5
+times the transitions of another), \code{"prob"} (transition probability),
+\code{"count"} or \code{"lift"} (observed / expected count).}
 
-\item{adjust}{Multiple-comparison correction; any method accepted by
-\code{\link[stats:p.adjust]{stats::p.adjust()}} (e.g. \code{"holm"}, \code{"BH"}, \code{"bonferroni"}).
-Default \code{"none"}. For more than two groups it is applied across the
-pooled per-edge p-values of all pairs.}
+\item{adjust}{Multiple-comparison correction, any method of
+\code{\link[stats:p.adjust]{stats::p.adjust()}} such as \code{"BH"}, \code{"holm"} or \code{"bonferroni"}.
+Default \code{"none"}.}
 
-\item{min_count}{Integer. Minimum pooled observed count (group a +
-group b) for a transition to be tested. Default \code{5}. Rarer cells
-carry an unstable odds ratio and a near-degenerate permutation null
-that produces spurious small p-values, so they get \code{p = NA} and are
-excluded from the multiple-comparison family and the omnibus rather
-than flagged significant. Set \code{0} to test every cell.}
+\item{min_count}{Minimum combined count of a transition in the two
+groups for it to be tested. Default \code{5}; \code{0} tests every transition.}
 
-\item{parallel}{Logical. Use multi-core resampling. Default \code{FALSE}.}
+\item{parallel}{Run the permutations on several cores. Default \code{FALSE}.}
 
-\item{n_cores}{Integer. Worker count when \code{parallel = TRUE}.}
+\item{n_cores}{Number of cores when \code{parallel = TRUE}. Default \code{NULL},
+all cores but one.}
 
-\item{verbose}{Logical. Print progress every 100 permutations.}
+\item{verbose}{Report progress. Default \code{FALSE}.}
 
-\item{...}{Reserved.}
+\item{...}{Not used.}
 }
 \value{
-For two groups, an object of class
-\code{c("lsa_comparison", "list")} with:
-\describe{
-\item{edges}{Tidy per-edge data frame: \code{from}, \code{to}, the measure in
-each group (\verb{<measure>_a}, \verb{<measure>_b}), their difference
-\code{diff} (= a - b), the permutation p-value \code{p_perm}, the adjusted
-p-value \code{p_adj}, and a \code{significant} flag.}
-\item{global}{Omnibus test list: \code{statistic} (observed sum of
-squared edge differences), \code{p_value}, and \code{R}.}
-\item{perm_diff}{\verb{R x K^2} matrix of permuted edge differences.}
-\item{measure, R, adjust, groups}{Call metadata; \code{groups} is the
-length-two character vector of group labels (a, b).}
-\item{fits}{The two original fits, named by group.}
+With two groups, an object of class
+\code{c("lsa_comparison", "list")}; with more than two, an object of class
+\code{c("lsa_comparison_pairwise", "list")}. Read the per-transition table
+with \code{\link[=transitions]{transitions()}}: one row per transition (\code{from -> to} pair), and
+for more than two groups one row per transition and pair of groups,
+with the columns
+\itemize{
+\item \code{group_a}, \code{group_b} (more than two groups only): the pair compared;
+\item \code{from}, \code{to}: source and target state;
+\item \verb{<measure>_a}, \verb{<measure>_b} (for example \code{log_or_a}): the measure
+in each group;
+\item \code{diff}: the difference, group a minus group b;
+\item \code{p_perm}: permutation p-value (\code{NA} when not tested);
+\item \code{p_adj}: p-value after \code{adjust};
+\item \code{significant}: \code{p_adj} below the \code{alpha} of the fits.
 }
-For more than two groups, an object of class
-\code{c("lsa_comparison_pairwise", "list")} with:
-\describe{
-\item{edges}{Tidy per-edge data frame across all pairs, prefixed by
-\code{group_a}, \code{group_b}; \code{p_adj} and \code{significant} reflect the
-family-wide correction.}
-\item{global}{One row per pair: \code{group_a}, \code{group_b}, \code{statistic},
-\code{p_value}, and the across-pairs adjusted \code{p_adj}.}
-\item{comparisons}{Named list of the underlying two-group
-\code{lsa_comparison} objects (each fit with \code{adjust = "none"}), for
-drill-down.}
-\item{measure, R, adjust, groups}{Call metadata; \code{groups} lists all
-group labels.}
-}
-Read the per-edge table with \code{\link[=transitions]{transitions()}}; \code{print()} shows the
-group labels, the number of significant edges and the omnibus test.
+
+\code{transitions(x, significant = TRUE)} keeps the significant
+transitions; \code{sort = "strength"} orders by the absolute difference.
+The omnibus test is read with \code{as.data.frame(x, what = "global")}
+(one row per pair of groups). \code{print()} shows the groups, the number
+of significant transitions and the omnibus test (see
+\code{\link[=as.data.frame.lsa_comparison]{as.data.frame.lsa_comparison()}}); \link[=plot.lsa_comparison]{plot()}
+draws the differences. The object also stores the permuted
+differences, the settings and the group fits.
 }
 \description{
-Permutation test for whether groups produce different LSA transition
-structures. For each pair of groups it pools their sequences,
-repeatedly reassigns the group label of whole sequences (preserving
-the original group sizes), refits each pseudo-group, and builds a
-permutation distribution of the per-edge difference in the chosen
-\code{measure}. The two-sided p-value is
-\verb{(1 + #\{ |diff_perm| >= |diff_obs| \}) / (1 + R)} (Phipson & Smyth
-2010). A single omnibus test of overall difference is reported from
-the same permutations.
-}
-\details{
-With exactly two groups a single comparison is returned. With more
-than two groups every pairwise comparison is run and the requested
-\code{adjust} correction is applied \strong{once across the whole family} of
-per-edge p-values (and separately across the per-pair omnibus tests),
-giving family-wise control rather than per-pair control.
+\code{compare_lsa()} tests whether groups of sequences (high and low achievers,
+courses, conditions) differ in their transition structure, transition by
+transition and as a whole, with a permutation test. Groups can differ in
+which transitions they over- or under-produce. The permutation test checks
+whether an observed difference between groups is larger than would arise if
+group membership were unrelated to the sequences: the group labels of whole
+sequences are shuffled many times, the models are refitted, and the observed
+difference is set against the differences produced by the shuffles. Because
+whole sequences are permuted, the dependence between events of one sequence
+is kept and only the link between group and transition structure is tested.
 
-\strong{NA handling.} Non-estimable cells (structural zeros, zero-margin
-rows in a permuted pseudo-group) carry \code{NA} in the measure matrix and
-are never coerced to zero. Such cells get \code{p_perm = NA} rather than a
-spurious significant flag, and the exceedance tally and omnibus
-statistic are computed with \code{na.rm = TRUE}, matching \code{\link[=permute_lsa]{permute_lsa()}}.
+For each transition, \code{compare_lsa()} compares a per-group measure, by default
+the log odds ratio of the transition against all other transitions, which
+does not grow with the number of transitions observed, so groups of different
+sizes can be compared. Each transition gets the group difference, a
+permutation p-value (Phipson & Smyth, 2010) and an adjusted p-value;
+transitions too rare to be compared are left untested. An omnibus test of
+overall difference, the sum of squared differences over the tested
+transitions, is computed from the same permutations, in the spirit of the
+network comparison test of van Borkulo et al. (2023). With more than two
+groups every pair is compared and the \code{adjust} correction is applied once
+across the p-values of all pairs.
 
-\strong{Interpretation caveats.} The odds ratio is non-collapsible: the
-per-group log odds ratios are group-specific departure-from-
-independence measures and should not be pooled across groups that
-have different marginal state distributions. As with any LSA, a
-between-group difference can also be driven by subgroup composition
-(Simpson's paradox); confirm with subgroup analysis when a confound
-is plausible.
+The groups must share their states, engine, lag and structural zeros;
+fitting them together with \code{lsa(data, group = )} ensures this. For a
+Bayesian comparison of transition probabilities that reports the
+plausible size of each difference without resampling, use
+\code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}. A difference between groups can also arise from
+a difference in their composition; check subgroups when such a
+confound is plausible.
 }
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and one of:
+\itemize{
+\item \code{lagdynamics_needs_events}: a fit was built from a transition matrix,
+so there are no sequences to permute.
+\item \code{lagdynamics_incompatible_fits}: the groups differ in their states,
+engine, lag or structural zeros.
+\item \code{lagdynamics_bad_input}: \code{adjust} is not a method of
+\code{\link[stats:p.adjust]{stats::p.adjust()}}; \code{x} is neither a grouped fit nor an \code{lsa} fit
+with a second fit in \code{y}; \code{y} is given together with a grouped fit;
+or the grouped fit has fewer than two groups.
+}
+}
+
 \examples{
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
-cmp <- compare_lsa(g, R = 100)
+cmp <- compare_lsa(g, R = 100, adjust = "BH")
 cmp
-transitions(cmp, significant = TRUE, sort = "strength")
+transitions(cmp, significant = TRUE, sort = "strength") |> head()
+as.data.frame(cmp, what = "global")
 \donttest{
-# A full analysis uses more label permutations
+# A full analysis uses more permutations
 compare_lsa(g, R = 1000, adjust = "BH")
+
+# Three courses: every pair, corrected across all pairs
+courses <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+               time = "Time", group = "Course")
+compare_lsa(courses, R = 100, adjust = "BH") |>
+  as.data.frame(what = "global")
 }
 
 }
 \references{
-Phipson, B., & Smyth, G. K. (2010). Permutation p-values should
-never be zero: calculating exact p-values when permutations are
-randomly drawn. \emph{Statistical Applications in Genetics and
-Molecular Biology}, 9(1), Article 39.
+Phipson, B., & Smyth, G. K. (2010). Permutation p-values should never
+be zero: Calculating exact p-values when permutations are randomly
+drawn. \emph{Statistical Applications in Genetics and Molecular
+Biology, 9}(1), Article 39.
 
-van Borkulo, C. D., et al. (2022). Comparing network structures on
-three aspects: A permutation test. \emph{Psychological Methods}.
+van Borkulo, C. D., van Bork, R., Boschloo, L., Kossakowski, J. J.,
+Tio, P., Schoevers, R. A., Borsboom, D., & Waldorp, L. J. (2023).
+Comparing network structures on three aspects: A permutation test.
+\emph{Psychological Methods, 28}(6), 1273-1285.
 }
 \seealso{
-\code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}
+\code{\link[=transitions]{transitions()}} and \code{\link[=as.data.frame.lsa_comparison]{as.data.frame.lsa_comparison()}} to read
+the result; \code{\link[=plot.lsa_comparison]{plot.lsa_comparison()}} to draw it; \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}
+for a Bayesian comparison; \code{\link[=permute_lsa]{permute_lsa()}} to test one fit against
+no sequential structure; \code{\link[=lsa]{lsa()}} with \verb{group =} to fit the groups.
 }

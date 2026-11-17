@@ -4,7 +4,7 @@
 \alias{lsa_lags}
 \alias{print.lsa_lags}
 \alias{as.data.frame.lsa_lags}
-\title{Lag Sequential Analysis Across Several Lags}
+\title{Fit lag sequential analysis models at several lags}
 \usage{
 lsa_lags(data, lags = 1:3, ...)
 
@@ -13,45 +13,52 @@ lsa_lags(data, lags = 1:3, ...)
 \method{as.data.frame}{lsa_lags}(x, row.names = NULL, optional = FALSE, ...)
 }
 \arguments{
-\item{data}{Sequence input (any form accepted by \code{\link[=lsa]{lsa()}}).}
+\item{data}{Sequences in any form accepted by \code{\link[=lsa]{lsa()}}.}
 
-\item{lags}{Integer vector of lags. May include negative lags
-(predecessors) and \code{0}. Default \code{1:3}.}
+\item{lags}{Integer vector of lags (default \code{1:3}). Negative lags look
+back to predecessors.}
 
-\item{...}{Passed to \code{\link[=lsa]{lsa()}} (e.g. \code{engine}, \code{alpha},
-\code{structural_zeros}). Ignored by the \code{print()} and \code{as.data.frame()}
-methods.}
+\item{...}{Passed to \code{\link[=lsa]{lsa()}} (for example \code{engine}, \code{alpha}, \code{loops}).
+Ignored by the \code{print()} and \code{as.data.frame()} methods.}
 
-\item{x}{An \code{lsa_lags} object (\code{print()} and \code{as.data.frame()}
-methods).}
+\item{x}{An \code{lsa_lags} object.}
 
 \item{row.names}{Optional row names for the stacked data frame.}
 
 \item{optional}{Ignored; present for consistency with the generic.}
 }
 \value{
-An object of class \code{c("lsa_lags", "list")}: a named list of
-\code{lsa} fits (names \code{"lag1"}, \code{"lag2"}, ...), with a \code{lags} attribute.
-\code{\link[=transitions]{transitions()}} (with all its filtering arguments) and
-\code{as.data.frame()} row-bind the per-lag transition tables (each
-carries its \code{lag} column) into one tidy frame, one row per
-transition and lag, with the same columns as \code{transitions()}.
-\code{print()} lists the number of significant transitions per lag and
-returns \code{x} invisibly.
+An object of class \code{c("lsa_lags", "list")}, one \code{lsa} fit per
+lag. \code{\link[=transitions]{transitions()}} and \code{as.data.frame()} return a \code{data.frame} with
+one row per transition and lag and the columns of \code{\link[=transitions]{transitions()}} for
+a single fit. \code{print()} lists the number of significant transitions at
+each lag and returns \code{x} invisibly.
 }
 \description{
-Fits \code{\link[=lsa]{lsa()}} at each requested lag and returns the fits together, so
-you can compare a transition's strength across lags (a \emph{lag
-profile}). Each element is an ordinary \code{lsa} fit.
+\code{lsa_lags()} fits \code{\link[=lsa]{lsa()}} once per requested lag, with the same engine and
+options, and keeps the fits together. The result is a lag profile in the
+sense of Sackett (1979), who proposed examining a transition across a range
+of lags to separate short-range from longer-range dependence and to detect
+cycles: a sequential contingency need not be immediate, a state may tend to
+recur two or three events later, and an association that is strong at lag 1
+may fade with distance.
+
+\code{\link[=transitions]{transitions()}} on the result stacks the per-lag transition tables into one
+table with a \code{lag} column, with the same filtering and sorting arguments as
+for a single fit. To follow one transition across lags, use \code{\link[=lag_profile]{lag_profile()}}.
 }
 \examples{
 prof <- lsa_lags(engagement, lags = 1:3)
 prof
-transitions(prof, significant = TRUE, sort = "strength")
-# Track one transition across lags with the dedicated verb:
-lag_profile(engagement, from = "Active", to = "Average", lags = 1:3)
+transitions(prof, direction = "over", sort = "strength")
 
 }
+\references{
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+\emph{Handbook of infant development} (pp. 623-649). Wiley.
+}
 \seealso{
-\code{\link[=lsa]{lsa()}}
+\code{\link[=lag_profile]{lag_profile()}} for one transition across lags; \code{\link[=lsa]{lsa()}};
+\code{\link[=transitions]{transitions()}}.
 }

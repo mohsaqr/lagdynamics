@@ -4,7 +4,7 @@
 \alias{lsa_to_tna}
 \alias{lsa_to_tna.lsa}
 \alias{lsa_to_tna.lsa_group}
-\title{Convert an lsa Fit to a tna Network}
+\title{Convert a lag sequential analysis fit to a transition network for tna}
 \usage{
 lsa_to_tna(x, ...)
 
@@ -13,34 +13,57 @@ lsa_to_tna(x, ...)
 \method{lsa_to_tna}{lsa_group}(x, weights = c("prob", "count", "adj_res", "lift"), ...)
 }
 \arguments{
-\item{x}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\item{x}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
 \code{lsa(..., group = )}.}
 
-\item{...}{Method-specific arguments.}
+\item{...}{Passed between methods.}
 
-\item{weights}{Character. Which matrix to expose as the tna edge
-weights. One of \code{"prob"} (row-normalised probabilities, default),
-\code{"count"} (raw observed counts), \code{"adj_res"} (adjusted residuals,
-over-representation network), or \code{"lift"} (observed / expected
-association strength).}
+\item{weights}{Edge weights: \code{"prob"} (default, transition
+probabilities), \code{"count"} (observed counts), \code{"adj_res"} (adjusted
+residuals, negative values set to 0) or \code{"lift"} (observed over
+expected counts).}
 }
 \value{
-For an \code{lsa} fit, a \code{tna} object with \code{weights}, \code{inits},
-\code{labels}, and, when available, \code{data} slots. For an \code{lsa_group}, a
-\code{group_tna} object.
+A \code{tna} object (for an \code{lsa} fit) or a \code{group_tna} object (one
+\code{tna} per group, for a grouped fit), read with the functions of the
+\pkg{tna} package.
 }
 \description{
-Convert an \code{lsa} fit to a \code{tna}-class network object usable by the
-\code{tna} package's centrality, pruning, community, and bootstrap routines.
+\code{lsa_to_tna()} converts a lag sequential analysis fit to a transition network
+for the \pkg{tna} package: a \code{tna} network from an \code{lsa} fit, or a
+\code{group_tna} from a grouped fit, so that a network found by LSA can be
+analysed with the network tools of \pkg{tna}. Lag sequential analysis and
+Transition Network Analysis (TNA) read the same transitions from two angles.
+LSA tests which transitions are more or less frequent than independence
+predicts; TNA treats the transition probabilities as a weighted network and
+studies its structure with centralities, communities, cliques and
+resampling-based pruning.
+
+The edge weights are chosen by \code{weights}: the transition probabilities (the
+TNA model), the counts, the positive adjusted residuals (the
+over-representation network) or the lift. With probabilities or counts the
+network also carries the initial-state probabilities and the sequences, so
+the resampling functions of \pkg{tna} can be used on it. With residuals or
+lift it carries neither, because \pkg{tna} would re-estimate probabilities
+from the sequences; resample with \code{\link[=bootstrap_lsa]{bootstrap_lsa()}} instead.
 }
-\details{
-This function is deliberately named \code{lsa_to_tna()}, not \code{as_tna()},
-to avoid overlapping export names with sibling packages.
+\section{Conditions}{
+
+Errors carry the class \code{lagdynamics_error} and
+\code{lagdynamics_missing_package} when \pkg{tna} is not installed. With
+\code{weights = "adj_res"} or \code{"lift"} and a fit that has sequences, a
+warning of class \code{lagdynamics_tna_no_data} notes that the network
+carries no sequence data.
 }
+
 \examples{
 \dontshow{if (requireNamespace("tna", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 fit <- lsa(engagement)
 net <- lsa_to_tna(fit, weights = "prob")
 tna::centralities(net)
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[=transition_probabilities]{transition_probabilities()}} and \code{\link[=initial]{initial()}} for the same
+parameters as tidy tables; \code{\link[=lsa]{lsa()}}.
 }

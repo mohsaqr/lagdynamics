@@ -16,7 +16,7 @@ test_that("plot_polar builds a sunburst for each fill metric", {
 
 test_that("plot_polar tolerates structural-zero cells and bad input", {
   skip_if_not_installed("ggplot2")
-  fit <- lsa(engagement, structural_zeros = 1 - diag(3))
+  fit <- lsa_forbidden_counts(engagement, structural_zeros = 1 - diag(3))
   expect_s3_class(plot_polar(fit), "ggplot")        # diagonal wedges absent
   expect_error(plot_polar(list()), "lsa")
 })

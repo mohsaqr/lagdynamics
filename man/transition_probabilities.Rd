@@ -4,7 +4,7 @@
 \alias{transition_probabilities}
 \alias{transition_probabilities.lsa}
 \alias{transition_probabilities.lsa_group}
-\title{Transition-Probability Matrix of an LSA Fit}
+\title{Read the transition probabilities of a fit}
 \usage{
 transition_probabilities(fit)
 
@@ -13,26 +13,34 @@ transition_probabilities(fit)
 \method{transition_probabilities}{lsa_group}(fit)
 }
 \arguments{
-\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or an \code{lsa_group} from
+\item{fit}{An \code{lsa} fit from \code{\link[=lsa]{lsa()}}, or a grouped fit from
 \code{lsa(..., group = )}.}
 }
 \value{
-A square numeric matrix with \code{from} states in rows and \code{to}
-states in columns. For an \code{lsa_group}, a named list of such matrices,
-one per group.
+A \code{data.frame} with one row per \code{from -> to} pair (\code{K^2} rows
+for \code{K} states, ordered by \code{from} and then \code{to}) and the columns
+\code{from}, \code{to} and \code{prob}. A grouped fit stacks the groups under a
+leading \code{group} column.
 }
 \description{
-The row-stochastic transition-probability matrix \eqn{P(\text{to} \mid
-\text{from})}: each row holds the distribution over next states out of
-a state, so the entries in a row sum to 1 (up to structural zeros).
-This is the transition-probability matrix a Transition Network Analysis
-reads; pair it with \code{\link[=initial]{initial()}} for the initial-state probabilities.
+\code{transition_probabilities()} returns the transition probabilities of a fit,
+one row per ordered pair of states. The transition probability
+\eqn{P(\text{to} \mid \text{from})} is the share of the transitions leaving a
+state that go to each other state, so the probabilities out of one state sum
+to 1. They describe where the process goes next, regardless of chance
+expectation; the adjusted residuals of \code{\link[=transitions]{transitions()}} say which of these
+moves are more or less frequent than independence predicts. Together with the
+initial-state probabilities of \code{\link[=initial]{initial()}}, they are the parameters of the
+first-order Markov model read by Transition Network Analysis.
+
+A cell declared a structural zero has probability 0, as does every cell of a
+state that is never left.
 }
 \examples{
-transition_probabilities(lsa(group_regulation))
+transition_probabilities(lsa(engagement))
 
 }
 \seealso{
-\code{\link[=initial]{initial()}} (initial-state probabilities), \code{\link[=transitions]{transitions()}}
-(the tidy per-edge view), \code{\link[=nodes]{nodes()}}
+\code{\link[=initial]{initial()}} for the initial-state probabilities;
+\code{\link[=transitions]{transitions()}}, which also carries \code{prob}; \code{\link[=lsa_to_tna]{lsa_to_tna()}}.
 }

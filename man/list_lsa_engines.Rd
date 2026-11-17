@@ -2,22 +2,25 @@
 % Please edit documentation in R/engine-registry.R
 \name{list_lsa_engines}
 \alias{list_lsa_engines}
-\title{List All Registered LSA Engines}
+\title{List the registered engines}
 \usage{
 list_lsa_engines()
 }
 \value{
-A \code{data.frame}, one row per registered engine, with columns
-\code{name}, \code{description}, and \code{requires} (comma-separated package
-names, \code{""} when none).
+A \code{data.frame} with one row per registered engine, in
+alphabetical order, and the columns \code{name}, \code{description} and
+\code{requires} (comma-separated package names, \code{""} when none).
 }
 \description{
-List All Registered LSA Engines
+\code{list_lsa_engines()} lists the engines available in the session, the five
+built-in ones and any added with \code{\link[=register_lsa_engine]{register_lsa_engine()}}, with a one-line
+description of each. Each engine of \code{\link[=lsa]{lsa()}} implements one test of the
+transition table. Use the list to choose the \code{engine} argument of \code{\link[=lsa]{lsa()}}.
 }
 \examples{
 list_lsa_engines()
 
 }
 \seealso{
-\code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}}
+\code{\link[=lsa]{lsa()}}, \code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}}
 }

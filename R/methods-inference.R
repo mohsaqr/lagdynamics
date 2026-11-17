@@ -1,22 +1,29 @@
 # Print methods for the three inference S3 classes.
 
-#' Print and Tidy Resampling Results
+#' Print and read resampling results
 #'
-#' Methods for the results of [bootstrap_lsa()], [permute_lsa()] and
-#' [stability_lsa()]. `print()` shows a header summary: the engine, the
-#' number of replicates, the resampling settings, and how many edges are
-#' stable or significant. `as.data.frame()` returns the per-edge table
-#' described under *Value* of the constructor; [transitions()] returns
-#' the same table and adds `significant =` and `sort =` arguments.
+#' @description
+#' `print()` and `as.data.frame()` read the results of [bootstrap_lsa()],
+#' [permute_lsa()] and [stability_lsa()]. `print()` shows a short summary: the
+#' engine, the number of replicates, the resampling settings and how many
+#' transitions are stable or significant (with the number of failed replicates
+#' for a stability result). `as.data.frame()` returns the per-transition table
+#' of the result.
+#'
+#' [transitions()] returns the same table and adds the arguments
+#' `significant` (keep the transitions the method flags) and `sort`
+#' (order by the size of the effect); it is the usual way to read these
+#' results. Results of [certainty_lsa()] use the bootstrap methods.
 #'
 #' @param x An `lsa_bootstrap`, `lsa_permutation` or `lsa_stability`
 #'   object.
-#' @param row.names,optional,... Ignored; present for consistency with
-#'   the generics.
+#' @param row.names,optional Not used; present for consistency with the
+#'   generic.
+#' @param ... Not used.
 #'
 #' @return `print()` returns `x` invisibly. `as.data.frame()` returns a
-#'   `data.frame` with one row per `from -> to` cell: the bootstrap,
-#'   permutation or stability columns listed in [bootstrap_lsa()],
+#'   data frame with one row per transition (`from -> to` pair); its
+#'   columns are listed under *Value* in [bootstrap_lsa()],
 #'   [permute_lsa()] and [stability_lsa()].
 #'
 #' @examples
@@ -25,7 +32,9 @@
 #' st
 #' head(as.data.frame(st))
 #'
-#' @seealso [transitions()]
+#' @seealso [transitions()], [bootstrap_lsa()], [permute_lsa()],
+#'   [stability_lsa()].
+#'
 #' @name lsa-inference-methods
 NULL
 
@@ -65,6 +74,8 @@ print.lsa_stability <- function(x, ...) {
   cat(sprintf("  replicates:    %d\n", x$R))
   cat(sprintf("  proportion:    %.0f%%\n", 100 * x$proportion))
   cat(sprintf("  min stable:    %.0f%%\n", 100 * x$min_stable))
+  cat(sprintf("  failed:        %d of %d replicates\n",
+              x$n_failed %||% 0L, x$R))
   n_stable <- sum(x$edges$stable, na.rm = TRUE)
   cat(sprintf("  stable edges:  %d of %d (>= %.0f%% across replicates)\n",
               n_stable, nrow(x$edges), 100 * x$min_stable))

@@ -21,10 +21,11 @@
                                                           "less"),
                                           n_events = NULL,
                                           ...) {
-  stopifnot(inherits(transitions, "lsa_transitions"))
+  stopifnot("`transitions` must be an `lsa_transitions` object" =
+              inherits(transitions, "lsa_transitions"))
   alternative <- match.arg(alternative)
   if (!is.null(structural_zeros)) {
-    stop("Engine 'nonparallel_dominance' does not support ",
+    .lsa_stop(class = "unsupported_option", "Engine 'nonparallel_dominance' does not support ",
          "structural_zeros. Use engine = 'classical' for ",
          "structural-zero handling.", call. = FALSE)
   }
@@ -34,7 +35,7 @@
   R   <- rowSums(obs)
   C   <- colSums(obs)
   N   <- transitions$n_transitions
-  if (N == 0) stop("No transitions in input.", call. = FALSE)
+  if (N == 0) .lsa_stop(class = "no_transitions", "No transitions in input.", call. = FALSE)
 
   exp_mat <- outer(R, C) / N
 

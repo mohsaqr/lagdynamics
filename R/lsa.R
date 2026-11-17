@@ -2,179 +2,157 @@
 # to the named engine via the registry, and assembles the S3 fit object
 # with stable named slots.
 
-#' Lag Sequential Analysis
+#' Fit a lag sequential analysis model
 #'
-#' Fits a lag sequential analysis (LSA) on categorical event sequence
-#' data using a registered engine. Returns a tidy S3 object with named
-#' slots for observed/expected/probability/residual matrices and a
-#' long-format edge table suitable for transition-network visualization.
+#' @description
+#' `lsa()` fits a lag sequential analysis model to event sequences, wide
+#' sequence tables, transition-count matrices, long event logs, or sequence
+#' objects from other packages. Lag sequential analysis (Sackett, 1979; Bakeman
+#' & Gottman, 1997) tests whether, in a stream of coded events, one state
+#' follows another more or less often than chance predicts.
 #'
-#' @param data Sequence input (any form accepted by [lsa_data()]),
-#'   *or* a raw long-format event-log `data.frame` when the `actor` /
-#'   `action` arguments are supplied (see below). Accepted already-
-#'   sequenced forms include vectors, lists of sequences, wide
-#'   matrices/data.frames, transition-count matrices, and sequence-
-#'   bearing objects (`tna`, `group_tna`, `tna_seq_data`, `tna_data`,
-#'   `nestimate_data`, `netobject`, `stslist`); see [lsa_data()].
-#'   `NA` and empty-string cells are treated as missingness, not as a
-#'   state: they are dropped wherever they occur and no transition is
-#'   counted into or out of them. To model missingness as its own
-#'   state, recode it (e.g. `NA -> "missing"`) before calling `lsa()`.
-#' @param lag Integer. The transition lag. Default `1`. Positive lags
-#'   count successors (state at `t -> t + lag`); negative lags count
-#'   predecessors (what occurred `|lag|` steps before); `0` pairs each
-#'   event with itself (degenerate for single-stream event data --
-#'   genuine co-occurrence needs concurrent codes, not yet supported).
-#'   Pre-computed transition-matrix input supports `lag = 1` only. To
-#'   analyse several lags at once, see [lsa_lags()].
-#' @param engine Character scalar. The engine name, registered via
-#'   [register_lsa_engine()]. Built-in engines: `"classical"`,
-#'   `"two_cell"`, `"bidirectional"`, `"parallel_dominance"`,
-#'   `"nonparallel_dominance"`. Default `"classical"`.
-#' @param alternative Character scalar. The alternative hypothesis for
-#'   adjusted-residual and kappa p-values: one of `"two.sided"`
-#'   (default), `"greater"`, or `"less"`.
-#' @param alpha Numeric. Significance threshold used to mark edges as
-#'   significant (the `significant` column of [transitions()]). Default
-#'   `0.05`.
-#' @param loops Logical. Keep self-transitions (the diagonal)? **Default
-#'   `TRUE`.** Set `loops = FALSE` to forbid every self-transition -- the
-#'   common reason to exclude cells -- without building a matrix by hand.
-#' @param structural_zeros Optional `K x K` 0/1 matrix for an *arbitrary*
-#'   forbidden-cell pattern, where `0` marks a forbidden (structural-zero)
-#'   cell and `1` an estimable one. **Default `NULL`: every cell is part
-#'   of the model.** Combines with `loops`: `loops = FALSE` also zeros the
-#'   diagonal of a supplied matrix. When any cell is forbidden the engine
-#'   switches to iterative proportional fitting and Christensen's
-#'   design-matrix residuals (see `inst/REFERENCES.md`, sections 2.2 and
-#'   4.2).
-#' @param labels Optional character vector of state labels.
-#' @param group Optional grouping for a multi-group fit. Either a vector
-#'   with one entry per input sequence (length `n_sequences`), or --- for
-#'   **long-format** input (see `actor`/`action`) --- the **name of a
-#'   grouping column** in the log, which must be constant within each
-#'   actor/session so each recovered sequence maps to one group. Sequences
-#'   are partitioned by group and a separate `lsa` fit is built for each.
-#'   All group fits share one global label set (derived from the full
-#'   data) so their `K x K` matrices are directly comparable, even when
-#'   a group never visits some state. Returns an `lsa_group` object (a
-#'   named list of `lsa` fits). Requires event-level input; a
-#'   pre-computed transition matrix cannot be split by group. Default
-#'   `NULL` (single-group fit).
-#' @param actor,action,time,order,session Column names (each a single
-#'   string) for **long-format** event-log input. Supplying `action`
-#'   switches `lsa()` into long-format mode: the raw log in `data` is
-#'   sequenced by grouping rows per `actor`, per `session`, per
-#'   `actor x session`, or as one global sequence when neither boundary
-#'   is supplied. Events are ordered within each sequence by `order` if
-#'   given else by `time`, and -- when `time` is given and no `session`
-#'   column is -- a new sequence starts whenever the gap between
-#'   consecutive events exceeds `time_threshold` seconds. All `NULL` by
-#'   default; `action` is required in long-format mode (without it the
-#'   input is taken as already sequenced). See the *Long-format input*
-#'   section for a limit on combining `actor` and `session`.
-#' @param time_threshold Numeric. Maximum gap in seconds between
-#'   consecutive events before a new session is started in long-format
-#'   mode. Default `900` (15 minutes). Ignored unless `time` is given
-#'   and `session` is not.
-#' @param custom_format Optional `strptime` format string for parsing
-#'   the `time` column (e.g. `"%Y-%m-%d %H:%M:%S"`). Default `NULL`
-#'   (native date/time classes and ISO strings are parsed directly).
-#' @param is_unix_time Logical. Treat the `time` column as a Unix
-#'   epoch. Default `FALSE`.
-#' @param unix_time_unit Character. Unit of the Unix epoch when
-#'   `is_unix_time = TRUE`: `"seconds"` (default), `"milliseconds"`, or
-#'   `"microseconds"`.
-#' @param params Optional named list of engine-specific parameters
-#'   forwarded to the engine function.
-#' @param ... Additional engine-specific parameters (merged into
-#'   `params`). For the engine wrappers (`lsa_classical()`,
-#'   `lsa_two_cell()`, `lsa_bidirectional()`, `lsa_parallel_dominance()`,
-#'   `lsa_nonparallel_dominance()`), any argument of `lsa()` other than
-#'   `engine`.
+#' The transitions observed at a given lag are counted into a table of
+#' antecedent (`from`) by consequent (`to`) states; an expected table is derived
+#' under the hypothesis that the two are independent; and each cell is tested
+#' with an adjusted residual (Haberman, 1979), a standard normal deviate that is
+#' positive when the transition is over-represented and negative when it is
+#' avoided. The significant cells define a lag transition network, and the
+#' tablewise likelihood-ratio and Pearson tests show whether there is any
+#' sequential dependence at all. For every cell, `lsa()` estimates the observed
+#' and expected counts, the transition probability, the adjusted residual and
+#' its p-value, Yule's Q, kappa and lift. The `engine` selects the test: the
+#' classical analysis of Bakeman and Quera (1995) by default; a two-cell (2 x 2)
+#' test with odds ratios; Sackett's bidirectional test on the symmetrised table;
+#' or the parallel and non-parallel dominance tests of Sackett (1979) and
+#' Wampold (1984). Self-transitions or any other cells that cannot occur by
+#' construction are declared as structural zeros, and the expected table is then
+#' fitted by iterative proportional fitting (Christensen, 1997). With `group`,
+#' one model is fitted per group on a shared state set so the groups can be
+#' compared.
 #'
-#' @details
-#' The engine wrappers `lsa_classical()`, `lsa_two_cell()`,
-#' `lsa_bidirectional()`, `lsa_parallel_dominance()` and
-#' `lsa_nonparallel_dominance()` are `lsa()` with `engine` fixed to the
-#' matching built-in engine; they return the same object.
+#' It returns an `lsa` object, or with `group` an `lsa_group` object holding one
+#' fit per group.
+#'
+#' The fit is read with [transitions()], [nodes()], [tests()], [initial()]
+#' and [transition_probabilities()], and drawn with [plot.lsa()]. To fit
+#' several lags at once use [lsa_lags()]; to assess the transitions use
+#' [bootstrap_lsa()], [certainty_lsa()] or [permute_lsa()]; to compare
+#' groups use [compare_lsa()]. The engine wrappers `lsa_classical()`,
+#' `lsa_two_cell()`, `lsa_bidirectional()`, `lsa_parallel_dominance()` and
+#' `lsa_nonparallel_dominance()` are `lsa()` with `engine` fixed and return
+#' the same object.
+#'
+#' @param data Sequences in any form accepted by [lsa_data()]: a vector, a
+#'   list of sequences, a wide table (one row per sequence), a square
+#'   transition-count matrix, or a `tna`, `group_tna`, `tna_seq_data`,
+#'   `tna_data`, `nestimate_data`, `netobject` or `stslist` object. With
+#'   `action`, a long event log (one row per event). `NA` and empty
+#'   strings are missing values, not a state; to model missingness as a
+#'   state, recode it first.
+#' @param lag Integer lag (default `1`). Positive lags pair each event with
+#'   the one `lag` steps later, negative lags with the one `|lag|` steps
+#'   earlier. A transition-count matrix supports `lag = 1` only.
+#' @param engine Name of a registered engine (default `"classical"`); the
+#'   built-in engines are listed by [list_lsa_engines()].
+#' @param alternative Alternative hypothesis for the residual and kappa
+#'   p-values: `"two.sided"` (default), `"greater"` or `"less"`.
+#' @param alpha Significance level that flags a transition as significant
+#'   (default `0.05`).
+#' @param loops Keep self-transitions in the model (default `TRUE`).
+#'   `FALSE` declares every self-transition a structural zero.
+#' @param structural_zeros Optional `K x K` 0/1 matrix in which `0` marks a
+#'   transition that cannot occur; default `NULL` (none). Combined with
+#'   `loops = FALSE`, the diagonal is also forbidden. Supported by the
+#'   classical engine.
+#' @param labels Optional character vector of state names. Default `NULL`
+#'   takes them from the data (sorted values of character input).
+#' @param group Optional grouping: one value per sequence, or, with a long
+#'   event log, the name of a column that is constant within each
+#'   sequence. Default `NULL` (one model).
+#' @param actor,action,time,order,session Column names for a long event
+#'   log (all default `NULL`). Supplying `action` (the state column)
+#'   switches to long-format input. Rows are grouped into sequences by
+#'   `actor`, `session`, or both, ordered by `order` or else by `time`.
+#' @param time_threshold Gap in seconds that starts a new sequence when
+#'   `time` is given and `session` is not (default `900`).
+#' @param custom_format Optional `strptime()` format for the `time` column
+#'   (default `NULL`).
+#' @param is_unix_time Read the `time` column as a Unix epoch (default
+#'   `FALSE`).
+#' @param unix_time_unit Unit of the epoch: `"seconds"` (default),
+#'   `"milliseconds"` or `"microseconds"`.
+#' @param params Named list of engine-specific parameters (default
+#'   `list()`).
+#' @param ... Engine-specific parameters, merged into `params`. For the
+#'   engine wrappers, any argument of `lsa()` other than `engine`.
 #'
 #' @section Long-format input:
-#' When both `actor` and `session` are given, each sequence is keyed by
-#' the actor x session combination, built with [interaction()]. That key
-#' is an integer index over the full cross of distinct actors and
-#' distinct sessions, so it overflows once the number of distinct actors
-#' times the number of distinct sessions exceeds `.Machine$integer.max`
-#' (about 2.1e9). The overflowing keys become `NA` and those sequences
-#' are dropped, with only R's warning "NAs produced by integer overflow".
-#' Check that the sequence count reported by `summary(fit)` matches the
-#' number of distinct sessions in the log. When the session identifier is
-#' already unique across actors, pass it as `actor` and leave `session`
-#' `NULL`: no cross is formed and every sequence is kept.
+#' A long event log is turned into sequences before the model is fitted:
+#' one sequence per `actor`, per `session`, or per actor-session pair, or a
+#' single sequence when neither is given. Events are ordered within a
+#' sequence by `order`, or else by `time`; when `time` is given without
+#' `session`, a gap longer than `time_threshold` seconds starts a new
+#' sequence. If the session identifier is already unique across actors,
+#' pass it as `actor` and leave `session` unset. Check the number of
+#' sequences reported by `summary(fit)` against the number expected.
+#'
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and one of:
+#' * `lagdynamics_bad_input`: invalid data, labels, group, structural-zero
+#'   matrix or long-format column.
+#' * `lagdynamics_unknown_engine`: `engine` is not registered.
+#' * `lagdynamics_missing_package`: the engine needs a package that is not
+#'   installed.
+#' * `lagdynamics_no_transitions`: the data contain no transition at the
+#'   requested lag.
+#' * `lagdynamics_unsupported_option`: the engine does not support
+#'   structural zeros.
+#' * `lagdynamics_ipf_infeasible`: the structural zeros leave a state with
+#'   observed transitions but no permitted cell.
+#' * `lagdynamics_needs_events`: `group` was given with a
+#'   transition-count matrix, which cannot be split.
+#'
+#' A warning of class `lagdynamics_structural_zero_counts` is raised when
+#' the data contain transitions in cells declared structural zeros: the
+#' row and column totals then include transitions the model declares
+#' impossible, and the tablewise test and residuals are not interpretable.
 #'
 #' @return An object of class `c("lsa", "cograph_network")`. Read it with
-#' the verbs rather than by reaching into slots: [transitions()] for the
-#' tidy edge table, [nodes()], [tests()], [initial()], and [summary()]
-#' for the other results, and [plot()]/[plot_transitions()] to draw it.
-#' Every number a verb returns is backed by these slots:
-#' \describe{
-#'   \item{edges}{The tidy one-row-per-transition frame that backs
-#'     [transitions()] (with extra `cograph_network` protocol columns).}
-#'   \item{nodes}{Data frame backing [nodes()]: `id, label, name,
-#'     outgoing, incoming`.}
-#'   \item{obs, exp, prob, prob_col, adj_res, p, yules_q, kappa,
-#'     kappa_z, kappa_p}{The same per-cell quantities as `edges`, in
-#'     `K x K` matrix form (`prob` is row-conditional P(to | from),
-#'     `prob_col` column-conditional P(from | to)). Convenient for
-#'     matrix algebra; not the primary interface.}
-#'   \item{lrx2, x2}{Lists `(statistic, df, p)` backing [tests()]: the
-#'     tablewise likelihood-ratio (G^2) and Pearson chi-square tests of
-#'     independence; `NULL` for engines without an expected table.}
-#'   \item{inits}{Named numeric vector backing [initial()] (proportion
-#'     of sequences starting in each state, sums to 1); `NULL` for
-#'     transition-matrix input.}
-#'   \item{weights}{`K x K` matrix used as the default edge weight for
-#'     plotting. Equal to `obs` (counts) by default.}
-#'   \item{directed}{Logical scalar; `TRUE` for directed engines,
-#'     `FALSE` for `bidirectional`.}
-#'   \item{method}{Engine name (the slot the `cograph_network` protocol
-#'     reads). Also recorded in `params$engine`.}
-#'   \item{data}{The canonical `lsa_data` object (events + seq_id).}
-#'   \item{params}{Immutable snapshot of all parameters used (recipe),
-#'     including `params$engine`.}
-#'   \item{meta}{List with source, IPF info, version, and call.}
-#' }
+#'   [transitions()] (one row per `from -> to` pair: `from`, `to`, `lag`,
+#'   `count`, `expected`, `prob`, `prob_col`, `adj_res`, `p`, `yules_q`,
+#'   `kappa`, `kappa_z`, `kappa_p`, `lift`, `sign`, `significant`, plus any
+#'   engine-specific columns), [nodes()] (one row per state), [tests()]
+#'   (one row per tablewise test), [initial()] (one row per state),
+#'   [transition_probabilities()] and `summary()` (see [lsa-methods]).
+#'   The object also stores the per-cell quantities as `K x K` matrices,
+#'   the canonical [lsa_data()] input and the parameters of the call, for
+#'   the inference and plotting functions.
 #'
-#' When `group` is supplied, returns an object of class
-#' `c("lsa_group", "list")`: a named list of `lsa` fits (one per group
-#' level) carrying `levels`, `group_sizes`, `labels`, and `engine`
-#' attributes. Downstream verbs ([transitions()],
-#' [transition_probabilities()], [reliability_lsa()], etc.) dispatch on
-#' it and return grouped results.
+#'   With `group`, an object of class `c("lsa_group", "list")`: one `lsa`
+#'   fit per group level. The reading verbs return the same tables with a
+#'   leading `group` column, and `summary()` returns one row per group.
 #'
 #' @examples
-#' seq <- c("Question", "Explain", "Agree",
-#'          "Question", "Explain", "Elaborate",
-#'          "Agree", "Question", "Explain")
-#' fit <- lsa(seq, engine = "classical")
+#' fit <- lsa(engagement)
 #' fit
-#' transitions(fit)
+#' transitions(fit, significant = TRUE, sort = "strength")
+#' tests(fit)
 #'
-#' # The same model through an engine wrapper
-#' lsa_classical(seq)
+#' # The same model through an engine wrapper, at lag 2
+#' lsa_classical(engagement, lag = 2)
 #'
-#' # Long-format event log with a recorded grouping column
+#' # A long event log, one model per achievement group
 #' gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
 #'             time = "Time", group = "Achiever")
 #' summary(gfit)
 #'
 #' @references
-#' Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
-#' Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
-#'
 #' Bakeman, R., & Gottman, J. M. (1997). \emph{Observing interaction: An
 #' introduction to sequential analysis} (2nd ed.). Cambridge University
 #' Press.
+#'
+#' Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+#' Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
 #'
 #' Christensen, R. (1997). \emph{Log-linear models and logistic
 #' regression} (2nd ed.). Springer.
@@ -189,8 +167,14 @@
 #' Wampold, B. E. (1984). Tests of dominance in sequential categorical
 #' data. \emph{Psychological Bulletin, 96}(2), 424-429.
 #'
-#' @seealso [lsa_data()], [lsa_transitions()], [register_lsa_engine()],
-#'   [list_lsa_engines()]
+#' The formula-by-formula source map is installed with the package at
+#' `system.file("REFERENCES.md", package = "lagdynamics")`.
+#'
+#' @seealso [transitions()], [nodes()], [tests()], [initial()] to read the
+#'   fit; [lsa_lags()] for several lags; [bootstrap_lsa()],
+#'   [permute_lsa()] and [compare_lsa()] for inference; [plot.lsa()];
+#'   [list_lsa_engines()] and [register_lsa_engine()] for engines;
+#'   [lsa_data()] for the accepted input forms.
 #'
 #' @export
 lsa <- function(data,
@@ -216,7 +200,8 @@ lsa <- function(data,
   call <- match.call()
   alternative <- match.arg(alternative)
   stopifnot(
-    is.numeric(alpha), length(alpha) == 1L, alpha > 0, alpha < 1
+    "`alpha` must be a single number in (0, 1)" =
+      is.numeric(alpha) && length(alpha) == 1L && alpha > 0 && alpha < 1
   )
 
   # Long-format mode: a raw event log is sequenced into a list of event
@@ -229,7 +214,7 @@ lsa <- function(data,
     long_group <- NULL
     if (!is.null(group)) {
       if (!is.character(group) || length(group) != 1L) {
-        stop("With long-format input, `group` must be the name of a ",
+        .lsa_stop("With long-format input, `group` must be the name of a ",
              "grouping column in the log (a single string).",
              call. = FALSE)
       }
@@ -287,12 +272,77 @@ lsa <- function(data,
     params
   ))
 
+  # After the engine: an engine that rejects structural zeros errors first.
+  .warn_structural_zero_counts(tx$obs, structural_zeros)
+
   .build_lsa_object(
     result = result, data = d,
     engine = engine, params = params, alpha = alpha,
     structural_zeros = structural_zeros, alternative = alternative,
     lag = lag, call = call
   )
+}
+
+# Convenience wrappers. Each one pins a specific engine. They live here,
+# after lsa(), so the shared help topic is named "lsa".
+
+#' @rdname lsa
+#' @export
+lsa_classical <- function(data, ...) {
+  lsa(data, engine = "classical", ...)
+}
+
+#' @rdname lsa
+#' @export
+lsa_two_cell <- function(data, ...) {
+  lsa(data, engine = "two_cell", ...)
+}
+
+#' @rdname lsa
+#' @export
+lsa_bidirectional <- function(data, ...) {
+  lsa(data, engine = "bidirectional", ...)
+}
+
+#' @rdname lsa
+#' @export
+lsa_parallel_dominance <- function(data, ...) {
+  lsa(data, engine = "parallel_dominance", ...)
+}
+
+#' @rdname lsa
+#' @export
+lsa_nonparallel_dominance <- function(data, ...) {
+  lsa(data, engine = "nonparallel_dominance", ...)
+}
+
+# Structural zeros declare cells that cannot occur. When the data contain
+# transitions in such cells, the row and column totals still include them
+# while the expected counts are forced to 0, so the tablewise G^2 and the
+# residuals of the remaining cells are not interpretable (G^2 can even be
+# negative). How such counts should be handled (merge repeated codes, drop
+# the forbidden transitions, or refuse) is an open design decision; until
+# it is made, the fit warns with a classed condition.
+.warn_structural_zero_counts <- function(obs, structural_zeros) {
+  if (is.null(structural_zeros)) return(invisible(NULL))
+  forbidden <- structural_zeros == 0 & obs > 0
+  if (!any(forbidden)) return(invisible(NULL))
+  cells <- which(forbidden, arr.ind = TRUE)
+  labels <- rownames(obs)
+  shown <- utils::head(sprintf("%s -> %s (%d)", labels[cells[, 1L]],
+                               labels[cells[, 2L]],
+                               as.integer(obs[forbidden])), 5L)
+  warning(warningCondition(
+    sprintf(paste0(
+      "%d transitions fall in cells declared structural zeros: %s%s. ",
+      "The marginal totals include them, so the tablewise test and the ",
+      "residuals are not interpretable. Remove or merge these transitions ",
+      "(for example, collapse repeated codes) before declaring the cells ",
+      "impossible."),
+      as.integer(sum(obs[forbidden])), paste(shown, collapse = ", "),
+      if (sum(forbidden) > 5L) ", ..." else ""),
+    class = "lagdynamics_structural_zero_counts", call = NULL))
+  invisible(NULL)
 }
 
 # Resolve the structural-zeros spec to a K x K 0/1 matrix (or NULL when
@@ -304,7 +354,7 @@ lsa <- function(data,
   if (is.null(structural_zeros) && isTRUE(loops)) return(NULL)
   m <- if (is.null(structural_zeros)) matrix(1, K, K) else structural_zeros
   if (!is.matrix(m) || nrow(m) != K || ncol(m) != K) {
-    stop(sprintf("`structural_zeros` must be a %d x %d 0/1 matrix.", K, K),
+    .lsa_stop(sprintf("`structural_zeros` must be a %d x %d 0/1 matrix.", K, K),
          call. = FALSE)
   }
   if (!isTRUE(loops)) diag(m) <- 0
@@ -323,7 +373,7 @@ lsa <- function(data,
                          call, ...) {
   d <- lsa_data(data, labels = labels)
   if (!identical(d$source, "events")) {
-    stop("Grouped lsa() requires event-level sequence data; a ",
+    .lsa_stop(class = "needs_events", "Grouped lsa() requires event-level sequence data; a ",
          "pre-computed transition matrix cannot be split by group.",
          call. = FALSE)
   }
@@ -365,62 +415,78 @@ lsa <- function(data,
 # fits and prints never carry a zero-sequence group.
 .resolve_group <- function(group, S) {
   if (length(group) != S) {
-    stop(sprintf(
+    .lsa_stop(sprintf(
       paste0("`group` must have one entry per sequence: got length %d ",
              "but the data has %d sequences."),
       length(group), S), call. = FALSE)
   }
   if (anyNA(group)) {
-    stop("`group` must not contain NA.", call. = FALSE)
+    .lsa_stop("`group` must not contain NA.", call. = FALSE)
   }
   g <- if (is.factor(group)) droplevels(group) else as.factor(group)
   g
 }
 
-#' Print, Summarise and Tidy an LSA Fit
+#' Print, summarise and tidy a lag sequential analysis fit
 #'
-#' Methods for the objects returned by [lsa()]. `print()` gives a compact
-#' model overview: engine, sizes, the tablewise independence test, the
-#' strongest over-represented transitions, and the initial-state
-#' distribution. `summary()` prints that overview followed by the node
-#' activity and the observed, expected, probability and residual matrices,
-#' and returns a one-row tidy overview. `as.data.frame()` returns the full
-#' edge table, including the integer ids and `cograph_network` protocol
-#' columns that [transitions()] leaves out. `nobs()` is the number of
-#' transitions the model was fitted to.
+#' @description
+#' `print()`, `summary()`, `as.data.frame()` and `nobs()` describe a fitted lag
+#' sequential analysis, an `lsa` object from [lsa()]. A fit has three levels of
+#' description: the model as a whole (its size and the tablewise test of
+#' independence), the states (how often each is left and entered, and how often
+#' a sequence starts in it), and the individual transitions. These methods give
+#' the first two levels; [transitions()] gives the third.
 #'
-#' For reading results, prefer the verbs: [transitions()] for the
-#' per-transition table, [nodes()], [tests()] and [initial()] for the
-#' other parts of the fit.
+#' `print()` shows a compact overview: the engine and lag, the numbers of
+#' states, transitions, events and sequences, the likelihood-ratio test of
+#' independence, the strongest over-represented transitions and the
+#' initial-state distribution. `summary()` returns a `summary.lsa` object
+#' holding two tables, a one-row overview of the fit and one row per state,
+#' which are read with `as.data.frame(summary(fit), what = )`. For a
+#' grouped fit, `summary()` returns one overview row per group.
+#' `as.data.frame()` on a fit returns the full edge table, including the
+#' integer state ids and the network columns that [transitions()] leaves
+#' out. `nobs()` is the number of transitions the model was fitted to.
 #'
-#' @param x,object An `lsa` fit from [lsa()], or (for the `lsa_group`
-#'   methods) a grouped fit from `lsa(..., group = )`.
-#' @param row.names Optional row names for the returned data frame
-#'   (`as.data.frame.lsa()` only); ignored by the grouped method.
+#' For the per-transition, per-state and per-test tables, prefer the
+#' reading verbs [transitions()], [nodes()], [tests()] and [initial()].
+#'
+#' @param x,object An `lsa` fit from [lsa()], or a grouped fit from
+#'   `lsa(..., group = )`. For `print()` and `as.data.frame()` on a
+#'   summary, a `summary.lsa` object.
+#' @param row.names Optional row names for the returned data frame;
+#'   ignored by the grouped method.
 #' @param optional Ignored; present for consistency with the generic.
 #' @param ... Ignored.
 #'
 #' @return
 #' * `print()` returns `x` invisibly.
-#' * `summary.lsa()` prints the extended view and returns, invisibly, a
-#'   one-row `data.frame` with columns `engine`, `lag`, `n_states`,
-#'   `n_sequences`, `n_events`, `n_transitions`, `n_significant`,
-#'   `alpha`, `lrx2`, `lrx2_df`, `lrx2_p`, `x2`, `x2_df`, `x2_p`
-#'   (`NA` where the engine computed no tablewise test or the input was a
-#'   transition matrix).
-#' * `summary.lsa_group()` returns that frame visibly with one row per
-#'   group and a leading `group` column; it prints nothing else.
-#' * `as.data.frame.lsa()` returns a `data.frame` with one row per
-#'   `from -> to` cell: integer `from`/`to` ids, `from_label`, `to_label`,
-#'   the statistic columns of [transitions()], and the protocol columns
-#'   `edge` and `weight`. `as.data.frame.lsa_group()` stacks these with a
-#'   leading `group` column.
+#' * `summary()` on an `lsa` fit returns an object of class `summary.lsa`
+#'   holding two tables. The overview has one row and the columns
+#'   `engine`, `lag`, `n_states`, `n_sequences`, `n_events`,
+#'   `n_transitions`, `n_significant`, `alpha`, `lrx2`, `lrx2_df`,
+#'   `lrx2_p`, `x2`, `x2_df`, `x2_p` (`NA` where the engine computed no
+#'   tablewise test or the input was a transition matrix). The node table
+#'   has one row per state and the columns `state`, `outgoing`,
+#'   `incoming`, `out_share`, `in_share`, `init_prob`. Read them with
+#'   `as.data.frame(s)` and `as.data.frame(s, what = "nodes")`.
+#' * `summary()` on a grouped fit returns a `data.frame` with one row per
+#'   group: a leading `group` column followed by the overview columns.
+#' * `as.data.frame()` on an `lsa` fit returns a `data.frame` with one row
+#'   per `from -> to` cell: integer `from` and `to` ids, `from_label`,
+#'   `to_label`, the statistic columns of [transitions()], and the network
+#'   columns `edge` and `weight`. On a grouped fit the tables are stacked
+#'   under a leading `group` column.
+#' * `as.data.frame()` on a summary returns the overview or the node table.
 #' * `nobs()` returns a single number, the total transition count.
 #'
 #' @examples
 #' fit <- lsa(engagement)
-#' print(fit)
-#' summary(fit)
+#' fit
+#' s <- summary(fit)
+#' s
+#' as.data.frame(s)
+#' as.data.frame(s, what = "nodes")
 #' nobs(fit)
 #' head(as.data.frame(fit))
 #'
@@ -429,7 +495,8 @@ lsa <- function(data,
 #' gfit
 #' summary(gfit)
 #'
-#' @seealso [lsa()], [transitions()]
+#' @seealso [lsa()]; [transitions()], [nodes()], [tests()] and [initial()]
+#'   for the reading verbs.
 #' @name lsa-methods
 NULL
 

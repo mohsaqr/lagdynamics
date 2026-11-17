@@ -6,83 +6,103 @@
 \alias{lagdynamics-package}
 \title{lagdynamics: Lag Sequential Analysis, Dynamics, and Lag Transition Networks}
 \description{
-A unified, pipe-friendly interface for lag sequential analysis (LSA) of
-categorical event sequences. Provides classical, two-cell,
-bidirectional, parallel-dominance, and non-parallel-dominance engines
-via a single \code{\link[=lsa]{lsa()}} constructor with a pluggable engine registry,
-sequence-level bootstrap and permutation inference, case-drop
-stability, and tidy edge tables ready for transition-network
-visualization.
+\code{lagdynamics} fits lag sequential analysis models, reads them as lag
+transition networks, and assesses, compares and plots them. Lag sequential
+analysis (LSA; Sackett, 1979; Bakeman & Gottman, 1997) tests whether, in a
+stream of coded events, one behaviour follows another more or less often than
+chance would predict.
+
+The observed transitions at a given lag are counted into a contingency table
+of antecedent by consequent states, an expected table is derived under the
+hypothesis that the two are independent, and each cell is tested with an
+adjusted residual (Haberman, 1979). The cells that depart from independence
+form a lag transition network: a directed graph whose edges are the over- and
+under-represented sequential contingencies.
+
+The model is fitted with one constructor, \code{\link[=lsa]{lsa()}}, which accepts event
+sequences, wide sequence tables, transition-count matrices, long event logs
+and sequence objects from \pkg{tna}, \pkg{Nestimate} and \pkg{TraMineR}.
+Results are read with verbs that return tidy data frames, assessed with
+resampling and analytic inference, compared across groups, and drawn as
+heatmaps, networks, chord diagrams and polar displays.
+
+The documentation site, with tutorials and case studies, is at
+\url{https://pak.dynasite.org/lagdynamics/}.
 }
-\section{Design principles}{
+\section{Workflow}{
 
-
-Numerical methods are implemented from primary literature and
-cross-validated against base-R primitives and hand-formula identities
-(\code{\link[stats:loglin]{stats::loglin()}}, \code{\link[stats:chisq.test]{stats::chisq.test()}}, \code{\link[stats:Chisquare]{stats::pchisq()}}). See the
-\code{inst/REFERENCES.md} file shipped with the package for the
-formula-by-formula citation map.
-
-The package returns S3 objects of class \code{c("lsa", "cograph_network")},
-which means fits inherit compatibility with the \code{cograph} package's
-visualization layer when it is installed.
+\enumerate{
+\item \strong{Fit} a model with \code{\link[=lsa]{lsa()}}: choose the lag, the engine (the
+classical test of Bakeman & Quera, 1995, or the two-cell,
+bidirectional and dominance tests of Sackett, 1979, and Wampold,
+1984), and any structurally forbidden transitions. A \code{group}
+argument fits one model per group on a shared state set.
+\item \strong{Read} the fit with \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}}, \code{\link[=tests]{tests()}},
+\code{\link[=initial]{initial()}}, \code{\link[=transition_probabilities]{transition_probabilities()}} and \code{summary()}.
+\item \strong{Evaluate} how far the transitions can be trusted:
+\code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=certainty_lsa]{certainty_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}},
+\code{\link[=stability_lsa]{stability_lsa()}} and \code{\link[=reliability_lsa]{reliability_lsa()}}.
+\item \strong{Compare} groups with \code{\link[=compare_lsa]{compare_lsa()}} (permutation test) or
+\code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} (Dirichlet-multinomial posterior).
+\item \strong{Plot} the fit or a comparison: \code{\link[=plot.lsa]{plot.lsa()}}, \code{\link[=plot_transitions]{plot_transitions()}},
+\code{\link[=plot_chords]{plot_chords()}}, \code{\link[=plot_polar]{plot_polar()}}, \code{\link[=plot_forest]{plot_forest()}} and
+\code{\link[=plot.lsa_comparison]{plot.lsa_comparison()}}.
+\item \strong{Go beyond LSA} with multi-lag profiles (\code{\link[=lsa_lags]{lsa_lags()}},
+\code{\link[=lag_profile]{lag_profile()}}), directed transfer entropy (\code{\link[=transfer_entropy]{transfer_entropy()}}) and
+Transition Network Analysis through \code{\link[=lsa_to_tna]{lsa_to_tna()}}.
 }
-
-\section{Main functions}{
-
-
-Construction: \code{\link[=lsa]{lsa()}} (sequences, wide tables, transition matrices,
-long event logs and \code{tna} / \code{Nestimate} / \code{TraMineR} objects),
-\code{\link[=lsa_data]{lsa_data()}}, \code{\link[=lsa_transitions]{lsa_transitions()}}, and the multi-lag \code{\link[=lsa_lags]{lsa_lags()}} and
-\code{\link[=lag_profile]{lag_profile()}}.
-
-Engine wrappers: \code{lsa_classical()}, \code{lsa_two_cell()},
-\code{lsa_bidirectional()}, \code{lsa_parallel_dominance()},
-\code{lsa_nonparallel_dominance()} (documented with \code{\link[=lsa]{lsa()}}).
-
-Engine registry: \code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}},
-\code{\link[=list_lsa_engines]{list_lsa_engines()}}, \code{\link[=unregister_lsa_engine]{unregister_lsa_engine()}}.
-
-Reading a fit (tidy data frames): \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}},
-\code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}}, and \code{summary()} (see \link{lsa-methods}).
-\code{\link[=transition_probabilities]{transition_probabilities()}} returns the row-stochastic
-transition-probability matrix.
-
-Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}}, \code{\link[=stability_lsa]{stability_lsa()}},
-\code{\link[=reliability_lsa]{reliability_lsa()}}, and analytic certainty via \code{\link[=certainty_lsa]{certainty_lsa()}}.
-Every result is read with \code{\link[=transitions]{transitions()}}.
-
-Group comparison: \code{\link[=compare_lsa]{compare_lsa()}} (permutation) and
-\code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}} (Dirichlet-Multinomial) for between-group
-differences in transition structure, on a grouped fit from
-\code{lsa(data, group = )}.
-
-Plotting: \code{\link[=plot.lsa]{plot.lsa()}} (heatmap, network, chord, sunburst),
-\code{\link[=plot_transitions]{plot_transitions()}}, \code{\link[=plot_chords]{plot_chords()}}, \code{\link[=plot_polar]{plot_polar()}},
-\code{\link[=plot_forest]{plot_forest()}}, and \code{\link[=plot.lsa_comparison]{plot.lsa_comparison()}}.
-
-Other: \code{\link[=transfer_entropy]{transfer_entropy()}} (directed information flow, experimental),
-\code{\link[=lsa_ipf]{lsa_ipf()}} (iterative proportional fitting for structural zeros),
-and \code{\link[=lsa_to_tna]{lsa_to_tna()}} (hand a fit to the \code{tna} package).
-
-Data: \link{engagement}, \link{group_regulation}, \link{group_regulation_long},
-\link{ai_long}.
 }
 
-\section{Roadmap (not yet implemented)}{
+\section{Functions by task}{
 
+\itemize{
+\item Fitting: \code{\link[=lsa]{lsa()}} and its engine wrappers \code{lsa_classical()},
+\code{lsa_two_cell()}, \code{lsa_bidirectional()}, \code{lsa_parallel_dominance()},
+\code{lsa_nonparallel_dominance()}; \code{\link[=lsa_lags]{lsa_lags()}}.
+\item Input: \code{\link[=lsa_data]{lsa_data()}} (canonical sequences), \code{\link[=lsa_transitions]{lsa_transitions()}}
+(transition counts at a lag), \code{\link[=lsa_ipf]{lsa_ipf()}} (expected counts with
+structural zeros).
+\item Reading: \code{\link[=transitions]{transitions()}}, \code{\link[=nodes]{nodes()}}, \code{\link[=tests]{tests()}}, \code{\link[=initial]{initial()}},
+\code{\link[=transition_probabilities]{transition_probabilities()}}, \code{\link[=lag_profile]{lag_profile()}}, and the \code{print()},
+\code{summary()} and \code{as.data.frame()} methods in \link{lsa-methods}.
+\item Inference: \code{\link[=bootstrap_lsa]{bootstrap_lsa()}}, \code{\link[=certainty_lsa]{certainty_lsa()}}, \code{\link[=permute_lsa]{permute_lsa()}},
+\code{\link[=stability_lsa]{stability_lsa()}}, \code{\link[=reliability_lsa]{reliability_lsa()}}; every result is read with
+\code{\link[=transitions]{transitions()}} or \code{as.data.frame()}.
+\item Group comparison: \code{\link[=compare_lsa]{compare_lsa()}}, \code{\link[=bayes_compare_lsa]{bayes_compare_lsa()}}.
+\item Plotting: \code{\link[=plot.lsa]{plot.lsa()}}, \code{\link[=plot_transitions]{plot_transitions()}}, \code{\link[=plot_chords]{plot_chords()}},
+\code{\link[=plot_polar]{plot_polar()}}, \code{\link[=plot_forest]{plot_forest()}}, \code{\link[=plot.lsa_comparison]{plot.lsa_comparison()}}.
+\item Engines: \code{\link[=list_lsa_engines]{list_lsa_engines()}}, \code{\link[=get_lsa_engine]{get_lsa_engine()}},
+\code{\link[=register_lsa_engine]{register_lsa_engine()}}, \code{\link[=unregister_lsa_engine]{unregister_lsa_engine()}}.
+\item Other: \code{\link[=transfer_entropy]{transfer_entropy()}}, \code{\link[=lsa_to_tna]{lsa_to_tna()}}.
+}
+}
 
-Stationarity tests (\code{stationarity_lsa()}) are planned but not yet
-exported.
+\section{Data}{
+
+\link{engagement} (engagement states of 138 students over 15 time points),
+\link{group_regulation} and \link{group_regulation_long} (collaborative regulation
+actions, as a wide sequence table and as a long event log), and
+\link{ai_long} (coded AI behaviours in human-AI programming sessions).
+}
+
+\section{Formulas and sources}{
+
+Each formula the package implements is listed with its primary source,
+page and equation number in the file \code{REFERENCES.md} installed with the
+package; its location is given by
+\code{system.file("REFERENCES.md", package = "lagdynamics")}.
+
+Fits are objects of class \code{c("lsa", "cograph_network")}, so the network
+functions of \pkg{cograph} accept them directly.
 }
 
 \references{
-Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
-Sequential analysis}. Cambridge University Press.
-
 Bakeman, R., & Gottman, J. M. (1997). \emph{Observing interaction: An
 introduction to sequential analysis} (2nd ed.). Cambridge University
 Press.
+
+Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
+Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
 
 Christensen, R. (1997). \emph{Log-linear models and logistic
 regression} (2nd ed.). Springer.
@@ -94,10 +114,6 @@ Sackett, G. P. (1979). The lag sequential analysis of contingency and
 cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
 \emph{Handbook of infant development} (pp. 623-649). Wiley.
 
-Wampold, B. E. (1982). Sequential analysis: Stationarity, statistical
-procedures, and applications. \emph{Psychological Bulletin, 92}(2),
-380-387.
-
 Wampold, B. E. (1984). Tests of dominance in sequential categorical
 data. \emph{Psychological Bulletin, 96}(2), 424-429.
 
@@ -105,19 +121,16 @@ Wickens, T. D. (1989). \emph{Multiway contingency tables analysis for
 the social sciences}. Lawrence Erlbaum.
 }
 \seealso{
-Useful links:
-\itemize{
-  \item \url{https://github.com/mohsaqr/lagdynamics}
-  \item Report bugs at \url{https://github.com/mohsaqr/lagdynamics/issues}
-}
-
+\code{\link[=lsa]{lsa()}} to start; \url{https://pak.dynasite.org/lagdynamics/} for
+the tutorials.
 }
 \author{
-\strong{Maintainer}: Mohammed Saqr \email{saqr@saqr.me} [copyright holder]
+\strong{Maintainer}: Mohammed Saqr \email{saqr@saqr.me} (\href{https://orcid.org/0000-0001-5881-3109}{ORCID}) [copyright holder]
 
 Authors:
 \itemize{
-  \item Sonsoles López-Pernas
+  \item Mohammed Saqr \email{saqr@saqr.me} (\href{https://orcid.org/0000-0001-5881-3109}{ORCID}) [copyright holder]
+  \item Sonsoles López-Pernas (\href{https://orcid.org/0000-0002-9621-1392}{ORCID})
 }
 
 }

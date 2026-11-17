@@ -15,7 +15,7 @@ test_that("plot.lsa builds a heatmap for each matrix", {
 
 test_that("plot.lsa tolerates structural-zero (NA) cells", {
   skip_if_not_installed("ggplot2")
-  fit <- lsa(engagement, structural_zeros = 1 - diag(3))
+  fit <- lsa_forbidden_counts(engagement, structural_zeros = 1 - diag(3))
   tmp <- tempfile(fileext = ".png")
   grDevices::png(tmp, width = 500, height = 500)
   on.exit({ grDevices::dev.off(); unlink(tmp) }, add = TRUE)

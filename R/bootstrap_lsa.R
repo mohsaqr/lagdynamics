@@ -7,112 +7,115 @@
 # structural_zeros). No config drift possible between the original
 # fit and its bootstrap.
 
-#' Bootstrap Confidence Intervals for an LSA Fit
+#' Estimate bootstrap confidence intervals for transitions
 #'
-#' Non-parametric bootstrap for any LSA fit produced by [lsa()].
-#' Resamples the underlying sequence data (whole sequences when more
-#' than one is available; geometric-block stationary bootstrap on
-#' events otherwise), refits the engine on each resample using the
-#' immutable recipe stored in `fit$params`, and aggregates per-edge
-#' statistics into a tidy data frame.
+#' @description
+#' `bootstrap_lsa()` estimates bootstrap confidence intervals for the
+#' transitions of a fit from [lsa()]: it resamples the sequences behind the fit
+#' and refits it with the same engine, lag, alternative, significance level and
+#' structural zeros. The non-parametric bootstrap (Efron, 1979) estimates how
+#' much the count, transition probability, adjusted residual and Yule's Q of
+#' each transition, all estimated from one sample of sequences, would vary over
+#' repeated samples from the same population: it draws many resamples of the
+#' data, refits the model on each, and uses the spread of the refitted values as
+#' the sampling distribution. A transition whose residual interval excludes zero
+#' is over- or under-represented in a way that survives resampling, not only in
+#' the sample at hand.
 #'
-#' @param fit An `lsa` object returned by [lsa()].
-#' @param R Integer. Number of bootstrap replicates. Default `1000`.
-#' @param level Character. Resampling unit: `"auto"` (default) picks
-#'   `"sequence"` when the fit has more than one sequence and `"event"`
-#'   otherwise; `"sequence"` resamples whole sequences with replacement;
-#'   `"event"` runs a stationary block bootstrap on the event stream.
-#' @param block_length For event-level bootstrap, mean geometric
-#'   block length. Default `NULL` -> `ceiling(sqrt(T))`.
-#' @param level_alpha Numeric. Confidence level for percentile
-#'   intervals. Default `0.95`.
-#' @param indices Optional integer matrix of replay indices, one row
-#'   per resample (row `b` is used for resample `b`). For sequence-level
-#'   bootstrap it must be `R x S` with each entry a sequence index in
-#'   `1..S`. For event-level bootstrap it is `R x T` with each entry an
-#'   event position in `1..T` (the fully expanded positions, not block
-#'   starts). When supplied, replaces internal RNG and enables
-#'   bit-identical reproducibility across runs. Dimensions and ranges
-#'   are validated. See Details.
-#' @param parallel Logical. Use multi-core resampling. Default
-#'   `FALSE`. Requires base R only (`parallel` package).
-#' @param n_cores Integer. Worker count when `parallel = TRUE`.
-#'   Default `NULL` -> `parallel::detectCores() - 1`.
-#' @param verbose Logical. Print progress every 100 replicates.
-#'   Default `FALSE`.
-#' @param ... Reserved for future use.
+#' With two or more sequences, whole sequences are drawn with replacement, which
+#' keeps the dependence between events of one sequence intact. A single sequence
+#' is resampled with the stationary block bootstrap (Politis & Romano, 1994),
+#' which draws blocks of consecutive events of random length. For every
+#' transition it returns the bootstrap mean, standard error and percentile
+#' interval of the count, the transition probability, the adjusted residual and
+#' Yule's Q, a two-sided bootstrap p-value for the residual, and a flag for
+#' transitions whose residual interval excludes zero.
 #'
-#' @details
-#' **Sequence-level resampling (default for multi-sequence input).**
-#' Each resample draws `S` sequence indices with replacement from
-#' `seq_len(S)` and rebuilds the multi-sequence input as the
-#' corresponding list of event vectors. Preserves within-sequence
-#' structure.
+#' For an interval on transition probabilities without resampling, use
+#' [certainty_lsa()]; it is exact under a Dirichlet-Multinomial model but
+#' ignores dependence between the transitions of one sequence. For a
+#' p-value against the null hypothesis of no sequential structure, use
+#' [permute_lsa()]; for the share of subsamples in which a transition
+#' stays significant, use [stability_lsa()].
 #'
-#' **Event-level resampling (single-sequence input).** Implements
-#' the stationary block bootstrap of Politis & Romano (1994). Block
-#' length is geometric with mean `block_length`; resampled blocks
-#' wrap around the event stream and are concatenated until total
-#' length equals the original `T`.
+#' @param fit An `lsa` fit from [lsa()], built from sequences (not from a
+#'   transition matrix).
+#' @param R Number of bootstrap resamples. Default `1000`.
+#' @param level Resampling unit: `"auto"` (default; `"sequence"` when the
+#'   fit has two or more sequences, `"event"` otherwise), `"sequence"`
+#'   (whole sequences with replacement) or `"event"` (stationary block
+#'   bootstrap of the event stream). A single sequence always uses
+#'   `"event"`, with a warning.
+#' @param block_length Mean block length for `level = "event"`. Default
+#'   `NULL`, the square root of the number of events, rounded up.
+#' @param level_alpha Confidence level of the percentile intervals.
+#'   Default `0.95`.
+#' @param indices Optional matrix of resampling indices to replay, one row
+#'   per resample: `R` x number of sequences (sequence indices) for
+#'   `level = "sequence"`, or `R` x number of events (event positions) for
+#'   `level = "event"`. Default `NULL` draws them at random.
+#' @param parallel Run the resamples on several cores. Default `FALSE`.
+#' @param n_cores Number of cores when `parallel = TRUE`. Default `NULL`,
+#'   all cores but one.
+#' @param verbose Report progress every 100 resamples. Default `FALSE`.
+#' @param ... Not used.
 #'
-#' **Reproducibility hook.** Supply `indices` as an `R x S` integer
-#' matrix of sequence indices (sequence-level) or an `R x T` matrix of
-#' event positions (event-level) to deterministically replay the
-#' bootstrap across sessions, processes, or languages. The event-level
-#' matrix holds the fully expanded resampled positions, i.e. the same
-#' form produced internally, so a captured `indices_used` can be fed
-#' straight back in.
+#' @return An object of class `c("lsa_bootstrap", "list")`. Read it with
+#'   [transitions()], which returns a data frame with one row per
+#'   transition (`from -> to` pair) and the columns:
+#'   * `from`, `to`: source and target state.
+#'   * `observed`: the observed count; `count_mean`, `count_se`,
+#'     `count_ci_low`, `count_ci_high`: its bootstrap mean, standard
+#'     error and interval.
+#'   * `adj_res_observed`, `adj_res_mean`, `adj_res_se`, `adj_res_ci_low`,
+#'     `adj_res_ci_high`: the same for the adjusted residual;
+#'     `adj_res_p_boot`: two-sided bootstrap p-value of the residual;
+#'     `adj_res_stable`: `TRUE` when the residual interval excludes zero.
+#'   * `prob_observed`, `prob_mean`, `prob_ci_low`, `prob_ci_high`: the
+#'     transition probability.
+#'   * `yules_q_observed`, `yules_q_mean`, `yules_q_ci_low`,
+#'     `yules_q_ci_high`: Yule's Q.
 #'
-#' **NA handling.** Per-cell summary statistics (`mean`, `se`,
-#' `ci_low`, `ci_high`, `p_boot`) are computed with `na.rm = TRUE`,
-#' so replicates that produced `NA` for a given cell (for example
-#' structural-zero cells, or cells whose row marginal collapsed to
-#' zero in the resampled data) are excluded from that cell's
-#' summary. The summary therefore reflects only the finite
-#' replicates; cells whose every replicate was `NA` come back as
-#' `NA` themselves.
+#'   `transitions(x, significant = TRUE)` keeps the transitions with
+#'   `adj_res_stable = TRUE`; `sort = "strength"` orders by the absolute
+#'   observed residual. `print()` shows the settings and the number of
+#'   stable transitions (see [lsa-inference-methods]); [plot_forest()]
+#'   draws the intervals. The object also stores the per-resample
+#'   matrices, the settings, the resampling indices used (which can be
+#'   passed back as `indices`) and the original fit.
 #'
-#' @return An object of class `c("lsa_bootstrap", "list")`. Read the
-#' per-edge table with [transitions()]; see [lsa-inference-methods] for
-#' `print()` and `as.data.frame()`. Elements:
-#' \describe{
-#'   \item{edges}{Tidy data frame, one row per `from -> to` cell:
-#'     `from`, `to`, `observed` (observed count); `count_mean`,
-#'     `count_se`, `count_ci_low`, `count_ci_high`;
-#'     `adj_res_observed`, `adj_res_mean`, `adj_res_se`,
-#'     `adj_res_ci_low`, `adj_res_ci_high`, the two-sided bootstrap
-#'     p-value `adj_res_p_boot`, and `adj_res_stable` (`TRUE` when the
-#'     residual interval excludes zero); `prob_observed`, `prob_mean`,
-#'     `prob_ci_low`, `prob_ci_high`; and `yules_q_observed`,
-#'     `yules_q_mean`, `yules_q_ci_low`, `yules_q_ci_high`.}
-#'   \item{boot_obs, boot_adj_res, boot_prob, boot_yulesq}{`R x K^2`
-#'     numeric matrices of the per-replicate counts, adjusted residuals,
-#'     transition probabilities and Yule's Q (cells in `as.vector(obs)`
-#'     order).}
-#'   \item{R, level, level_alpha, indices_used}{Recipe metadata;
-#'     `indices_used` is the replay matrix accepted by `indices`.}
-#'   \item{fit}{The original fit.}
-#' }
+#' @section Conditions:
+#' Errors carry the class `lagdynamics_error` and one of:
+#' * `lagdynamics_needs_events`: the fit was built from a transition
+#'   matrix, so there are no sequences to resample.
+#' * `lagdynamics_bad_input`: `indices` is not a matrix of whole numbers
+#'   with at least `R` rows, the expected number of columns and values in
+#'   range, or `block_length` is not a single number of at least 1.
 #'
 #' @examples
-#' fit <- lsa(engagement, engine = "classical")
+#' fit <- lsa(engagement)
 #' bs <- bootstrap_lsa(fit, R = 100)
 #' bs
-#' transitions(bs, significant = TRUE)
+#' transitions(bs, significant = TRUE, sort = "strength")
 #' \donttest{
-#' # A full analysis uses more replicates
-#' transitions(bootstrap_lsa(fit, R = 1000), sort = "strength")
+#' # A full analysis uses more resamples
+#' bootstrap_lsa(fit, R = 1000) |>
+#'   transitions(sort = "strength") |>
+#'   head()
 #' }
 #'
 #' @references
-#' Efron, B. (1979). Bootstrap methods: another look at the
-#' jackknife. \emph{Annals of Statistics}, 7(1), 1-26.
+#' Efron, B. (1979). Bootstrap methods: Another look at the jackknife.
+#' \emph{The Annals of Statistics, 7}(1), 1-26.
 #'
 #' Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap.
-#' \emph{Journal of the American Statistical Association}, 89(428),
+#' \emph{Journal of the American Statistical Association, 89}(428),
 #' 1303-1313.
 #'
-#' @seealso [permute_lsa()], [stability_lsa()]
+#' @seealso [transitions()] to read the result; [plot_forest()] to draw
+#'   the intervals; [certainty_lsa()] for analytic intervals;
+#'   [permute_lsa()], [stability_lsa()] and [reliability_lsa()] for other
+#'   checks of a fit; [compare_lsa()] to compare groups.
 #'
 #' @export
 bootstrap_lsa <- function(fit,
@@ -125,18 +128,24 @@ bootstrap_lsa <- function(fit,
                           n_cores = NULL,
                           verbose = FALSE,
                           ...) {
-  stopifnot(inherits(fit, "lsa"))
-  stopifnot(is.numeric(R), length(R) == 1L, is.finite(R),
-            R >= 1L, R == floor(R))
-  stopifnot(is.numeric(level_alpha), length(level_alpha) == 1L,
-            is.finite(level_alpha), level_alpha > 0, level_alpha < 1)
+  stopifnot("`fit` must be an `lsa` fit from lsa()" = inherits(fit, "lsa"))
+  stopifnot(
+    "`R` must be a single whole number >= 1" =
+      is.numeric(R) && length(R) == 1L && is.finite(R) && R >= 1L &&
+      R == floor(R)
+  )
+  stopifnot(
+    "`level_alpha` must be a single number in (0, 1)" =
+      is.numeric(level_alpha) && length(level_alpha) == 1L &&
+      is.finite(level_alpha) && level_alpha > 0 && level_alpha < 1
+  )
   level <- match.arg(level)
   R <- as.integer(R)
 
   recipe <- fit$params
   d <- fit$data
   if (identical(d$source, "transitions")) {
-    stop("bootstrap_lsa() requires event-level input. The fit was ",
+    .lsa_stop(class = "needs_events", "bootstrap_lsa() requires event-level input. The fit was ",
          "built from a pre-computed transition matrix and has no ",
          "underlying sequences to resample.", call. = FALSE)
   }
@@ -254,36 +263,36 @@ bootstrap_lsa <- function(fit,
 # bit-identical replay contract.
 .validate_boot_indices <- function(indices, R, level, S, T) {
   if (!is.matrix(indices) || !is.numeric(indices)) {
-    stop("`indices` must be a numeric matrix.", call. = FALSE)
+    .lsa_stop("`indices` must be a numeric matrix.", call. = FALSE)
   }
   if (nrow(indices) < R) {
-    stop(sprintf("`indices` has %d rows but R = %d are required.",
+    .lsa_stop(sprintf("`indices` has %d rows but R = %d are required.",
                  nrow(indices), R), call. = FALSE)
   }
   indices <- indices[seq_len(R), , drop = FALSE]
   if (anyNA(indices) || !all(is.finite(indices)) ||
       !isTRUE(all(indices == floor(indices)))) {
-    stop("`indices` must contain only finite whole numbers ",
+    .lsa_stop("`indices` must contain only finite whole numbers ",
          "(no NA, NaN, Inf, or fractional values).", call. = FALSE)
   }
   hi <- if (level == "sequence") S else T
   unit <- if (level == "sequence") "sequence" else "event"
   if (level == "sequence" && ncol(indices) != S) {
-    stop(sprintf(
+    .lsa_stop(sprintf(
       "`indices` has %d columns but sequence-level replay needs exactly ",
       ncol(indices)),
       sprintf("S = %d (one column per resampled sequence).", S),
       call. = FALSE)
   }
   if (level == "event" && ncol(indices) != T) {
-    stop(sprintf(
+    .lsa_stop(sprintf(
       "`indices` has %d columns but event-level replay needs exactly ",
       ncol(indices)),
       sprintf("T = %d (one column per resampled event).", T),
       call. = FALSE)
   }
   if (min(indices) < 1L || max(indices) > hi) {
-    stop(sprintf("`indices` values must be in 1..%d (%s positions).",
+    .lsa_stop(sprintf("`indices` values must be in 1..%d (%s positions).",
                  hi, unit), call. = FALSE)
   }
   storage.mode(indices) <- "integer"
@@ -295,7 +304,7 @@ bootstrap_lsa <- function(fit,
   if (is.null(block_length)) return(ceiling(sqrt(T)))
   if (!is.numeric(block_length) || length(block_length) != 1L ||
       !is.finite(block_length) || block_length < 1) {
-    stop("`block_length` must be a single finite number >= 1.",
+    .lsa_stop("`block_length` must be a single finite number >= 1.",
          call. = FALSE)
   }
   as.integer(block_length)
@@ -330,16 +339,11 @@ bootstrap_lsa <- function(fit,
 .run_parallel <- function(worker, R, parallel = FALSE, n_cores = NULL,
                           verbose = FALSE) {
   if (!parallel) {
-    out <- vector("list", R)
-    for (b in seq_len(R)) {
-      out[[b]] <- worker(b)
+    return(lapply(seq_len(R), function(b) {
+      out <- worker(b)
       if (verbose && b %% 100L == 0L) message("  replicate ", b, "/", R)
-    }
-    return(out)
-  }
-  if (!requireNamespace("parallel", quietly = TRUE)) {
-    stop("parallel = TRUE requires the base 'parallel' package.",
-         call. = FALSE)
+      out
+    }))
   }
   if (is.null(n_cores)) n_cores <- max(1L, parallel::detectCores() - 1L)
   if (.Platform$OS.type != "windows") {
@@ -381,7 +385,7 @@ bootstrap_lsa <- function(fit,
   ))
 }
 
-# Null-coalesce helper.
+# Null-coalesce helper (base R has `%||%` only from 4.4.0).
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 # Summarize per-cell bootstrap distributions into a tidy edges frame.

@@ -1,0 +1,273 @@
+---
+title: "Lag sequential analysis"
+author: "Written by [Mohammed Saqr](https://saqr.me) and [Sonsoles López-Pernas](https://sonsoles.me)"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{Lag sequential analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r options, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6.5,
+                      fig.height = 4.5, fig.align = "center", dpi = 72)
+old_options <- options(digits = 3, width = 90)
+```
+
+Lag sequential analysis (LSA) studies the order in which categorical events
+occur (Sackett, 1979; Bakeman & Gottman, 1997). A process is coded as a
+sequence of states, such as weekly engagement levels or the moves of a
+collaborative discussion, and the analysis asks whether one state is followed
+by another more often, or less often, than the base rates of the two states
+alone would predict. A transition that occurs more often than expected is a
+sequential regularity of the process; a transition that occurs less often is
+an avoidance. Neither can be read from frequencies alone: a frequent
+transition may only reflect two busy states, and a rare transition may still
+occur far more often than chance allows.
+
+The method reduces the data to a lagged contingency table and tests every
+cell of it against sequential independence, the model in which the next state
+carries no memory of the current one. The result is a set of tested
+transitions, each with a direction, a size, and a p-value, together with an
+omnibus test of the whole table. `lagdynamics` fits the model in one call,
+`lsa()`, and returns every part of it as a tidy data frame.
+
+## Data
+
+`engagement` records the weekly engagement state of 138 students over 15
+weeks, one row per student and one column per week.
+
+- **Sequence:** each row is one student's sequence.
+- **Order:** the column order (weeks 1 to 15) orders the states.
+- **State:** each cell is `Active`, `Average`, or `Disengaged`; `NA` marks
+  a missing week and is skipped rather than counted as a state.
+
+Two rows are missing in every week, so the model is fitted to 136 sequences.
+
+```{r setup}
+library(lagdynamics)
+head(engagement)
+```
+
+## The lagged contingency table
+
+Let the process visit $K$ states. At lag $\ell$, every pair of positions
+$\ell$ steps apart within a sequence is one transition, and the transitions
+are tabulated in a $K \times K$ table whose cell $O_{ij}$ counts the
+occasions on which state $i$ was followed, $\ell$ positions later, by state
+$j$. At lag 1 this is the table of immediate successors. Pairs never cross
+the boundary between two sequences, so the last week of one student and the
+first week of the next are not counted.
+
+Two descriptive quantities come directly from the table. The transitional
+probability $P(j \mid i) = O_{ij} / R_i$, where $R_i$ is the row total,
+is the share of moves out of state $i$ that reach state $j$; it describes
+where the process goes. The expected count under independence,
+
+$$E_{ij} = \frac{R_i \, C_j}{N},$$
+
+with $C_j$ the column total and $N$ the number of transitions, is the
+count the cell would reach if the next state were drawn from the base rates
+regardless of the current one.
+
+## Adjusted residuals and Yule's Q
+
+The adjusted residual standardises the gap between the observed and the
+expected count (Haberman, 1973),
+
+$$z_{ij} = \frac{O_{ij} - E_{ij}}
+  {\sqrt{E_{ij}\,(1 - R_i/N)\,(1 - C_j/N)}},$$
+
+and is approximately standard normal under independence. A residual above
+1.96 marks a transition that is over-represented at the 5% level, and a
+residual below -1.96 one that is under-represented. The residual is the
+evidential unit of LSA: it states how far a transition departs from chance
+on a common scale, whatever the base rates of its states.
+
+The residual is a test statistic, so it grows with the number of
+transitions. Yule's Q is the matching effect size. For each cell the table
+is collapsed to a 2-by-2 table (from $i$ or not, to $j$ or not) with cells
+$a = O_{ij}$, $b$, $c$, and $d$, and
+
+$$Q_{ij} = \frac{ad - bc}{ad + bc},$$
+
+which lies between -1 (the transition never occurs) and 1 (state $i$ is
+always followed by state $j$), with 0 at independence. Because it does not
+grow with sample size, Q is the scale on which transitions of different data
+sets or groups are compared (Bakeman & Quera, 2011).
+
+## Fitting the model
+
+`lsa()` takes the wide data frame directly: rows are sequences and columns
+are ordered positions. The default is the classical engine at lag 1.
+
+```{r fit}
+fit <- lsa(engagement)
+fit
+```
+
+The model counts 1734 transitions among 1870 events in 136 sequences. The
+omnibus likelihood-ratio test of independence is $G^2 = 618.3$ on 4 degrees
+of freedom, so the next week's state depends strongly on the current one.
+Seven of the nine transitions depart from independence, and the three
+strongest over-represented transitions are the three self-transitions.
+
+## Which transitions depart from chance
+
+`transitions()` returns one row per ordered pair with the observed and
+expected counts, the transitional probability (`prob`), the adjusted
+residual (`adj_res`), its p-value, Yule's Q, and further association
+measures. The argument `significant = TRUE` keeps the transitions whose
+p-value is below `alpha`, and `sort = "strength"` orders them by the
+absolute residual.
+
+```{r significant}
+transitions(fit, significant = TRUE, sort = "strength")
+```
+
+`Active -> Active` is the strongest regularity: it occurred 459 times
+against 247 expected, an adjusted residual of 21.7 and a Yule's Q of 0.828.
+Active students therefore stay active from one week to the next far more
+often than the base rate of activity predicts. `Disengaged -> Disengaged`
+(z = 15.4, Q = 0.754) and `Average -> Average` (z = 12.5, Q = 0.553) are
+the other two persistences, so every state tends to repeat. The avoidances
+are as informative. `Active -> Disengaged` occurred 23 times against 121
+expected (z = -12.6, Q = -0.826): an active student almost never drops to
+disengagement in a single week. `Disengaged -> Active` is also avoided
+(z = -10.5, Q = -0.698), so recovery from disengagement to full activity is
+rare. Moves between `Average` and `Disengaged`, by contrast, occur at the
+rate the base rates predict.
+
+The two transitions missing from this table, `Average -> Disengaged` and
+`Disengaged -> Average`, are the ones that occur at the rate chance predicts. `direction = "over"` or `direction = "under"` keeps
+only one sign, and `min_count` drops pairs with few observations.
+
+```{r over}
+transitions(fit, direction = "under", sort = "strength")
+```
+
+Four transitions are significantly avoided, and all four connect `Active`
+with another state, in either direction. Active engagement is therefore a
+closed state: students who hold it keep it, and students outside it rarely
+reach it in one week (`Average -> Active`, z = -12.9).
+
+## Is the table as a whole dependent
+
+`tests()` returns the omnibus tests of independence for the whole table: the
+likelihood-ratio statistic (`lrx2`) and Pearson's chi-squared (`x2`).
+
+```{r tests}
+tests(fit)
+```
+
+Both statistics reject independence ($G^2 = 618$ and $\chi^2 = 629$ on 4
+degrees of freedom, p far below 0.001). A non-significant omnibus test would
+give no basis for interpreting individual residuals, so this test is read
+before the transitions.
+
+## States and starting points
+
+`nodes()` returns one row per state with the number of transitions it sends
+and receives, and `initial()` the share of sequences that start in each
+state.
+
+```{r nodes}
+nodes(fit)
+initial(fit)
+```
+
+`Average` is the busiest state (751 outgoing, 763 incoming transitions) and
+`Disengaged` the least visited (325 and 320). These totals are what the
+expected counts control for: `Average` is not credited with regularities on
+the strength of its volume. Sequences start in `Active` (0.382) and
+`Average` (0.368) more often than in `Disengaged` (0.250).
+
+## A summary of the model
+
+`summary()` returns a summary object. Printed, it gives the model in a few
+lines; its tables are read with `as.data.frame()`.
+
+```{r summary}
+fit_summary <- summary(fit)
+fit_summary
+as.data.frame(fit_summary)
+as.data.frame(fit_summary, what = "nodes")
+```
+
+The overview table is one row with the dimensions and omnibus tests of the
+model, the form to collect when several models are fitted. The node table
+adds the shares of outgoing and incoming transitions and the initial
+probability for each state: `Average` carries 43.3% of the outgoing
+transitions and `Disengaged` 18.7%.
+
+## Transition probabilities
+
+`transition_probabilities()` returns the transitional probabilities
+$P(\text{to} \mid \text{from})$ as a tidy table, one row per ordered pair.
+They are the edge weights of a transition network analysis model and the
+input that probability-based tools expect.
+
+```{r probabilities}
+transition_probabilities(fit)
+```
+
+Each state is most often followed by itself: 0.698 for `Active`, 0.610 for
+`Average`, and 0.483 for `Disengaged`. The probabilities and the residuals
+answer different questions. `Disengaged -> Average` has a probability of
+0.397, the second largest move out of `Disengaged`, yet its residual
+(-1.7) is not significant: the move is frequent because `Average` is a busy
+state, not because disengaged students are drawn to it.
+
+## Residual heatmap
+
+`plot()` draws a residual heatmap by default. Rows are the current states,
+columns the next states, and the fill is the adjusted residual on a
+diverging scale.
+
+```{r heatmap}
+plot(fit)
+```
+
+The heatmap shows the structure of the model at a glance: the diagonal is
+uniformly over-represented, the four off-diagonal cells in the `Active` row
+and column are avoided, and the two cells linking `Average` and
+`Disengaged` sit near zero. The process is one of persistence, with
+movement mostly confined to the two lower states.
+
+## Where next
+
+- [Lag transition networks](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.html):
+  the fitted model drawn as a residual, Yule's Q, or probability network.
+- [Evaluating transitions](https://pak.dynasite.org/lagdynamics/articles/confirmatory.html):
+  edge uncertainty, case-drop stability, split-half reliability, and a
+  permutation null.
+- [Comparing groups](https://pak.dynasite.org/lagdynamics/articles/group-comparison.html):
+  grouped fits and permutation and Bayesian tests of group differences.
+- [Workflow](https://pak.dynasite.org/lagdynamics/articles/workflow.html),
+  [event logs](https://pak.dynasite.org/lagdynamics/articles/event-logs.html),
+  [engines](https://pak.dynasite.org/lagdynamics/articles/engines.html),
+  [lags and structural zeros](https://pak.dynasite.org/lagdynamics/articles/lags-structural-zeros.html),
+  and [plotting](https://pak.dynasite.org/lagdynamics/articles/plotting.html):
+  the guides to each part of the package.
+
+## References
+
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
+introduction to sequential analysis* (2nd ed.). Cambridge University Press.
+
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Haberman, S. J. (1973). The analysis of residuals in cross-classified tables.
+*Biometrics, 29*, 205-220.
+
+Sackett, G. P. (1979). The lag sequential analysis of contingency and
+cyclicity in behavioral interaction research. In J. D. Osofsky (Ed.),
+*Handbook of infant development* (pp. 623-649). Wiley.
+
+```{r cleanup, include = FALSE}
+options(old_options)
+```
