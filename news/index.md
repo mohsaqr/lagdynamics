@@ -1,9 +1,8 @@
 # Changelog
 
-## lagdynamics 0.34.1
+## lagdynamics 0.35.0
 
-This release collects all changes since the CRAN release 0.32 (including
-the unreleased 0.33).
+This release collects all changes since the CRAN release 0.32.
 
 ### Changes to results
 
@@ -43,7 +42,6 @@ the unreleased 0.33).
   `lagdynamics_unknown_engine`, `lagdynamics_unsupported_option`,
   `lagdynamics_incompatible_fits`, `lagdynamics_missing_package` and
   `lagdynamics_ipf_infeasible`, each also of class `lagdynamics_error`.
-  Argument checks state the expected value in their message.
 - Console output and plot subtitles use ASCII replacements for the block
   glyph, the superscript in G^2 and the middle dot when the session is
   not UTF-8.
@@ -58,35 +56,6 @@ the unreleased 0.33).
   interoperability, engines, lags and structural zeros, plotting, and
   transfer entropy. Case studies: course engagement, regulation in high
   and low achieving groups, and AI behaviour in programming sessions.
-- Help pages rewritten: each describes what the method or display
-  represents, what the function estimates, and which related function to
-  use instead, and documents the structure of its return value and the
-  conditions it raises. Every exported S3 method has a help page with a
-  `Value` section.
-- The engine-registration example defines a complete engine instead of
-  calling a registered engine’s internals.
-- README is generated from `README.Rmd`, so its numbers come from the
-  rendered output.
-- [`?lsa`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  documents the engine wrappers
-  ([`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  and siblings) on a topic named `lsa`, and warns that combining `actor`
-  and `session` overflows R’s integer range once distinct actors x
-  distinct sessions exceeds about 2.1e9; the fix (pass a globally unique
-  session id as `actor`) is given there and in the event-log guide.
-- Corrected return-value descriptions: the column names of
-  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
-  edges, the conditional columns of
-  [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md),
-  the engine-function contract of
-  [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
-  and the size of the `engagement` data (136 non-empty sequences).
-
-### Package
-
-- `graphics` and `parallel` are declared in Imports.
-- Authors carry ORCID identifiers; the documentation website is listed
-  in `URL`.
 
 ## lagdynamics 0.32
 
