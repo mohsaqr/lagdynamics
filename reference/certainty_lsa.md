@@ -1,13 +1,35 @@
-# Analytic Certainty of Transition Edges (Dirichlet-Multinomial)
+# Compute the analytic certainty of transition probabilities
 
-Closed-form Bayesian alternative to
-[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
-for the transition-probability edges of an `lsa` fit. Each state's
-outgoing transitions are modelled as Dirichlet-Multinomial: with a
-Jeffreys prior the posterior for a row is `Dirichlet(count + prior)`, so
-each edge probability is marginally `Beta(a, b)` and its posterior mean,
-standard deviation, credible interval and stability decision are
-available analytically. No resampling, so it runs in microseconds.
+`certainty_lsa()` computes the analytic certainty of every transition
+probability of a fit from
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md): how
+precisely the data pin down each transition probability, and which
+transitions are estimated precisely enough to be called certain. Under a
+Dirichlet-Multinomial model the outgoing transitions of each state are a
+multinomial draw whose probabilities have a Dirichlet posterior, so each
+transition probability has a Beta posterior with a closed-form mean,
+standard deviation and credible interval. A transition probability
+estimated from counts is uncertain in proportion to how often its source
+state was visited: a probability of 0.5 from 4 departures is far less
+certain than the same value from 400.
+
+The posterior is computed with a Jeffreys prior by default and needs no
+resampling. Each transition gets its posterior mean, standard deviation
+and credible interval, and a posterior tail probability that decides
+whether it is certain. With `inference = "stability"` a transition is
+certain when its posterior stays within a band around the observed
+probability (by default 75% to 125% of it); with
+`inference = "threshold"` it is certain when its posterior lies above a
+minimum probability. A grouped fit gives one result per group.
+
+The model treats the transitions as independent draws. When sequences
+differ strongly from one another (for example, a mixture of latent
+groups with long sequences) it reports more certainty than the data
+support; use
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
+which resamples whole sequences, in that case. To compare two groups'
+transition probabilities with the same model, use
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md).
 
 ## Usage
 
@@ -36,97 +58,97 @@ print(x, ...)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  an `lsa_group`.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or a
+  grouped fit from `lsa(..., group = )`.
 
 - prior:
 
-  Numeric \> 0. Dirichlet prior concentration added to every cell.
-  Default `0.5` (the Jeffreys prior).
+  Dirichlet concentration added to every cell. Default `0.5` (the
+  Jeffreys prior).
 
 - level_alpha:
 
-  Numeric in (0, 1). Credible-interval level. Default `0.95` (a 95%
-  interval), matching
-  [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md).
+  Credible-interval level. Default `0.95`. The certainty decision uses
+  `1 - level_alpha` as its threshold.
 
 - inference:
 
-  `"stability"` (default) flags an edge whose posterior keeps it within
-  a multiplicative `consistency_range` of its observed probability;
-  `"threshold"` flags an edge whose posterior mass lies above
+  `"stability"` (default): a transition is certain when little posterior
+  mass lies outside `consistency_range` times its observed probability.
+  `"threshold"`: certain when little posterior mass lies below
   `edge_threshold`.
 
 - consistency_range:
 
-  Length-2 multiplicative bounds for stability inference. Default
-  `c(0.75, 1.25)`.
+  Two multipliers of the observed probability that bound the band for
+  `inference = "stability"`. Default `c(0.75, 1.25)`.
 
 - edge_threshold:
 
-  Numeric or `NULL`. Fixed threshold for `inference = "threshold"`;
-  `NULL` uses the 0.10 quantile of non-zero edge probabilities.
+  Minimum probability for `inference = "threshold"`. Default `NULL`, the
+  10% quantile of the non-zero transition probabilities.
 
 - x:
 
-  An `lsa_certainty` or `lsa_certainty_group` object
-  ([`print()`](https://rdrr.io/r/base/print.html) and
+  An `lsa_certainty` or `lsa_certainty_group` object, for the
+  [`print()`](https://rdrr.io/r/base/print.html) and
   [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
-  methods).
+  methods.
 
-- row.names, optional, ...:
+- ...:
 
-  Ignored by the methods; present for consistency with the generics.
+  Not used.
+
+- row.names, optional:
+
+  Not used; present for consistency with the generic.
 
 ## Value
 
-An object of class `c("lsa_certainty", "lsa_bootstrap", "list")` with an
-`edges` data frame (`from`, `to`, `prob_observed`, `prob_mean`,
-`prob_se`, `prob_ci_low`, `prob_ci_high`, `p_value`, `stable`, plus
-`adj_res_observed`/`adj_res_stable` for plotting), the posterior
-matrices (`mean`, `sd`, `ci_lower`, `ci_upper`), and call metadata
-(`prior`, `level_alpha`, `inference`, ...). Read the per-edge table with
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md).
-For an `lsa_group`, a named list of these, one per group (class
-`lsa_certainty_group`), whose
+An object of class `c("lsa_certainty", "lsa_bootstrap", "list")`. Read
+it with
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+which returns a data frame with one row per transition (`from -> to`
+pair) and the columns `from`, `to`, `observed` (count), `prob_observed`,
+`prob_mean` (posterior mean), `prob_se` (posterior standard deviation),
+`prob_ci_low`, `prob_ci_high` (credible interval), `p_value` (posterior
+mass outside the band, or below the threshold), `stable` (certain), and
+`adj_res_observed`, `adj_res_stable` (the fit's adjusted residual and a
+copy of `stable`, used by
+[`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)).
+Transitions that cannot be estimated (a source state never left, or a
+structural zero) are `NA` and never certain.
+`transitions(x, significant = TRUE)` keeps the certain transitions.
+
+For a grouped fit, an object of class `lsa_certainty_group`, a list with
+one `lsa_certainty` per group;
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) stacks
-the group tables with a leading `group` column.
-[`print()`](https://rdrr.io/r/base/print.html) shows a header summary
-(the number of certain edges) and returns `x` invisibly.
-
-## Details
-
-The result carries class `c("lsa_certainty", "lsa_bootstrap")` and an
-`edges` table with the columns
-[`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
-and
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
-expect, so it is a drop-in for a bootstrap result (use
-`metric = "prob"`).
-
-**Certainty vs bootstrap.** Both answer "how precisely is this edge
-pinned down?". They agree on homogeneous data. The Dirichlet posterior
-treats transitions as independent, so on strongly heterogeneous data (a
-mixture of latent classes with long sequences) it reports *more*
-certainty than the sequence bootstrap – prefer
-[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
-then.
+their tables with a leading `group` column.
+[`print()`](https://rdrr.io/r/base/print.html) shows the settings and
+the number of certain transitions and returns `x` invisibly.
 
 ## References
 
-Johnston, L. & Jendoubi, T. (2026). How Delivery Mode Reshapes Resource
-Engagement: A Bayesian Differential Network Analysis. TNA Workshop 2026.
+Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes resource
+engagement: A Bayesian differential network analysis. TNA Workshop 2026.
 
 ## See also
 
-[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
-[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+to read the result;
+[`plot.lsa_certainty()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_certainty.md)
+and
 [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
+to draw it;
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+for resampling intervals;
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+to compare groups under the same model.
 
 ## Examples
 
 ``` r
-fit  <- lsa(engagement)
+fit <- lsa(engagement)
 cert <- certainty_lsa(fit)
 cert
 #> <lsa_certainty>  (analytic Dirichlet-Multinomial)
@@ -152,7 +174,7 @@ transitions(cert, significant = TRUE)
 #> 6    0.2153070 1.168633e-03   TRUE        0.1757996           TRUE
 #> 7    0.5365741 9.440665e-06   TRUE       15.3904661           TRUE
 
-# One certainty table per group
+# One table per group
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
 gcert <- certainty_lsa(g)

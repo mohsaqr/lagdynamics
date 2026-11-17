@@ -1,6 +1,12 @@
-# Retrieve a Registered LSA Engine
+# Retrieve a registered engine
 
-Retrieve a Registered LSA Engine
+`get_lsa_engine()` returns the registry entry of one engine: its name,
+its function, its description and the packages it requires. It is the
+lookup [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+performs before fitting, and it is useful for inspecting a built-in
+engine's function or for checking that a registered engine can run in
+the current session. To see which engines exist, use
+[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md).
 
 ## Usage
 
@@ -12,17 +18,27 @@ get_lsa_engine(name)
 
 - name:
 
-  Character scalar. The engine's identifier.
+  Name of the engine.
 
 ## Value
 
-The registry entry: a list with elements `name`, `fn`, `description`,
-`requires`.
+A list with the elements `name`, `fn`, `description` and `requires`, as
+given to
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md).
+
+## Conditions
+
+Errors carry the class `lagdynamics_error` and one of:
+
+- `lagdynamics_unknown_engine`: no engine is registered under `name`.
+
+- `lagdynamics_missing_package`: a package the engine requires is not
+  installed.
 
 ## See also
 
-[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
-[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
+[`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md),
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
 
 ## Examples
 

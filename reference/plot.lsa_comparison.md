@@ -1,18 +1,30 @@
-# Plot a Group Comparison
+# Plot a comparison of transitions between groups
 
-Two views of a
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+result of
 [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
-result. The default `"barrel"` is a back-to-back pyramid (one row per
-transition): the first group's bar runs left and the second's right, bar
-length is each group's transition probability, bar colour is each
-group's log odds ratio (blue = over-represented, red = avoided,
-following the vcd / mosaic convention), bar ends show the observed
-count, and the centre chip shows the difference p-value (bold and
-starred when significant). The bar of the group with the higher value
-gets a border that darkens with the size of the difference (faint =
-small, dark = large). For more than two groups, one barrel is drawn per
-pair via facets. The `"heatmap"` style draws the signed difference as a
-`from x to` grid on the same diverging scale.
+or
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+as a barrel chart (default) or a heatmap. When the same states are
+observed in two or more groups, a comparison shows which transitions
+differ between them, by how much, and whether the difference is larger
+than chance, so a display of it has to show both the transitions
+themselves in each group and the test of their difference.
+
+The barrel is a back-to-back chart with one row per transition: the
+first group's bar runs to the left and the second's to the right, bar
+length is the transition probability (or count), bar colour is the log
+odds ratio of the transition within the group (blue over-represented,
+red avoided), and the centre shows the p-value of the difference, in
+bold when significant. The rows are the `top_n` most frequent
+transitions, or with `rank = "effect"` those with the strongest
+association in either group. The heatmap draws the difference between
+the groups as a grid of `from` by `to` states. With more than two
+groups, each pair is drawn as a facet.
+
+The tested differences are read as a table with `transitions(cmp)`. To
+colour the ribbons of a chord diagram by a group difference, see
+[`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md).
 
 ## Usage
 
@@ -42,10 +54,10 @@ plot(
 
 - x:
 
-  An `lsa_comparison` or `lsa_comparison_pairwise` object from
+  The result of
   [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
-  (or the Bayesian equivalents from
-  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)).
+  or
+  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md).
 
 - style:
 
@@ -53,45 +65,45 @@ plot(
 
 - value:
 
-  For `"barrel"`, the quantity mapped to bar length: `"prob"`
-  (transition probability, default) or `"count"`.
+  For the barrel, bar length: `"prob"` (default) or `"count"`.
 
 - rank:
 
-  For `"barrel"`, how to choose which transitions to show: `"frequency"`
-  (default) ranks by pooled observed count – the backbone transitions,
-  which are mostly over-represented (blue); `"effect"` ranks by the
-  strongest association in either group (`|log OR|`, among tested
-  cells), surfacing both over- (blue) and under-represented / avoided
-  (red) transitions.
+  For the barrel, which transitions to show: `"frequency"` (default, the
+  most frequent overall) or `"effect"` (the strongest association,
+  largest absolute log odds ratio, in either group).
 
 - top_n:
 
-  For `"barrel"`, how many transitions to show (highest `rank` on top;
-  for the pairwise object the ranking is shared across facets so they
-  line up). Default `12`.
+  For the barrel, the number of transitions shown (default `12`); with
+  several pairs the same transitions are shown in every facet.
 
 - ...:
 
-  Reserved.
+  Ignored.
 
 ## Value
 
-A `ggplot` object (drawn when printed).
+A `ggplot` object, drawn when printed.
 
 ## See also
 
 [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md),
-[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md)
 
 ## Examples
 
 ``` r
-g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
-         time = "Time", group = "Achiever")
-cmp <- compare_lsa(g, R = 100)
-plot(cmp)                    # back-to-back barrel
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+set.seed(1)
+cmp <- compare_lsa(gfit, R = 100, adjust = "BH")
+plot(cmp)
 
-plot(cmp, style = "heatmap") # difference heatmap
+plot(cmp, rank = "effect")
+
+plot(cmp, style = "heatmap")
 
 ```

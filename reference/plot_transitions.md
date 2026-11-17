@@ -1,10 +1,33 @@
-# Plot the Transition Network
+# Plot a lag transition network
 
-Draws the directed transition network of an `lsa` fit with
-[`cograph::splot()`](https://sonsoles.me/cograph/reference/splot.html).
-Pick the edge weight with `weights`; optionally keep only significant
-edges. Nodes are white and edges are labelled by default. Returns the
-`cograph` network invisibly.
+`plot_transitions()` draws a lag transition network with cograph: the
+states are nodes and the transitions between them directed edges. Which
+quantity weights the edges decides what the network shows. Weighted by
+adjusted residuals it is a residual network: edges show where a
+transition is more frequent (over-represented) or less frequent
+(avoided) than independence predicts, the reading of lag sequential
+analysis. Weighted by transition probabilities it is the network of
+Transition Network Analysis, which shows where the process goes next,
+whether or not that is more than chance.
+
+With `weights = "residuals"` (default), over-represented transitions are
+solid blue edges and avoided transitions dashed red edges; `"yules_q"`
+draws the same signed network on the bounded Yule's Q scale, and
+`"lift"` the ratio of observed to expected counts. With `"prob"` (or its
+aliases `"tna"` and `"relative"`) or `"count"`, the network is drawn in
+the style of Transition Network Analysis, each node ringed by its
+initial-state probability; probability edges below 0.05 are hidden
+unless `edge_cutoff` is passed. Dense networks are thinned with
+`significant` or, better at large sample sizes where nearly every cell
+is significant, with `top`.
+
+The same display is `plot(fit, type = "network")`. For the full table
+use the residual heatmap of
+[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md);
+for the per-source breakdown,
+[`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md)
+or
+[`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md).
 
 ## Usage
 
@@ -30,102 +53,65 @@ plot_transitions(
 
 - weights:
 
-  Which matrix becomes the edge weight, and how it is drawn:
-
-  - `"residuals"` (default) – a **residual network** (not a transition
-    one): adjusted residuals coloured by sign on the TNA / Nestimate
-    convention, **blue = more** (over-represented) solid and **red =
-    less** (avoided) dashed with a soft halo.
-
-  - `"tna"` / `"relative"` / `"prob"` / `"count"` – the familiar
-    **transition network** of Transition Network Analysis (TNA), drawn
-    with `cograph::splot(tna_styling = TRUE)`: cograph's own TNA styling
-    (coloured nodes, weighted directed edges) plus a donut ring per node
-    carrying its initial-state probability, and edges labelled with the
-    transition probability (`"tna"` / `"relative"` / `"prob"`) or
-    observed count (`"count"`). `"tna"` and `"relative"` are explicit
-    aliases for `"prob"`. For probability/TNA networks, edges below
-    `0.05` are dropped by default so weak transitions do not clutter the
-    plot (override with `edge_cutoff`).
-
-  - `"lift"` – observed / expected, drawn in a single neutral colour
-    with magnitude carried by edge width.
-
-  - `"yules_q"` – a **signed association network**: Yule's Q on a fixed
-    `[-1, 1]` scale, coloured by sign like the residual network (blue
-    over-represented, red avoided) but bounded and not growing with
-    sample size.
+  Edge weight: `"residuals"` (default), `"tna"`, `"relative"`, `"prob"`
+  (the three are the transition probability), `"count"`, `"lift"` or
+  `"yules_q"`.
 
 - significant:
 
-  Logical. Keep only edges whose adjusted-residual p-value is below the
-  fit's alpha; weaker cells are set to 0 (no edge). Default `FALSE`.
-  Note that at large sample sizes almost every cell is significant, so
-  this is a weak visual filter – prefer `top` (effect-size pruning) to
-  declutter a dense residual network.
+  Keep only transitions whose residual p-value is below the fit's
+  `alpha` (default `FALSE`).
 
 - top:
 
-  Numeric or `NULL`. Keep only the strongest edges by absolute weight
-  (applied after `significant`); the rest are set to 0. A fraction
-  `0 < top < 1` keeps that **proportion** of the present edges
-  (`top = 0.5` -\> the strongest half); a value `top >= 1` keeps that
-  many edges (`top = 12` -\> the 12 strongest). The legible way to thin
-  a dense residual network: it prunes by effect size
-  (`|adjusted residual|`) rather than by p-value. `NULL` (default) keeps
-  every edge. Applies to every view; for the probability network it
-  composes with the default `edge_cutoff = 0.05`.
+  Keep only the strongest edges by absolute weight: a fraction below 1
+  keeps that share of the edges, a number of 1 or more keeps that many.
+  Default `NULL` (all edges). Applied after `significant`.
 
 - decimals:
 
-  Number of decimal places for edge labels. Default `1`.
+  Decimal places of the edge labels (default `1`).
 
 - node_fill:
 
-  Node fill colour. Default `"white"`; the probability / count networks
-  use a per-state palette instead unless `node_fill` is set explicitly.
+  Node colour (default `"white"`). The probability and count networks
+  colour nodes by state unless `node_fill` is set.
 
 - edge_labels:
 
-  Logical (or a label vector). Show edge weights as labels. Default
-  `TRUE`.
+  Show the edge weights as labels (default `TRUE`).
 
 - ...:
 
   Passed to
-  [`cograph::splot()`](https://sonsoles.me/cograph/reference/splot.html)
-  (e.g. `node_shape`, `layout`, `edge_cutoff`, `curvature`).
+  [`cograph::splot()`](https://sonsoles.me/cograph/reference/splot.html),
+  for example `layout`, `node_shape`, `edge_cutoff` or `curvature`.
 
 ## Value
 
-The `cograph_network` object, invisibly (drawn as a side effect).
+The network drawn by
+[`cograph::splot()`](https://sonsoles.me/cograph/reference/splot.html),
+invisibly; the plot is drawn on the current device.
 
 ## See also
 
-[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
-(heatmap),
+[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md),
+[`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md),
 [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
 [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
 
 ## Examples
 
 ``` r
-fit <- lsa(group_regulation)
-plot_transitions(fit)                                   # residual network
+fit <- lsa(engagement)
+plot_transitions(fit)
 
-plot_transitions(fit, weights = "tna")                  # TNA probabilities
+plot_transitions(fit, weights = "prob")
 
-plot_transitions(fit, weights = "relative")             # same as "tna"
-plot_transitions(fit, weights = "prob")                 # same matrix
-plot_transitions(fit, weights = "residuals",            # residual network,
-                 significant = TRUE)                     #   significant only
 
-plot_transitions(fit, top = 12)                         # 12 strongest edges
+fit9 <- lsa(group_regulation)
+plot_transitions(fit9, top = 12)
 
-plot_transitions(fit, top = 0.5)                        # strongest 50%
-
-plot_transitions(fit, decimals = 2)                     # 2-dp edge labels
-
-plot_transitions(fit, node_shape = "square")            # splot passthrough
+plot_transitions(fit9, weights = "yules_q", significant = TRUE)
 
 ```

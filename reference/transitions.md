@@ -1,8 +1,42 @@
-# Transitions of an LSA Fit or an Inference Result (Tidy)
+# Read the transitions of a fit or an inference result
 
-The canonical way to read the per-transition table of a fit or of any
-inference result as a tidy one-row-per-transition `data.frame`.
-`transitions(x)` returns every transition; the arguments narrow it.
+`transitions()` returns the transitions of a lag sequential analysis as
+a table, one row per ordered pair of states, from a fit and from every
+result built on a fit. The transitions are the substance of the
+analysis: for each ordered pair of states, how often the second follows
+the first at the chosen lag, how often independence would predict, and
+whether the difference is larger than chance. A positive adjusted
+residual marks an over-represented transition, one the process prefers;
+a negative residual marks an avoided one. Yule's Q, kappa and lift
+express the same association on bounded or ratio scales.
+
+On a fit from
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), a
+grouped fit or a multi-lag fit from
+[`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md),
+it returns the estimated statistics of each transition. On the result of
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+or
+[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md),
+it returns that method's per-transition quantities. The arguments narrow
+and order the table: `significant = TRUE` keeps the transitions the
+method flags (significant for a fit, a permutation test or a group
+comparison; stable under resampling for the bootstrap, certainty and
+stability results), `direction` keeps over- or under-represented
+transitions, `min_count` drops rare ones, and `sort` puts the strongest
+first.
+
+Use
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md) and
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
+for the other tables of a fit, and
+[`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md)
+to follow one transition across lags.
 
 ## Usage
 
@@ -65,11 +99,7 @@ transitions(
 
 - fit:
 
-  An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), a
-  grouped `lsa_group`, a multi-lag `lsa_lags` from
-  [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md),
-  or an inference result from
+  An `lsa` fit, a grouped fit, an `lsa_lags` result, or the result of
   [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
   [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
   [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
@@ -80,1036 +110,174 @@ transitions(
 
 - ...:
 
-  Arguments passed to the method; ignored by the methods themselves.
+  Arguments passed to the method.
 
 - significant:
 
-  Logical. Keep only the transitions the method flags as significant or
-  stable. Default `FALSE` (keep all).
+  Keep only the transitions the method flags as significant or stable
+  (default `FALSE`).
 
 - direction:
 
-  (Fits, grouped fits and `lsa_lags` only.) One of `"any"` (default),
-  `"over"` (over-represented: significant with a positive residual), or
-  `"under"` (under-represented: significant with a negative residual).
-  Selecting a direction implies `significant = TRUE`.
+  For fits only: `"any"` (default), `"over"` (significant with a
+  positive residual) or `"under"` (significant with a negative
+  residual). `"over"` and `"under"` imply `significant = TRUE`.
 
 - min_count:
 
-  (Fits, grouped fits and `lsa_lags` only.) Optional integer. Keep only
-  transitions observed at least this many times. Default `NULL` (no
-  count filter).
+  For fits only: keep transitions observed at least this many times.
+  Default `NULL` (no filter).
 
 - alpha:
 
-  (Fits, grouped fits and `lsa_lags` only.) Significance threshold.
-  Default `NULL`, which uses the `alpha` the fit was built with.
+  For fits only: significance level. Default `NULL` uses the `alpha` of
+  the fit.
 
 - sort:
 
-  Row ordering. `"none"` (default) keeps the matrix (column-major)
-  order; `"strength"` orders by the absolute size of the method's signed
-  effect (the adjusted residual for a fit, a bootstrap, certainty or
-  permutation result; the stability proportion for
+  Row order: `"none"` (default, table order) or `"strength"` (largest
+  absolute effect first: the adjusted residual for a fit, a bootstrap,
+  certainty or permutation result; the stability proportion for
   [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md);
-  the group difference `diff` for a comparison), `"count"` by observed
-  count and `"prob"` by transition probability (these two not for
-  inference results) – each descending, so the table reads
-  strongest-first.
+  the group difference for a comparison). Fits also accept `"count"` and
+  `"prob"` (largest first).
 
 ## Value
 
-A `data.frame`, one row per transition. For a fit the columns are
-`from`, `to` (the source and target **state names**), `lag`, `count`,
-`expected`, `prob` (row-conditional), `prob_col` (column- conditional),
-`adj_res`, `p`, `yules_q`, `kappa`, `kappa_z`, `kappa_p`, `lift`,
-`sign`, `significant`. Engines that compute extra per-cell statistics
-append them as further columns (e.g. the two-cell engine adds
-`odds_ratio`, `log_or`, `log_or_se`). An inference result carries
-`from`, `to` and that method's own quantities (the columns listed under
-*Value* of that function; a pairwise comparison adds `group_a`,
-`group_b`). A grouped fit gains a leading `group` column. Row names are
-reset.
-
-## Details
-
-Applied to a fit from
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) (or a
-grouped fit, or the multi-lag result of
-[`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md))
-the table holds the estimated transition statistics. Applied to the
-result of
-[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
-[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
-[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
-[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
-[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
-or
-[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
-the table holds that method's per-transition quantities, and
-`significant = TRUE` keeps the transitions the method itself flags:
-resampling-stable for
-[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
-and
-[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
-stable across replicates for
-[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
-and below the significance threshold for
-[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
-[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
-and
-[`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md).
+A `data.frame` with one row per transition. For a fit the columns are
+`from`, `to`, `lag`, `count`, `expected`, `prob` (row conditional,
+\\P(\text{to} \mid \text{from})\\), `prob_col` (column conditional,
+\\P(\text{from} \mid \text{to})\\), `adj_res`, `p`, `yules_q`, `kappa`,
+`kappa_z`, `kappa_p`, `lift` (observed over expected), `sign` (`"over"`,
+`"under"` or `"expected"`, comparing the count with the expected count)
+and `significant`; engines that compute further statistics append them
+(the two-cell engine adds `odds_ratio`, `log_or` and `log_or_se`). For
+an inference result the columns are `from`, `to` and that method's
+quantities, described on its help page; a pairwise comparison adds
+`group_a` and `group_b`. A grouped fit gains a leading `group` column,
+an `lsa_lags` result one row per transition and lag.
 
 ## See also
 
 [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
 [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
-[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md)
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
+[`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md)
 
 ## Examples
 
 ``` r
-fit <- lsa(group_regulation)
-transitions(fit)                       # all transitions
-#>          from         to lag count   expected         prob    prob_col
-#> 1       adapt      adapt   1     0   10.58548 0.0000000000 0.000000000
-#> 2    cohesion      adapt   1     5   35.25026 0.0029498525 0.009416196
-#> 3   consensus      adapt   1    30  131.62178 0.0047400853 0.056497175
-#> 4  coregulate      adapt   1    32   40.96933 0.0162436548 0.060263653
-#> 5     discuss      adapt   1   282   82.16743 0.0713743356 0.531073446
-#> 6     emotion      adapt   1     7   59.00000 0.0024673951 0.013182674
-#> 7     monitor      adapt   1    16   29.80155 0.0111653873 0.030131827
-#> 8        plan      adapt   1     6  128.04477 0.0009745006 0.011299435
-#> 9   synthesis      adapt   1   153   13.55939 0.2346625767 0.288135593
-#> 10      adapt   cohesion   1   139   34.24831 0.2730844794 0.080908033
-#> 11   cohesion   cohesion   1    46  114.04888 0.0271386431 0.026775320
-#> 12  consensus   cohesion   1    94  425.84976 0.0148522673 0.054714785
-#> 13 coregulate   cohesion   1    71  132.55238 0.0360406091 0.041327125
-#> 14    discuss   cohesion   1   188  265.84491 0.0475828904 0.109429569
-#> 15    emotion   cohesion   1   923  190.88889 0.3253436729 0.537252619
-#> 16    monitor   cohesion   1    80   96.42008 0.0558269365 0.046565774
-#> 17       plan   cohesion   1   155  414.27666 0.0251745980 0.090221187
-#> 18  synthesis   cohesion   1    22   43.87013 0.0337423313 0.012805588
-#> 19      adapt  consensus   1   243  126.96593 0.4774066798 0.038153556
-#> 20   cohesion  consensus   1   844  422.80402 0.4979351032 0.132516879
-#> 21  consensus  consensus   1   519 1578.71778 0.0820034761 0.081488460
-#> 22 coregulate  consensus   1   265  491.40054 0.1345177665 0.041607788
-#> 23    discuss  consensus   1  1269  985.54494 0.3211845103 0.199246350
-#> 24    emotion  consensus   1   909  707.66667 0.3204088826 0.142722562
-#> 25    monitor  consensus   1   228  357.45024 0.1591067690 0.035798398
-#> 26       plan  consensus   1  1788 1535.81377 0.2904011694 0.280734809
-#> 27  synthesis  consensus   1   304  162.63612 0.4662576687 0.047731198
-#> 28      adapt coregulate   1    11   41.76380 0.0216110020 0.005250597
-#> 29   cohesion coregulate   1   202  139.07590 0.1191740413 0.096420048
-#> 30  consensus coregulate   1  1188  519.29875 0.1877073787 0.567064439
-#> 31 coregulate coregulate   1    46  161.63984 0.0233502538 0.021957041
-#> 32    discuss coregulate   1   333  324.18223 0.0842824601 0.158949881
-#> 33    emotion coregulate   1    97  232.77778 0.0341910469 0.046300716
-#> 34    monitor coregulate   1    83  117.57862 0.0579204466 0.039618138
-#> 35       plan coregulate   1   106  505.18603 0.0172161767 0.050596659
-#> 36  synthesis coregulate   1    29   53.49704 0.0444785276 0.013842482
-#> 37      adapt    discuss   1    30   78.06541 0.0589390963 0.007660878
-#> 38   cohesion    discuss   1   101  259.96240 0.0595870206 0.025791624
-#> 39  consensus    discuss   1  1190  970.67967 0.1880233844 0.303881512
-#> 40 coregulate    discuss   1   539  302.13919 0.2736040609 0.137640449
-#> 41    discuss    discuss   1   770  605.96546 0.1948873703 0.196629213
-#> 42    emotion    discuss   1   289  435.11111 0.1018681706 0.073799796
-#> 43    monitor    discuss   1   538  219.77942 0.3754361479 0.137385087
-#> 44       plan    discuss   1   418  944.30000 0.0678902063 0.106741573
-#> 45  synthesis    discuss   1    41   99.99734 0.0628834356 0.010469867
-#> 46      adapt    emotion   1    61   55.25978 0.1198428291 0.022005772
-#> 47   cohesion    emotion   1   196  184.01833 0.1156342183 0.070707071
-#> 48  consensus    emotion   1   460  687.11033 0.0726813083 0.165945166
-#> 49 coregulate    emotion   1   339  213.87381 0.1720812183 0.122294372
-#> 50    discuss    emotion   1   418  428.94184 0.1057960010 0.150793651
-#> 51    emotion    emotion   1   218  308.00000 0.0768417342 0.078643579
-#> 52    monitor    emotion   1   130  155.57420 0.0907187718 0.046897547
-#> 53       plan    emotion   1   904  668.43708 0.1468247523 0.326118326
-#> 54  synthesis    emotion   1    46   70.78463 0.0705521472 0.016594517
-#> 55      adapt    monitor   1    17   24.48016 0.0333988212 0.013843648
-#> 56   cohesion    monitor   1    56   81.52039 0.0330383481 0.045602606
-#> 57  consensus    monitor   1   295  304.39087 0.0466108390 0.240228013
-#> 58 coregulate    monitor   1   170   94.74641 0.0862944162 0.138436482
-#> 59    discuss    monitor   1    88  190.02185 0.0222728423 0.071661238
-#> 60    emotion    monitor   1   103  136.44444 0.0363059570 0.083876221
-#> 61    monitor    monitor   1    26   68.91959 0.0181437544 0.021172638
-#> 62       plan    monitor   1   465  296.11859 0.0755237941 0.378664495
-#> 63  synthesis    monitor   1     8   31.35769 0.0122699387 0.006514658
-#> 64      adapt       plan   1     8  123.87600 0.0157170923 0.001287416
-#> 65   cohesion       plan   1   239  412.51439 0.1410029499 0.038461538
-#> 66  consensus       plan   1  2505 1540.29711 0.3957971243 0.403121983
-#> 67 coregulate       plan   1   471  479.44151 0.2390862944 0.075796588
-#> 68    discuss       plan   1    46  961.56010 0.0116426221 0.007402639
-#> 69    emotion       plan   1   283  690.44444 0.0997532605 0.045542324
-#> 70    monitor       plan   1   309  348.75111 0.2156315422 0.049726424
-#> 71       plan       plan   1  2304 1498.43724 0.3742082183 0.370775668
-#> 72  synthesis       plan   1    49  158.67810 0.0751533742 0.007885420
-#> 73      adapt  synthesis   1     0   13.75514 0.0000000000 0.000000000
-#> 74   cohesion  synthesis   1     6   45.80543 0.0035398230 0.008695652
-#> 75  consensus  synthesis   1    48  171.03396 0.0075841365 0.069565217
-#> 76 coregulate  synthesis   1    37   53.23699 0.0187817259 0.053623188
-#> 77    discuss  synthesis   1   557  106.77124 0.1409769679 0.807246377
-#> 78    emotion  synthesis   1     8   76.66667 0.0028198802 0.011594203
-#> 79    monitor  synthesis   1    23   38.72518 0.0160502442 0.033333333
-#> 80       plan  synthesis   1    11  166.38585 0.0017865844 0.015942029
-#> 81  synthesis  synthesis   1     0   17.61955 0.0000000000 0.000000000
-#>        adj_res             p     yules_q        kappa     kappa_z       kappa_p
-#> 1   -3.3211717  8.964036e-04 -1.00000000 -1.000000000  -3.4072406  6.562326e-04
-#> 2   -5.3287770  9.887630e-08 -0.76815515 -0.864876139  -5.5016095  3.763398e-08
-#> 3  -10.3214699  5.635375e-25 -0.69808622 -0.780644891 -10.6269957  2.231867e-26
-#> 4   -1.4741101  1.404520e-01 -0.13431040 -0.254405161  -1.7529330  7.961350e-02
-#> 5   24.2317649 1.029539e-129  0.73632074  0.418980176  23.2623644 1.066476e-119
-#> 6   -7.2563320  3.977281e-13 -0.81051007 -0.886865076  -7.4770534  7.600754e-14
-#> 7   -2.6297497  8.544776e-03 -0.31830027 -0.475476982  -2.7290490  6.351727e-03
-#> 8  -12.5118247  6.432933e-36 -0.93232010 -0.954976395 -12.7792050  2.142483e-37
-#> 9   38.7658830  0.000000e+00  0.90419397  0.256487056  36.9796105 2.435758e-299
-#> 10  18.7214591  3.309601e-78  0.69595780  0.197287276  17.5341578  7.860557e-69
-#> 11  -6.8283709  8.588429e-12 -0.46004781 -0.625503375  -7.4284559  1.098727e-13
-#> 12 -19.1996809  3.723726e-82 -0.71939250 -0.792946589 -20.1527336  2.546563e-90
-#> 13  -5.7625189  8.286776e-09 -0.33555110 -0.501644450  -6.4531011  1.095842e-10
-#> 14  -5.3770830  7.570229e-08 -0.20862594 -0.340359956  -6.4704249  9.772769e-11
-#> 15  58.1953875  0.000000e+00  0.85999151  0.439279624  54.9949554  0.000000e+00
-#> 16  -1.7822132  7.471448e-02 -0.10446943 -0.209935421  -2.2495756  2.447590e-02
-#> 17 -15.1412832  8.650916e-52 -0.54521777 -0.649612384 -16.2292534  3.132462e-59
-#> 18  -3.4634548  5.332862e-04 -0.35374869 -0.548178432  -4.0130982  5.992696e-05
-#> 19  12.0066636  3.278050e-33  0.47618556  0.254617530  10.5743333  3.919551e-26
-#> 20  24.4702565 3.063603e-132  0.53350656  0.281594081  21.8333946 1.118017e-105
-#> 21 -35.4977548 5.323515e-276 -0.66124843 -0.690695419 -37.5662411 7.651900e-309
-#> 22 -12.2716544  1.285985e-34 -0.38450860 -0.496741309 -13.6748909  1.434222e-42
-#> 23  11.3359759  8.705623e-30  0.20921222  0.067094752   8.3274445  8.260609e-17
-#> 24   9.2658532  1.935238e-20  0.19624970  0.064719493   6.6507395  2.916241e-11
-#> 25  -8.1347706  4.127192e-16 -0.28754940 -0.390783145  -8.9613170  3.208234e-19
-#> 26   8.5266570  1.506377e-17  0.13857046  0.030673080   5.0029998  5.644499e-07
-#> 27  12.9614865  2.022890e-38  0.46093598  0.225912682  10.7976018  3.533111e-27
-#> 28  -5.0188376  5.198507e-07 -0.60882735 -0.743701774  -5.1243434  2.985764e-07
-#> 29   5.7636516  8.231325e-09  0.22132666  0.035090087   5.3752635  7.647078e-08
-#> 30  35.3158137 3.358380e-273  0.64674728  0.411739749  34.5799294 5.061358e-262
-#> 31  -9.8823345  4.966221e-23 -0.59867800 -0.721625368 -10.0551328  8.720377e-24
-#> 32   0.5559806  5.782241e-01  0.01735217  0.001349645   0.1515363  8.795527e-01
-#> 33  -9.8520101  6.718664e-23 -0.46333992 -0.592817323 -10.1071899  5.133562e-24
-#> 34  -3.4259149  6.127324e-04 -0.19406423 -0.293289457  -3.4041986  6.635848e-04
-#> 35 -21.2793902 1.762194e-100 -0.73440542 -0.793407862 -21.4706064 2.931680e-102
-#> 36  -3.5412487  3.982380e-04 -0.32096577 -0.486508630  -3.8579088  1.143613e-04
-#> 37  -5.9721275  2.341794e-09 -0.49178012 -0.650584327  -6.6246798  3.480016e-11
-#> 38 -11.0894082  1.412188e-28 -0.50087253 -0.645618913 -12.2735611  1.256050e-34
-#> 39   8.8216376  1.127978e-18  0.16657595  0.042511858   5.2763463  1.317850e-07
-#> 40  15.4162419  1.272999e-53  0.38489574  0.115639630  12.9838558  1.510790e-38
-#> 41   7.8771601  3.349058e-15  0.17304750  0.030149486   5.0026347  5.655205e-07
-#> 42  -8.0744440  6.778478e-16 -0.25288227 -0.393565899  -9.9162825  3.536845e-23
-#> 43  24.0121119 2.078138e-127  0.57333274  0.236566058  22.1254365 1.798889e-108
-#> 44 -21.3673394 2.690331e-101 -0.50306997 -0.592758134 -23.7053965 3.172039e-124
-#> 45  -6.4954375  8.279245e-11 -0.46653428 -0.637099789  -7.4660477  8.263939e-14
-#> 46   0.8261362  4.087268e-01  0.05690472 -0.014109947  -0.1189593  9.053076e-01
-#> 47   0.9681845  3.329523e-01  0.03810394 -0.045704762  -0.7193950  4.718976e-01
-#> 48 -10.5811769  3.643527e-26 -0.27174124 -0.394032996 -13.2727130  3.332919e-40
-#> 49   9.4332273  3.976612e-21  0.28701490  0.053187076   7.2125938  5.489597e-13
-#> 50  -0.6086274  5.427715e-01 -0.01708317 -0.122873861  -3.0959286  1.961976e-03
-#> 51  -5.7610105  8.361185e-09 -0.20740022 -0.365225038  -7.6190988  2.554530e-14
-#> 52  -2.2352747  2.539932e-02 -0.10477842 -0.232192119  -3.2976111  9.751109e-04
-#> 53  11.0777299  1.609004e-28  0.23458138  0.070361277   7.3555360  1.901625e-13
-#> 54  -3.1607143  1.573828e-03 -0.23691712 -0.435012658  -4.2208199  2.434153e-05
-#> 55  -1.5652351  1.175278e-01 -0.19087018 -0.442694293  -2.5408894  1.105709e-02
-#> 56  -2.9982873  2.715016e-03 -0.20425402 -0.446954795  -4.7893710  1.673049e-06
-#> 57  -0.6361332  5.246896e-01 -0.02175901 -0.211758893  -4.8559888  1.197875e-06
-#> 58   8.2486829  1.601497e-16  0.33531696  0.037577701   5.1938752  2.059612e-07
-#> 59  -8.2508677  1.572485e-16 -0.41996506 -0.625446066 -10.7282824  7.497680e-27
-#> 60  -3.1126152  1.854376e-03 -0.16119431 -0.391659909  -5.5623855  2.661117e-08
-#> 61  -5.4541837  4.919832e-08 -0.47926363 -0.688521209  -6.6569943  2.794840e-11
-#> 62  11.5470481  7.639963e-31  0.33174607  0.087142440   6.2018210  5.581354e-10
-#> 63  -4.3308987  1.485020e-05 -0.61170418 -0.800695643  -5.2889724  1.230055e-07
-#> 64 -12.0901329  1.190940e-33 -0.90763463 -0.939968527 -12.5783742  2.776858e-36
-#> 65 -10.1646065  2.852717e-24 -0.34161399 -0.459724901 -11.4852982  1.563950e-30
-#> 66  32.5840458 6.901601e-233  0.46476603  0.174418148  28.4488535 5.034845e-178
-#> 67  -0.4613669  6.445354e-01 -0.01267717 -0.082029275  -2.2198145  2.643136e-02
-#> 68 -36.9200534 2.203193e-298 -0.94280770 -0.955183909 -38.1994139 2.879810e-319
-#> 69 -18.9077083  9.854735e-80 -0.52298101 -0.617404291 -20.4432987  6.891972e-93
-#> 70  -2.5187927  1.177580e-02 -0.08279025 -0.152659318  -3.4412288  5.790786e-04
-#> 71  27.4636063 4.779402e-166  0.40569788  0.141326716  23.4500162 1.321402e-121
-#> 72 -10.1399786  3.671800e-24 -0.60424280 -0.720573667 -11.0971534  1.295031e-28
-#> 73  -3.7979914  1.458734e-04 -1.00000000 -1.000000000  -3.9212524  8.808993e-05
-#> 74  -6.1709034  6.790092e-10 -0.78531293 -0.876775936  -6.4186910  1.374511e-10
-#> 75 -10.9973436  3.935548e-28 -0.63806313 -0.733283444 -11.4881702  1.512823e-30
-#> 76  -2.3484605  1.885120e-02 -0.19649048 -0.344855838  -2.7346326  6.244993e-03
-#> 77  48.0463146  0.000000e+00  0.92718439  0.720788868  46.0564491  0.000000e+00
-#> 78  -8.4327231  3.377132e-17 -0.83271163 -0.901741332  -8.7493725  2.145424e-18
-#> 79  -2.6368789  8.367269e-03 -0.27139592 -0.426999975  -2.8205362  4.794346e-03
-#> 80 -14.0191293  1.190665e-44 -0.90606241 -0.937271640 -14.4343980  3.143784e-47
-#> 81  -4.3108542  1.626251e-05 -1.00000000 -1.000000000  -4.5128074  6.397511e-06
-#>           lift  sign significant
-#> 1   0.00000000 under        TRUE
-#> 2   0.14184291 under        TRUE
-#> 3   0.22792580 under        TRUE
-#> 4   0.78107201 under       FALSE
-#> 5   3.43201678  over        TRUE
-#> 6   0.11864407 under        TRUE
-#> 7   0.53688481 under        TRUE
-#> 8   0.04685861 under        TRUE
-#> 9  11.28369034  over        TRUE
-#> 10  4.05859488  over        TRUE
-#> 11  0.40333584 under        TRUE
-#> 12  0.22073512 under        TRUE
-#> 13  0.53563730 under        TRUE
-#> 14  0.70717924 under        TRUE
-#> 15  4.83527357  over        TRUE
-#> 16  0.82970266 under       FALSE
-#> 17  0.37414611 under        TRUE
-#> 18  0.50148018 under        TRUE
-#> 19  1.91389932  over        TRUE
-#> 20  1.99619673  over        TRUE
-#> 21  0.32874780 under        TRUE
-#> 22  0.53927495 under        TRUE
-#> 23  1.28761251  over        TRUE
-#> 24  1.28450306  over        TRUE
-#> 25  0.63785102 under        TRUE
-#> 26  1.16420365  over        TRUE
-#> 27  1.86920349  over        TRUE
-#> 28  0.26338602 under        TRUE
-#> 29  1.45244429  over        TRUE
-#> 30  2.28770048  over        TRUE
-#> 31  0.28458331 under        TRUE
-#> 32  1.02720003  over       FALSE
-#> 33  0.41670644 under        TRUE
-#> 34  0.70591063 under        TRUE
-#> 35  0.20982369 under        TRUE
-#> 36  0.54208604 under        TRUE
-#> 37  0.38429314 under        TRUE
-#> 38  0.38851772 under        TRUE
-#> 39  1.22594512  over        TRUE
-#> 40  1.78394599  over        TRUE
-#> 41  1.27069950  over        TRUE
-#> 42  0.66419816 under        TRUE
-#> 43  2.44790888  over        TRUE
-#> 44  0.44265593 under        TRUE
-#> 45  0.41001092 under        TRUE
-#> 46  1.10387697  over       FALSE
-#> 47  1.06511129  over       FALSE
-#> 48  0.66947036 under        TRUE
-#> 49  1.58504681  over        TRUE
-#> 50  0.97449109 under       FALSE
-#> 51  0.70779221 under        TRUE
-#> 52  0.83561414 under        TRUE
-#> 53  1.35240851  over        TRUE
-#> 54  0.64985858 under        TRUE
-#> 55  0.69443982 under       FALSE
-#> 56  0.68694474 under        TRUE
-#> 57  0.96914866 under       FALSE
-#> 58  1.79426330  over        TRUE
-#> 59  0.46310463 under        TRUE
-#> 60  0.75488599 under        TRUE
-#> 61  0.37725121 under        TRUE
-#> 62  1.57031680  over        TRUE
-#> 63  0.25512080 under        TRUE
-#> 64  0.06458071 under        TRUE
-#> 65  0.57937372 under        TRUE
-#> 66  1.62630962  over        TRUE
-#> 67  0.98239304 under       FALSE
-#> 68  0.04783892 under        TRUE
-#> 69  0.40988091 under        TRUE
-#> 70  0.88601869 under        TRUE
-#> 71  1.53760194  over        TRUE
-#> 72  0.30880127 under        TRUE
-#> 73  0.00000000 under        TRUE
-#> 74  0.13098884 under        TRUE
-#> 75  0.28064603 under        TRUE
-#> 76  0.69500552 under        TRUE
-#> 77  5.21676075  over        TRUE
-#> 78  0.10434783 under        TRUE
-#> 79  0.59392882 under        TRUE
-#> 80  0.06611139 under        TRUE
-#> 81  0.00000000 under        TRUE
-transitions(fit, significant = TRUE)   # significant ones
-#>          from         to lag count   expected         prob    prob_col
-#> 1       adapt      adapt   1     0   10.58548 0.0000000000 0.000000000
-#> 2    cohesion      adapt   1     5   35.25026 0.0029498525 0.009416196
-#> 3   consensus      adapt   1    30  131.62178 0.0047400853 0.056497175
-#> 4     discuss      adapt   1   282   82.16743 0.0713743356 0.531073446
-#> 5     emotion      adapt   1     7   59.00000 0.0024673951 0.013182674
-#> 6     monitor      adapt   1    16   29.80155 0.0111653873 0.030131827
-#> 7        plan      adapt   1     6  128.04477 0.0009745006 0.011299435
-#> 8   synthesis      adapt   1   153   13.55939 0.2346625767 0.288135593
-#> 9       adapt   cohesion   1   139   34.24831 0.2730844794 0.080908033
-#> 10   cohesion   cohesion   1    46  114.04888 0.0271386431 0.026775320
-#> 11  consensus   cohesion   1    94  425.84976 0.0148522673 0.054714785
-#> 12 coregulate   cohesion   1    71  132.55238 0.0360406091 0.041327125
-#> 13    discuss   cohesion   1   188  265.84491 0.0475828904 0.109429569
-#> 14    emotion   cohesion   1   923  190.88889 0.3253436729 0.537252619
-#> 15       plan   cohesion   1   155  414.27666 0.0251745980 0.090221187
-#> 16  synthesis   cohesion   1    22   43.87013 0.0337423313 0.012805588
-#> 17      adapt  consensus   1   243  126.96593 0.4774066798 0.038153556
-#> 18   cohesion  consensus   1   844  422.80402 0.4979351032 0.132516879
-#> 19  consensus  consensus   1   519 1578.71778 0.0820034761 0.081488460
-#> 20 coregulate  consensus   1   265  491.40054 0.1345177665 0.041607788
-#> 21    discuss  consensus   1  1269  985.54494 0.3211845103 0.199246350
-#> 22    emotion  consensus   1   909  707.66667 0.3204088826 0.142722562
-#> 23    monitor  consensus   1   228  357.45024 0.1591067690 0.035798398
-#> 24       plan  consensus   1  1788 1535.81377 0.2904011694 0.280734809
-#> 25  synthesis  consensus   1   304  162.63612 0.4662576687 0.047731198
-#> 26      adapt coregulate   1    11   41.76380 0.0216110020 0.005250597
-#> 27   cohesion coregulate   1   202  139.07590 0.1191740413 0.096420048
-#> 28  consensus coregulate   1  1188  519.29875 0.1877073787 0.567064439
-#> 29 coregulate coregulate   1    46  161.63984 0.0233502538 0.021957041
-#> 30    emotion coregulate   1    97  232.77778 0.0341910469 0.046300716
-#> 31    monitor coregulate   1    83  117.57862 0.0579204466 0.039618138
-#> 32       plan coregulate   1   106  505.18603 0.0172161767 0.050596659
-#> 33  synthesis coregulate   1    29   53.49704 0.0444785276 0.013842482
-#> 34      adapt    discuss   1    30   78.06541 0.0589390963 0.007660878
-#> 35   cohesion    discuss   1   101  259.96240 0.0595870206 0.025791624
-#> 36  consensus    discuss   1  1190  970.67967 0.1880233844 0.303881512
-#> 37 coregulate    discuss   1   539  302.13919 0.2736040609 0.137640449
-#> 38    discuss    discuss   1   770  605.96546 0.1948873703 0.196629213
-#> 39    emotion    discuss   1   289  435.11111 0.1018681706 0.073799796
-#> 40    monitor    discuss   1   538  219.77942 0.3754361479 0.137385087
-#> 41       plan    discuss   1   418  944.30000 0.0678902063 0.106741573
-#> 42  synthesis    discuss   1    41   99.99734 0.0628834356 0.010469867
-#> 43  consensus    emotion   1   460  687.11033 0.0726813083 0.165945166
-#> 44 coregulate    emotion   1   339  213.87381 0.1720812183 0.122294372
-#> 45    emotion    emotion   1   218  308.00000 0.0768417342 0.078643579
-#> 46    monitor    emotion   1   130  155.57420 0.0907187718 0.046897547
-#> 47       plan    emotion   1   904  668.43708 0.1468247523 0.326118326
-#> 48  synthesis    emotion   1    46   70.78463 0.0705521472 0.016594517
-#> 49   cohesion    monitor   1    56   81.52039 0.0330383481 0.045602606
-#> 50 coregulate    monitor   1   170   94.74641 0.0862944162 0.138436482
-#> 51    discuss    monitor   1    88  190.02185 0.0222728423 0.071661238
-#> 52    emotion    monitor   1   103  136.44444 0.0363059570 0.083876221
-#> 53    monitor    monitor   1    26   68.91959 0.0181437544 0.021172638
-#> 54       plan    monitor   1   465  296.11859 0.0755237941 0.378664495
-#> 55  synthesis    monitor   1     8   31.35769 0.0122699387 0.006514658
-#> 56      adapt       plan   1     8  123.87600 0.0157170923 0.001287416
-#> 57   cohesion       plan   1   239  412.51439 0.1410029499 0.038461538
-#> 58  consensus       plan   1  2505 1540.29711 0.3957971243 0.403121983
-#> 59    discuss       plan   1    46  961.56010 0.0116426221 0.007402639
-#> 60    emotion       plan   1   283  690.44444 0.0997532605 0.045542324
-#> 61    monitor       plan   1   309  348.75111 0.2156315422 0.049726424
-#> 62       plan       plan   1  2304 1498.43724 0.3742082183 0.370775668
-#> 63  synthesis       plan   1    49  158.67810 0.0751533742 0.007885420
-#> 64      adapt  synthesis   1     0   13.75514 0.0000000000 0.000000000
-#> 65   cohesion  synthesis   1     6   45.80543 0.0035398230 0.008695652
-#> 66  consensus  synthesis   1    48  171.03396 0.0075841365 0.069565217
-#> 67 coregulate  synthesis   1    37   53.23699 0.0187817259 0.053623188
-#> 68    discuss  synthesis   1   557  106.77124 0.1409769679 0.807246377
-#> 69    emotion  synthesis   1     8   76.66667 0.0028198802 0.011594203
-#> 70    monitor  synthesis   1    23   38.72518 0.0160502442 0.033333333
-#> 71       plan  synthesis   1    11  166.38585 0.0017865844 0.015942029
-#> 72  synthesis  synthesis   1     0   17.61955 0.0000000000 0.000000000
-#>       adj_res             p     yules_q       kappa    kappa_z       kappa_p
-#> 1   -3.321172  8.964036e-04 -1.00000000 -1.00000000  -3.407241  6.562326e-04
-#> 2   -5.328777  9.887630e-08 -0.76815515 -0.86487614  -5.501609  3.763398e-08
-#> 3  -10.321470  5.635375e-25 -0.69808622 -0.78064489 -10.626996  2.231867e-26
-#> 4   24.231765 1.029539e-129  0.73632074  0.41898018  23.262364 1.066476e-119
-#> 5   -7.256332  3.977281e-13 -0.81051007 -0.88686508  -7.477053  7.600754e-14
-#> 6   -2.629750  8.544776e-03 -0.31830027 -0.47547698  -2.729049  6.351727e-03
-#> 7  -12.511825  6.432933e-36 -0.93232010 -0.95497640 -12.779205  2.142483e-37
-#> 8   38.765883  0.000000e+00  0.90419397  0.25648706  36.979611 2.435758e-299
-#> 9   18.721459  3.309601e-78  0.69595780  0.19728728  17.534158  7.860557e-69
-#> 10  -6.828371  8.588429e-12 -0.46004781 -0.62550338  -7.428456  1.098727e-13
-#> 11 -19.199681  3.723726e-82 -0.71939250 -0.79294659 -20.152734  2.546563e-90
-#> 12  -5.762519  8.286776e-09 -0.33555110 -0.50164445  -6.453101  1.095842e-10
-#> 13  -5.377083  7.570229e-08 -0.20862594 -0.34035996  -6.470425  9.772769e-11
-#> 14  58.195387  0.000000e+00  0.85999151  0.43927962  54.994955  0.000000e+00
-#> 15 -15.141283  8.650916e-52 -0.54521777 -0.64961238 -16.229253  3.132462e-59
-#> 16  -3.463455  5.332862e-04 -0.35374869 -0.54817843  -4.013098  5.992696e-05
-#> 17  12.006664  3.278050e-33  0.47618556  0.25461753  10.574333  3.919551e-26
-#> 18  24.470257 3.063603e-132  0.53350656  0.28159408  21.833395 1.118017e-105
-#> 19 -35.497755 5.323515e-276 -0.66124843 -0.69069542 -37.566241 7.651900e-309
-#> 20 -12.271654  1.285985e-34 -0.38450860 -0.49674131 -13.674891  1.434222e-42
-#> 21  11.335976  8.705623e-30  0.20921222  0.06709475   8.327445  8.260609e-17
-#> 22   9.265853  1.935238e-20  0.19624970  0.06471949   6.650739  2.916241e-11
-#> 23  -8.134771  4.127192e-16 -0.28754940 -0.39078314  -8.961317  3.208234e-19
-#> 24   8.526657  1.506377e-17  0.13857046  0.03067308   5.003000  5.644499e-07
-#> 25  12.961486  2.022890e-38  0.46093598  0.22591268  10.797602  3.533111e-27
-#> 26  -5.018838  5.198507e-07 -0.60882735 -0.74370177  -5.124343  2.985764e-07
-#> 27   5.763652  8.231325e-09  0.22132666  0.03509009   5.375263  7.647078e-08
-#> 28  35.315814 3.358380e-273  0.64674728  0.41173975  34.579929 5.061358e-262
-#> 29  -9.882335  4.966221e-23 -0.59867800 -0.72162537 -10.055133  8.720377e-24
-#> 30  -9.852010  6.718664e-23 -0.46333992 -0.59281732 -10.107190  5.133562e-24
-#> 31  -3.425915  6.127324e-04 -0.19406423 -0.29328946  -3.404199  6.635848e-04
-#> 32 -21.279390 1.762194e-100 -0.73440542 -0.79340786 -21.470606 2.931680e-102
-#> 33  -3.541249  3.982380e-04 -0.32096577 -0.48650863  -3.857909  1.143613e-04
-#> 34  -5.972127  2.341794e-09 -0.49178012 -0.65058433  -6.624680  3.480016e-11
-#> 35 -11.089408  1.412188e-28 -0.50087253 -0.64561891 -12.273561  1.256050e-34
-#> 36   8.821638  1.127978e-18  0.16657595  0.04251186   5.276346  1.317850e-07
-#> 37  15.416242  1.272999e-53  0.38489574  0.11563963  12.983856  1.510790e-38
-#> 38   7.877160  3.349058e-15  0.17304750  0.03014949   5.002635  5.655205e-07
-#> 39  -8.074444  6.778478e-16 -0.25288227 -0.39356590  -9.916283  3.536845e-23
-#> 40  24.012112 2.078138e-127  0.57333274  0.23656606  22.125436 1.798889e-108
-#> 41 -21.367339 2.690331e-101 -0.50306997 -0.59275813 -23.705396 3.172039e-124
-#> 42  -6.495438  8.279245e-11 -0.46653428 -0.63709979  -7.466048  8.263939e-14
-#> 43 -10.581177  3.643527e-26 -0.27174124 -0.39403300 -13.272713  3.332919e-40
-#> 44   9.433227  3.976612e-21  0.28701490  0.05318708   7.212594  5.489597e-13
-#> 45  -5.761010  8.361185e-09 -0.20740022 -0.36522504  -7.619099  2.554530e-14
-#> 46  -2.235275  2.539932e-02 -0.10477842 -0.23219212  -3.297611  9.751109e-04
-#> 47  11.077730  1.609004e-28  0.23458138  0.07036128   7.355536  1.901625e-13
-#> 48  -3.160714  1.573828e-03 -0.23691712 -0.43501266  -4.220820  2.434153e-05
-#> 49  -2.998287  2.715016e-03 -0.20425402 -0.44695480  -4.789371  1.673049e-06
-#> 50   8.248683  1.601497e-16  0.33531696  0.03757770   5.193875  2.059612e-07
-#> 51  -8.250868  1.572485e-16 -0.41996506 -0.62544607 -10.728282  7.497680e-27
-#> 52  -3.112615  1.854376e-03 -0.16119431 -0.39165991  -5.562385  2.661117e-08
-#> 53  -5.454184  4.919832e-08 -0.47926363 -0.68852121  -6.656994  2.794840e-11
-#> 54  11.547048  7.639963e-31  0.33174607  0.08714244   6.201821  5.581354e-10
-#> 55  -4.330899  1.485020e-05 -0.61170418 -0.80069564  -5.288972  1.230055e-07
-#> 56 -12.090133  1.190940e-33 -0.90763463 -0.93996853 -12.578374  2.776858e-36
-#> 57 -10.164606  2.852717e-24 -0.34161399 -0.45972490 -11.485298  1.563950e-30
-#> 58  32.584046 6.901601e-233  0.46476603  0.17441815  28.448854 5.034845e-178
-#> 59 -36.920053 2.203193e-298 -0.94280770 -0.95518391 -38.199414 2.879810e-319
-#> 60 -18.907708  9.854735e-80 -0.52298101 -0.61740429 -20.443299  6.891972e-93
-#> 61  -2.518793  1.177580e-02 -0.08279025 -0.15265932  -3.441229  5.790786e-04
-#> 62  27.463606 4.779402e-166  0.40569788  0.14132672  23.450016 1.321402e-121
-#> 63 -10.139979  3.671800e-24 -0.60424280 -0.72057367 -11.097153  1.295031e-28
-#> 64  -3.797991  1.458734e-04 -1.00000000 -1.00000000  -3.921252  8.808993e-05
-#> 65  -6.170903  6.790092e-10 -0.78531293 -0.87677594  -6.418691  1.374511e-10
-#> 66 -10.997344  3.935548e-28 -0.63806313 -0.73328344 -11.488170  1.512823e-30
-#> 67  -2.348460  1.885120e-02 -0.19649048 -0.34485584  -2.734633  6.244993e-03
-#> 68  48.046315  0.000000e+00  0.92718439  0.72078887  46.056449  0.000000e+00
-#> 69  -8.432723  3.377132e-17 -0.83271163 -0.90174133  -8.749372  2.145424e-18
-#> 70  -2.636879  8.367269e-03 -0.27139592 -0.42699997  -2.820536  4.794346e-03
-#> 71 -14.019129  1.190665e-44 -0.90606241 -0.93727164 -14.434398  3.143784e-47
-#> 72  -4.310854  1.626251e-05 -1.00000000 -1.00000000  -4.512807  6.397511e-06
-#>           lift  sign significant
-#> 1   0.00000000 under        TRUE
-#> 2   0.14184291 under        TRUE
-#> 3   0.22792580 under        TRUE
-#> 4   3.43201678  over        TRUE
-#> 5   0.11864407 under        TRUE
-#> 6   0.53688481 under        TRUE
-#> 7   0.04685861 under        TRUE
-#> 8  11.28369034  over        TRUE
-#> 9   4.05859488  over        TRUE
-#> 10  0.40333584 under        TRUE
-#> 11  0.22073512 under        TRUE
-#> 12  0.53563730 under        TRUE
-#> 13  0.70717924 under        TRUE
-#> 14  4.83527357  over        TRUE
-#> 15  0.37414611 under        TRUE
-#> 16  0.50148018 under        TRUE
-#> 17  1.91389932  over        TRUE
-#> 18  1.99619673  over        TRUE
-#> 19  0.32874780 under        TRUE
-#> 20  0.53927495 under        TRUE
-#> 21  1.28761251  over        TRUE
-#> 22  1.28450306  over        TRUE
-#> 23  0.63785102 under        TRUE
-#> 24  1.16420365  over        TRUE
-#> 25  1.86920349  over        TRUE
-#> 26  0.26338602 under        TRUE
-#> 27  1.45244429  over        TRUE
-#> 28  2.28770048  over        TRUE
-#> 29  0.28458331 under        TRUE
-#> 30  0.41670644 under        TRUE
-#> 31  0.70591063 under        TRUE
-#> 32  0.20982369 under        TRUE
-#> 33  0.54208604 under        TRUE
-#> 34  0.38429314 under        TRUE
-#> 35  0.38851772 under        TRUE
-#> 36  1.22594512  over        TRUE
-#> 37  1.78394599  over        TRUE
-#> 38  1.27069950  over        TRUE
-#> 39  0.66419816 under        TRUE
-#> 40  2.44790888  over        TRUE
-#> 41  0.44265593 under        TRUE
-#> 42  0.41001092 under        TRUE
-#> 43  0.66947036 under        TRUE
-#> 44  1.58504681  over        TRUE
-#> 45  0.70779221 under        TRUE
-#> 46  0.83561414 under        TRUE
-#> 47  1.35240851  over        TRUE
-#> 48  0.64985858 under        TRUE
-#> 49  0.68694474 under        TRUE
-#> 50  1.79426330  over        TRUE
-#> 51  0.46310463 under        TRUE
-#> 52  0.75488599 under        TRUE
-#> 53  0.37725121 under        TRUE
-#> 54  1.57031680  over        TRUE
-#> 55  0.25512080 under        TRUE
-#> 56  0.06458071 under        TRUE
-#> 57  0.57937372 under        TRUE
-#> 58  1.62630962  over        TRUE
-#> 59  0.04783892 under        TRUE
-#> 60  0.40988091 under        TRUE
-#> 61  0.88601869 under        TRUE
-#> 62  1.53760194  over        TRUE
-#> 63  0.30880127 under        TRUE
-#> 64  0.00000000 under        TRUE
-#> 65  0.13098884 under        TRUE
-#> 66  0.28064603 under        TRUE
-#> 67  0.69500552 under        TRUE
-#> 68  5.21676075  over        TRUE
-#> 69  0.10434783 under        TRUE
-#> 70  0.59392882 under        TRUE
-#> 71  0.06611139 under        TRUE
-#> 72  0.00000000 under        TRUE
-transitions(fit, direction = "over")   # over-represented
-#>          from         to lag count   expected       prob   prob_col   adj_res
-#> 1     discuss      adapt   1   282   82.16743 0.07137434 0.53107345 24.231765
-#> 2   synthesis      adapt   1   153   13.55939 0.23466258 0.28813559 38.765883
-#> 3       adapt   cohesion   1   139   34.24831 0.27308448 0.08090803 18.721459
-#> 4     emotion   cohesion   1   923  190.88889 0.32534367 0.53725262 58.195387
-#> 5       adapt  consensus   1   243  126.96593 0.47740668 0.03815356 12.006664
-#> 6    cohesion  consensus   1   844  422.80402 0.49793510 0.13251688 24.470257
-#> 7     discuss  consensus   1  1269  985.54494 0.32118451 0.19924635 11.335976
-#> 8     emotion  consensus   1   909  707.66667 0.32040888 0.14272256  9.265853
-#> 9        plan  consensus   1  1788 1535.81377 0.29040117 0.28073481  8.526657
-#> 10  synthesis  consensus   1   304  162.63612 0.46625767 0.04773120 12.961486
-#> 11   cohesion coregulate   1   202  139.07590 0.11917404 0.09642005  5.763652
-#> 12  consensus coregulate   1  1188  519.29875 0.18770738 0.56706444 35.315814
-#> 13  consensus    discuss   1  1190  970.67967 0.18802338 0.30388151  8.821638
-#> 14 coregulate    discuss   1   539  302.13919 0.27360406 0.13764045 15.416242
-#> 15    discuss    discuss   1   770  605.96546 0.19488737 0.19662921  7.877160
-#> 16    monitor    discuss   1   538  219.77942 0.37543615 0.13738509 24.012112
-#> 17 coregulate    emotion   1   339  213.87381 0.17208122 0.12229437  9.433227
-#> 18       plan    emotion   1   904  668.43708 0.14682475 0.32611833 11.077730
-#> 19 coregulate    monitor   1   170   94.74641 0.08629442 0.13843648  8.248683
-#> 20       plan    monitor   1   465  296.11859 0.07552379 0.37866450 11.547048
-#> 21  consensus       plan   1  2505 1540.29711 0.39579712 0.40312198 32.584046
-#> 22       plan       plan   1  2304 1498.43724 0.37420822 0.37077567 27.463606
-#> 23    discuss  synthesis   1   557  106.77124 0.14097697 0.80724638 48.046315
-#>                p   yules_q      kappa   kappa_z       kappa_p      lift sign
-#> 1  1.029539e-129 0.7363207 0.41898018 23.262364 1.066476e-119  3.432017 over
-#> 2   0.000000e+00 0.9041940 0.25648706 36.979611 2.435758e-299 11.283690 over
-#> 3   3.309601e-78 0.6959578 0.19728728 17.534158  7.860557e-69  4.058595 over
-#> 4   0.000000e+00 0.8599915 0.43927962 54.994955  0.000000e+00  4.835274 over
-#> 5   3.278050e-33 0.4761856 0.25461753 10.574333  3.919551e-26  1.913899 over
-#> 6  3.063603e-132 0.5335066 0.28159408 21.833395 1.118017e-105  1.996197 over
-#> 7   8.705623e-30 0.2092122 0.06709475  8.327445  8.260609e-17  1.287613 over
-#> 8   1.935238e-20 0.1962497 0.06471949  6.650739  2.916241e-11  1.284503 over
-#> 9   1.506377e-17 0.1385705 0.03067308  5.003000  5.644499e-07  1.164204 over
-#> 10  2.022890e-38 0.4609360 0.22591268 10.797602  3.533111e-27  1.869203 over
-#> 11  8.231325e-09 0.2213267 0.03509009  5.375263  7.647078e-08  1.452444 over
-#> 12 3.358380e-273 0.6467473 0.41173975 34.579929 5.061358e-262  2.287700 over
-#> 13  1.127978e-18 0.1665760 0.04251186  5.276346  1.317850e-07  1.225945 over
-#> 14  1.272999e-53 0.3848957 0.11563963 12.983856  1.510790e-38  1.783946 over
-#> 15  3.349058e-15 0.1730475 0.03014949  5.002635  5.655205e-07  1.270699 over
-#> 16 2.078138e-127 0.5733327 0.23656606 22.125436 1.798889e-108  2.447909 over
-#> 17  3.976612e-21 0.2870149 0.05318708  7.212594  5.489597e-13  1.585047 over
-#> 18  1.609004e-28 0.2345814 0.07036128  7.355536  1.901625e-13  1.352409 over
-#> 19  1.601497e-16 0.3353170 0.03757770  5.193875  2.059612e-07  1.794263 over
-#> 20  7.639963e-31 0.3317461 0.08714244  6.201821  5.581354e-10  1.570317 over
-#> 21 6.901601e-233 0.4647660 0.17441815 28.448854 5.034845e-178  1.626310 over
-#> 22 4.779402e-166 0.4056979 0.14132672 23.450016 1.321402e-121  1.537602 over
-#> 23  0.000000e+00 0.9271844 0.72078887 46.056449  0.000000e+00  5.216761 over
-#>    significant
-#> 1         TRUE
-#> 2         TRUE
-#> 3         TRUE
-#> 4         TRUE
-#> 5         TRUE
-#> 6         TRUE
-#> 7         TRUE
-#> 8         TRUE
-#> 9         TRUE
-#> 10        TRUE
-#> 11        TRUE
-#> 12        TRUE
-#> 13        TRUE
-#> 14        TRUE
-#> 15        TRUE
-#> 16        TRUE
-#> 17        TRUE
-#> 18        TRUE
-#> 19        TRUE
-#> 20        TRUE
-#> 21        TRUE
-#> 22        TRUE
-#> 23        TRUE
-transitions(fit, min_count = 500)      # frequently observed
-#>          from         to lag count  expected       prob   prob_col    adj_res
-#> 1     emotion   cohesion   1   923  190.8889 0.32534367 0.53725262  58.195387
-#> 2    cohesion  consensus   1   844  422.8040 0.49793510 0.13251688  24.470257
-#> 3   consensus  consensus   1   519 1578.7178 0.08200348 0.08148846 -35.497755
-#> 4     discuss  consensus   1  1269  985.5449 0.32118451 0.19924635  11.335976
-#> 5     emotion  consensus   1   909  707.6667 0.32040888 0.14272256   9.265853
-#> 6        plan  consensus   1  1788 1535.8138 0.29040117 0.28073481   8.526657
-#> 7   consensus coregulate   1  1188  519.2988 0.18770738 0.56706444  35.315814
-#> 8   consensus    discuss   1  1190  970.6797 0.18802338 0.30388151   8.821638
-#> 9  coregulate    discuss   1   539  302.1392 0.27360406 0.13764045  15.416242
-#> 10    discuss    discuss   1   770  605.9655 0.19488737 0.19662921   7.877160
-#> 11    monitor    discuss   1   538  219.7794 0.37543615 0.13738509  24.012112
-#> 12       plan    emotion   1   904  668.4371 0.14682475 0.32611833  11.077730
-#> 13  consensus       plan   1  2505 1540.2971 0.39579712 0.40312198  32.584046
-#> 14       plan       plan   1  2304 1498.4372 0.37420822 0.37077567  27.463606
-#> 15    discuss  synthesis   1   557  106.7712 0.14097697 0.80724638  48.046315
-#>                p    yules_q       kappa    kappa_z       kappa_p      lift
-#> 1   0.000000e+00  0.8599915  0.43927962  54.994955  0.000000e+00 4.8352736
-#> 2  3.063603e-132  0.5335066  0.28159408  21.833395 1.118017e-105 1.9961967
-#> 3  5.323515e-276 -0.6612484 -0.69069542 -37.566241 7.651900e-309 0.3287478
-#> 4   8.705623e-30  0.2092122  0.06709475   8.327445  8.260609e-17 1.2876125
-#> 5   1.935238e-20  0.1962497  0.06471949   6.650739  2.916241e-11 1.2845031
-#> 6   1.506377e-17  0.1385705  0.03067308   5.003000  5.644499e-07 1.1642037
-#> 7  3.358380e-273  0.6467473  0.41173975  34.579929 5.061358e-262 2.2877005
-#> 8   1.127978e-18  0.1665760  0.04251186   5.276346  1.317850e-07 1.2259451
-#> 9   1.272999e-53  0.3848957  0.11563963  12.983856  1.510790e-38 1.7839460
-#> 10  3.349058e-15  0.1730475  0.03014949   5.002635  5.655205e-07 1.2706995
-#> 11 2.078138e-127  0.5733327  0.23656606  22.125436 1.798889e-108 2.4479089
-#> 12  1.609004e-28  0.2345814  0.07036128   7.355536  1.901625e-13 1.3524085
-#> 13 6.901601e-233  0.4647660  0.17441815  28.448854 5.034845e-178 1.6263096
-#> 14 4.779402e-166  0.4056979  0.14132672  23.450016 1.321402e-121 1.5376019
-#> 15  0.000000e+00  0.9271844  0.72078887  46.056449  0.000000e+00 5.2167608
-#>     sign significant
-#> 1   over        TRUE
-#> 2   over        TRUE
-#> 3  under        TRUE
-#> 4   over        TRUE
-#> 5   over        TRUE
-#> 6   over        TRUE
-#> 7   over        TRUE
-#> 8   over        TRUE
-#> 9   over        TRUE
-#> 10  over        TRUE
-#> 11  over        TRUE
-#> 12  over        TRUE
-#> 13  over        TRUE
-#> 14  over        TRUE
-#> 15  over        TRUE
+fit <- lsa(engagement)
+transitions(fit)
+#>         from         to lag count  expected       prob   prob_col     adj_res
+#> 1     Active     Active   1   459 247.03460 0.69756839 0.70506912  21.6628107
+#> 2    Average     Active   1   153 281.94983 0.20372836 0.23502304 -12.9060384
+#> 3 Disengaged     Active   1    39 122.01557 0.12000000 0.05990783 -10.5494860
+#> 4     Active    Average   1   176 289.53518 0.26747720 0.23066841 -11.3191319
+#> 5    Average    Average   1   458 330.45732 0.60985353 0.60026212  12.4526148
+#> 6 Disengaged    Average   1   129 143.00750 0.39692308 0.16906946  -1.7364613
+#> 7     Active Disengaged   1    23 121.43022 0.03495441 0.07187500 -12.5569254
+#> 8    Average Disengaged   1   140 138.59285 0.18641811 0.43750000   0.1757996
+#> 9 Disengaged Disengaged   1   157  59.97693 0.48307692 0.49062500  15.3904661
+#>               p     yules_q       kappa    kappa_z      kappa_p      lift  sign
+#> 1 4.602765e-104  0.82787794  0.44383295  19.187756 4.684307e-82 1.8580393  over
+#> 2  4.161672e-38 -0.60105804 -0.49940424 -14.696262 6.811736e-49 0.5426497 under
+#> 3  5.107575e-26 -0.69839167 -0.70694602 -11.462654 2.031922e-30 0.3196313 under
+#> 4  1.055115e-29 -0.53352593 -0.42415128 -12.481749 9.390092e-36 0.6078709 under
+#> 5  1.353374e-35  0.55305097  0.22748944   9.834808 7.971952e-23 1.3859581  over
+#> 6  8.248229e-02 -0.10831746 -0.16181958  -2.964801 3.028788e-03 0.9020506 under
+#> 7  3.642124e-36 -0.82647982 -0.82717329 -13.412058 5.139269e-41 0.1894092 under
+#> 8  8.604514e-01  0.01097122 -0.09034684  -1.655303 9.786312e-02 1.0101531  over
+#> 9  1.896612e-53  0.75441020  0.31355560  13.555614 7.339504e-42 2.6176731  over
+#>   significant
+#> 1        TRUE
+#> 2        TRUE
+#> 3        TRUE
+#> 4        TRUE
+#> 5        TRUE
+#> 6       FALSE
+#> 7        TRUE
+#> 8       FALSE
+#> 9        TRUE
+transitions(fit, significant = TRUE, sort = "strength")
+#>         from         to lag count  expected       prob   prob_col   adj_res
+#> 1     Active     Active   1   459 247.03460 0.69756839 0.70506912  21.66281
+#> 2 Disengaged Disengaged   1   157  59.97693 0.48307692 0.49062500  15.39047
+#> 3    Average     Active   1   153 281.94983 0.20372836 0.23502304 -12.90604
+#> 4     Active Disengaged   1    23 121.43022 0.03495441 0.07187500 -12.55693
+#> 5    Average    Average   1   458 330.45732 0.60985353 0.60026212  12.45261
+#> 6     Active    Average   1   176 289.53518 0.26747720 0.23066841 -11.31913
+#> 7 Disengaged     Active   1    39 122.01557 0.12000000 0.05990783 -10.54949
+#>               p    yules_q      kappa    kappa_z      kappa_p      lift  sign
+#> 1 4.602765e-104  0.8278779  0.4438330  19.187756 4.684307e-82 1.8580393  over
+#> 2  1.896612e-53  0.7544102  0.3135556  13.555614 7.339504e-42 2.6176731  over
+#> 3  4.161672e-38 -0.6010580 -0.4994042 -14.696262 6.811736e-49 0.5426497 under
+#> 4  3.642124e-36 -0.8264798 -0.8271733 -13.412058 5.139269e-41 0.1894092 under
+#> 5  1.353374e-35  0.5530510  0.2274894   9.834808 7.971952e-23 1.3859581  over
+#> 6  1.055115e-29 -0.5335259 -0.4241513 -12.481749 9.390092e-36 0.6078709 under
+#> 7  5.107575e-26 -0.6983917 -0.7069460 -11.462654 2.031922e-30 0.3196313 under
+#>   significant
+#> 1        TRUE
+#> 2        TRUE
+#> 3        TRUE
+#> 4        TRUE
+#> 5        TRUE
+#> 6        TRUE
+#> 7        TRUE
+transitions(fit, direction = "under")
+#>         from         to lag count expected       prob   prob_col   adj_res
+#> 1    Average     Active   1   153 281.9498 0.20372836 0.23502304 -12.90604
+#> 2 Disengaged     Active   1    39 122.0156 0.12000000 0.05990783 -10.54949
+#> 3     Active    Average   1   176 289.5352 0.26747720 0.23066841 -11.31913
+#> 4     Active Disengaged   1    23 121.4302 0.03495441 0.07187500 -12.55693
+#>              p    yules_q      kappa   kappa_z      kappa_p      lift  sign
+#> 1 4.161672e-38 -0.6010580 -0.4994042 -14.69626 6.811736e-49 0.5426497 under
+#> 2 5.107575e-26 -0.6983917 -0.7069460 -11.46265 2.031922e-30 0.3196313 under
+#> 3 1.055115e-29 -0.5335259 -0.4241513 -12.48175 9.390092e-36 0.6078709 under
+#> 4 3.642124e-36 -0.8264798 -0.8271733 -13.41206 5.139269e-41 0.1894092 under
+#>   significant
+#> 1        TRUE
+#> 2        TRUE
+#> 3        TRUE
+#> 4        TRUE
+transitions(fit, min_count = 150, sort = "count")
+#>         from         to lag count  expected      prob  prob_col   adj_res
+#> 1     Active     Active   1   459 247.03460 0.6975684 0.7050691  21.66281
+#> 2    Average    Average   1   458 330.45732 0.6098535 0.6002621  12.45261
+#> 3     Active    Average   1   176 289.53518 0.2674772 0.2306684 -11.31913
+#> 4 Disengaged Disengaged   1   157  59.97693 0.4830769 0.4906250  15.39047
+#> 5    Average     Active   1   153 281.94983 0.2037284 0.2350230 -12.90604
+#>               p    yules_q      kappa    kappa_z      kappa_p      lift  sign
+#> 1 4.602765e-104  0.8278779  0.4438330  19.187756 4.684307e-82 1.8580393  over
+#> 2  1.353374e-35  0.5530510  0.2274894   9.834808 7.971952e-23 1.3859581  over
+#> 3  1.055115e-29 -0.5335259 -0.4241513 -12.481749 9.390092e-36 0.6078709 under
+#> 4  1.896612e-53  0.7544102  0.3135556  13.555614 7.339504e-42 2.6176731  over
+#> 5  4.161672e-38 -0.6010580 -0.4994042 -14.696262 6.811736e-49 0.5426497 under
+#>   significant
+#> 1        TRUE
+#> 2        TRUE
+#> 3        TRUE
+#> 4        TRUE
+#> 5        TRUE
 
-transitions(certainty_lsa(fit))                      # analytic CIs per edge
-#>          from         to observed prob_observed    prob_mean      prob_se
-#> 1       adapt      adapt        0  0.0000000000 0.0009737098 0.0013750249
-#> 2    cohesion      adapt        5  0.0029498525 0.0032362460 0.0013773000
-#> 3   consensus      adapt       30  0.0047400853 0.0048156627 0.0008698085
-#> 4  coregulate      adapt       32  0.0162436548 0.0164598633 0.0028626657
-#> 5     discuss      adapt      282  0.0713743356 0.0714195424 0.0040941403
-#> 6     emotion      adapt        7  0.0024673951 0.0026394510 0.0009623491
-#> 7     monitor      adapt       16  0.0111653873 0.0114782609 0.0028085116
-#> 8        plan      adapt        6  0.0009745006 0.0010549379 0.0004135288
-#> 9   synthesis      adapt      153  0.2346625767 0.2338156893 0.0165065219
-#> 10      adapt   cohesion      139  0.2730844794 0.2716650438 0.0196105497
-#> 11   cohesion   cohesion       46  0.0271386431 0.0273609885 0.0039559739
-#> 12  consensus   cohesion       94  0.0148522673 0.0149206600 0.0015232579
-#> 13 coregulate   cohesion       71  0.0360406091 0.0362116992 0.0042031681
-#> 14    discuss   cohesion      188  0.0475828904 0.0476551637 0.0033868543
-#> 15    emotion   cohesion      923  0.3253436729 0.3250043991 0.0087850625
-#> 16    monitor   cohesion       80  0.0558269365 0.0560000000 0.0060621277
-#> 17       plan   cohesion      155  0.0251745980 0.0252373610 0.0019979883
-#> 18  synthesis   cohesion       22  0.0337423313 0.0342726580 0.0070950144
-#> 19      adapt  consensus      243  0.4774066798 0.4741966894 0.0220139628
-#> 20   cohesion  consensus      844  0.4979351032 0.4969108561 0.0121247669
-#> 21  consensus  consensus      519  0.0820034761 0.0820241573 0.0034477070
-#> 22 coregulate  consensus      265  0.1345177665 0.1344644214 0.0076755170
-#> 23    discuss  consensus     1269  0.3211845103 0.3209455189 0.0074218536
-#> 24    emotion  consensus      909  0.3204088826 0.3200774239 0.0087499791
-#> 25    monitor  consensus      228  0.1591067690 0.1589565217 0.0096403648
-#> 26       plan  consensus     1788  0.2904011694 0.2902702264 0.0057818829
-#> 27  synthesis  consensus      304  0.4662576687 0.4638233054 0.0194483325
-#> 28      adapt coregulate       11  0.0216110020 0.0223953262 0.0065233043
-#> 29   cohesion coregulate      202  0.1191740413 0.1191526920 0.0078562253
-#> 30  consensus coregulate     1188  0.1877073787 0.1876529565 0.0049056023
-#> 31 coregulate coregulate       46  0.0233502538 0.0235502659 0.0034118061
-#> 32    discuss coregulate      333  0.0842824601 0.0843129819 0.0044173841
-#> 33    emotion coregulate       97  0.0341910469 0.0343128629 0.0034142590
-#> 34    monitor coregulate       83  0.0579204466 0.0580869565 0.0061672249
-#> 35       plan coregulate      106  0.0172161767 0.0172847521 0.0016602250
-#> 36  synthesis coregulate       29  0.0444785276 0.0449352628 0.0080790849
-#> 37      adapt    discuss       30  0.0589390963 0.0593962999 0.0104205429
-#> 38   cohesion    discuss      101  0.0595870206 0.0597234481 0.0057466126
-#> 39  consensus    discuss     1190  0.1880233844 0.1879687377 0.0049087738
-#> 40 coregulate    discuss      539  0.2736040609 0.2732337301 0.0100259612
-#> 41    discuss    discuss      770  0.1948873703 0.1947920617 0.0062962805
-#> 42    emotion    discuss      289  0.1018681706 0.1018828084 0.0056737046
-#> 43    monitor    discuss      538  0.3754361479 0.3746086957 0.0127617406
-#> 44       plan    discuss      418  0.0678902063 0.0679217723 0.0032051785
-#> 45  synthesis    discuss       41  0.0628834356 0.0632140137 0.0094902794
-#> 46      adapt    emotion       61  0.1198428291 0.1197663096 0.0143144161
-#> 47   cohesion    emotion      196  0.1156342183 0.1156222418 0.0077544550
-#> 48  consensus    emotion      460  0.0726813083 0.0727086129 0.0032624576
-#> 49 coregulate    emotion      339  0.1720812183 0.1719422639 0.0084895195
-#> 50    discuss    emotion      418  0.1057960010 0.1058020478 0.0048899936
-#> 51    emotion    emotion      218  0.0768417342 0.0768960056 0.0049972027
-#> 52    monitor    emotion      130  0.0907187718 0.0907826087 0.0075749586
-#> 53       plan    emotion      904  0.1468247523 0.1467986692 0.0045082538
-#> 54  synthesis    emotion       46  0.0705521472 0.0708301599 0.0100048086
-#> 55      adapt    monitor       17  0.0333988212 0.0340798442 0.0079988348
-#> 56   cohesion    monitor       56  0.0330383481 0.0332450721 0.0043474392
-#> 57  consensus    monitor      295  0.0466108390 0.0466566669 0.0026498748
-#> 58 coregulate    monitor      170  0.0862944162 0.0863509749 0.0063195303
-#> 59    discuss    monitor       88  0.0222728423 0.0223739097 0.0023512659
-#> 60    emotion    monitor      103  0.0363059570 0.0364244237 0.0035138968
-#> 61    monitor    monitor       26  0.0181437544 0.0184347826 0.0035466935
-#> 62       plan    monitor      465  0.0755237941 0.0755497850 0.0033665100
-#> 63  synthesis    monitor        8  0.0122699387 0.0129474486 0.0044087387
-#> 64      adapt       plan        8  0.0157170923 0.0165530672 0.0056249934
-#> 65   cohesion       plan      239  0.1410029499 0.1409238011 0.0084376149
-#> 66  consensus       plan     2505  0.3957971243 0.3955948528 0.0061437456
-#> 67 coregulate       plan      471  0.2390862944 0.2387946316 0.0095923426
-#> 68    discuss       plan       46  0.0116426221 0.0117557831 0.0017135719
-#> 69    emotion       plan      283  0.0997532605 0.0997712476 0.0056211983
-#> 70    monitor       plan      309  0.2156315422 0.2153043478 0.0108373248
-#> 71       plan       plan     2304  0.3742082183 0.3740160675 0.0061637960
-#> 72  synthesis       plan       49  0.0751533742 0.0753998477 0.0102970859
-#> 73      adapt  synthesis        0  0.0000000000 0.0009737098 0.0013750249
-#> 74   cohesion  synthesis        6  0.0035398230 0.0038246543 0.0014968410
-#> 75  consensus  synthesis       48  0.0075841365 0.0076576932 0.0010952760
-#> 76 coregulate  synthesis       37  0.0187817259 0.0189921499 0.0030710352
-#> 77    discuss  synthesis      557  0.1409769679 0.1409429908 0.0055319360
-#> 78    emotion  synthesis        8  0.0028198802 0.0029913778 0.0010243181
-#> 79    monitor  synthesis       23  0.0160502442 0.0163478261 0.0033434578
-#> 80       plan  synthesis       11  0.0017865844 0.0018664286 0.0005498213
-#> 81  synthesis  synthesis        0  0.0000000000 0.0007616146 0.0010758564
-#>     prob_ci_low prob_ci_high      p_value stable adj_res_observed
-#> 1  9.576485e-07  0.004886981 1.000000e+00  FALSE       -3.3211717
-#> 2  1.124128e-03  0.006440504 5.689098e-01  FALSE       -5.3287770
-#> 3  3.263486e-03  0.006663359 1.681180e-01  FALSE      -10.3214699
-#> 4  1.132697e-02  0.022518610 1.518037e-01  FALSE       -1.4741101
-#> 5  6.360278e-02  0.079646724 2.421746e-05   TRUE       24.2317649
-#> 6  1.102949e-03  0.004832486 5.018095e-01  FALSE       -7.2563320
-#> 7  6.643390e-03  0.017595165 3.097730e-01  FALSE       -2.6297497
-#> 8  4.066203e-04  0.002006478 5.340563e-01  FALSE      -12.5118247
-#> 9  2.022487e-01  0.266918656 3.888167e-04   TRUE       38.7658830
-#> 10 2.340941e-01  0.310920604 4.835908e-04   TRUE       18.7214591
-#> 11 2.014783e-02  0.035626301 8.476233e-02  FALSE       -6.8283709
-#> 12 1.208285e-02  0.018048429 1.555809e-02   TRUE      -19.1996809
-#> 13 2.842808e-02  0.044884448 3.230071e-02   TRUE       -5.7625189
-#> 14 4.123662e-02  0.054506833 5.936383e-04   TRUE       -5.3770830
-#> 15 3.079042e-01  0.342337896 1.165794e-22   TRUE       58.1953875
-#> 16 4.471565e-02  0.068453708 2.166366e-02   TRUE       -1.7822132
-#> 17 2.146945e-02  0.029297073 1.993356e-03   TRUE      -15.1412832
-#> 18 2.175935e-02  0.049466008 2.278030e-01  FALSE       -3.4634548
-#> 19 4.311631e-01  0.517420630 4.700272e-08   TRUE       12.0066636
-#> 20 4.731531e-01  0.520675460 2.107004e-25   TRUE       24.4702565
-#> 21 7.539287e-02  0.088905448 1.354206e-08   TRUE      -35.4977548
-#> 22 1.197760e-01  0.149854129 1.892381e-05   TRUE      -12.2716544
-#> 23 3.064857e-01  0.335576871 2.348440e-30   TRUE       11.3359759
-#> 24 3.030493e-01  0.337345430 3.129158e-22   TRUE        9.2658532
-#> 25 1.405179e-01  0.178293873 5.033305e-05   TRUE       -8.1347706
-#> 26 2.790029e-01  0.301666464 1.108739e-40   TRUE        8.5266570
-#> 27 4.258220e-01  0.502033368 1.374543e-09   TRUE       12.9614865
-#> 28 1.145573e-02  0.036837786 3.947093e-01  FALSE       -5.0188376
-#> 29 1.041855e-01  0.134968733 1.965361e-04   TRUE        5.7636516
-#> 30 1.781322e-01  0.197360519 4.188544e-25   TRUE       35.3158137
-#> 31 1.733209e-02  0.030681345 8.550595e-02  FALSE       -9.8823345
-#> 32 7.585629e-02  0.093167762 4.119865e-06   TRUE        0.5559806
-#> 33 2.793718e-02  0.041309050 1.293984e-02   TRUE       -9.8520101
-#> 34 4.659364e-02  0.070744174 1.925985e-02   TRUE       -3.4259149
-#> 35 1.418173e-02  0.020684398 1.027419e-02   TRUE      -21.2793902
-#> 36 3.045649e-02  0.062034774 1.643113e-01  FALSE       -3.5412487
-#> 37 4.065122e-02  0.081386089 1.534920e-01  FALSE       -5.9721275
-#> 38 4.896017e-02  0.071467672 1.002673e-02   TRUE      -11.0894082
-#> 39 1.784417e-01  0.197682422 3.765904e-25   TRUE        8.8216376
-#> 40 2.538038e-01  0.293098808 2.556384e-11   TRUE       15.4162419
-#> 41 1.825990e-01  0.207277399 1.061891e-13   TRUE        7.8771601
-#> 42 9.103112e-02  0.113265231 1.315469e-05   TRUE       -8.0744440
-#> 43 3.497655e-01  0.399782415 2.252537e-13   TRUE       24.0121119
-#> 44 6.177383e-02  0.074335360 3.868296e-07   TRUE      -21.3673394
-#> 45 4.590984e-02  0.083035465 9.551210e-02  FALSE       -6.4954375
-#> 46 9.315001e-02  0.149186117 3.581136e-02   TRUE        0.8261362
-#> 47 1.008585e-01  0.131242631 2.503126e-04   TRUE        0.9681845
-#> 48 6.644327e-02  0.079229526 9.900443e-08   TRUE      -10.5811769
-#> 49 1.556218e-01  0.188892117 7.993643e-07   TRUE        9.4332273
-#> 50 9.640851e-02  0.115573117 1.960936e-07   TRUE       -0.6086274
-#> 51 6.738744e-02  0.086968570 1.749894e-04   TRUE       -5.7610105
-#> 52 7.648453e-02  0.106158803 3.034831e-03   TRUE       -2.2352747
-#> 53 1.380720e-01  0.155742466 8.660447e-15   TRUE       11.0777299
-#> 54 5.249348e-02  0.091640697 7.639906e-02  FALSE       -3.1607143
-#> 55 2.019097e-02  0.051393645 2.880250e-01  FALSE       -1.5652351
-#> 56 2.525685e-02  0.042272638 5.688609e-02  FALSE       -2.9982873
-#> 57 4.160007e-02  0.051984390 2.182023e-05   TRUE       -0.6361332
-#> 58 7.436774e-02  0.099127675 7.871782e-04   TRUE        8.2486829
-#> 59 1.799858e-02  0.027206374 1.856001e-02   TRUE       -8.2508677
-#> 60 2.985188e-02  0.043614689 1.042450e-02   TRUE       -3.1126152
-#> 61 1.213894e-02  0.025996562 1.950338e-01  FALSE       -5.4541837
-#> 62 6.908322e-02  0.082277309 8.053836e-08   TRUE       11.5470481
-#> 63 5.786233e-03  0.022895736 4.697309e-01  FALSE       -4.3308987
-#> 64 7.406644e-03  0.029236724 4.685155e-01  FALSE      -12.0901329
-#> 65 1.247922e-01  0.157855718 4.269690e-05   TRUE      -10.1646065
-#> 66 3.835850e-01  0.407667169 3.134726e-63   TRUE       32.5840458
-#> 67 2.202478e-01  0.257842610 1.232737e-09   TRUE       -0.4613669
-#> 68 8.636982e-03  0.015341532 8.781709e-02  FALSE      -36.9200534
-#> 69 8.902391e-02  0.111052126 1.643624e-05   TRUE      -18.9077083
-#> 70 1.944443e-01  0.236914662 1.050102e-06   TRUE       -2.5187927
-#> 71 3.619744e-01  0.386135159 7.442164e-57   TRUE       27.4636063
-#> 72 5.647602e-02  0.096771419 6.683425e-02  FALSE      -10.1399786
-#> 73 9.576485e-07  0.004886981 1.000000e+00  FALSE       -3.7979914
-#> 74 1.475765e-03  0.007266891 5.331294e-01  FALSE       -6.1709034
-#> 75 5.661883e-03  0.009947588 8.212498e-02  FALSE      -10.9973436
-#> 76 1.344752e-02  0.025458063 1.232132e-01  FALSE       -2.3484605
-#> 77 1.302741e-01  0.151955729 9.749820e-10   TRUE       48.0463146
-#> 78 1.332361e-03  0.005307280 4.730850e-01  FALSE       -8.4327231
-#> 79 1.045426e-02  0.023512359 2.230874e-01  FALSE       -2.6368789
-#> 80 9.490278e-04  0.003088162 4.016109e-01  FALSE      -14.0191293
-#> 81 7.488133e-07  0.003823313 1.000000e+00  FALSE       -4.3108542
-#>    adj_res_stable
-#> 1           FALSE
-#> 2           FALSE
-#> 3           FALSE
-#> 4           FALSE
-#> 5            TRUE
-#> 6           FALSE
-#> 7           FALSE
-#> 8           FALSE
-#> 9            TRUE
-#> 10           TRUE
-#> 11          FALSE
-#> 12           TRUE
-#> 13           TRUE
-#> 14           TRUE
-#> 15           TRUE
-#> 16           TRUE
-#> 17           TRUE
-#> 18          FALSE
-#> 19           TRUE
-#> 20           TRUE
-#> 21           TRUE
-#> 22           TRUE
-#> 23           TRUE
-#> 24           TRUE
-#> 25           TRUE
-#> 26           TRUE
-#> 27           TRUE
-#> 28          FALSE
-#> 29           TRUE
-#> 30           TRUE
-#> 31          FALSE
-#> 32           TRUE
-#> 33           TRUE
-#> 34           TRUE
-#> 35           TRUE
-#> 36          FALSE
-#> 37          FALSE
-#> 38           TRUE
-#> 39           TRUE
-#> 40           TRUE
-#> 41           TRUE
-#> 42           TRUE
-#> 43           TRUE
-#> 44           TRUE
-#> 45          FALSE
-#> 46           TRUE
-#> 47           TRUE
-#> 48           TRUE
-#> 49           TRUE
-#> 50           TRUE
-#> 51           TRUE
-#> 52           TRUE
-#> 53           TRUE
-#> 54          FALSE
-#> 55          FALSE
-#> 56          FALSE
-#> 57           TRUE
-#> 58           TRUE
-#> 59           TRUE
-#> 60           TRUE
-#> 61          FALSE
-#> 62           TRUE
-#> 63          FALSE
-#> 64          FALSE
-#> 65           TRUE
-#> 66           TRUE
-#> 67           TRUE
-#> 68          FALSE
-#> 69           TRUE
-#> 70           TRUE
-#> 71           TRUE
-#> 72          FALSE
-#> 73          FALSE
-#> 74          FALSE
-#> 75          FALSE
-#> 76          FALSE
-#> 77           TRUE
-#> 78          FALSE
-#> 79          FALSE
-#> 80          FALSE
-#> 81          FALSE
-transitions(certainty_lsa(fit), significant = TRUE)  # the certain ones
-#>          from         to observed prob_observed  prob_mean     prob_se
-#> 1     discuss      adapt      282    0.07137434 0.07141954 0.004094140
-#> 2   synthesis      adapt      153    0.23466258 0.23381569 0.016506522
-#> 3       adapt   cohesion      139    0.27308448 0.27166504 0.019610550
-#> 4   consensus   cohesion       94    0.01485227 0.01492066 0.001523258
-#> 5  coregulate   cohesion       71    0.03604061 0.03621170 0.004203168
-#> 6     discuss   cohesion      188    0.04758289 0.04765516 0.003386854
-#> 7     emotion   cohesion      923    0.32534367 0.32500440 0.008785062
-#> 8     monitor   cohesion       80    0.05582694 0.05600000 0.006062128
-#> 9        plan   cohesion      155    0.02517460 0.02523736 0.001997988
-#> 10      adapt  consensus      243    0.47740668 0.47419669 0.022013963
-#> 11   cohesion  consensus      844    0.49793510 0.49691086 0.012124767
-#> 12  consensus  consensus      519    0.08200348 0.08202416 0.003447707
-#> 13 coregulate  consensus      265    0.13451777 0.13446442 0.007675517
-#> 14    discuss  consensus     1269    0.32118451 0.32094552 0.007421854
-#> 15    emotion  consensus      909    0.32040888 0.32007742 0.008749979
-#> 16    monitor  consensus      228    0.15910677 0.15895652 0.009640365
-#> 17       plan  consensus     1788    0.29040117 0.29027023 0.005781883
-#> 18  synthesis  consensus      304    0.46625767 0.46382331 0.019448333
-#> 19   cohesion coregulate      202    0.11917404 0.11915269 0.007856225
-#> 20  consensus coregulate     1188    0.18770738 0.18765296 0.004905602
-#> 21    discuss coregulate      333    0.08428246 0.08431298 0.004417384
-#> 22    emotion coregulate       97    0.03419105 0.03431286 0.003414259
-#> 23    monitor coregulate       83    0.05792045 0.05808696 0.006167225
-#> 24       plan coregulate      106    0.01721618 0.01728475 0.001660225
-#> 25   cohesion    discuss      101    0.05958702 0.05972345 0.005746613
-#> 26  consensus    discuss     1190    0.18802338 0.18796874 0.004908774
-#> 27 coregulate    discuss      539    0.27360406 0.27323373 0.010025961
-#> 28    discuss    discuss      770    0.19488737 0.19479206 0.006296280
-#> 29    emotion    discuss      289    0.10186817 0.10188281 0.005673705
-#> 30    monitor    discuss      538    0.37543615 0.37460870 0.012761741
-#> 31       plan    discuss      418    0.06789021 0.06792177 0.003205178
-#> 32      adapt    emotion       61    0.11984283 0.11976631 0.014314416
-#> 33   cohesion    emotion      196    0.11563422 0.11562224 0.007754455
-#> 34  consensus    emotion      460    0.07268131 0.07270861 0.003262458
-#> 35 coregulate    emotion      339    0.17208122 0.17194226 0.008489520
-#> 36    discuss    emotion      418    0.10579600 0.10580205 0.004889994
-#> 37    emotion    emotion      218    0.07684173 0.07689601 0.004997203
-#> 38    monitor    emotion      130    0.09071877 0.09078261 0.007574959
-#> 39       plan    emotion      904    0.14682475 0.14679867 0.004508254
-#> 40  consensus    monitor      295    0.04661084 0.04665667 0.002649875
-#> 41 coregulate    monitor      170    0.08629442 0.08635097 0.006319530
-#> 42    discuss    monitor       88    0.02227284 0.02237391 0.002351266
-#> 43    emotion    monitor      103    0.03630596 0.03642442 0.003513897
-#> 44       plan    monitor      465    0.07552379 0.07554978 0.003366510
-#> 45   cohesion       plan      239    0.14100295 0.14092380 0.008437615
-#> 46  consensus       plan     2505    0.39579712 0.39559485 0.006143746
-#> 47 coregulate       plan      471    0.23908629 0.23879463 0.009592343
-#> 48    emotion       plan      283    0.09975326 0.09977125 0.005621198
-#> 49    monitor       plan      309    0.21563154 0.21530435 0.010837325
-#> 50       plan       plan     2304    0.37420822 0.37401607 0.006163796
-#> 51    discuss  synthesis      557    0.14097697 0.14094299 0.005531936
-#>    prob_ci_low prob_ci_high      p_value stable adj_res_observed adj_res_stable
-#> 1   0.06360278   0.07964672 2.421746e-05   TRUE       24.2317649           TRUE
-#> 2   0.20224872   0.26691866 3.888167e-04   TRUE       38.7658830           TRUE
-#> 3   0.23409408   0.31092060 4.835908e-04   TRUE       18.7214591           TRUE
-#> 4   0.01208285   0.01804843 1.555809e-02   TRUE      -19.1996809           TRUE
-#> 5   0.02842808   0.04488445 3.230071e-02   TRUE       -5.7625189           TRUE
-#> 6   0.04123662   0.05450683 5.936383e-04   TRUE       -5.3770830           TRUE
-#> 7   0.30790423   0.34233790 1.165794e-22   TRUE       58.1953875           TRUE
-#> 8   0.04471565   0.06845371 2.166366e-02   TRUE       -1.7822132           TRUE
-#> 9   0.02146945   0.02929707 1.993356e-03   TRUE      -15.1412832           TRUE
-#> 10  0.43116315   0.51742063 4.700272e-08   TRUE       12.0066636           TRUE
-#> 11  0.47315314   0.52067546 2.107004e-25   TRUE       24.4702565           TRUE
-#> 12  0.07539287   0.08890545 1.354206e-08   TRUE      -35.4977548           TRUE
-#> 13  0.11977600   0.14985413 1.892381e-05   TRUE      -12.2716544           TRUE
-#> 14  0.30648567   0.33557687 2.348440e-30   TRUE       11.3359759           TRUE
-#> 15  0.30304931   0.33734543 3.129158e-22   TRUE        9.2658532           TRUE
-#> 16  0.14051789   0.17829387 5.033305e-05   TRUE       -8.1347706           TRUE
-#> 17  0.27900295   0.30166646 1.108739e-40   TRUE        8.5266570           TRUE
-#> 18  0.42582203   0.50203337 1.374543e-09   TRUE       12.9614865           TRUE
-#> 19  0.10418549   0.13496873 1.965361e-04   TRUE        5.7636516           TRUE
-#> 20  0.17813223   0.19736052 4.188544e-25   TRUE       35.3158137           TRUE
-#> 21  0.07585629   0.09316776 4.119865e-06   TRUE        0.5559806           TRUE
-#> 22  0.02793718   0.04130905 1.293984e-02   TRUE       -9.8520101           TRUE
-#> 23  0.04659364   0.07074417 1.925985e-02   TRUE       -3.4259149           TRUE
-#> 24  0.01418173   0.02068440 1.027419e-02   TRUE      -21.2793902           TRUE
-#> 25  0.04896017   0.07146767 1.002673e-02   TRUE      -11.0894082           TRUE
-#> 26  0.17844170   0.19768242 3.765904e-25   TRUE        8.8216376           TRUE
-#> 27  0.25380376   0.29309881 2.556384e-11   TRUE       15.4162419           TRUE
-#> 28  0.18259905   0.20727740 1.061891e-13   TRUE        7.8771601           TRUE
-#> 29  0.09103112   0.11326523 1.315469e-05   TRUE       -8.0744440           TRUE
-#> 30  0.34976546   0.39978241 2.252537e-13   TRUE       24.0121119           TRUE
-#> 31  0.06177383   0.07433536 3.868296e-07   TRUE      -21.3673394           TRUE
-#> 32  0.09315001   0.14918612 3.581136e-02   TRUE        0.8261362           TRUE
-#> 33  0.10085855   0.13124263 2.503126e-04   TRUE        0.9681845           TRUE
-#> 34  0.06644327   0.07922953 9.900443e-08   TRUE      -10.5811769           TRUE
-#> 35  0.15562183   0.18889212 7.993643e-07   TRUE        9.4332273           TRUE
-#> 36  0.09640851   0.11557312 1.960936e-07   TRUE       -0.6086274           TRUE
-#> 37  0.06738744   0.08696857 1.749894e-04   TRUE       -5.7610105           TRUE
-#> 38  0.07648453   0.10615880 3.034831e-03   TRUE       -2.2352747           TRUE
-#> 39  0.13807204   0.15574247 8.660447e-15   TRUE       11.0777299           TRUE
-#> 40  0.04160007   0.05198439 2.182023e-05   TRUE       -0.6361332           TRUE
-#> 41  0.07436774   0.09912767 7.871782e-04   TRUE        8.2486829           TRUE
-#> 42  0.01799858   0.02720637 1.856001e-02   TRUE       -8.2508677           TRUE
-#> 43  0.02985188   0.04361469 1.042450e-02   TRUE       -3.1126152           TRUE
-#> 44  0.06908322   0.08227731 8.053836e-08   TRUE       11.5470481           TRUE
-#> 45  0.12479224   0.15785572 4.269690e-05   TRUE      -10.1646065           TRUE
-#> 46  0.38358499   0.40766717 3.134726e-63   TRUE       32.5840458           TRUE
-#> 47  0.22024783   0.25784261 1.232737e-09   TRUE       -0.4613669           TRUE
-#> 48  0.08902391   0.11105213 1.643624e-05   TRUE      -18.9077083           TRUE
-#> 49  0.19444432   0.23691466 1.050102e-06   TRUE       -2.5187927           TRUE
-#> 50  0.36197444   0.38613516 7.442164e-57   TRUE       27.4636063           TRUE
-#> 51  0.13027414   0.15195573 9.749820e-10   TRUE       48.0463146           TRUE
+# The same verb reads an inference result
+transitions(certainty_lsa(fit), significant = TRUE)
+#>         from         to observed prob_observed prob_mean    prob_se prob_ci_low
+#> 1     Active     Active      459     0.6975684 0.6967400 0.01788572   0.6611341
+#> 2    Average     Active      153     0.2037284 0.2039867 0.01467978   0.1759752
+#> 3     Active    Average      176     0.2674772 0.2676270 0.01722641   0.2345470
+#> 4    Average    Average      458     0.6098535 0.6093023 0.01777441   0.5742005
+#> 5 Disengaged    Average      129     0.3969231 0.3966309 0.02703206   0.3442858
+#> 6    Average Disengaged      140     0.1864181 0.1867110 0.01419599   0.1596920
+#> 7 Disengaged Disengaged      157     0.4830769 0.4823890 0.02761180   0.4284082
+#>   prob_ci_high      p_value stable adj_res_observed adj_res_stable
+#> 1    0.7312156 5.560385e-20   TRUE       21.6628107           TRUE
+#> 2    0.2334883 6.063196e-04   TRUE      -12.9060384           TRUE
+#> 3    0.3020418 1.205186e-04   TRUE      -11.3191319           TRUE
+#> 4    0.6438538 3.141020e-17   TRUE       12.4526148           TRUE
+#> 5    0.4501757 2.232689e-04   TRUE       -1.7364613           TRUE
+#> 6    0.2153070 1.168633e-03   TRUE        0.1757996           TRUE
+#> 7    0.5365741 9.440665e-06   TRUE       15.3904661           TRUE
 ```

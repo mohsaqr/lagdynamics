@@ -1,11 +1,34 @@
-# Split-Half Reliability for an LSA Fit
+# Estimate the split-half reliability of a lag transition network
 
-Estimates the reliability of an LSA network by repeated random
-split-half resampling of sequences. Each replicate draws two disjoint
-halves of the sequences without replacement, refits the engine on each
-half, and computes the correlation between the two half-network
-edge-weight vectors. Returns the distribution of replicate correlations
-plus a point summary.
+`reliability_lsa()` estimates the split-half reliability of a lag
+transition network from one data set. A lag transition network is
+reliable when two independent samples of the same population give
+similar networks. Split-half reliability follows the resampling approach
+that Epskamp, Borsboom and Fried (2018) describe for the accuracy of
+psychological networks: the sequences are divided at random into two
+halves, a network is estimated on each half, and the two networks are
+compared transition by transition. A high correlation between the halves
+means that the structure of the network does not depend on which
+sequences happened to be sampled.
+
+The random split is repeated `R` times. Each split assigns half of the
+sequences to one half and the rest to the other, refits the model on
+each with the same engine and settings, and correlates the two halves'
+transition probabilities, counts or adjusted residuals over all
+transitions. `reliability_lsa()` reports the mean, standard deviation
+and 95% interval (2.5% and 97.5% quantiles) of the split-half
+correlations, and the number of failed replicates, in which a half had
+no transitions or a half's values did not vary. A grouped fit gives one
+result per group.
+
+Reliability describes the network as a whole. For the precision of each
+transition use
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+or
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md);
+for whether each transition stays significant when sequences are
+dropped, use
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md).
 
 ## Usage
 
@@ -38,85 +61,69 @@ print(x, ...)
 
 - fit:
 
-  An `lsa` object returned by
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  an `lsa_group` from `lsa(..., group = )`. Must be built from
-  event-level data (sequences), not from a pre-computed transition
-  matrix.
+  An `lsa` fit from
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or a
+  grouped fit from `lsa(..., group = )`, built from at least two
+  sequences (not from a transition matrix).
 
 - ...:
 
-  For the `lsa_group` method, the arguments above, passed to each
-  group's fit; otherwise reserved (and ignored by
-  [`print()`](https://rdrr.io/r/base/print.html)).
+  For a grouped fit, the arguments above, passed on to each group;
+  otherwise not used.
 
 - R:
 
-  Integer. Number of split-half replicates. Default `100`.
+  Number of random splits. Default `100`.
 
 - weights:
 
-  Character. Which edge matrix to correlate across halves: `"prob"`
-  (default), `"count"`, or `"adj_res"`.
+  Transition values correlated between the halves: `"prob"` (default,
+  transition probabilities), `"count"` or `"adj_res"` (adjusted
+  residuals).
 
 - method:
 
-  Character. Correlation method: `"pearson"` (default) or `"spearman"`.
+  Correlation: `"pearson"` (default) or `"spearman"`.
 
 - parallel:
 
-  Logical. Use multi-core resampling. Default `FALSE`.
+  Run the splits on several cores. Default `FALSE`.
 
 - n_cores:
 
-  Integer. Worker count when `parallel = TRUE`.
+  Number of cores when `parallel = TRUE`. Default `NULL`, all cores but
+  one.
 
 - verbose:
 
-  Logical. Print progress every 100 replicates.
+  Report progress every 100 splits. Default `FALSE`.
 
 - x:
 
-  An `lsa_reliability` or `lsa_reliability_group` object
-  ([`print()`](https://rdrr.io/r/base/print.html) methods).
+  An `lsa_reliability` or `lsa_reliability_group` object, for the
+  [`print()`](https://rdrr.io/r/base/print.html) methods.
 
 ## Value
 
-An object of class `c("lsa_reliability", "list")`.
-[`print()`](https://rdrr.io/r/base/print.html) shows the mean split-half
-correlation with its spread and interval and returns `x` invisibly;
-[as.data.frame()](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
-gives the per-replicate correlations. Elements:
+An object of class `c("lsa_reliability", "list")`. Read it with
+[as.data.frame()](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md):
+`as.data.frame(x)` gives one row per split with its correlation (`NA`
+for a failed replicate), and `as.data.frame(x, what = "summary")` one
+row with the settings, the number of failed replicates `n_failed`, and
+the `mean`, `sd`, `ci_low` and `ci_high` of the correlations.
+[`print()`](https://rdrr.io/r/base/print.html) shows the same summary
+and returns `x` invisibly. For a grouped fit, an object of class
+`c("lsa_reliability_group", "list")` with one result per group, whose
+tables gain a leading `group` column.
 
-- correlations:
+## Conditions
 
-  Numeric vector of length `R`: the split-half correlation of each
-  replicate.
+Errors carry the class `lagdynamics_error` and one of:
 
-- mean, sd:
+- `lagdynamics_needs_events`: the fit was built from a transition
+  matrix, so there are no sequences to split.
 
-  Mean and standard deviation of the finite replicate correlations.
-
-- ci_low, ci_high:
-
-  Empirical 2.5% and 97.5% quantiles.
-
-- R, weights, method, n_sequences:
-
-  Recipe metadata.
-
-- fit:
-
-  Reference to the original fit.
-
-For an `lsa_group`, a named list of these, one per group, of class
-`c("lsa_reliability_group", "list")`.
-
-## Details
-
-For a grouped fit (`lsa_group`), reliability is estimated separately
-within each group and the per-group `lsa_reliability` objects are
-returned in an `lsa_reliability_group` container.
+- `lagdynamics_bad_input`: the fit has fewer than two sequences.
 
 ## References
 
@@ -126,14 +133,19 @@ Research Methods, 50*(1), 195-212.
 
 ## See also
 
+[`as.data.frame.lsa_reliability()`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
+to read the result;
 [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
-[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
+and
 [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md)
+for transition-level checks.
 
 ## Examples
 
 ``` r
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 rel <- reliability_lsa(fit, R = 50)
 rel
 #> <lsa_reliability>
@@ -142,10 +154,23 @@ rel
 #>   weights:       prob
 #>   method:        pearson
 #>   n sequences:   136
-#>   split-half r:  0.971  (sd = 0.029)
-#>   95% CI:        [0.900, 0.995]
+#>   split-half r:  0.965  (sd = 0.029)
+#>   95% CI:        [0.896, 0.997]
+#>   failed:        0 of 50 replicates
+as.data.frame(rel, what = "summary")
+#>   weights  method  R n_failed      mean         sd    ci_low   ci_high
+#> 1    prob pearson 50        0 0.9653006 0.02936169 0.8959057 0.9971183
+
+# One result per group
+g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+         time = "Time", group = "Achiever")
+reliability_lsa(g, R = 20) |>
+  as.data.frame(what = "summary")
+#>   group weights  method  R n_failed      mean          sd    ci_low   ci_high
+#> 1  High    prob pearson 20        0 0.9866562 0.007352071 0.9691266 0.9935066
+#> 2   Low    prob pearson 20        0 0.9864346 0.004408260 0.9776246 0.9926271
 # \donttest{
-# A full analysis uses more split-half replicates
+# A full analysis uses more splits
 reliability_lsa(fit, R = 500)
 #> <lsa_reliability>
 #>   engine:        classical
@@ -153,7 +178,8 @@ reliability_lsa(fit, R = 500)
 #>   weights:       prob
 #>   method:        pearson
 #>   n sequences:   136
-#>   split-half r:  0.969  (sd = 0.026)
-#>   95% CI:        [0.902, 0.996]
+#>   split-half r:  0.968  (sd = 0.027)
+#>   95% CI:        [0.895, 0.996]
+#>   failed:        0 of 500 replicates
 # }
 ```

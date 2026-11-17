@@ -1,8 +1,44 @@
-# Canonicalize Sequence Input for Lag Sequential Analysis
+# Convert sequence input to the canonical form used by lag sequential analysis
 
-Coerces a wide variety of user input shapes into a single canonical
-representation used by every downstream lagdynamics function (engines,
-bootstrap, permutation, grouping, plotting).
+`lsa_data()` converts the forms in which sequence data usually arrive
+into the canonical representation used by lag sequential analysis, and
+it is what
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) calls
+on its input. A lag sequential analysis needs, for every sequence, the
+ordered list of coded events, and a common set of state labels across
+sequences. Transitions are counted within sequences only, so the
+boundaries between sequences must be kept.
+
+Accepted forms are:
+
+- an atomic vector of codes (one sequence);
+
+- a list of vectors (several sequences);
+
+- a wide matrix or data frame, one row per sequence and one column per
+  ordered time point;
+
+- a square numeric matrix of transition counts, row `i` and column `j`
+  holding the count of `i -> j` (any square numeric matrix is read this
+  way, so pass square integer-coded sequences as a data frame);
+
+- a sequence object: a `tna` or `group_tna` model with its data, a
+  `tna_seq_data`, `tna_data` or `nestimate_data` object, a Nestimate
+  `netobject`, or a TraMineR `stslist`.
+
+`NA` and empty strings are treated as missing observations, not as a
+state: they are dropped wherever they occur and the surrounding events
+close up. To model missingness as a state, recode it (for example to
+`"missing"`) first. A transition-count matrix carries no sequences, so
+the functions that resample sequences
+([`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md),
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md),
+[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md),
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md))
+cannot be used on a fit built from it. Long event logs are read by
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) through
+its `actor` and `action` arguments.
 
 ## Usage
 
@@ -14,109 +50,56 @@ lsa_data(x, labels = NULL)
 
 - x:
 
-  Sequence input. See Details.
+  Sequence input in one of the forms listed above. An `lsa_data` object
+  is returned unchanged.
 
 - labels:
 
-  Optional character vector of label names for the states. When `NULL`,
-  labels are extracted from the data: unique sorted values of character
-  input, or `"Code 1", "Code 2", ...` for integer input.
+  Optional character vector of state names. Default `NULL` takes the
+  sorted distinct values of character input, the levels of a factor, or
+  `"Code 1"`, `"Code 2"`, ... for integer codes. When supplied,
+  character codes are matched to it by name and integer codes index into
+  it.
 
 ## Value
 
-An object of class `c("lsa_data", "list")` with elements:
+An object of class `c("lsa_data", "list")`. Print it for the input
+source, the number of states, sequences, events and lag-1 transitions;
+read the events with
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) (one row
+per event, or per cell for a transition matrix). The object stores the
+integer-coded events and their sequence membership (`NULL` for a
+transition matrix), the state labels, the counts of states, sequences
+and events, and the source (`"events"` or `"transitions"`).
 
-- events:
+## Conditions
 
-  Integer vector of event codes (1-indexed), or `NULL` if input was a
-  transition matrix.
-
-- seq_id:
-
-  Integer vector of sequence membership, same length as `events`, or
-  `NULL` if input was a transition matrix.
-
-- labels:
-
-  Character vector of state labels.
-
-- n_states:
-
-  Number of distinct states (`K`).
-
-- n_sequences:
-
-  Integer count of independent sequences.
-
-- n_events:
-
-  Total number of events across all sequences.
-
-- transitions_per_seq:
-
-  Integer vector: number of transitions each sequence contributes at lag
-  1.
-
-- source:
-
-  One of `"events"`, `"transitions"` – flags whether event-level data is
-  available.
-
-- obs_input:
-
-  If `source = "transitions"`, the original `K x K` count matrix.
-  Otherwise `NULL`.
-
-## Details
-
-Accepted input forms:
-
-- An atomic vector of integer or character codes – treated as a single
-  sequence.
-
-- A list of atomic vectors – treated as multiple independent sequences;
-  transitions are not counted across sequence boundaries.
-
-- A wide matrix or data.frame with rows = sequences, columns = ordered
-  time points. Missing values (`NA`) and empty strings are treated as
-  missingness, not as a state: they are dropped wherever they occur in a
-  row and the surrounding events close up, so no transition is counted
-  into or out of a gap. To model missingness as its own state, recode it
-  (e.g. `NA -> "missing"`) before calling
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
-
-- A square numeric matrix of pre-computed transition counts. Row `i`,
-  column `j` is the count of `i -> j` transitions. In this case `events`
-  and `seq_id` are not available and downstream resampling tools that
-  need event-level data will error.
-
-- A sequence-bearing object: a `tna` or `group_tna` (sequences read from
-  its `data` slot), a `tna_seq_data` code matrix, a `tna_data` or
-  `nestimate_data` (its `sequence_data`), a `Nestimate` `netobject` (its
-  prepared sequence data), or a `TraMineR` `stslist`. The stored event
-  sequences are recovered and analysed. A `tna` built from a bare matrix
-  (no retained sequences) errors, because transition *counts* cannot be
-  recovered from probability weights.
+Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`:
+an unsupported input type, no usable events, invalid counts in a
+transition matrix, invalid integer codes, or codes that do not match
+`labels`.
 
 ## See also
 
-[`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md),
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+[`as.data.frame.lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_data.md)
+for the event table;
+[`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
+for transition counts;
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Examples
 
 ``` r
-# Single character sequence
-lsa_data(c("a", "b", "a", "c", "b"))
+lsa_data(engagement)
 #> <lsa_data>
 #>   source:        events
 #>   states (K):    3
-#>   labels:        a, b, c
-#>   sequences:     1
-#>   events:        5
-#>   transitions:   4 (lag 1, summed across sequences)
+#>   labels:        Active, Average, Disengaged
+#>   sequences:     136
+#>   events:        1870
+#>   transitions:   1734 (lag 1, summed across sequences)
 
-# Multiple sequences: no transition is counted across the boundary
+# Several sequences: no transition is counted across the boundary
 lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
 #> <lsa_data>
 #>   source:        events
@@ -126,10 +109,10 @@ lsa_data(list(c("a", "b", "a"), c("b", "c", "a", "b")))
 #>   events:        7
 #>   transitions:   5 (lag 1, summed across sequences)
 
-# Pre-computed transition matrix (source = "transitions")
-tm <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
-             dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
-lsa_data(tm)
+# A transition-count matrix
+counts <- matrix(c(0, 3, 1, 2, 0, 4, 5, 1, 0), 3, 3,
+                 dimnames = list(c("a", "b", "c"), c("a", "b", "c")))
+lsa_data(counts)
 #> <lsa_data>
 #>   source:        transitions
 #>   states (K):    3

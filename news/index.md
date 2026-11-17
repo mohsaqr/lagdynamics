@@ -1,34 +1,79 @@
 # Changelog
 
-## lagdynamics 0.33
+## lagdynamics 0.34.1
+
+This release collects all changes since the CRAN release 0.32 (including
+the unreleased 0.33).
+
+### Changes to results
+
+- [`summary()`](https://rdrr.io/r/base/summary.html) on a fit now
+  returns a `summary.lsa` object instead of printing the fit and its
+  matrices. The object holds two tidy tables, a one-row overview and a
+  per-state activity table; it prints when shown, and
+  `as.data.frame(summary(fit), what = "nodes")` returns either table.
+  Grouped fits are unchanged (one row per group).
+- [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+  now returns a tidy data frame with columns `from`, `to` and `prob`
+  (one row per pair of states; grouped fits gain a leading `group`
+  column) instead of a matrix or a list of matrices.
+- [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on
+  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+  and
+  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  results gains `what = "global"` for the omnibus test, and on
+  [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  results `what = "summary"` for a one-row summary of the replicates.
+
+### Reliability and stability
+
+- [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  and
+  [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
+  now treat only the documented degenerate case (a resample with no
+  transitions) as a failed replicate; any other error is reported to the
+  caller. The number of failed replicates is stored in the result
+  (`n_failed`) and shown by
+  [`print()`](https://rdrr.io/r/base/print.html).
+
+### Errors and output
+
+- User-facing errors are classed conditions: `lagdynamics_bad_input`,
+  `lagdynamics_needs_events`, `lagdynamics_no_transitions`,
+  `lagdynamics_unknown_engine`, `lagdynamics_unsupported_option`,
+  `lagdynamics_incompatible_fits`, `lagdynamics_missing_package` and
+  `lagdynamics_ipf_infeasible`, each also of class `lagdynamics_error`.
+  Argument checks state the expected value in their message.
+- Console output and plot subtitles use ASCII replacements for the block
+  glyph, the superscript in G^2 and the middle dot when the session is
+  not UTF-8.
+- `transfer_entropy(seed = )` and `bayes_compare_lsa(seed = )` restore
+  the caller’s random number stream on exit.
 
 ### Documentation
 
-- Every exported S3 method now has a help page with a `Value` section:
-  [`print()`](https://rdrr.io/r/base/print.html),
-  [`summary()`](https://rdrr.io/r/base/summary.html),
-  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) and
-  [`nobs()`](https://rdrr.io/r/stats/nobs.html) for fits (new topic
-  [`?"lsa-methods"`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)),
-  and the [`print()`](https://rdrr.io/r/base/print.html) /
-  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) methods
-  of every inference, comparison, lag and data object, each documented
-  on its constructor’s page.
+- New documentation structure. Vignettes: lag sequential analysis, lag
+  transition networks, evaluating transitions and comparing groups.
+  Guides (on the package website): a complete workflow, event logs and
+  interoperability, engines, lags and structural zeros, plotting, and
+  transfer entropy. Case studies: course engagement, regulation in high
+  and low achieving groups, and AI behaviour in programming sessions.
+- Help pages rewritten: each describes what the method or display
+  represents, what the function estimates, and which related function to
+  use instead, and documents the structure of its return value and the
+  conditions it raises. Every exported S3 method has a help page with a
+  `Value` section.
+- The engine-registration example defines a complete engine instead of
+  calling a registered engine’s internals.
+- README is generated from `README.Rmd`, so its numbers come from the
+  rendered output.
 - [`?lsa`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
   documents the engine wrappers
   ([`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  and siblings), adds method references, and warns that combining
-  `actor` and `session` overflows R’s integer range once distinct actors
-  x distinct sessions exceeds about 2.1e9, silently dropping sequences;
-  the fix (pass a globally unique session id as `actor`) is given there
-  and in the interoperability vignette.
-- Examples read results with
-  [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-  [`summary()`](https://rdrr.io/r/base/summary.html) and the print
-  methods instead of reaching into objects with `$`, and group examples
-  use the recorded `Achiever` column of `group_regulation_long` instead
-  of a derived grouping vector. Resampling examples now run a small
-  unwrapped version before the `\donttest{}` full-size call.
+  and siblings) on a topic named `lsa`, and warns that combining `actor`
+  and `session` overflows R’s integer range once distinct actors x
+  distinct sessions exceeds about 2.1e9; the fix (pass a globally unique
+  session id as `actor`) is given there and in the event-log guide.
 - Corrected return-value descriptions: the column names of
   [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
   edges, the conditional columns of
@@ -36,19 +81,12 @@
   the engine-function contract of
   [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
   and the size of the `engagement` data (136 non-empty sequences).
-  Details that were attached to the wrong roxygen tag
-  ([`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
-  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md),
-  [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md))
-  now sit in Details.
-- README: CRAN install line, a bundled-data example, and the missing
-  `intro` vignette. Vignettes gain interpretation of the printed results
-  in the quick start, the permutation-null section of the confirmatory
-  vignette and the comparison step of the workflow, and correct several
-  stale statements (engine count,
-  [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
-  returns a matrix, state capitalization, time-gap splitting of long
-  logs).
+
+### Package
+
+- `graphics` and `parallel` are declared in Imports.
+- Authors carry ORCID identifiers; the documentation website is listed
+  in `URL`.
 
 ## lagdynamics 0.32
 

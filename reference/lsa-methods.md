@@ -1,19 +1,41 @@
-# Print, Summarise and Tidy an LSA Fit
+# Print, summarise and tidy a lag sequential analysis fit
 
-Methods for the objects returned by
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
-[`print()`](https://rdrr.io/r/base/print.html) gives a compact model
-overview: engine, sizes, the tablewise independence test, the strongest
-over-represented transitions, and the initial-state distribution.
-[`summary()`](https://rdrr.io/r/base/summary.html) prints that overview
-followed by the node activity and the observed, expected, probability
-and residual matrices, and returns a one-row tidy overview.
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) returns
-the full edge table, including the integer ids and `cograph_network`
-protocol columns that
+[`print()`](https://rdrr.io/r/base/print.html),
+[`summary()`](https://rdrr.io/r/base/summary.html),
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) and
+[`nobs()`](https://rdrr.io/r/stats/nobs.html) describe a fitted lag
+sequential analysis, an `lsa` object from
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md). A fit
+has three levels of description: the model as a whole (its size and the
+tablewise test of independence), the states (how often each is left and
+entered, and how often a sequence starts in it), and the individual
+transitions. These methods give the first two levels;
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+gives the third.
+
+[`print()`](https://rdrr.io/r/base/print.html) shows a compact overview:
+the engine and lag, the numbers of states, transitions, events and
+sequences, the likelihood-ratio test of independence, the strongest
+over-represented transitions and the initial-state distribution.
+[`summary()`](https://rdrr.io/r/base/summary.html) returns a
+`summary.lsa` object holding two tables, a one-row overview of the fit
+and one row per state, which are read with
+`as.data.frame(summary(fit), what = )`. For a grouped fit,
+[`summary()`](https://rdrr.io/r/base/summary.html) returns one overview
+row per group.
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on a fit
+returns the full edge table, including the integer state ids and the
+network columns that
 [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 leaves out. [`nobs()`](https://rdrr.io/r/stats/nobs.html) is the number
 of transitions the model was fitted to.
+
+For the per-transition, per-state and per-test tables, prefer the
+reading verbs
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md) and
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md).
 
 ## Usage
 
@@ -26,6 +48,18 @@ print(x, ...)
 
 # S3 method for class 'lsa'
 summary(object, ...)
+
+# S3 method for class 'summary.lsa'
+print(x, ...)
+
+# S3 method for class 'summary.lsa'
+as.data.frame(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  what = c("overview", "nodes"),
+  ...
+)
 
 # S3 method for class 'lsa'
 as.data.frame(x, row.names = NULL, optional = FALSE, ...)
@@ -45,8 +79,11 @@ nobs(object, ...)
 - x, object:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  (for the `lsa_group` methods) a grouped fit from `lsa(..., group = )`.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or a
+  grouped fit from `lsa(..., group = )`. For
+  [`print()`](https://rdrr.io/r/base/print.html) and
+  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on a
+  summary, a `summary.lsa` object.
 
 - ...:
 
@@ -54,58 +91,65 @@ nobs(object, ...)
 
 - row.names:
 
-  Optional row names for the returned data frame (`as.data.frame.lsa()`
-  only); ignored by the grouped method.
+  Optional row names for the returned data frame; ignored by the grouped
+  method.
 
 - optional:
 
   Ignored; present for consistency with the generic.
 
+- what:
+
+  For [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on
+  a summary: `"overview"` (default, the one-row overview of the fit) or
+  `"nodes"` (one row per state).
+
 ## Value
 
 - [`print()`](https://rdrr.io/r/base/print.html) returns `x` invisibly.
 
-- `summary.lsa()` prints the extended view and returns, invisibly, a
-  one-row `data.frame` with columns `engine`, `lag`, `n_states`,
+- [`summary()`](https://rdrr.io/r/base/summary.html) on an `lsa` fit
+  returns an object of class `summary.lsa` holding two tables. The
+  overview has one row and the columns `engine`, `lag`, `n_states`,
   `n_sequences`, `n_events`, `n_transitions`, `n_significant`, `alpha`,
   `lrx2`, `lrx2_df`, `lrx2_p`, `x2`, `x2_df`, `x2_p` (`NA` where the
   engine computed no tablewise test or the input was a transition
-  matrix).
+  matrix). The node table has one row per state and the columns `state`,
+  `outgoing`, `incoming`, `out_share`, `in_share`, `init_prob`. Read
+  them with `as.data.frame(s)` and `as.data.frame(s, what = "nodes")`.
 
-- `summary.lsa_group()` returns that frame visibly with one row per
-  group and a leading `group` column; it prints nothing else.
+- [`summary()`](https://rdrr.io/r/base/summary.html) on a grouped fit
+  returns a `data.frame` with one row per group: a leading `group`
+  column followed by the overview columns.
 
-- `as.data.frame.lsa()` returns a `data.frame` with one row per
-  `from -> to` cell: integer `from`/`to` ids, `from_label`, `to_label`,
-  the statistic columns of
+- [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on an
+  `lsa` fit returns a `data.frame` with one row per `from -> to` cell:
+  integer `from` and `to` ids, `from_label`, `to_label`, the statistic
+  columns of
   [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-  and the protocol columns `edge` and `weight`.
-  `as.data.frame.lsa_group()` stacks these with a leading `group`
-  column.
+  and the network columns `edge` and `weight`. On a grouped fit the
+  tables are stacked under a leading `group` column.
+
+- [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) on a
+  summary returns the overview or the node table.
 
 - [`nobs()`](https://rdrr.io/r/stats/nobs.html) returns a single number,
   the total transition count.
 
-## Details
+## See also
 
-For reading results, prefer the verbs:
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
-for the per-transition table,
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md);
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
 [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
 [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md) and
 [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
-for the other parts of the fit.
-
-## See also
-
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+for the reading verbs.
 
 ## Examples
 
 ``` r
 fit <- lsa(engagement)
-print(fit)
+fit
 #> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences
 #>   states: Active, Average, Disengaged
@@ -121,53 +165,28 @@ print(fit)
 #>     Active     0.382  ████████████████████████
 #>     Average    0.368  ███████████████████████
 #>     Disengaged 0.250  ████████████████
-summary(fit)
-#> Lag Sequential Analysis
-#> =======================
-#> Lag Sequential Analysis  -  classical  (lag 1, directed)
-#>   3 states | 1734 transitions | 1870 events | 136 sequences
-#>   states: Active, Average, Disengaged
-#>   independence: G² = 618.3, df = 4, p <2e-16
+s <- summary(fit)
+s
+#> Lag sequential analysis: classical engine, lag 1
+#>   3 states, 1734 transitions, 1870 events, 136 sequences
+#>   significant transitions (p < 0.05): 7 of 9
+#>   likelihood-ratio test: G² = 618.31, df = 4, p <2e-16
+#>   Pearson test: χ² = 629.20, df = 4, p <2e-16
 #> 
-#>   Significant transitions (p < 0.05): 7 of 9
-#>   strongest over-represented (of 3):
-#>     Active -> Active          z =  +21.7  ***
-#>     Disengaged -> Disengaged  z =  +15.4  ***
-#>     Average -> Average        z =  +12.5  ***
-#> 
-#>   Initial states:
-#>     Active     0.382  ████████████████████████
-#>     Average    0.368  ███████████████████████
-#>     Disengaged 0.250  ████████████████
-#> 
-#> Node activity (share of transitions):
-#>     Active      out 0.379 ██████████  in 0.375 ██████████
+#>   State activity (share of transitions out and in):
+#>     Active      out 0.379 ██████████    in 0.375 ██████████
 #>     Average     out 0.433 ████████████  in 0.440 ████████████
-#>     Disengaged  out 0.187 █████  in 0.185 █████
-#> 
-#> Observed counts (obs):
-#>            Active Average Disengaged
-#> Active        459     176         23
-#> Average       153     458        140
-#> Disengaged     39     129        157
-#> 
-#> Expected counts (exp):
-#>             Active Average Disengaged
-#> Active     247.035 289.535    121.430
-#> Average    281.950 330.457    138.593
-#> Disengaged 122.016 143.007     59.977
-#> 
-#> Transitional probabilities (prob):
-#>            Active Average Disengaged
-#> Active      0.698   0.267      0.035
-#> Average     0.204   0.610      0.186
-#> Disengaged  0.120   0.397      0.483
-#> 
-#> Adjusted residuals (adj_res):
-#>             Active Average Disengaged
-#> Active      21.663 -11.319    -12.557
-#> Average    -12.906  12.453      0.176
-#> Disengaged -10.549  -1.736     15.390
+#>     Disengaged  out 0.187 █████         in 0.185 █████
+as.data.frame(s)
+#>      engine lag n_states n_sequences n_events n_transitions n_significant alpha
+#> 1 classical   1        3         136     1870          1734             7  0.05
+#>       lrx2 lrx2_df       lrx2_p       x2 x2_df          x2_p
+#> 1 618.3053       4 1.69152e-132 629.2022     4 7.406567e-135
+as.data.frame(s, what = "nodes")
+#>        state outgoing incoming out_share  in_share init_prob
+#> 1     Active      658      651 0.3794694 0.3754325 0.3823529
+#> 2    Average      751      763 0.4331027 0.4400231 0.3676471
+#> 3 Disengaged      325      320 0.1874279 0.1845444 0.2500000
 nobs(fit)
 #> [1] 1734
 head(as.data.frame(fit))

@@ -1,14 +1,24 @@
-# Tidy the Per-Replicate Split-Half Correlations
+# Read the tables of a split-half reliability result
 
-Returns the split-half correlation of every replicate from
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) returns
+the tables of a
 [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
-as a tidy data frame.
+result, which holds the split-half correlation of every random split:
+these correlations, one row per split, or a one-row summary of their
+distribution, chosen with `what`. For a grouped result the tables of the
+groups are stacked.
 
 ## Usage
 
 ``` r
 # S3 method for class 'lsa_reliability'
-as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+as.data.frame(
+  x,
+  row.names = NULL,
+  optional = FALSE,
+  what = c("replicates", "summary"),
+  ...
+)
 
 # S3 method for class 'lsa_reliability_group'
 as.data.frame(x, row.names = NULL, optional = FALSE, ...)
@@ -18,87 +28,62 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 
 - x:
 
-  An `lsa_reliability` (or `lsa_reliability_group`) object.
+  An `lsa_reliability` or `lsa_reliability_group` object from
+  [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md).
 
-- row.names, optional, ...:
+- row.names, optional:
 
-  Ignored (method signature compatibility).
+  Not used; present for consistency with the generic.
+
+- what:
+
+  `"replicates"` (default): one row per split. `"summary"`: one row
+  summarizing all splits.
+
+- ...:
+
+  For a grouped result, passed on to each group (use it for `what`);
+  otherwise not used.
 
 ## Value
 
-A `data.frame`, one row per replicate, with columns `replicate` and
-`correlation` (a grouped object gains a leading `group` column). `NA`
-correlations from degenerate splits are kept.
+A data frame.
+
+- `what = "replicates"`: one row per split, with `replicate` and
+  `correlation`; a failed replicate (a half with no transitions, or no
+  variation to correlate) is kept as `NA`.
+
+- `what = "summary"`: one row with `weights`, `method`, `R`, `n_failed`,
+  `mean`, `sd`, `ci_low` and `ci_high` (2.5% and 97.5% quantiles of the
+  finite correlations).
+
+A grouped result gains a leading `group` column.
+
+## See also
+
+[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md).
 
 ## Examples
 
 ``` r
-fit <- lsa(engagement)
-rel <- reliability_lsa(fit, R = 20)
-rel
-#> <lsa_reliability>
-#>   engine:        classical
-#>   replicates:    20
-#>   weights:       prob
-#>   method:        pearson
-#>   n sequences:   136
-#>   split-half r:  0.965  (sd = 0.033)
-#>   95% CI:        [0.889, 0.994]
-as.data.frame(rel)
-#>    replicate correlation
-#> 1          1   0.9813133
-#> 2          2   0.9683861
-#> 3          3   0.9885036
-#> 4          4   0.9873595
-#> 5          5   0.9729948
-#> 6          6   0.9741100
-#> 7          7   0.9725761
-#> 8          8   0.9394135
-#> 9          9   0.9720272
-#> 10        10   0.9462399
-#> 11        11   0.9605240
-#> 12        12   0.9386932
-#> 13        13   0.8443619
-#> 14        14   0.9863998
-#> 15        15   0.9939222
-#> 16        16   0.9939688
-#> 17        17   0.9655112
-#> 18        18   0.9625765
-#> 19        19   0.9930543
-#> 20        20   0.9619175
+rel <- reliability_lsa(lsa(engagement), R = 20)
+as.data.frame(rel) |> head()
+#>   replicate correlation
+#> 1         1   0.9813133
+#> 2         2   0.9683861
+#> 3         3   0.9885036
+#> 4         4   0.9873595
+#> 5         5   0.9729948
+#> 6         6   0.9741100
+as.data.frame(rel, what = "summary")
+#>   weights  method  R n_failed      mean         sd    ci_low   ci_high
+#> 1    prob pearson 20        0 0.9651927 0.03308002 0.8891692 0.9939467
 
 g <- lsa(group_regulation_long, actor = "Actor", action = "Action",
          time = "Time", group = "Achiever")
 grel <- reliability_lsa(g, R = 10)
-grel
-#> <lsa_reliability_group>
-#>   groups: 2
-#> 
-#> [High]
-#> <lsa_reliability>
-#>   engine:        classical
-#>   replicates:    10
-#>   weights:       prob
-#>   method:        pearson
-#>   n sequences:   1000
-#>   split-half r:  0.988  (sd = 0.003)
-#>   95% CI:        [0.984, 0.992]
-#> 
-#> [Low]
-#> <lsa_reliability>
-#>   engine:        classical
-#>   replicates:    10
-#>   weights:       prob
-#>   method:        pearson
-#>   n sequences:   1000
-#>   split-half r:  0.986  (sd = 0.005)
-#>   95% CI:        [0.978, 0.992]
-head(as.data.frame(grel))
-#>   group replicate correlation
-#> 1  High         1   0.9880121
-#> 2  High         2   0.9914672
-#> 3  High         3   0.9926938
-#> 4  High         4   0.9853287
-#> 5  High         5   0.9903779
-#> 6  High         6   0.9862367
+as.data.frame(grel, what = "summary")
+#>   group weights  method  R n_failed      mean          sd    ci_low   ci_high
+#> 1  High    prob pearson 10        0 0.9880429 0.002878287 0.9842305 0.9924178
+#> 2   Low    prob pearson 10        0 0.9861624 0.004595129 0.9775524 0.9919682
 ```

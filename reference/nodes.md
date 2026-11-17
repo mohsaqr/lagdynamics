@@ -1,7 +1,17 @@
-# Nodes of an LSA Fit (Tidy)
+# Read the states of a lag sequential analysis fit
 
-The states and their incoming / outgoing transition totals, as a tidy
-`data.frame` (one row per state).
+`nodes()` returns the states of a lag sequential analysis fit, one row
+per state with its total outgoing and incoming transition counts. In a
+lag transition network the states are the nodes, and how often a state
+is left and how often it is entered describe its place in the process: a
+state with many outgoing but few incoming transitions tends to open
+episodes, one with the reverse tends to close them. The marginal totals
+also set the expected counts against which every transition is tested.
+
+The shares of all transitions and the initial-state probability are in
+`as.data.frame(summary(fit), what = "nodes")`; the per-transition table
+is
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md).
 
 ## Usage
 
@@ -20,35 +30,31 @@ nodes(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  an `lsa_group` from `lsa(..., group = )`.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or a
+  grouped fit from `lsa(..., group = )`.
 
 ## Value
 
-A `data.frame`, one row per state, with columns `state` (the state name,
-matching the `from`/`to` endpoints of
+A `data.frame` with one row per state and the columns `state` (matching
+the `from` and `to` names of
 [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)),
-`outgoing`, and `incoming` (its total out- and in-transition counts). A
-grouped fit gains a leading `group` column (one row per group and
-state).
+`outgoing` and `incoming`. A grouped fit gives one row per group and
+state, with a leading `group` column.
 
 ## See also
 
 [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md)
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+[lsa-methods](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+for [`summary()`](https://rdrr.io/r/base/summary.html).
 
 ## Examples
 
 ``` r
-nodes(lsa(group_regulation))
+nodes(lsa(engagement))
 #>        state outgoing incoming
-#> 1      adapt      509      531
-#> 2   cohesion     1695     1718
-#> 3  consensus     6329     6369
-#> 4 coregulate     1970     2095
-#> 5    discuss     3951     3916
-#> 6    emotion     2837     2772
-#> 7    monitor     1433     1228
-#> 8       plan     6157     6214
-#> 9  synthesis      652      690
+#> 1     Active      658      651
+#> 2    Average      751      763
+#> 3 Disengaged      325      320
 ```

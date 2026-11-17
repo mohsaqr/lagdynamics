@@ -1,12 +1,27 @@
-# Circular (Chord) Diagram of an LSA Fit
+# Plot a chord diagram of transitions
 
-Draws the transition structure as a chord diagram via
-[`cograph::plot_chord()`](https://sonsoles.me/cograph/reference/plot_chord.html):
-states are arcs on an outer ring and each transition is a curved ribbon
-whose **width** is its frequency (or probability) and whose **fill
-colour** is its adjusted residual (warm = over-represented, cool =
-avoided). Supply a second fit as `compare` to fill each ribbon by the
-*difference* in the colour metric between the two fits.
+`plot_chords()` draws the transitions of a fit as a chord diagram with
+cograph: the states are arcs around a circle and each transition is a
+ribbon from its source arc to its target arc. The width of a ribbon
+shows how much of the traffic the transition carries, and its colour can
+show whether the transition is more or less frequent than independence
+predicts, so the diagram shows where the transitions out of each state
+go, and which of the frequent routes are also over-represented.
+
+Ribbon width is the count (default) or the transition probability;
+ribbon colour is the adjusted residual on a diverging scale (red
+over-represented, blue avoided), or the lift, probability or count on a
+sequential scale. With `compare`, a second fit on the same states, each
+ribbon is coloured by the difference between the two fits in the colour
+quantity, which shows where two groups differ.
+
+The same display is `plot(fit, type = "chord")`. For the full table use
+the residual heatmap of
+[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md);
+for a network layout,
+[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md);
+for a test of group differences,
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md).
 
 ## Usage
 
@@ -32,79 +47,71 @@ plot_chords(
 
 - compare:
 
-  Optional second `lsa` fit. When supplied, ribbon colour is
-  `colour(fit) - colour(compare)` (a signed difference on the diverging
-  scale). The two fits must share the same states. Default `NULL`.
+  Optional second `lsa` fit with the same states; ribbons are then
+  coloured by `fit` minus `compare`. Default `NULL`.
 
 - width:
 
-  Which non-negative quantity sets ribbon width: `"count"` (default,
-  transition frequency) or `"prob"` (row-conditional probability).
+  Ribbon width: `"count"` (default) or `"prob"`.
 
 - color:
 
-  Which quantity fills the ribbons: `"residuals"` (default, signed
-  adjusted residual, diverging), `"lift"`, `"prob"`, or `"count"`.
-  Non-residual metrics use a sequential scale unless `compare` makes
-  them a signed difference.
+  Ribbon colour: `"residuals"` (default), `"lift"`, `"prob"` or
+  `"count"`.
 
 - significant:
 
-  Logical. Keep only significant transitions (drops the others'
-  ribbons). Ignored when `compare` is set. Default `FALSE`.
+  Draw only transitions whose residual p-value is below the fit's
+  `alpha` (default `FALSE`); ignored with `compare`.
 
 - self_loops:
 
-  Logical. Draw self-transition ribbons. Default `TRUE`.
+  Draw self-transitions (default `TRUE`).
 
 - alpha:
 
-  Ribbon fill opacity. Default `0.6`.
+  Ribbon opacity (default `0.6`).
 
 - ...:
 
   Passed to
-  [`cograph::plot_chord()`](https://sonsoles.me/cograph/reference/plot_chord.html)
-  (e.g. `ticks`, `segment_width`, `label_size`, `title`).
+  [`cograph::plot_chord()`](https://sonsoles.me/cograph/reference/plot_chord.html),
+  for example `ticks`, `segment_width`, `label_size` or `title`.
 
 ## Value
 
-Invisibly, the list returned by
+The value of
 [`cograph::plot_chord()`](https://sonsoles.me/cograph/reference/plot_chord.html)
-(`segments` and `chords` data frames). Drawn as a side effect.
+(the drawn segments and chords), invisibly; the plot is drawn on the
+current device.
 
-## Details
+## Conditions
 
-This is the circular companion to the
-[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
-heatmap and the
-[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
-network; the drawing is delegated to `cograph`.
+Errors carry the class `lagdynamics_error` and
+`lagdynamics_incompatible_fits` when `fit` and `compare` have different
+states.
 
 ## See also
 
-[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
-(heatmap),
-[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
-(network),
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+[`plot.lsa()`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md),
+[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md),
+[`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md),
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
 
 ## Examples
 
 ``` r
-fit <- lsa(group_regulation)
-plot_chords(fit)                          # ribbons filled by residual
+fit <- lsa(engagement)
+plot_chords(fit)
 
-plot_chords(fit, width = "prob")          # width = probability
-
-plot_chords(fit, significant = TRUE, ticks = TRUE)
+plot_chords(fit, width = "prob", self_loops = FALSE)
 
 
-# Compare two groups: ribbon colour = difference in residuals.
+# Ribbons coloured by the difference between two groups
 high <- lsa(subset(group_regulation_long, Achiever == "High"),
             actor = "Actor", action = "Action", time = "Time")
-low  <- lsa(subset(group_regulation_long, Achiever == "Low"),
-            actor = "Actor", action = "Action", time = "Time")
+low <- lsa(subset(group_regulation_long, Achiever == "Low"),
+           actor = "Actor", action = "Action", time = "Time")
 plot_chords(high, compare = low)
 
 ```

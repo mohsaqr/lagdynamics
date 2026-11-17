@@ -1,6 +1,6 @@
 # Lag transition networks
 
-Lag-sequential analysis studies the order in which categorical events
+Lag sequential analysis studies the order in which categorical events
 occur. Given a series of events, the method examines pairs that follow
 one another and tests whether a given event is followed by another event
 more or less often than the order of events alone would predict. The
@@ -22,17 +22,31 @@ occurs more often than expected, which marks a behavioural regularity
 above the base rates of its states. A negative residual identifies a
 transition that occurs less often than expected, which marks an
 avoidance. A residual near zero identifies a transition that occurs
-about as often as chance predicts. This tutorial develops these
-quantities, fits a model to a real data set, and interprets the network
-that results.
+about as often as chance predicts. The network drawn from these
+residuals answers a different question from a transition network
+weighted by probabilities: not where the process tends to go, but which
+moves it makes more or less often than chance.
 
-## The data and the fitted model
+## Data
 
-The `ai_long` data set is a long-format event log of coded AI-side
-actions in human–AI coding sessions, with one row per event.
+`ai_long` is a long-format event log of coded AI-side actions in
+human-AI coding sessions, one row per event: 8551 events in 428
+sessions.
+
+- **Action:** `code`, the coded action (8 states: `Ask`, `Delegate`,
+  `Execute`, `Explain`, `Investigate`, `Plan`, `Repair`, `Report`); its
+  transitions are modelled.
+- **Order:** `order_in_session`, the position of the event within its
+  session.
+- **Sequence:** `session_id`, one uninterrupted session. Transitions are
+  counted within a session only, so the last event of one session and
+  the first of the next are never treated as a pair.
+- **Context:** `project`, `timestamp`, `session_date`, and `cluster` are
+  available as metadata and are not needed for this fit.
 
 ``` r
 
+library(lagdynamics)
 head(ai_long)
 #>   message_id   project   session_id  timestamp session_date        code cluster
 #> 1       3441 Project_7 0086cabebd15 1772661600   2026-03-05    Delegate  Action
@@ -50,19 +64,11 @@ head(ai_long)
 #> 6          1               14
 ```
 
-Three columns define the analysis. The `code` column holds the action,
-the event type whose transitions are modelled. The `order_in_session`
-column orders events within a session. The `session_id` column
-identifies one uninterrupted sequence. Transitions are counted within a
-session only, so the last event of one session and the first of the next
-are never treated as a pair; the `session` argument enforces this
-boundary. The `project` column is available as contextual metadata, but
-it is not required for this fit because `session_id` already defines the
-sequence boundary.
+## The fitted model
 
-The [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-function fits the model by naming the action column, the session
-boundary, and the ordering column.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) fits
+the model by naming the action column, the session boundary, and the
+ordering column.
 
 ``` r
 
@@ -99,19 +105,17 @@ fit
 The printed model reports the number of states, transitions, and
 sequences, the omnibus test of independence, the strongest
 over-represented transitions, and the initial-state distribution. The
-`ai_long` process has 8 states and 8123 within-session transitions drawn
-from 428 sessions, so the model estimates a compact 8-by-8 transition
-system from a large number of observed moves; the residuals it reports
-are therefore repeated tendencies in the process rather than isolated
-episodes.
+process has 8 states and 8123 within-session transitions drawn from 428
+sessions, so the model estimates a compact 8-by-8 transition system from
+a large number of observed moves; the residuals it reports are repeated
+tendencies in the process rather than isolated episodes. Of the 64
+possible transitions, 40 depart significantly from independence.
 
 ## Reading the model
 
 The fitted model exposes its contents through accessor functions, each
-of which returns a table.
-
-The initial-state distribution records the share of sessions that begin
-in each state.
+of which returns a table. The initial-state distribution records the
+share of sessions that begin in each state.
 
 ``` r
 
@@ -129,8 +133,8 @@ initial(fit)
 
 The initial-state distribution places most of its mass on `Investigate`,
 whose value of 0.715 means that about 71% of sessions begin with an
-investigation action. `Delegate` begins 18% of sessions and `Execute`
-6%, while `Repair` and `Report` never begin a session. The process
+investigation action. `Delegate` begins 18.5% of sessions and `Execute`
+5.8%, while `Repair` and `Report` never begin a session. The process
 almost always opens by gathering information.
 
 Node activity records how often each state sends and receives
@@ -153,9 +157,9 @@ nodes(fit)
 `Execute` sends 3090 transitions and receives 3233, more than any other
 state, which makes it the most frequently visited state in the process.
 `Ask`, `Report`, and `Explain` are visited rarely. The magnitude of
-these totals is exactly what the expected-count calculation controls
-for, so that a busy state is not credited with meaningful transitions on
-the strength of its activity alone.
+these totals is what the expected-count calculation controls for, so
+that a busy state is not credited with meaningful transitions on the
+strength of its activity alone.
 
 The omnibus test evaluates the whole table against independence and is
 the first result to consult.
@@ -183,46 +187,46 @@ orders them by strength.
 ``` r
 
 transitions(fit, direction = "over", sort = "strength")
-#>           from          to lag count expected   prob prob_col adj_res         p
-#> 1  Investigate        Plan   1   977   441.61 0.4371   0.6087   33.41 1.11e-244
-#> 2     Delegate        Plan   1   174    55.32 0.6214   0.1084   18.13  1.96e-73
-#> 3          Ask     Explain   1    44     5.86 0.4835   0.0841   16.38  2.56e-60
-#> 4      Execute     Execute   1  1575  1229.84 0.5097   0.4872   16.12  1.98e-58
-#> 5      Explain      Report   1    56    11.23 0.1111   0.3094   13.95  3.12e-44
-#> 6       Repair     Explain   1    43    16.16 0.1713   0.0822    7.01  2.36e-12
-#> 7      Explain      Repair   1    42    15.95 0.0833   0.1634    6.85  7.59e-12
-#> 8         Plan     Execute   1   709   600.99 0.4695   0.2193    6.29  3.10e-10
-#> 9      Explain     Explain   1    66    32.45 0.1310   0.1262    6.29  3.24e-10
-#> 10      Repair         Ask   1    13     3.00 0.0518   0.1340    5.90  3.54e-09
-#> 11        Plan    Delegate   1    73    40.15 0.0483   0.3380    5.82  5.78e-09
-#> 12        Plan Investigate   1   458   373.83 0.3033   0.2277    5.56  2.66e-08
-#> 13        Plan      Report   1    56    33.65 0.0371   0.3094    4.32  1.56e-05
-#> 14      Report      Repair   1    14     5.13 0.0864   0.0545    4.02  5.73e-05
-#> 15     Explain Investigate   1   158   124.77 0.3135   0.0786    3.54  3.99e-04
-#> 16      Report    Delegate   1    10     4.31 0.0617   0.0463    2.81  4.99e-03
-#> 17      Repair     Execute   1   119    99.90 0.4741   0.0368    2.50  1.23e-02
-#> 18      Report     Explain   1    18    10.43 0.1111   0.0344    2.45  1.44e-02
-#> 19        Plan      Repair   1    60    47.77 0.0397   0.2335    1.99  4.64e-02
-#>    yules_q  kappa kappa_z   kappa_p lift sign significant
-#> 1    0.734 0.4556   33.41 1.15e-244 2.21 over        TRUE
-#> 2    0.761 0.4940   17.86  2.49e-71 3.15 over        TRUE
-#> 3    0.873 0.4082   15.99  1.56e-57 7.51 over        TRUE
-#> 4    0.358 0.1655   15.30  7.73e-53 1.28 over        TRUE
-#> 5    0.765 0.2643   14.07  6.11e-45 4.99 over        TRUE
-#> 6    0.522 0.1130    7.20  6.20e-13 2.66 over        TRUE
-#> 7    0.516 0.1088    6.93  4.15e-12 2.63 over        TRUE
-#> 8    0.178 0.0915    5.21  1.84e-07 1.18 over        TRUE
-#> 9    0.405 0.0689    6.37  1.88e-10 2.03 over        TRUE
-#> 10   0.670 0.1044    5.93  2.94e-09 4.34 over        TRUE
-#> 11   0.394 0.0716    2.59  9.67e-03 1.82 over        TRUE
-#> 12   0.173 0.0161    1.18  2.37e-01 1.23 over        TRUE
-#> 13   0.333 0.1480    4.16  3.16e-05 1.66 over        TRUE
-#> 14   0.501 0.0488    3.77  1.66e-04 2.73 over        TRUE
-#> 15   0.174 0.0419    1.62  1.04e-01 1.27 over        TRUE
-#> 16   0.425 0.0215    1.55  1.22e-01 2.32 over        TRUE
-#> 17   0.159 0.1325    2.75  5.97e-03 1.19 over        TRUE
-#> 18   0.297 0.0407    2.16  3.05e-02 1.73 over        TRUE
-#> 19   0.148 0.0543    1.83  6.75e-02 1.26 over        TRUE
+#>           from          to lag count expected   prob prob_col adj_res         p yules_q
+#> 1  Investigate        Plan   1   977   441.61 0.4371   0.6087   33.41 1.11e-244   0.734
+#> 2     Delegate        Plan   1   174    55.32 0.6214   0.1084   18.13  1.96e-73   0.761
+#> 3          Ask     Explain   1    44     5.86 0.4835   0.0841   16.38  2.56e-60   0.873
+#> 4      Execute     Execute   1  1575  1229.84 0.5097   0.4872   16.12  1.98e-58   0.358
+#> 5      Explain      Report   1    56    11.23 0.1111   0.3094   13.95  3.12e-44   0.765
+#> 6       Repair     Explain   1    43    16.16 0.1713   0.0822    7.01  2.36e-12   0.522
+#> 7      Explain      Repair   1    42    15.95 0.0833   0.1634    6.85  7.59e-12   0.516
+#> 8         Plan     Execute   1   709   600.99 0.4695   0.2193    6.29  3.10e-10   0.178
+#> 9      Explain     Explain   1    66    32.45 0.1310   0.1262    6.29  3.24e-10   0.405
+#> 10      Repair         Ask   1    13     3.00 0.0518   0.1340    5.90  3.54e-09   0.670
+#> 11        Plan    Delegate   1    73    40.15 0.0483   0.3380    5.82  5.78e-09   0.394
+#> 12        Plan Investigate   1   458   373.83 0.3033   0.2277    5.56  2.66e-08   0.173
+#> 13        Plan      Report   1    56    33.65 0.0371   0.3094    4.32  1.56e-05   0.333
+#> 14      Report      Repair   1    14     5.13 0.0864   0.0545    4.02  5.73e-05   0.501
+#> 15     Explain Investigate   1   158   124.77 0.3135   0.0786    3.54  3.99e-04   0.174
+#> 16      Report    Delegate   1    10     4.31 0.0617   0.0463    2.81  4.99e-03   0.425
+#> 17      Repair     Execute   1   119    99.90 0.4741   0.0368    2.50  1.23e-02   0.159
+#> 18      Report     Explain   1    18    10.43 0.1111   0.0344    2.45  1.44e-02   0.297
+#> 19        Plan      Repair   1    60    47.77 0.0397   0.2335    1.99  4.64e-02   0.148
+#>     kappa kappa_z   kappa_p lift sign significant
+#> 1  0.4556   33.41 1.15e-244 2.21 over        TRUE
+#> 2  0.4940   17.86  2.49e-71 3.15 over        TRUE
+#> 3  0.4082   15.99  1.56e-57 7.51 over        TRUE
+#> 4  0.1655   15.30  7.73e-53 1.28 over        TRUE
+#> 5  0.2643   14.07  6.11e-45 4.99 over        TRUE
+#> 6  0.1130    7.20  6.20e-13 2.66 over        TRUE
+#> 7  0.1088    6.93  4.15e-12 2.63 over        TRUE
+#> 8  0.0915    5.21  1.84e-07 1.18 over        TRUE
+#> 9  0.0689    6.37  1.88e-10 2.03 over        TRUE
+#> 10 0.1044    5.93  2.94e-09 4.34 over        TRUE
+#> 11 0.0716    2.59  9.67e-03 1.82 over        TRUE
+#> 12 0.0161    1.18  2.37e-01 1.23 over        TRUE
+#> 13 0.1480    4.16  3.16e-05 1.66 over        TRUE
+#> 14 0.0488    3.77  1.66e-04 2.73 over        TRUE
+#> 15 0.0419    1.62  1.04e-01 1.27 over        TRUE
+#> 16 0.0215    1.55  1.22e-01 2.32 over        TRUE
+#> 17 0.1325    2.75  5.97e-03 1.19 over        TRUE
+#> 18 0.0407    2.16  3.05e-02 1.73 over        TRUE
+#> 19 0.0543    1.83  6.75e-02 1.26 over        TRUE
 ```
 
 `Investigate -> Plan` is the strongest over-represented transition. It
@@ -240,50 +244,50 @@ regularities.
 ``` r
 
 transitions(fit, direction = "under", sort = "strength")
-#>           from          to lag count expected    prob prob_col adj_res        p
-#> 1         Plan        Plan   1    49   298.36 0.03245  0.03053  -17.86 2.36e-71
-#> 2  Investigate     Execute   1   563   889.54 0.25190  0.17414  -16.57 1.07e-61
-#> 3      Execute        Plan   1   358   610.54 0.11586  0.22305  -14.50 1.30e-47
-#> 4     Delegate     Execute   1    51   111.44 0.18214  0.01577   -7.51 5.92e-14
-#> 5      Explain        Plan   1    35    99.58 0.06944  0.02181   -7.46 8.65e-14
-#> 6       Repair        Plan   1     4    49.59 0.01594  0.00249   -7.34 2.10e-13
-#> 7      Explain     Execute   1   129   200.59 0.25595  0.03990   -6.73 1.73e-11
-#> 8  Investigate     Explain   1    79   143.90 0.03535  0.15105   -6.57 5.04e-11
-#> 9     Delegate Investigate   1    26    69.32 0.09286  0.01293   -6.10 1.03e-09
-#> 10     Execute      Report   1    32    68.85 0.01036  0.17680   -5.71 1.16e-08
-#> 11      Report        Plan   1     5    32.01 0.03086  0.00312   -5.38 7.31e-08
-#> 12 Investigate      Repair   1    40    70.71 0.01790  0.15564   -4.36 1.30e-05
-#> 13 Investigate      Report   1    26    49.80 0.01163  0.14365   -4.01 6.17e-05
-#> 14         Ask        Plan   1     3    17.98 0.03297  0.00187   -3.97 7.30e-05
-#> 15 Investigate    Delegate   1    36    59.43 0.01611  0.16667   -3.62 2.96e-04
-#> 16 Investigate Investigate   1   493   553.32 0.22058  0.24515   -3.47 5.16e-04
-#> 17         Ask Investigate   1     9    22.53 0.09890  0.00448   -3.30 9.52e-04
-#> 18     Execute     Explain   1   169   198.95 0.05469  0.32314   -2.79 5.29e-03
-#> 19         Ask     Execute   1    26    36.22 0.28571  0.00804   -2.20 2.78e-02
-#> 20      Repair      Repair   1     2     7.94 0.00797  0.00778   -2.18 2.95e-02
-#> 21      Repair      Report   1     1     5.59 0.00398  0.00552   -2.00 4.60e-02
-#>    yules_q  kappa kappa_z  kappa_p   lift  sign significant
-#> 1   -0.803 -0.840  -18.16 1.04e-73 0.1642 under        TRUE
-#> 2   -0.423 -0.362  -16.02 9.06e-58 0.6329 under        TRUE
-#> 3   -0.431 -0.420  -14.73 4.13e-49 0.5864 under        TRUE
-#> 4   -0.508 -0.546   -7.49 6.85e-14 0.4576 under        TRUE
-#> 5   -0.553 -0.647   -7.39 1.42e-13 0.3515 under        TRUE
-#> 6   -0.881 -0.918   -7.22 5.10e-13 0.0807 under        TRUE
-#> 7   -0.333 -0.354   -6.56 5.42e-11 0.6431 under        TRUE
-#> 8   -0.380 -0.444   -6.39 1.67e-10 0.5490 under        TRUE
-#> 9   -0.536 -0.675   -7.19 6.49e-13 0.3751 under        TRUE
-#> 10  -0.489 -0.536   -5.72 1.08e-08 0.4648 under        TRUE
-#> 11  -0.775 -0.854   -5.62 1.96e-08 0.1562 under        TRUE
-#> 12  -0.355 -0.426   -4.22 2.41e-05 0.5657 under        TRUE
-#> 13  -0.393 -0.470   -3.90 9.82e-05 0.5221 under        TRUE
-#> 14  -0.759 -0.840   -4.06 4.82e-05 0.1668 under        TRUE
-#> 15  -0.317 -0.550   -5.86 4.72e-09 0.6057 under        TRUE
-#> 16  -0.102 -0.215   -7.38 1.58e-13 0.8910 under        TRUE
-#> 17  -0.503 -0.664   -4.05 5.03e-05 0.3995 under        TRUE
-#> 18  -0.133 -0.154   -2.85 4.44e-03 0.8495 under        TRUE
-#> 19  -0.249 -0.311   -2.44 1.47e-02 0.7179 under        TRUE
-#> 20  -0.613 -0.741   -2.12 3.37e-02 0.2518 under        TRUE
-#> 21  -0.708 -0.816   -1.95 5.08e-02 0.1788 under        TRUE
+#>           from          to lag count expected    prob prob_col adj_res        p yules_q
+#> 1         Plan        Plan   1    49   298.36 0.03245  0.03053  -17.86 2.36e-71  -0.803
+#> 2  Investigate     Execute   1   563   889.54 0.25190  0.17414  -16.57 1.07e-61  -0.423
+#> 3      Execute        Plan   1   358   610.54 0.11586  0.22305  -14.50 1.30e-47  -0.431
+#> 4     Delegate     Execute   1    51   111.44 0.18214  0.01577   -7.51 5.92e-14  -0.508
+#> 5      Explain        Plan   1    35    99.58 0.06944  0.02181   -7.46 8.65e-14  -0.553
+#> 6       Repair        Plan   1     4    49.59 0.01594  0.00249   -7.34 2.10e-13  -0.881
+#> 7      Explain     Execute   1   129   200.59 0.25595  0.03990   -6.73 1.73e-11  -0.333
+#> 8  Investigate     Explain   1    79   143.90 0.03535  0.15105   -6.57 5.04e-11  -0.380
+#> 9     Delegate Investigate   1    26    69.32 0.09286  0.01293   -6.10 1.03e-09  -0.536
+#> 10     Execute      Report   1    32    68.85 0.01036  0.17680   -5.71 1.16e-08  -0.489
+#> 11      Report        Plan   1     5    32.01 0.03086  0.00312   -5.38 7.31e-08  -0.775
+#> 12 Investigate      Repair   1    40    70.71 0.01790  0.15564   -4.36 1.30e-05  -0.355
+#> 13 Investigate      Report   1    26    49.80 0.01163  0.14365   -4.01 6.17e-05  -0.393
+#> 14         Ask        Plan   1     3    17.98 0.03297  0.00187   -3.97 7.30e-05  -0.759
+#> 15 Investigate    Delegate   1    36    59.43 0.01611  0.16667   -3.62 2.96e-04  -0.317
+#> 16 Investigate Investigate   1   493   553.32 0.22058  0.24515   -3.47 5.16e-04  -0.102
+#> 17         Ask Investigate   1     9    22.53 0.09890  0.00448   -3.30 9.52e-04  -0.503
+#> 18     Execute     Explain   1   169   198.95 0.05469  0.32314   -2.79 5.29e-03  -0.133
+#> 19         Ask     Execute   1    26    36.22 0.28571  0.00804   -2.20 2.78e-02  -0.249
+#> 20      Repair      Repair   1     2     7.94 0.00797  0.00778   -2.18 2.95e-02  -0.613
+#> 21      Repair      Report   1     1     5.59 0.00398  0.00552   -2.00 4.60e-02  -0.708
+#>     kappa kappa_z  kappa_p   lift  sign significant
+#> 1  -0.840  -18.16 1.04e-73 0.1642 under        TRUE
+#> 2  -0.362  -16.02 9.06e-58 0.6329 under        TRUE
+#> 3  -0.420  -14.73 4.13e-49 0.5864 under        TRUE
+#> 4  -0.546   -7.49 6.85e-14 0.4576 under        TRUE
+#> 5  -0.647   -7.39 1.42e-13 0.3515 under        TRUE
+#> 6  -0.918   -7.22 5.10e-13 0.0807 under        TRUE
+#> 7  -0.354   -6.56 5.42e-11 0.6431 under        TRUE
+#> 8  -0.444   -6.39 1.67e-10 0.5490 under        TRUE
+#> 9  -0.675   -7.19 6.49e-13 0.3751 under        TRUE
+#> 10 -0.536   -5.72 1.08e-08 0.4648 under        TRUE
+#> 11 -0.854   -5.62 1.96e-08 0.1562 under        TRUE
+#> 12 -0.426   -4.22 2.41e-05 0.5657 under        TRUE
+#> 13 -0.470   -3.90 9.82e-05 0.5221 under        TRUE
+#> 14 -0.840   -4.06 4.82e-05 0.1668 under        TRUE
+#> 15 -0.550   -5.86 4.72e-09 0.6057 under        TRUE
+#> 16 -0.215   -7.38 1.58e-13 0.8910 under        TRUE
+#> 17 -0.664   -4.05 5.03e-05 0.3995 under        TRUE
+#> 18 -0.154   -2.85 4.44e-03 0.8495 under        TRUE
+#> 19 -0.311   -2.44 1.47e-02 0.7179 under        TRUE
+#> 20 -0.741   -2.12 3.37e-02 0.2518 under        TRUE
+#> 21 -0.816   -1.95 5.08e-02 0.1788 under        TRUE
 ```
 
 `Plan -> Plan` is the strongest under-represented transition, with an
@@ -297,75 +301,72 @@ to execution. Read together with the over-represented
 `Investigate -> Plan`, these avoidances show a separation between
 gathering information and acting on it, with a planning step in between.
 
-## The network
+## The residual network
 
 The network represents each state as a node and each transition as a
 directed edge, with edge width proportional to the weight and an edge
 that loops to its own node marking a self-transition. Three networks can
 be drawn from the same model, differing in the quantity they place on
-the edges. The two lag-sequential networks come first: the residual
-network, whose edges are signed adjusted residuals (blue
-over-represented, red avoided), and the Yule’s Q network, which shows
-the same signed departures on a fixed $`[-1, 1]`$ scale that does not
-grow with sample size. The probability network, which is the Transition
-Network Analysis view, comes last.
+the edges: the residual network, the Yule’s Q network, and the
+probability network.
 
-The residual network draws the tested departures from independence. The
-full network draws every edge:
-
-``` r
-
-plot_transitions(fit, weights = "residuals", decimals = 1)
-```
-
-![](lag-transition-networks_files/figure-html/net-residual-full-1.png)
-
-Because a residual grows with sample size and the data set has many
-transitions, most edges are significant and the full network is dense.
-The `top` argument keeps the strongest edges by absolute residual:
+The residual network draws the signed adjusted residuals, blue for
+over-represented and red for avoided transitions. Because a residual
+grows with sample size and 40 of the 64 transitions are significant, the
+network with every edge is dense. The `top` argument of
+[`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
+keeps the strongest edges by absolute residual.
 
 ``` r
 
 plot_transitions(fit, weights = "residuals", top = 12, decimals = 1)
 ```
 
-![](lag-transition-networks_files/figure-html/net-residual-top-1.png)
+![](lag-transition-networks_files/figure-html/net-residual-1.png)
 
-The pruned residual network has a directed shape that the edge weights
-make explicit. `Investigate -> Plan` is the heaviest edge (residual
-33.4), and its reverse `Plan -> Investigate` is also over-represented
-(residual 5.6); investigation and planning therefore form a mutual pair.
-`Plan -> Execute` then runs forward (residual 6.3), while its reverse
-`Execute -> Plan` is red (residual -14.5), so the link from planning to
-execution is one-directional. `Execute -> Execute` is a heavy self-loop
-(residual 16.1), so the process remains in execution once it arrives.
-The red edges `Plan -> Plan` and `Investigate -> Execute` show that
-planning does not repeat and that investigation does not jump straight
-to execution.
+The pruned residual network keeps the 12 edges with an absolute residual
+of 7 or more, and it has a directed shape. `Investigate -> Plan` is the
+heaviest edge (residual 33.4) and `Delegate -> Plan` the second (18.1),
+so planning is the common destination of information gathering and
+delegation. `Execute -> Execute` is a heavy self-loop (residual 16.1),
+so the process remains in execution once it arrives, and
+`Execute -> Plan` is red (residual -14.5), so it rarely returns to
+planning. The red edges `Plan -> Plan` (-17.9) and
+`Investigate -> Execute` (-16.6) show that planning does not repeat and
+that investigation does not jump straight to execution. Two weaker
+over-represented edges fall below the cut and are read from the
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+table above: `Plan -> Execute` (residual 6.3) and `Plan -> Investigate`
+(5.6). With them, investigation and planning form a mutual pair, and the
+link from planning to execution runs one way only.
 
-The Yule’s Q network shows the same signed departures on a bounded
-scale, so its edge values are comparable across datasets and across
-groups of different sizes. The full network again draws every edge, and
-`top` keeps the strongest:
+## The Yule’s Q network
 
-``` r
-
-plot_transitions(fit, weights = "yules_q", decimals = 2)
-```
-
-![](lag-transition-networks_files/figure-html/net-yulesq-full-1.png)
+The Yule’s Q network shows the same signed departures on a bounded scale
+from -1 to 1 that does not grow with sample size, so its edge values are
+comparable across data sets and across groups of different sizes.
 
 ``` r
 
 plot_transitions(fit, weights = "yules_q", top = 12, decimals = 2)
 ```
 
-![](lag-transition-networks_files/figure-html/net-yulesq-top-1.png)
+![](lag-transition-networks_files/figure-html/net-yulesq-1.png)
 
-The Yule’s Q network preserves the shape of the residual network, the
-same over-represented and avoided edges, but its weights are bounded
-association values rather than test statistics, which is the form to use
-when the networks of two groups are to be compared.
+The Yule’s Q network keeps the core of the residual network:
+`Investigate -> Plan` (Q = 0.734), `Delegate -> Plan` (0.761),
+`Ask -> Explain` (0.873), and the avoided `Plan -> Plan` (-0.803) are
+among its 12 strongest edges. Its weights are bounded association values
+rather than test statistics, so the ranking differs. The strongest Q of
+all is the avoided `Repair -> Plan` (Q = -0.881), which rests on 4
+observed transitions, and `Repair -> Report` enters with a single
+transition, whereas the frequent `Execute -> Execute` (Q = 0.358) drops
+out. A Q network therefore reads the strength of association
+independently of volume, and it is the form to use when the networks of
+two groups of different sizes are compared; a large Q on a rare
+transition is read together with its count.
+
+## The probability network
 
 The probability network draws the same transitions weighted by
 $`P(\text{to} \mid \text{from})`$, the share of moves out of a state
@@ -397,23 +398,24 @@ and in which direction.
 
 The adjusted residual is an analytic test, and its conclusions can be
 checked against the data by resampling. The bootstrap resamples whole
-sequences with replacement, refits the model on each resample, and
+sessions with replacement, refits the model on each resample, and
 records a confidence interval for every edge together with whether the
-edge keeps its sign.
+edge keeps its sign. The call below draws 500 resamples.
 
 ``` r
 
-boot <- bootstrap_lsa(fit, R = 1000)
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 500)
 boot
 #> <lsa_bootstrap>
 #>   engine:        classical
 #>   level:         sequence
-#>   replicates:    1000
+#>   replicates:    500
 #>   CI level:      95%
 #>   stable edges:  42 of 64
 ```
 
-The bootstrap finds 43 of the 64 possible edges to be stable, meaning
+The bootstrap finds 42 of the 64 possible edges to be stable, meaning
 their sign is preserved across the resamples. A stable edge can be
 reported with confidence, whereas an unstable edge might not reappear in
 a new sample even when its residual is large.
@@ -422,7 +424,7 @@ Analytic certainty offers a closed-form alternative to the bootstrap.
 The
 [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
 function models each state’s outgoing transitions as
-Dirichlet–Multinomial, which yields a posterior distribution, a credible
+Dirichlet-Multinomial, which yields a posterior distribution, a credible
 interval, and a certainty decision for each transition probability
 without resampling.
 
@@ -440,25 +442,32 @@ cert
 Analytic certainty classifies 26 of 64 edges as certain, meaning their
 transition probabilities are estimated precisely. The bootstrap and the
 analytic estimate agree on the overall picture: the frequent transitions
-are estimated with confidence, and the rare transitions are not.
+are estimated with confidence, and the rare transitions are not. The
+full set of checks, including case-drop stability, split-half
+reliability, and a permutation null, is in [Evaluating
+transitions](https://pak.dynasite.org/lagdynamics/articles/confirmatory.html).
 
 ## Summary
 
 The analysis of `ai_long` shows that the order of actions is not random
 ($`G^2 = 2168`$, $`p < 0.001`$) and that the process has a definite
 shape. Sessions almost always begin in `Investigate` (initial
-probability 0.71). `Investigate` and `Plan` form a mutual pair, feed
+probability 0.715). `Investigate` and `Plan` form a mutual pair, feed
 forward into `Execute` through the one-directional `Plan -> Execute`,
-and terminate in `Execute`, which is the busiest state (in-strength
-2.30), occurs in runs (`Execute -> Execute`, probability 0.51), and
-rarely returns to planning. Planning does not repeat (`Plan -> Plan`,
-residual -17.9) and investigation seldom leads straight to execution
-(`Investigate -> Execute`, residual -16.6), so a planning step separates
-information gathering from acting on it. Of the 64 possible transitions,
-40 are significant, 43 are sign-stable under the bootstrap, and 26 are
-certain under the Bayesian estimate, so a transition merits reporting
-when it is significant, sizeable, and reproducible. The residual network
-and the probability network remain complementary throughout: the
-probability network describes where the process tends to go, and the
-residual network identifies which transitions occur more or less often
-than chance.
+and terminate in `Execute`, which is the busiest state (3233 incoming
+transitions), occurs in runs (`Execute -> Execute`, probability 0.51),
+and rarely returns to planning. Planning does not repeat
+(`Plan -> Plan`, residual -17.9) and investigation seldom leads straight
+to execution (`Investigate -> Execute`, residual -16.6), so a planning
+step separates information gathering from acting on it. Of the 64
+possible transitions, 40 are significant, 42 are sign-stable under the
+bootstrap, and 26 are certain under the Bayesian estimate, so a
+transition merits reporting when it is significant, sizeable, and
+reproducible.
+
+The three networks have distinct uses. The residual network shows which
+transitions depart from chance and is the primary display of a lag
+sequential analysis. The Yule’s Q network shows the same departures on a
+scale that is comparable across data sets and groups. The probability
+network shows where the process tends to go and is the display to pair
+with a transition network analysis.

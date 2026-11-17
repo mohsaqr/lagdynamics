@@ -2,14 +2,20 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
+  articles/case-ai: case-ai.html
+  articles/case-engagement: case-engagement.html
+  articles/case-group-regulation: case-group-regulation.html
   confirmatory: confirmatory.html
-  interop: interop.html
-  intro: intro.html
+  articles/engines: engines.html
+  articles/event-logs: event-logs.html
+  group-comparison: group-comparison.html
   lag-transition-networks: lag-transition-networks.html
-  lagdynamics: lagdynamics.html
-  plotting: plotting.html
-  workflow: workflow.html
-last_built: 2026-11-01T21:35Z
+  articles/lags-structural-zeros: lags-structural-zeros.html
+  lsa: lsa.html
+  articles/plotting: plotting.html
+  articles/transfer-entropy: transfer-entropy.html
+  articles/workflow: workflow.html
+last_built: 2026-11-17T11:26Z
 urls:
   reference: https://pak.dynasite.org/lagdynamics/reference
   article: https://pak.dynasite.org/lagdynamics/articles

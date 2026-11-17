@@ -1,8 +1,14 @@
-# Tidy the Canonical Sequence Object
+# Read the events of canonical sequence data as a table
 
-Returns the canonical `lsa_data` as a tidy data frame: one row per event
-(`seq_id`, within-sequence `index`, `state`) for event-level input, or
-one row per `from`/`to`/`count` cell for transition-matrix input.
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) returns
+the canonical sequence data from
+[`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md),
+every event with its sequence and position, as a tidy table, which shows
+how the input was read: which rows became sequences, where missing
+values were dropped, and which labels were assigned. For input given as
+a transition-count matrix, it returns one row per cell instead.
+[`print()`](https://rdrr.io/r/base/print.html) shows the input source,
+the number of states, sequences, events and lag-1 transitions.
 
 ## Usage
 
@@ -23,40 +29,38 @@ print(x, ...)
 
 - row.names, optional, ...:
 
-  Standard
-  [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html)
-  arguments (unused; present for method consistency).
+  Ignored; present for consistency with the generic.
 
 ## Value
 
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html): a
-`data.frame` with one row per event and columns `seq_id`, `index`,
-`state` (event-level input), or one row per cell and columns `from`,
-`to`, `count` (transition-matrix input).
-[`print()`](https://rdrr.io/r/base/print.html): `x`, invisibly.
+`data.frame` with one row per event and the columns `seq_id`, `index`
+(position within the sequence) and `state`; or, for transition-matrix
+input, one row per cell and the columns `from`, `to` and `count`.
+[`print()`](https://rdrr.io/r/base/print.html) returns `x` invisibly.
 
-## Details
+## See also
 
-[`print()`](https://rdrr.io/r/base/print.html) shows the input source,
-the number of states, sequences, events and lag-1 transitions.
+[`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md),
+[`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
 
 ## Examples
 
 ``` r
-d <- lsa_data(c("a", "b", "a", "c", "b"))
+d <- lsa_data(list(c("a", "b", NA, "a"), c("b", "c")))
 d
 #> <lsa_data>
 #>   source:        events
 #>   states (K):    3
 #>   labels:        a, b, c
-#>   sequences:     1
+#>   sequences:     2
 #>   events:        5
-#>   transitions:   4 (lag 1, summed across sequences)
+#>   transitions:   3 (lag 1, summed across sequences)
 as.data.frame(d)
 #>   seq_id index state
 #> 1      1     1     a
 #> 2      1     2     b
 #> 3      1     3     a
-#> 4      1     4     c
-#> 5      1     5     b
+#> 4      2     1     b
+#> 5      2     2     c
 ```

@@ -1,11 +1,22 @@
-# Iterative Proportional Fitting for Two-Way Tables with Structural Zeros
+# Fit expected counts with structural zeros by iterative proportional fitting
 
-Fits expected cell frequencies under the row + column independence model
-when some cells are constrained to be exactly zero (structural zeros).
-The fitted table has the same row and column marginals as `obs`,
-satisfies `E[i, j] = 0` wherever `structure[i, j] = 0`, and is the
-maximum likelihood estimate under the independence model restricted to
-the non-zero pattern.
+`lsa_ipf()` fits the expected counts of a count table with structural
+zeros by iterative proportional fitting. When some transitions cannot
+occur by construction (structural zeros, such as self-transitions in a
+coding scheme that merges repeated codes), the quasi-independence model
+fits expected counts that are zero in the forbidden cells and reproduce
+the observed row and column totals; it has no closed form and is found
+by iterative proportional fitting (Wickens, 1989), which rescales the
+rows and columns of the table in turn until both sets of totals match.
+Under ordinary independence, the expected count of a transition is the
+product of its row and column totals divided by the grand total, a
+formula that assigns expected counts to impossible cells.
+
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) calls
+`lsa_ipf()` when `loops = FALSE` or `structural_zeros` is given, so it
+is needed directly only to inspect the expected table or to use it
+outside
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Usage
 
@@ -17,57 +28,49 @@ lsa_ipf(obs, structure = NULL, tol = 1e-08, max_iter = 200L)
 
 - obs:
 
-  Numeric `K x K` matrix of observed counts.
+  Square numeric matrix of observed transition counts.
 
 - structure:
 
-  Numeric `K x K` 0/1 matrix. **Default `matrix(1, K, K)`: every cell,
-  including the diagonal, is estimable – self-transitions and every
-  observed cell are kept.** A `0` marks a cell as a structural zero
-  (forbidden), a `1` marks it as estimable. Pass an explicit pattern
-  (e.g. `1 - diag(K)`) only when you want to *opt out* of specific cells
-  because the coding scheme makes them impossible by construction.
+  Square 0/1 matrix of the same size: `0` marks a structural zero, `1`
+  an estimable cell. Default `NULL`: every cell is estimable, which
+  gives the ordinary independence table.
 
 - tol:
 
-  Numeric. Convergence tolerance on marginal differences. Default
-  `1e-8`.
+  Convergence tolerance on the largest difference between fitted and
+  observed totals (default `1e-8`).
 
 - max_iter:
 
-  Integer. Maximum number of row+column scaling passes. Default `200L`.
+  Maximum number of row-and-column passes (default `200`).
 
 ## Value
 
-A plain list (no class) with elements:
+A list with the fitted `K x K` expected-count matrix (`fit`), the number
+of passes used (`iterations`), whether the totals converged within
+`max_iter` (`converged`), and the largest remaining difference between
+fitted and observed totals (`max_margin_diff`).
 
-- fit:
+## Conditions
 
-  The fitted `K x K` expected-frequency matrix.
+Errors carry the class `lagdynamics_error` and one of:
 
-- iterations:
+- `lagdynamics_bad_input`: `obs` contains missing, infinite or negative
+  values.
 
-  Number of row+column passes used.
-
-- converged:
-
-  Logical scalar: whether convergence was reached within `max_iter`.
-
-- max_margin_diff:
-
-  Maximum absolute difference between observed and fitted marginals at
-  termination.
-
-## Details
-
-Implementation follows Wickens (1989), pp. 107-112: alternately scale
-rows then columns of an initialized expected table until row and column
-marginals converge to those of `obs` within `tol`.
+- `lagdynamics_ipf_infeasible`: a row or column has observed transitions
+  but every one of its cells is a structural zero.
 
 ## References
 
 Wickens, T. D. (1989). *Multiway contingency tables analysis for the
-social sciences*, pp. 107-112. Lawrence Erlbaum.
+social sciences* (pp. 107-112). Lawrence Erlbaum.
+
+## See also
+
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) and its
+`loops` and `structural_zeros` arguments.
 
 ## Examples
 
@@ -93,8 +96,8 @@ lsa_ipf(obs)
 #> [1] 0
 #> 
 
-# Diagonal forbidden: the empty self-transition cells become structural
-# zeros and the fit keeps the observed row and column totals
+# Self-transitions forbidden: zero expected counts on the diagonal,
+# observed row and column totals kept
 lsa_ipf(obs, structure = 1 - diag(3))
 #> $fit
 #>          [,1]     [,2]     [,3]

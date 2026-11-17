@@ -1,250 +1,456 @@
 # lagdynamics
 
-> Modern, tidy lag sequential analysis for categorical event sequences.
+## Vignettes and guides
 
-Lag sequential analysis (LSA) is a statistical method for detecting
-temporal contingencies in categorical, time-ordered data. For every
-ordered pair of states, it tests whether one follows another at a given
-lag more — or less — often than expected under sequential independence,
-quantifying each contingency with the adjusted (standardized) residual
-of observed against expected transition frequencies. It is widely used
-to study how categorical processes unfold over time — in behavioral and
-dyadic interaction, conversation and group discourse, psychotherapy
-process research, human–computer interaction, and learning analytics —
-wherever the order of events, not merely their frequency, carries the
-meaning.
+**Vignettes**
 
-`lagdynamics` implements LSA as a modern, tidy workflow. A single
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-constructor fits the classical and extended engine family — classical,
-two-cell, bidirectional, and parallel / non-parallel dominance — and
-every result is read through a verb that returns a
-one-row-per-observation `data.frame`. Its distinguishing commitment is
-evidence: each transition is treated as a *tested departure from
-independence*, backed by a confirmatory battery of bootstrap intervals,
-analytic Bayesian certainty, split-half reliability, case-drop
-stability, and permutation tests.
+- [Lag sequential
+  analysis](https://pak.dynasite.org/lagdynamics/articles/lsa.html)
+- [Lag transition
+  networks](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.html)
+- [Evaluating
+  transitions](https://pak.dynasite.org/lagdynamics/articles/confirmatory.html)
+- [Comparing
+  groups](https://pak.dynasite.org/lagdynamics/articles/group-comparison.html)
 
-Beyond the classical test, the package adds multi-lag analysis,
-structural-zero constraints under quasi-independence, and grouped fits
-that estimate one model per group in a shared state space, with formal
-group comparison by permutation or Bayesian Dirichlet–Multinomial
-contrast. It is designed to interoperate across the sequence-analysis
-ecosystem:
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) ingests
-long event logs, wide matrices, lists of sequences, and objects from
-`tna`, `Nestimate`, and `TraMineR`, while fitted objects carry a
-`cograph` network class and expose transition and initial probabilities
-for downstream tooling. A single
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) verb renders a
-fit as a residual heatmap, transition network, chord diagram, or polar
-sunburst, and a bootstrap or certainty result as an uncertainty forest.
+**Guides**
+
+- [A complete
+  workflow](https://pak.dynasite.org/lagdynamics/articles/workflow.html)
+- [Event logs and
+  interoperability](https://pak.dynasite.org/lagdynamics/articles/event-logs.html)
+- [Engines: classical, two-cell, bidirectional and dominance
+  tests](https://pak.dynasite.org/lagdynamics/articles/engines.html)
+- [Lags and structural
+  zeros](https://pak.dynasite.org/lagdynamics/articles/lags-structural-zeros.html)
+- [Plotting lag sequential
+  models](https://pak.dynasite.org/lagdynamics/articles/plotting.html)
+- [Transfer entropy between
+  states](https://pak.dynasite.org/lagdynamics/articles/transfer-entropy.html)
+
+**Case studies**
+
+- [The dynamics of course
+  engagement](https://pak.dynasite.org/lagdynamics/articles/case-engagement.html)
+- [Regulation in high and low achieving
+  groups](https://pak.dynasite.org/lagdynamics/articles/case-group-regulation.html)
+- [AI behaviour in vibe-coding
+  sessions](https://pak.dynasite.org/lagdynamics/articles/case-ai.html)
+
+## Overview
+
+`lagdynamics` finds which events tend to follow which in categorical,
+time-ordered data: sequences of behaviours, dialogue moves, learning
+actions or other coded events. Lag sequential analysis (Sackett, 1979;
+Bakeman & Gottman, 1997) counts how often each state follows each other
+state at a given lag and tests every pair against the count expected if
+successive events were independent. The pairs that occur more or less
+often than expected form a lag transition network: a directed graph of
+the sequential contingencies in the data, which shows which actions tend
+to follow one another and which rarely do. Each transition can be
+assessed with bootstrap intervals, analytic Bayesian certainty,
+case-drop stability, split-half reliability and a permutation null, and
+groups can be compared by permutation or by a Bayesian
+Dirichlet-multinomial contrast.
+
+The model is fitted with one function,
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), from
+wide sequence data, lists of sequences or long event logs, with a choice
+of the classical test and four further engines (two-cell, bidirectional,
+and parallel and non-parallel dominance), multiple lags and structural
+zeros. Results are read as tidy data frames with
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md),
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
+and [`summary()`](https://rdrr.io/r/base/summary.html), drawn as
+residual heatmaps, lag transition networks, chord diagrams and
+sunbursts, and passed to the `tna` and `cograph` packages.
+
+## The method
+
+Events are pooled into a lagged contingency table whose cell $`n_{ij}`$
+counts how often state $`j`$ occurs $`\ell`$ steps after state $`i`$,
+counting within sequences only. With row totals $`n_{i+}`$, column
+totals $`n_{+j}`$ and $`N`$ transitions, the expected count under
+independence of successive events is $`e_{ij} = n_{i+} n_{+j} / N`$, and
+the transitional probability is $`p_{j \mid i} = n_{ij} / n_{i+}`$. The
+departure of a cell from independence is measured by its adjusted
+residual (Haberman, 1973),
+
+``` math
+z_{ij} = \frac{n_{ij} - e_{ij}}
+              {\sqrt{e_{ij}\,(1 - n_{i+}/N)\,(1 - n_{+j}/N)}},
+```
+
+which is approximately standard normal under independence. A large
+positive $`z_{ij}`$ marks a transition that occurs more often than
+chance; a large negative one, a transition that is avoided. Yule’s $`Q`$
+gives the strength of the same association on a $`-1`$ to $`1`$ scale,
+and the tablewise likelihood-ratio test $`G^2`$ asks whether the table
+as a whole departs from independence. Cells that cannot occur by design
+(for example, self-transitions in coded turn taking) are declared as
+structural zeros, and the expected counts are then estimated by
+iterative proportional fitting under quasi-independence.
 
 ## Installation
 
 ``` r
 
-# From CRAN
 install.packages("lagdynamics")
 
-# r-universe (pre-built binaries, no compiler needed)
-install.packages("lagdynamics",
-                 repos = c("https://mohsaqr.r-universe.dev",
-                           "https://cloud.r-project.org"))
-
 # development version
-# install.packages("remotes")
+install.packages("remotes")
 remotes::install_github("mohsaqr/lagdynamics")
 ```
 
-The analytical core depends only on base R; plotting adds `ggplot2` and
-`cograph`, which install automatically. Interoperability packages
-(`tna`, `Nestimate`) stay optional `Suggests`.
+## Example data
 
-## At a glance
+The package includes four datasets: `engagement` (engagement states of
+students over successive periods, in wide format), `group_regulation`
+(coded collaborative regulation in wide format), `group_regulation_long`
+(the same kind of data as a long event log with actor, achievement group
+and time stamp) and `ai_long` (coded AI behaviours in human-AI
+programming sessions, as a long event log).
 
-| Task | Functions |
-|----|----|
-| Fit a model | [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md), [`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md) |
-| Read results (tidy) | [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md), [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md), [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md), [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md), [`summary()`](https://rdrr.io/r/base/summary.html) |
-| Weigh the evidence | [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md), [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md), [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md), [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md), [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md) |
-| Compare groups | [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md), [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md) |
-| Plot | `plot(fit, type = )`, [`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md), [`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md), [`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md), [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md) |
-| Probabilities | [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md), [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md) |
-| Engines | `lsa(engine = )`, [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md), [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md) |
-| Beyond LSA | [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md), [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md), [`lsa_ipf()`](https://pak.dynasite.org/lagdynamics/reference/lsa_ipf.md) |
+## Fitting a model
 
-## Example
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) fits
+the classical engine at lag 1 by default. The print method shows the
+size of the data, the tablewise test, the strongest over-represented
+transitions and the initial-state distribution.
 
 ``` r
 
 library(lagdynamics)
 
-# 138 students' weekly engagement states (bundled data)
 fit <- lsa(engagement)
 fit
-
-transitions(fit, significant = TRUE)   # tidy table of tested transitions
-plot(fit, type = "network")            # residual transition network
-
-# quantify the evidence behind each edge
-boot <- bootstrap_lsa(fit, R = 1000)
-transitions(boot, significant = TRUE)  # edges whose residual CI excludes 0
-plot(boot)                             # circular bootstrap CI forest
+#> Lag Sequential Analysis  -  classical  (lag 1, directed)
+#>   3 states | 1734 transitions | 1870 events | 136 sequences
+#>   states: Active, Average, Disengaged
+#>   independence: G² = 618.3, df = 4, p <2e-16
+#> 
+#>   Significant transitions (p < 0.05): 7 of 9
+#>   strongest over-represented (of 3):
+#>     Active -> Active          z =  +21.7  ***
+#>     Disengaged -> Disengaged  z =  +15.4  ***
+#>     Average -> Average        z =  +12.5  ***
+#> 
+#>   Initial states:
+#>     Active     0.382  ████████████████████████
+#>     Average    0.368  ███████████████████████
+#>     Disengaged 0.250  ████████████████
 ```
 
-## Vignettes
+## Reading the transitions
 
-| Vignette | Topic |
-|----|----|
-| [`vignette("lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/lagdynamics.md) | Get started: from raw rows to a fitted model, tidy tables, plots, and one uncertainty check |
-| [`vignette("intro")`](https://pak.dynasite.org/lagdynamics/articles/intro.md) | Concepts: what LSA tests, the engine family, and the package map |
-| [`vignette("interop")`](https://pak.dynasite.org/lagdynamics/articles/interop.md) | Interoperability with wide data, long logs, `tna`, `Nestimate`, and `cograph` |
-| [`vignette("workflow")`](https://pak.dynasite.org/lagdynamics/articles/workflow.md) | A complete analysis from sequences to a group comparison |
-| [`vignette("confirmatory")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md) | The confirmatory testing battery: matching claims to evidence |
-| [`vignette("lag-transition-networks")`](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.md) | Lag transition networks |
-| [`vignette("plotting")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md) | The full plotting gallery |
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+returns one row per transition with the observed and expected counts,
+the transitional probability, the adjusted residual and its p-value, and
+Yule’s $`Q`$. Arguments select and order rows.
 
-## License
+``` r
 
-MIT © 2026 Mohammed Saqr
+transitions(fit, significant = TRUE, sort = "strength")
+#>         from         to lag count expected  prob prob_col adj_res         p yules_q
+#> 1     Active     Active   1   459      247 0.698   0.7051    21.7 4.60e-104   0.828
+#> 2 Disengaged Disengaged   1   157       60 0.483   0.4906    15.4  1.90e-53   0.754
+#> 3    Average     Active   1   153      282 0.204   0.2350   -12.9  4.16e-38  -0.601
+#> 4     Active Disengaged   1    23      121 0.035   0.0719   -12.6  3.64e-36  -0.826
+#> 5    Average    Average   1   458      330 0.610   0.6003    12.5  1.35e-35   0.553
+#> 6     Active    Average   1   176      290 0.267   0.2307   -11.3  1.06e-29  -0.534
+#> 7 Disengaged     Active   1    39      122 0.120   0.0599   -10.5  5.11e-26  -0.698
+#>    kappa kappa_z  kappa_p  lift  sign significant
+#> 1  0.444   19.19 4.68e-82 1.858  over        TRUE
+#> 2  0.314   13.56 7.34e-42 2.618  over        TRUE
+#> 3 -0.499  -14.70 6.81e-49 0.543 under        TRUE
+#> 4 -0.827  -13.41 5.14e-41 0.189 under        TRUE
+#> 5  0.227    9.83 7.97e-23 1.386  over        TRUE
+#> 6 -0.424  -12.48 9.39e-36 0.608 under        TRUE
+#> 7 -0.707  -11.46 2.03e-30 0.320 under        TRUE
+```
+
+## Evaluating the transitions
+
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+resamples sequences and gives a confidence interval for each
+transition’s residual, probability and Yule’s $`Q`$; `transitions(boot)`
+returns them as one row per transition.
+
+``` r
+
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 200)
+boot
+#> <lsa_bootstrap>
+#>   engine:        classical
+#>   level:         sequence
+#>   replicates:    200
+#>   CI level:      95%
+#>   stable edges:  7 of 9
+```
+
+## Plotting
+
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws a fit as
+a residual heatmap (the default), a lag transition network, a chord
+diagram or a sunburst.
+
+``` r
+
+plot(fit)
+```
+
+![plot of chunk heatmap](reference/figures/README-heatmap-1.png)
+
+plot of chunk heatmap
+
+## Comparing groups
+
+With a long event log, `group` names a column, and one model is fitted
+per group on a shared set of states.
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+tests each transition’s difference by permuting group labels; here the
+p-values are adjusted for multiplicity with the Benjamini-Hochberg
+method.
+
+``` r
+
+gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+            time = "Time", group = "Achiever")
+set.seed(2026)
+cmp <- compare_lsa(gfit, R = 200, adjust = "BH")
+cmp
+#> <lsa_comparison>
+#>   groups:   High vs Low
+#>   measure:  log_or difference (High - Low)
+#>   R:        200 label permutations
+#>   edges:    39 significant of 78 tested (adjust = BH)
+#>   omnibus:  statistic = 79.48, p = 0.004975
+```
+
+## Authors and citation
+
+`lagdynamics` is written by [Mohammed Saqr](https://saqr.me) and
+[Sonsoles López-Pernas](https://sonsoles.me). To cite the package, run
+`citation("lagdynamics")`.
 
 # Package index
 
-## All functions
+## Overview
 
-- [`ai_long`](https://pak.dynasite.org/lagdynamics/reference/ai_long.md)
-  : Human-AI Vibe Coding Interaction Events
-- [`as.data.frame(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
-  [`as.data.frame(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
-  [`print(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
-  [`print(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
-  : Tidy a Group Comparison
+- [`lagdynamics`](https://pak.dynasite.org/lagdynamics/reference/lagdynamics-package.md)
+  [`lagdynamics-package`](https://pak.dynasite.org/lagdynamics/reference/lagdynamics-package.md)
+  : lagdynamics: Lag Sequential Analysis, Dynamics, and Lag Transition
+  Networks
+
+## Fitting models
+
+Lag sequential analysis of sequences or event logs at one lag or at
+several, with a choice of engine.
+
+- [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  [`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  [`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  [`lsa_bidirectional()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  [`lsa_parallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  [`lsa_nonparallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+  : Fit a lag sequential analysis model
+- [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
+  [`print(`*`<lsa_lags>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
+  [`as.data.frame(`*`<lsa_lags>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
+  : Fit lag sequential analysis models at several lags
+
+## Preparing data
+
+Canonical sequence data, transition counts and expected counts under
+structural zeros.
+
+- [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md)
+  : Convert sequence input to the canonical form used by lag sequential
+  analysis
 - [`as.data.frame(`*`<lsa_data>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_data.md)
   [`print(`*`<lsa_data>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_data.md)
-  : Tidy the Canonical Sequence Object
-- [`as.data.frame(`*`<lsa_reliability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
-  [`as.data.frame(`*`<lsa_reliability_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
-  : Tidy the Per-Replicate Split-Half Correlations
-- [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
-  [`print(`*`<lsa_bayes>`*`)`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
-  [`print(`*`<lsa_bayes_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
-  : Bayesian Comparison of Group Transition Structures
-  (Dirichlet-Multinomial)
+  : Read the events of canonical sequence data as a table
+- [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
+  [`print(`*`<lsa_transitions>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
+  [`as.data.frame(`*`<lsa_transitions>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
+  : Count transitions at a given lag
+- [`lsa_ipf()`](https://pak.dynasite.org/lagdynamics/reference/lsa_ipf.md)
+  : Fit expected counts with structural zeros by iterative proportional
+  fitting
+
+## Reading results
+
+Tidy tables of a fitted model, one row per transition, state or test.
+
+- [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+  : Read the transitions of a fit or an inference result
+- [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md) :
+  Read the states of a lag sequential analysis fit
+- [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md) :
+  Read the tablewise tests of independence of a fit
+- [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
+  : Read the initial-state distribution of a fit
+- [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+  : Read the transition probabilities of a fit
+- [`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md)
+  : Trace one transition across lags
+- [`print(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`print(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`summary(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`print(`*`<summary.lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`as.data.frame(`*`<summary.lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`as.data.frame(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`as.data.frame(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`summary(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  [`nobs(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
+  : Print, summarise and tidy a lag sequential analysis fit
+
+## Evaluating transitions
+
+Uncertainty, stability, reliability and a permutation null for the
+transitions of a fit.
+
 - [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
-  : Bootstrap Confidence Intervals for an LSA Fit
+  : Estimate bootstrap confidence intervals for transitions
 - [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
   [`print(`*`<lsa_certainty>`*`)`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
   [`as.data.frame(`*`<lsa_certainty_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
   [`print(`*`<lsa_certainty_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
-  : Analytic Certainty of Transition Edges (Dirichlet-Multinomial)
-- [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
-  : Compare Groups' Transition Structures
-- [`engagement`](https://pak.dynasite.org/lagdynamics/reference/engagement.md)
-  : Student Engagement Trajectories
-- [`get_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/get_lsa_engine.md)
-  : Retrieve a Registered LSA Engine
-- [`group_regulation`](https://pak.dynasite.org/lagdynamics/reference/group_regulation.md)
-  : Collaborative Learning Self-Regulation Sequences
-- [`group_regulation_long`](https://pak.dynasite.org/lagdynamics/reference/group_regulation_long.md)
-  : Group Regulation Long Event Log
-- [`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
-  : Initial-State Distribution of an LSA Fit (Tidy)
-- [`lag_profile()`](https://pak.dynasite.org/lagdynamics/reference/lag_profile.md)
-  : Lag Profile of a Single Transition
-- [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
-  : List All Registered LSA Engines
+  : Compute the analytic certainty of transition probabilities
+- [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
+  : Assess the case-drop stability of significant transitions
+- [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  [`print(`*`<lsa_reliability_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  [`print(`*`<lsa_reliability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  : Estimate the split-half reliability of a lag transition network
+- [`as.data.frame(`*`<lsa_reliability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
+  [`as.data.frame(`*`<lsa_reliability_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_reliability.md)
+  : Read the tables of a split-half reliability result
+- [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md)
+  : Test transitions against no sequential structure by permutation
 - [`print(`*`<lsa_bootstrap>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
   [`print(`*`<lsa_permutation>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
   [`print(`*`<lsa_stability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
   [`as.data.frame(`*`<lsa_bootstrap>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
   [`as.data.frame(`*`<lsa_permutation>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
   [`as.data.frame(`*`<lsa_stability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
-  : Print and Tidy Resampling Results
-- [`print(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  [`print(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  [`summary(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  [`as.data.frame(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  [`as.data.frame(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  [`summary(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  [`nobs(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa-methods.md)
-  : Print, Summarise and Tidy an LSA Fit
-- [`lsa_classical()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  [`lsa_two_cell()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  [`lsa_bidirectional()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  [`lsa_parallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  [`lsa_nonparallel_dominance()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) : Lag
-  Sequential Analysis
-- [`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md)
-  : Canonicalize Sequence Input for Lag Sequential Analysis
-- [`lsa_ipf()`](https://pak.dynasite.org/lagdynamics/reference/lsa_ipf.md)
-  : Iterative Proportional Fitting for Two-Way Tables with Structural
-  Zeros
-- [`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
-  [`print(`*`<lsa_lags>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
-  [`as.data.frame(`*`<lsa_lags>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
-  : Lag Sequential Analysis Across Several Lags
-- [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md)
-  : Convert an lsa Fit to a tna Network
-- [`lsa_transitions()`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
-  [`print(`*`<lsa_transitions>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
-  [`as.data.frame(`*`<lsa_transitions>`*`)`](https://pak.dynasite.org/lagdynamics/reference/lsa_transitions.md)
-  : Tidy Transition Counts at a Given Lag
-- [`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md) :
-  Nodes of an LSA Fit (Tidy)
-- [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md)
-  : Permutation Test for an LSA Fit
+  : Print and read resampling results
+
+## Comparing groups
+
+Transition-level differences between groups by permutation or by a
+Bayesian Dirichlet-multinomial contrast.
+
+- [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+  : Compare transition structures between groups with a permutation test
+- [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  [`print(`*`<lsa_bayes>`*`)`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  [`print(`*`<lsa_bayes_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  : Compare transition probabilities between groups with a Bayesian
+  model
+- [`as.data.frame(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
+  [`as.data.frame(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
+  [`print(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
+  [`print(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/as.data.frame.lsa_comparison.md)
+  : Read the tables of a group comparison
+
+## Plots
+
+Residual heatmaps, lag transition networks, chord diagrams, sunbursts,
+uncertainty forests and comparison plots.
+
 - [`plot(`*`<lsa>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
   [`plot(`*`<lsa_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa.md)
-  : Plot an LSA Fit
-- [`plot(`*`<lsa_certainty>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_certainty.md)
-  : Plot an Analytic-Certainty Result
-- [`plot(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_comparison.md)
-  [`plot(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_comparison.md)
-  : Plot a Group Comparison
+  : Plot a lag sequential analysis fit
+- [`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
+  : Plot a lag transition network
 - [`plot_chords()`](https://pak.dynasite.org/lagdynamics/reference/plot_chords.md)
-  : Circular (Chord) Diagram of an LSA Fit
+  : Plot a chord diagram of transitions
+- [`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md)
+  : Plot a polar sunburst of transitions
 - [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
   [`plot(`*`<lsa_bootstrap>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
-  : Circular Bootstrap Forest of an LSA Fit
-- [`plot_polar()`](https://pak.dynasite.org/lagdynamics/reference/plot_polar.md)
-  : Polar Sunburst of an LSA Fit
-- [`plot_transitions()`](https://pak.dynasite.org/lagdynamics/reference/plot_transitions.md)
-  : Plot the Transition Network
-- [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
-  : Register a Lag Sequential Analysis Engine
-- [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
-  [`print(`*`<lsa_reliability_group>`*`)`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
-  [`print(`*`<lsa_reliability>`*`)`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
-  : Split-Half Reliability for an LSA Fit
-- [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
-  : Case-Drop Stability for an LSA Fit
-- [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md) :
-  Tablewise Independence Tests of an LSA Fit (Tidy)
+  : Plot a circular forest of bootstrap confidence intervals
+- [`plot(`*`<lsa_certainty>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_certainty.md)
+  : Plot credible intervals of transition probabilities
+- [`plot(`*`<lsa_comparison>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_comparison.md)
+  [`plot(`*`<lsa_comparison_pairwise>`*`)`](https://pak.dynasite.org/lagdynamics/reference/plot.lsa_comparison.md)
+  : Plot a comparison of transitions between groups
+
+## Beyond LSA
+
+Directed information transfer between states, and hand-off to transition
+network analysis.
+
 - [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md)
-  : Directed transfer entropy for categorical sequences (experimental)
-- [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
-  : Transition-Probability Matrix of an LSA Fit
-- [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
-  : Transitions of an LSA Fit or an Inference Result (Tidy)
+  : Estimate directed transfer entropy between categorical sequences
+- [`lsa_to_tna()`](https://pak.dynasite.org/lagdynamics/reference/lsa_to_tna.md)
+  : Convert a lag sequential analysis fit to a transition network for
+  tna
+
+## Engines
+
+The registry of test engines, open to user-defined engines.
+
+- [`list_lsa_engines()`](https://pak.dynasite.org/lagdynamics/reference/list_lsa_engines.md)
+  : List the registered engines
+- [`get_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/get_lsa_engine.md)
+  : Retrieve a registered engine
+- [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md)
+  : Register a lag sequential analysis engine
 - [`unregister_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/unregister_lsa_engine.md)
-  : Remove a Registered LSA Engine
+  : Remove a registered engine
+
+## Data
+
+Engagement states, collaborative regulation and human-AI programming
+sessions.
+
+- [`engagement`](https://pak.dynasite.org/lagdynamics/reference/engagement.md)
+  : Engagement states of students over time
+- [`group_regulation`](https://pak.dynasite.org/lagdynamics/reference/group_regulation.md)
+  : Regulation actions in collaborative learning, as sequences
+- [`group_regulation_long`](https://pak.dynasite.org/lagdynamics/reference/group_regulation_long.md)
+  : Regulation actions in collaborative learning, as an event log
+- [`ai_long`](https://pak.dynasite.org/lagdynamics/reference/ai_long.md)
+  : Coded AI behaviours in human-AI programming sessions
 
 # Articles
 
 ### Vignettes
 
-- [Introduction](https://pak.dynasite.org/lagdynamics/articles/intro.md):
-- [Get started with
-  lagdynamics](https://pak.dynasite.org/lagdynamics/articles/lagdynamics.md):
-- [Interoperability: wide data, long logs, tna, and
-  Nestimate](https://pak.dynasite.org/lagdynamics/articles/interop.md):
-- [A complete workflow: from sequences to a group
-  comparison](https://pak.dynasite.org/lagdynamics/articles/workflow.md):
+- [Lag sequential
+  analysis](https://pak.dynasite.org/lagdynamics/articles/lsa.md):
 - [Lag transition
   networks](https://pak.dynasite.org/lagdynamics/articles/lag-transition-networks.md):
-- [Confirmatory testing: matching claims to
-  evidence](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md):
-- [Plotting lag-sequential
+- [Evaluating
+  transitions](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md):
+- [Comparing
+  groups](https://pak.dynasite.org/lagdynamics/articles/group-comparison.md):
+
+### Guides
+
+- [A complete
+  workflow](https://pak.dynasite.org/lagdynamics/articles/workflow.md):
+- [Event logs and
+  interoperability](https://pak.dynasite.org/lagdynamics/articles/event-logs.md):
+- [Engines: classical, two-cell, bidirectional and dominance
+  tests](https://pak.dynasite.org/lagdynamics/articles/engines.md):
+- [Lags and structural
+  zeros](https://pak.dynasite.org/lagdynamics/articles/lags-structural-zeros.md):
+- [Plotting lag sequential
   models](https://pak.dynasite.org/lagdynamics/articles/plotting.md):
+- [Transfer entropy between
+  states](https://pak.dynasite.org/lagdynamics/articles/transfer-entropy.md):
+
+### Case studies
+
+- [Case study: the dynamics of course
+  engagement](https://pak.dynasite.org/lagdynamics/articles/case-engagement.md):
+- [Case study: regulation in high and low achieving
+  groups](https://pak.dynasite.org/lagdynamics/articles/case-group-regulation.md):
+- [Case study: AI behaviour in vibe-coding
+  sessions](https://pak.dynasite.org/lagdynamics/articles/case-ai.md):

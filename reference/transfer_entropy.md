@@ -1,31 +1,32 @@
-# Directed transfer entropy for categorical sequences (experimental)
+# Estimate directed transfer entropy between categorical sequences
 
-**Experimental.** Transfer entropy (Schreiber, 2000) measures *directed*
-predictive coupling: how much knowing the source's past reduces
-uncertainty about the target's future, **beyond what the target's own
-past already explains**. Because it conditions on the target's own
-history, transfer entropy is immune to the autocorrelation confound that
-inflates plain lagged association when a process has strong momentum.
+`transfer_entropy()` (**experimental**) estimates directed transfer
+entropy between categorical sequences. Transfer entropy (Schreiber,
+2000) measures directed predictive information: how much knowing the
+past of a source series reduces uncertainty about the future of a target
+series, beyond what the target's own past already tells. Because it
+conditions on the target's history, it is not inflated when a state
+merely tends to persist, which inflates lagged association measures for
+processes with strong momentum. Transfer entropy is unsigned: a large
+value means strong directed dependence, which may make the target more
+or less likely. Read it alongside the signed residuals and Yule's Q of
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md).
 
-Unlike
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)'s
-Yule's Q / adjusted residuals, transfer entropy is **sign-blind**: a
-large value means "strong directed predictive structure", which may be
-*facilitating* or *suppressing*. Read it alongside the signed measures
-from
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
-to interpret direction of effect.
+It works in two modes. With one set of sequences (`y = NULL`), it treats
+each state as an indicator series (in the state or not) and returns the
+transfer entropy from every state to every other state, a directed
+information-flow network among the states. With very few states the
+indicator series of the other states carry nearly the same information,
+so several pairs can share a value; the bivariate mode avoids this. With
+two aligned sets of sequences (`x` and `y`), it returns the transfer
+entropy between the two series in both directions, using their full
+alphabets.
 
-Two modes:
-
-- **State-flow network** (default, `y = NULL`): given categorical
-  sequences, returns directed transfer entropy between every ordered
-  pair of states, via a binary occupancy decomposition. Note: with very
-  few states the non-target source channels become redundant; prefer the
-  bivariate mode or a larger alphabet when that matters.
-
-- **Bivariate** (`y` supplied): full-alphabet transfer entropy between
-  two aligned categorical series, in both directions.
+Transfer entropy is in bits. The surrogate test (default) shuffles the
+source to build a null distribution, which gives a p-value and an
+effective transfer entropy with the average surrogate value subtracted.
+For the classical test of sequential dependence use
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Usage
 
@@ -46,66 +47,76 @@ transfer_entropy(
 
 - x:
 
-  Categorical sequence data: a vector (one sequence), or a matrix /
-  data.frame with one sequence per row and one time-step per column
-  (`NA`-padded), exactly the shape
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-  consumes.
+  Categorical sequences: a vector (one sequence) or a matrix or data
+  frame with one sequence per row and one time point per column, padded
+  with `NA`, as accepted by
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 - y:
 
-  Optional second series, same shape as `x`, for bivariate transfer
-  entropy. When `NULL`, the directed state-flow network of `x` is
-  returned.
+  Optional second set of sequences of the same shape as `x`, for the
+  bivariate mode. Default `NULL` (state-flow network of `x`).
 
 - lag:
 
-  Integer \>= 1. Prediction horizon: the target's future is taken `lag`
-  steps ahead. Default `1`.
+  Prediction horizon, an integer of at least 1 (default `1`).
 
 - history:
 
-  Integer \>= 1. Order of the target's own history conditioned on (and
-  combined into a composite symbol). Default `1`.
+  Number of past steps of the target conditioned on, an integer of at
+  least 1 (default `1`).
 
 - test:
 
-  `"surrogate"` (default) runs a source-permutation null to give a
-  p-value and the bias-corrected *effective* transfer entropy; `"none"`
-  skips it.
+  `"surrogate"` (default) for the surrogate test, or `"none"`.
 
 - R:
 
-  Integer. Number of surrogate permutations. Default `199`.
+  Number of surrogates (default `199`).
 
 - normalize:
 
-  Logical. Add `te_normalised`, transfer entropy as a share of the
-  target's leftover uncertainty `H(future | history)`, in `[0, 1]`.
-  Default `TRUE`.
+  Add `te_normalised`, transfer entropy as a share of the target's
+  remaining uncertainty given its own history, in `[0, 1]` (default
+  `TRUE`).
 
 - seed:
 
-  Optional integer seed for the surrogate test.
+  Optional seed for the surrogate test (default `NULL`). The session's
+  random number state is restored on exit.
 
 ## Value
 
-A tidy `data.frame`, one row per ordered pair, with columns `from`,
-`to`, `te` (bits), `te_effective` (surrogate-debiased; only when
-`test = "surrogate"`), `te_normalised` (0-1; only when
-`normalize = TRUE`), `p` (surrogate p-value; only when
-`test = "surrogate"`), and `n` (pooled transitions used). Rows are
-ordered by descending `te`.
+A `data.frame` with one row per ordered pair (`from`, `to`) and the
+columns `te` (bits), `te_effective` (with `test = "surrogate"`),
+`te_normalised` (with `normalize = TRUE`), `p` (with
+`test = "surrogate"`) and `n` (number of transitions used), sorted by
+decreasing `te`. In the state-flow mode there is one row per ordered
+pair of distinct states; in the bivariate mode two rows, named after the
+arguments.
+
+## Conditions
+
+Errors carry the class `lagdynamics_error` and `lagdynamics_bad_input`
+when `lag`, `history` or `R` is not a positive whole number, or when `x`
+and `y` are not aligned (different numbers of sequences or different
+lengths within a sequence).
 
 ## References
 
 Schreiber, T. (2000). Measuring information transfer. *Physical Review
-Letters*, 85(2), 461-464.
+Letters, 85*(2), 461-464.
+
+## See also
+
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+[`lsa_lags()`](https://pak.dynasite.org/lagdynamics/reference/lsa_lags.md)
 
 ## Examples
 
 ``` r
-# Directed information-flow network over engagement states
+# Information flow among the engagement states
 transfer_entropy(engagement, test = "none")
 #>         from         to          te te_normalised    n
 #> 1     Active Disengaged 0.036448215   0.060023389 1734
@@ -115,7 +126,7 @@ transfer_entropy(engagement, test = "none")
 #> 5    Average     Active 0.004793199   0.006345037 1734
 #> 6 Disengaged     Active 0.004793199   0.006345037 1734
 
-# With the surrogate test (a real analysis uses the default R = 199)
+# With the surrogate test (an analysis would use more surrogates)
 transfer_entropy(engagement, R = 19, seed = 1)
 #>         from         to          te te_effective te_normalised    p    n
 #> 1     Active Disengaged 0.036448215  0.035496615   0.060023389 0.05 1734
@@ -125,11 +136,11 @@ transfer_entropy(engagement, R = 19, seed = 1)
 #> 5    Average     Active 0.004793199  0.003806708   0.006345037 0.05 1734
 #> 6 Disengaged     Active 0.004793199  0.004268635   0.006345037 0.05 1734
 
-# Bivariate transfer entropy between two aligned series
-a <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")
-b <- c("low", "low", "low", "high", "high", "low", "high", "high")
-transfer_entropy(a, b, test = "none")
-#>   from to        te te_normalised n
-#> 1    a  b 0.9649839     1.0000000 7
-#> 2    b  a 0.6792696     0.7039181 7
+# Between two aligned series
+mood <- c("calm", "calm", "tense", "tense", "calm", "tense", "tense", "calm")
+effort <- c("low", "low", "low", "high", "high", "low", "high", "high")
+transfer_entropy(mood, effort, test = "none")
+#>     from     to        te te_normalised n
+#> 1   mood effort 0.9649839     1.0000000 7
+#> 2 effort   mood 0.6792696     0.7039181 7
 ```

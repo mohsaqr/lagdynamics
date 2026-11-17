@@ -1,9 +1,15 @@
-# Student Engagement Trajectories
+# Engagement states of students over time
 
-Wide-format categorical sequence data: 138 students observed over 15
-weekly time points. Each row is one student; each column is a week.
-Entries are the student's engagement state for that week, one of
-`"Active"`, `"Average"`, `"Disengaged"`, or `NA` for missing weeks.
+`engagement` is a coded dataset, in wide format, of engagement: 138
+students, each observed at 15 ordered time points and coded at each as
+`Active`, `Average` or `Disengaged`. Missing time points are `NA`. Two
+students have no observation at all, so a fit reports 136 sequences; the
+remaining sequences have on average about 14 observed states.
+
+With three states and many short sequences, the data show the typical
+pattern of a lag sequential analysis: each state tends to persist, and
+moves between `Active` and `Disengaged` are rare. They are the main
+example of the help pages.
 
 ## Usage
 
@@ -13,30 +19,26 @@ engagement
 
 ## Format
 
-A data frame with 138 rows and 15 character columns.
+A data frame with 138 rows (students) and 15 character columns named `1`
+to `15` (time points, in order). Values are `"Active"`, `"Average"`,
+`"Disengaged"` or `NA`.
 
 ## Source
 
-Derived from the `trajectories` matrix in the `Nestimate` package
-(<https://github.com/mohsaqr/Nestimate>), which is MIT-licensed and
-produced by Saqr and collaborators as a synthetic engagement trajectory
-example. The state values are preserved and stored here as a data frame
-for compatibility with sequence-data tooling.
+Derived from the synthetic `trajectories` example data of the Nestimate
+package (<https://github.com/mohsaqr/Nestimate>, MIT license), with the
+states kept and the matrix stored as a data frame.
 
-## Details
+## See also
 
-This is a standard small-K, multi-sequence example for lag sequential
-analysis: K = 3 states and 136 non-empty sequences (two rows are
-entirely missing), with a mean observed length of about 14 weeks. It
-exercises the wide-data input path of
-[`lsa_data()`](https://pak.dynasite.org/lagdynamics/reference/lsa_data.md)
-and produces a stable transition pattern with clear adjusted-residual
-signals.
+[group_regulation](https://pak.dynasite.org/lagdynamics/reference/group_regulation.md)
+for a larger set of sequences;
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Examples
 
 ``` r
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 fit
 #> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   3 states | 1734 transitions | 1870 events | 136 sequences

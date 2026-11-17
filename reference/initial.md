@@ -1,9 +1,14 @@
-# Initial-State Distribution of an LSA Fit (Tidy)
+# Read the initial-state distribution of a fit
 
-The proportion of sequences starting in each state, as a tidy
-`data.frame`. These are the initial-state probabilities (init P) that
-complement the transition-probability matrix from
+`initial()` returns the initial-state distribution of a fit, one row per
+state: the proportion of sequences that begin in each state. It
+describes how episodes open, which the transition table cannot show, and
+it completes the description of the process as a first-order Markov
+chain together with
 [`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md).
+
+A fit built from a transition-count matrix has no sequences and so no
+initial states; the table then has no rows.
 
 ## Usage
 
@@ -22,32 +27,27 @@ initial(fit)
 - fit:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  an `lsa_group` from `lsa(..., group = )`.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or a
+  grouped fit from `lsa(..., group = )`.
 
 ## Value
 
-A `data.frame`, one row per state, with columns `state`, `init_prob`;
-zero rows when the fit came from a transition matrix (no initial
-states). A grouped fit gains a leading `group` column.
+A `data.frame` with one row per state and the columns `state` and
+`init_prob` (summing to 1). A grouped fit gains a leading `group`
+column.
 
 ## See also
 
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
-[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md)
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md),
+[`nodes()`](https://pak.dynasite.org/lagdynamics/reference/nodes.md),
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
 
 ## Examples
 
 ``` r
-initial(lsa(group_regulation))
+initial(lsa(engagement))
 #>        state init_prob
-#> 1      adapt    0.0115
-#> 2   cohesion    0.0605
-#> 3  consensus    0.2140
-#> 4 coregulate    0.0190
-#> 5    discuss    0.1755
-#> 6    emotion    0.1515
-#> 7    monitor    0.1440
-#> 8       plan    0.2045
-#> 9  synthesis    0.0195
+#> 1     Active 0.3823529
+#> 2    Average 0.3676471
+#> 3 Disengaged 0.2500000
 ```

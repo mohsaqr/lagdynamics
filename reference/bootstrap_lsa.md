@@ -1,12 +1,37 @@
-# Bootstrap Confidence Intervals for an LSA Fit
+# Estimate bootstrap confidence intervals for transitions
 
-Non-parametric bootstrap for any LSA fit produced by
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
-Resamples the underlying sequence data (whole sequences when more than
-one is available; geometric-block stationary bootstrap on events
-otherwise), refits the engine on each resample using the immutable
-recipe stored in `fit$params`, and aggregates per-edge statistics into a
-tidy data frame.
+`bootstrap_lsa()` estimates bootstrap confidence intervals for the
+transitions of a fit from
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md): it
+resamples the sequences behind the fit and refits it with the same
+engine, lag, alternative, significance level and structural zeros. The
+non-parametric bootstrap (Efron, 1979) estimates how much the count,
+transition probability, adjusted residual and Yule's Q of each
+transition, all estimated from one sample of sequences, would vary over
+repeated samples from the same population: it draws many resamples of
+the data, refits the model on each, and uses the spread of the refitted
+values as the sampling distribution. A transition whose residual
+interval excludes zero is over- or under-represented in a way that
+survives resampling, not only in the sample at hand.
+
+With two or more sequences, whole sequences are drawn with replacement,
+which keeps the dependence between events of one sequence intact. A
+single sequence is resampled with the stationary block bootstrap
+(Politis & Romano, 1994), which draws blocks of consecutive events of
+random length. For every transition it returns the bootstrap mean,
+standard error and percentile interval of the count, the transition
+probability, the adjusted residual and Yule's Q, a two-sided bootstrap
+p-value for the residual, and a flag for transitions whose residual
+interval excludes zero.
+
+For an interval on transition probabilities without resampling, use
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md);
+it is exact under a Dirichlet-Multinomial model but ignores dependence
+between the transitions of one sequence. For a p-value against the null
+hypothesis of no sequential structure, use
+[`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md);
+for the share of subsamples in which a transition stays significant, use
+[`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md).
 
 ## Usage
 
@@ -29,139 +54,128 @@ bootstrap_lsa(
 
 - fit:
 
-  An `lsa` object returned by
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
+  An `lsa` fit from
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
+  built from sequences (not from a transition matrix).
 
 - R:
 
-  Integer. Number of bootstrap replicates. Default `1000`.
+  Number of bootstrap resamples. Default `1000`.
 
 - level:
 
-  Character. Resampling unit: `"auto"` (default) picks `"sequence"` when
-  the fit has more than one sequence and `"event"` otherwise;
-  `"sequence"` resamples whole sequences with replacement; `"event"`
-  runs a stationary block bootstrap on the event stream.
+  Resampling unit: `"auto"` (default; `"sequence"` when the fit has two
+  or more sequences, `"event"` otherwise), `"sequence"` (whole sequences
+  with replacement) or `"event"` (stationary block bootstrap of the
+  event stream). A single sequence always uses `"event"`, with a
+  warning.
 
 - block_length:
 
-  For event-level bootstrap, mean geometric block length. Default `NULL`
-  -\> `ceiling(sqrt(T))`.
+  Mean block length for `level = "event"`. Default `NULL`, the square
+  root of the number of events, rounded up.
 
 - level_alpha:
 
-  Numeric. Confidence level for percentile intervals. Default `0.95`.
+  Confidence level of the percentile intervals. Default `0.95`.
 
 - indices:
 
-  Optional integer matrix of replay indices, one row per resample (row
-  `b` is used for resample `b`). For sequence-level bootstrap it must be
-  `R x S` with each entry a sequence index in `1..S`. For event-level
-  bootstrap it is `R x T` with each entry an event position in `1..T`
-  (the fully expanded positions, not block starts). When supplied,
-  replaces internal RNG and enables bit-identical reproducibility across
-  runs. Dimensions and ranges are validated. See Details.
+  Optional matrix of resampling indices to replay, one row per resample:
+  `R` x number of sequences (sequence indices) for `level = "sequence"`,
+  or `R` x number of events (event positions) for `level = "event"`.
+  Default `NULL` draws them at random.
 
 - parallel:
 
-  Logical. Use multi-core resampling. Default `FALSE`. Requires base R
-  only (`parallel` package).
+  Run the resamples on several cores. Default `FALSE`.
 
 - n_cores:
 
-  Integer. Worker count when `parallel = TRUE`. Default `NULL` -\>
-  `parallel::detectCores() - 1`.
+  Number of cores when `parallel = TRUE`. Default `NULL`, all cores but
+  one.
 
 - verbose:
 
-  Logical. Print progress every 100 replicates. Default `FALSE`.
+  Report progress every 100 resamples. Default `FALSE`.
 
 - ...:
 
-  Reserved for future use.
+  Not used.
 
 ## Value
 
-An object of class `c("lsa_bootstrap", "list")`. Read the per-edge table
-with
-[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md);
-see
-[lsa-inference-methods](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md)
-for [`print()`](https://rdrr.io/r/base/print.html) and
-[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html).
-Elements:
+An object of class `c("lsa_bootstrap", "list")`. Read it with
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md),
+which returns a data frame with one row per transition (`from -> to`
+pair) and the columns:
 
-- edges:
+- `from`, `to`: source and target state.
 
-  Tidy data frame, one row per `from -> to` cell: `from`, `to`,
-  `observed` (observed count); `count_mean`, `count_se`, `count_ci_low`,
-  `count_ci_high`; `adj_res_observed`, `adj_res_mean`, `adj_res_se`,
-  `adj_res_ci_low`, `adj_res_ci_high`, the two-sided bootstrap p-value
-  `adj_res_p_boot`, and `adj_res_stable` (`TRUE` when the residual
-  interval excludes zero); `prob_observed`, `prob_mean`, `prob_ci_low`,
-  `prob_ci_high`; and `yules_q_observed`, `yules_q_mean`,
-  `yules_q_ci_low`, `yules_q_ci_high`.
+- `observed`: the observed count; `count_mean`, `count_se`,
+  `count_ci_low`, `count_ci_high`: its bootstrap mean, standard error
+  and interval.
 
-- boot_obs, boot_adj_res, boot_prob, boot_yulesq:
+- `adj_res_observed`, `adj_res_mean`, `adj_res_se`, `adj_res_ci_low`,
+  `adj_res_ci_high`: the same for the adjusted residual;
+  `adj_res_p_boot`: two-sided bootstrap p-value of the residual;
+  `adj_res_stable`: `TRUE` when the residual interval excludes zero.
 
-  `R x K^2` numeric matrices of the per-replicate counts, adjusted
-  residuals, transition probabilities and Yule's Q (cells in
-  `as.vector(obs)` order).
+- `prob_observed`, `prob_mean`, `prob_ci_low`, `prob_ci_high`: the
+  transition probability.
 
-- R, level, level_alpha, indices_used:
+- `yules_q_observed`, `yules_q_mean`, `yules_q_ci_low`,
+  `yules_q_ci_high`: Yule's Q.
 
-  Recipe metadata; `indices_used` is the replay matrix accepted by
-  `indices`.
+`transitions(x, significant = TRUE)` keeps the transitions with
+`adj_res_stable = TRUE`; `sort = "strength"` orders by the absolute
+observed residual. [`print()`](https://rdrr.io/r/base/print.html) shows
+the settings and the number of stable transitions (see
+[lsa-inference-methods](https://pak.dynasite.org/lagdynamics/reference/lsa-inference-methods.md));
+[`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
+draws the intervals. The object also stores the per-resample matrices,
+the settings, the resampling indices used (which can be passed back as
+`indices`) and the original fit.
 
-- fit:
+## Conditions
 
-  The original fit.
+Errors carry the class `lagdynamics_error` and one of:
 
-## Details
+- `lagdynamics_needs_events`: the fit was built from a transition
+  matrix, so there are no sequences to resample.
 
-**Sequence-level resampling (default for multi-sequence input).** Each
-resample draws `S` sequence indices with replacement from `seq_len(S)`
-and rebuilds the multi-sequence input as the corresponding list of event
-vectors. Preserves within-sequence structure.
-
-**Event-level resampling (single-sequence input).** Implements the
-stationary block bootstrap of Politis & Romano (1994). Block length is
-geometric with mean `block_length`; resampled blocks wrap around the
-event stream and are concatenated until total length equals the original
-`T`.
-
-**Reproducibility hook.** Supply `indices` as an `R x S` integer matrix
-of sequence indices (sequence-level) or an `R x T` matrix of event
-positions (event-level) to deterministically replay the bootstrap across
-sessions, processes, or languages. The event-level matrix holds the
-fully expanded resampled positions, i.e. the same form produced
-internally, so a captured `indices_used` can be fed straight back in.
-
-**NA handling.** Per-cell summary statistics (`mean`, `se`, `ci_low`,
-`ci_high`, `p_boot`) are computed with `na.rm = TRUE`, so replicates
-that produced `NA` for a given cell (for example structural-zero cells,
-or cells whose row marginal collapsed to zero in the resampled data) are
-excluded from that cell's summary. The summary therefore reflects only
-the finite replicates; cells whose every replicate was `NA` come back as
-`NA` themselves.
+- `lagdynamics_bad_input`: `indices` is not a matrix of whole numbers
+  with at least `R` rows, the expected number of columns and values in
+  range, or `block_length` is not a single number of at least 1.
 
 ## References
 
-Efron, B. (1979). Bootstrap methods: another look at the jackknife.
-*Annals of Statistics*, 7(1), 1-26.
+Efron, B. (1979). Bootstrap methods: Another look at the jackknife. *The
+Annals of Statistics, 7*(1), 1-26.
 
 Politis, D. N., & Romano, J. P. (1994). The stationary bootstrap.
-*Journal of the American Statistical Association*, 89(428), 1303-1313.
+*Journal of the American Statistical Association, 89*(428), 1303-1313.
 
 ## See also
 
+[`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
+to read the result;
+[`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
+to draw the intervals;
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+for analytic intervals;
 [`permute_lsa()`](https://pak.dynasite.org/lagdynamics/reference/permute_lsa.md),
 [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
+and
+[`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+for other checks of a fit;
+[`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+to compare groups.
 
 ## Examples
 
 ``` r
-fit <- lsa(engagement, engine = "classical")
+fit <- lsa(engagement)
 bs <- bootstrap_lsa(fit, R = 100)
 bs
 #> <lsa_bootstrap>
@@ -170,91 +184,86 @@ bs
 #>   replicates:    100
 #>   CI level:      95%
 #>   stable edges:  7 of 9
-transitions(bs, significant = TRUE)
-#>         from         to observed count_mean count_se count_ci_low count_ci_high
-#> 1     Active     Active      459     471.68 56.69106      361.375       577.075
-#> 2    Average     Active      153     152.52 16.08279      125.950       187.100
-#> 3 Disengaged     Active       39      38.21  6.15670       27.000        49.000
-#> 4     Active    Average      176     175.02 17.54013      148.475       212.525
-#> 5    Average    Average      458     452.10 42.07605      380.475       543.775
-#> 6     Active Disengaged       23      23.23  5.18127       14.000        33.000
-#> 7 Disengaged Disengaged      157     159.24 28.15653      106.850       209.675
-#>   adj_res_observed adj_res_mean adj_res_se adj_res_ci_low adj_res_ci_high
-#> 1         21.66281     21.82386   1.497096       19.22208       24.481665
-#> 2        -12.90604    -12.95315   1.418268      -15.55977      -10.181116
-#> 3        -10.54949    -10.78628   1.211023      -12.77849       -8.086579
-#> 4        -11.31913    -11.46380   1.532969      -14.34037       -8.733901
-#> 5         12.45261     12.67136   1.273073       10.40148       14.742772
-#> 6        -12.55693    -12.67236   1.033695      -14.50446      -10.666906
-#> 7         15.39047     15.69518   2.013464       11.21309       19.008666
-#>   adj_res_p_boot adj_res_stable prob_observed prob_mean prob_ci_low
-#> 1              0           TRUE    0.69756839 0.7025653  0.64724584
-#> 2              0           TRUE    0.20372836 0.2063853  0.16721114
-#> 3              0           TRUE    0.12000000 0.1189835  0.08077802
-#> 4              0           TRUE    0.26747720 0.2625375  0.21975016
-#> 5              0           TRUE    0.60985353 0.6092515  0.56502846
-#> 6              0           TRUE    0.03495441 0.0348972  0.02141810
-#> 7              0           TRUE    0.48307692 0.4881223  0.38415666
-#>   prob_ci_high yules_q_observed yules_q_mean yules_q_ci_low yules_q_ci_high
-#> 1    0.7531284        0.8278779    0.8292671      0.7702192       0.8769173
-#> 2    0.2556696       -0.6010580   -0.6018424     -0.6912605      -0.4917702
-#> 3    0.1658154       -0.6983917   -0.7078359     -0.8071431      -0.5827928
-#> 4    0.3200289       -0.5335259   -0.5379198     -0.6443172      -0.4288457
-#> 5    0.6501866        0.5530510    0.5611605      0.4687221       0.6368029
-#> 6    0.0520404       -0.8264798   -0.8273677     -0.8898637      -0.7596529
-#> 7    0.5679351        0.7544102    0.7602738      0.6499925       0.8369990
-# \donttest{
-# A full analysis uses more replicates
-transitions(bootstrap_lsa(fit, R = 1000), sort = "strength")
+transitions(bs, significant = TRUE, sort = "strength")
 #>         from         to observed count_mean  count_se count_ci_low
-#> 1     Active     Active      459    461.943 50.815332      368.000
-#> 2 Disengaged Disengaged      157    156.757 27.544012      103.000
-#> 3    Average     Active      153    153.544 14.470503      125.000
-#> 4     Active Disengaged       23     22.735  5.211135       13.975
-#> 5    Average    Average      458    457.412 39.761807      377.975
-#> 6     Active    Average      176    177.250 15.588602      147.975
-#> 7 Disengaged     Active       39     39.171  5.988792       28.000
-#> 8 Disengaged    Average      129    128.166 13.926823      102.000
-#> 9    Average Disengaged      140    139.568 14.569064      111.000
+#> 1     Active     Active      459     460.81 44.461695      372.425
+#> 2 Disengaged Disengaged      157     156.55 26.090122      111.425
+#> 3    Average     Active      153     153.83 14.189949      127.375
+#> 4     Active Disengaged       23      22.79  5.238349       14.000
+#> 5    Average    Average      458     456.49 41.086874      389.425
+#> 6     Active    Average      176     177.76 14.832479      148.950
+#> 7 Disengaged     Active       39      39.35  6.733566       28.000
 #>   count_ci_high adj_res_observed adj_res_mean adj_res_se adj_res_ci_low
-#> 1       561.000       21.6628107   21.5737454   1.504985      18.632735
-#> 2       215.000       15.3904661   15.3313800   1.962549      11.375243
-#> 3       182.000      -12.9060384  -12.8743075   1.466178     -15.679731
-#> 4        33.025      -12.5569254  -12.5716615   1.064613     -14.627083
-#> 5       537.050       12.4526148   12.4036141   1.392297       9.759276
-#> 6       209.000      -11.3191319  -11.2380812   1.602112     -14.357223
-#> 7        51.000      -10.5494860  -10.4982963   1.099916     -12.658793
-#> 8       156.000       -1.7364613   -1.7303818   1.449272      -4.492032
-#> 9       169.000        0.1757996    0.2468326   1.442574      -2.416885
+#> 1       528.200         21.66281     21.49281   1.557722      19.181097
+#> 2       210.000         15.39047     15.37902   1.727643      12.141444
+#> 3       180.775        -12.90604    -12.83189   1.470068     -15.684310
+#> 4        33.525        -12.55693    -12.56243   1.051631     -14.619661
+#> 5       533.775         12.45261     12.38897   1.226563       9.832774
+#> 6       206.000        -11.31913    -11.17702   1.618545     -13.551526
+#> 7        53.525        -10.54949    -10.46740   1.195836     -12.468922
 #>   adj_res_ci_high adj_res_p_boot adj_res_stable prob_observed  prob_mean
-#> 1       24.404272          0.000           TRUE    0.69756839 0.69652158
-#> 2       18.897963          0.000           TRUE    0.48307692 0.48086637
-#> 3       -9.822118          0.000           TRUE    0.20372836 0.20517119
-#> 4      -10.469285          0.000           TRUE    0.03495441 0.03451026
-#> 5       15.112067          0.000           TRUE    0.60985353 0.60872363
-#> 6       -8.017311          0.000           TRUE    0.26747720 0.26896816
-#> 7       -8.393433          0.000           TRUE    0.12000000 0.12181236
-#> 8        1.067600          0.232          FALSE    0.39692308 0.39732127
-#> 9        2.973862          0.858          FALSE    0.18641811 0.18610518
+#> 1       24.574148              0           TRUE    0.69756839 0.69574828
+#> 2       18.832847              0           TRUE    0.48307692 0.48204320
+#> 3      -10.066614              0           TRUE    0.20372836 0.20598847
+#> 4      -10.702942              0           TRUE    0.03495441 0.03451675
+#> 5       14.521364              0           TRUE    0.60985353 0.60852965
+#> 6       -7.502885              0           TRUE    0.26747720 0.26973498
+#> 7       -8.105727              0           TRUE    0.12000000 0.12249664
 #>   prob_ci_low prob_ci_high yules_q_observed yules_q_mean yules_q_ci_low
-#> 1  0.63862833   0.74620366       0.82787794   0.82441161      0.7610255
-#> 2  0.38519187   0.56403636       0.75441020   0.75072766      0.6456307
-#> 3  0.16451416   0.24819182      -0.60105804  -0.59828201     -0.6993383
-#> 4  0.02026974   0.05128738      -0.82647982  -0.82725466     -0.9021004
-#> 5  0.56210618   0.65518845       0.55305097   0.55012505      0.4455137
-#> 6  0.22143278   0.32460753      -0.53352593  -0.52832161     -0.6452188
-#> 7  0.08308331   0.16247847      -0.69839167  -0.69468403     -0.7904546
-#> 8  0.32073274   0.48152428      -0.10831746  -0.10670202     -0.2705137
-#> 9  0.15425792   0.22256878       0.01097122   0.01668867     -0.1434465
+#> 1  0.64513014   0.74382975        0.8278779    0.8227804      0.7640340
+#> 2  0.40384735   0.55598670        0.7544102    0.7533705      0.6678447
+#> 3  0.16563725   0.24642036       -0.6010580   -0.5967991     -0.7043651
+#> 4  0.02266560   0.05086872       -0.8264798   -0.8268602     -0.8948834
+#> 5  0.56241815   0.64560328        0.5530510    0.5503139      0.4464577
+#> 6  0.22476687   0.31584554       -0.5335259   -0.5258960     -0.6219965
+#> 7  0.08693525   0.16456610       -0.6983917   -0.6927039     -0.7873195
 #>   yules_q_ci_high
-#> 1      0.87900558
-#> 2      0.83256817
-#> 3     -0.48163552
-#> 4     -0.73651347
-#> 5      0.64775636
-#> 6     -0.39390622
-#> 7     -0.58396174
-#> 8      0.07048928
-#> 9      0.19375740
+#> 1       0.8805156
+#> 2       0.8184751
+#> 3      -0.4893245
+#> 4      -0.7482625
+#> 5       0.6293966
+#> 6      -0.3709085
+#> 7      -0.5712618
+# \donttest{
+# A full analysis uses more resamples
+bootstrap_lsa(fit, R = 1000) |>
+  transitions(sort = "strength") |>
+  head()
+#>         from         to observed count_mean  count_se count_ci_low
+#> 1     Active     Active      459    460.627 53.905395      356.975
+#> 2 Disengaged Disengaged      157    155.143 28.226216      102.975
+#> 3    Average     Active      153    152.771 15.077729      124.000
+#> 4     Active Disengaged       23     23.153  5.345106       13.000
+#> 5    Average    Average      458    457.798 39.026738      383.975
+#> 6     Active    Average      176    175.905 16.191916      146.000
+#>   count_ci_high adj_res_observed adj_res_mean adj_res_se adj_res_ci_low
+#> 1       562.000         21.66281     21.59385   1.581340      18.390932
+#> 2       210.000         15.39047     15.07333   1.958248      11.192064
+#> 3       181.000        -12.90604    -12.92917   1.531189     -15.784908
+#> 4        34.000        -12.55693    -12.47731   1.095469     -14.591847
+#> 5       536.025         12.45261     12.37141   1.374770       9.665542
+#> 6       207.000        -11.31913    -11.31600   1.663754     -14.366648
+#>   adj_res_ci_high adj_res_p_boot adj_res_stable prob_observed  prob_mean
+#> 1       24.510267              0           TRUE    0.69756839 0.69672987
+#> 2       18.617808              0           TRUE    0.48307692 0.47631437
+#> 3      -10.012508              0           TRUE    0.20372836 0.20395045
+#> 4      -10.355861              0           TRUE    0.03495441 0.03527769
+#> 5       15.073422              0           TRUE    0.60985353 0.60870161
+#> 6       -8.119518              0           TRUE    0.26747720 0.26799245
+#>   prob_ci_low prob_ci_high yules_q_observed yules_q_mean yules_q_ci_low
+#> 1  0.63251813   0.75000000        0.8278779    0.8250796      0.7587794
+#> 2  0.37927881   0.55946189        0.7544102    0.7441168      0.6391659
+#> 3  0.16235907   0.24660255       -0.6010580   -0.6006064     -0.7010812
+#> 4  0.01959984   0.05280939       -0.8264798   -0.8228775     -0.9036668
+#> 5  0.56339644   0.65454602        0.5530510    0.5491329      0.4453994
+#> 6  0.21732816   0.32775989       -0.5335259   -0.5318388     -0.6436483
+#>   yules_q_ci_high
+#> 1       0.8805664
+#> 2       0.8284375
+#> 3      -0.4888701
+#> 4      -0.7277132
+#> 5       0.6447136
+#> 6      -0.4001190
 # }
 ```

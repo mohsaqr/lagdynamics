@@ -1,11 +1,15 @@
-# Plot an Analytic-Certainty Result
+# Plot credible intervals of transition probabilities
 
-Circular forest of the per-edge transition-probability credible
-intervals from
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+result of
 [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
-(delegates to
+as a circular forest plot: one spoke per transition, showing the
+observed transition probability and its credible interval, so the
+precisely and imprecisely estimated transitions can be seen side by
+side. The plot is drawn by
 [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)
-with `metric = "prob"`).
+with `metric = "prob"`; see that page for the layout and the arguments
+that can be passed through `...`.
 
 ## Usage
 
@@ -18,11 +22,13 @@ plot(x, metric = "prob", ...)
 
 - x:
 
-  An `lsa_certainty` object.
+  An `lsa_certainty` object from
+  [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md).
 
 - metric:
 
-  Which credible interval to draw. Default `"prob"`.
+  Interval to draw. Default `"prob"`, the only interval a certainty
+  result has.
 
 - ...:
 
@@ -31,12 +37,17 @@ plot(x, metric = "prob", ...)
 
 ## Value
 
-A `ggplot` object (drawn when printed).
+A `ggplot` object, drawn when printed.
+
+## See also
+
+[`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md),
+[`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md).
 
 ## Examples
 
 ``` r
-fit <- lsa(group_regulation)
-cert <- certainty_lsa(fit)
+cert <- certainty_lsa(lsa(group_regulation))
 plot(cert)
+
 ```

@@ -1,7 +1,24 @@
-# Convert an lsa Fit to a tna Network
+# Convert a lag sequential analysis fit to a transition network for tna
 
-Convert an `lsa` fit to a `tna`-class network object usable by the `tna`
-package's centrality, pruning, community, and bootstrap routines.
+`lsa_to_tna()` converts a lag sequential analysis fit to a transition
+network for the tna package: a `tna` network from an `lsa` fit, or a
+`group_tna` from a grouped fit, so that a network found by LSA can be
+analysed with the network tools of tna. Lag sequential analysis and
+Transition Network Analysis (TNA) read the same transitions from two
+angles. LSA tests which transitions are more or less frequent than
+independence predicts; TNA treats the transition probabilities as a
+weighted network and studies its structure with centralities,
+communities, cliques and resampling-based pruning.
+
+The edge weights are chosen by `weights`: the transition probabilities
+(the TNA model), the counts, the positive adjusted residuals (the
+over-representation network) or the lift. With probabilities or counts
+the network also carries the initial-state probabilities and the
+sequences, so the resampling functions of tna can be used on it. With
+residuals or lift it carries neither, because tna would re-estimate
+probabilities from the sequences; resample with
+[`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
+instead.
 
 ## Usage
 
@@ -20,29 +37,39 @@ lsa_to_tna(x, weights = c("prob", "count", "adj_res", "lift"), ...)
 - x:
 
   An `lsa` fit from
-  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or
-  an `lsa_group` from `lsa(..., group = )`.
+  [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), or a
+  grouped fit from `lsa(..., group = )`.
 
 - ...:
 
-  Method-specific arguments.
+  Passed between methods.
 
 - weights:
 
-  Character. Which matrix to expose as the tna edge weights. One of
-  `"prob"` (row-normalised probabilities, default), `"count"` (raw
-  observed counts), `"adj_res"` (adjusted residuals, over-representation
-  network), or `"lift"` (observed / expected association strength).
+  Edge weights: `"prob"` (default, transition probabilities), `"count"`
+  (observed counts), `"adj_res"` (adjusted residuals, negative values
+  set to 0) or `"lift"` (observed over expected counts).
 
 ## Value
 
-For an `lsa` fit, a `tna` object with `weights`, `inits`, `labels`, and,
-when available, `data` slots. For an `lsa_group`, a `group_tna` object.
+A `tna` object (for an `lsa` fit) or a `group_tna` object (one `tna` per
+group, for a grouped fit), read with the functions of the tna package.
 
-## Details
+## Conditions
 
-This function is deliberately named `lsa_to_tna()`, not `as_tna()`, to
-avoid overlapping export names with sibling packages.
+Errors carry the class `lagdynamics_error` and
+`lagdynamics_missing_package` when tna is not installed. With
+`weights = "adj_res"` or `"lift"` and a fit that has sequences, a
+warning of class `lagdynamics_tna_no_data` notes that the network
+carries no sequence data.
+
+## See also
+
+[`transition_probabilities()`](https://pak.dynasite.org/lagdynamics/reference/transition_probabilities.md)
+and
+[`initial()`](https://pak.dynasite.org/lagdynamics/reference/initial.md)
+for the same parameters as tidy tables;
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Examples
 

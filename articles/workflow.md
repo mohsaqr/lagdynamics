@@ -1,53 +1,93 @@
-# A complete workflow: from sequences to a group comparison
+# A complete workflow
 
-This vignette shows a complete applied workflow: define the sequence
-data, fit an LSA model, read the fitted transitions, visualise the main
-structure, add uncertainty evidence, start from a raw event log, and
-compare groups.
+Lag sequential analysis (LSA) asks whether one event follows another
+more often, or less often, than it would if the events of a sequence
+were independent of each other (Bakeman & Gottman, 1997; Bakeman &
+Quera, 2011). For every ordered pair of states it compares the observed
+count of the transition with the count expected from the marginal
+frequencies of the two states, and expresses the difference as an
+adjusted residual: a positive residual marks a transition the process
+favours, a negative residual marks a transition the process avoids.
 
-It assumes the method overview in
-[`vignette("intro", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/intro.md).
-It uses only a small plotting subset; the full gallery is in
-[`vignette("plotting", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/plotting.md).
-The full confirmatory battery is in
-[`vignette("confirmatory", package = "lagdynamics")`](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md).
+A finding from LSA is a claim, and each kind of claim needs its own
+evidence. A descriptive claim (“disengaged students tend to stay
+disengaged”) rests on the fitted transition table. A claim about a
+single transition adds an interval for it. A claim about the whole
+network adds a check that the network reproduces in independent halves
+of the data. A claim that two groups differ needs a test of the
+difference. This guide runs that chain from end to end on the bundled
+data: it fits a model to weekly engagement states, reads and draws the
+result, adds uncertainty evidence, then fits one model per achievement
+group from a raw event log and tests where the groups differ. The method
+itself is introduced in [the LSA
+vignette](https://pak.dynasite.org/lagdynamics/articles/lsa.md); the
+full confirmatory battery is in [the confirmatory
+vignette](https://pak.dynasite.org/lagdynamics/articles/confirmatory.md).
 
-## Define the sequence data
+``` r
 
-`engagement` contains 138 students observed over 15 weekly time points.
-Each row is one student sequence. Each cell is a weekly engagement
-state: `Active`, `Average`, or `Disengaged`.
+library(lagdynamics)
+```
+
+## Data
+
+The first part of the guide uses `engagement`, a wide data frame with
+one row per student and one column per week of a course.
+
+- **Sequence:** each row is one student; 138 rows, of which 2 are empty.
+- **Time point:** the 15 columns, in course order.
+- **State:** the weekly engagement state, `Active`, `Average`, or
+  `Disengaged`. A missing cell means no record that week.
 
 ``` r
 
 head(engagement)
-#>         1          2          3          4          5          6       7
-#> 1  Active Disengaged Disengaged Disengaged     Active     Active  Active
-#> 2 Average    Average    Average    Average    Average    Average Average
-#> 3 Average     Active     Active     Active     Active     Active  Active
-#> 4  Active     Active     Active     Active     Active    Average Average
-#> 5  Active     Active     Active    Average     Active    Average  Active
-#> 6 Average    Average Disengaged    Average Disengaged Disengaged Average
-#>         8       9         10      11         12      13      14      15
-#> 1  Active Average     Active Average     Active    <NA>    <NA>    <NA>
-#> 2 Average Average     Active Average    Average Average Average Average
-#> 3  Active  Active    Average  Active     Active  Active  Active  Active
-#> 4  Active  Active     Active Average     Active Average  Active Average
-#> 5  Active  Active Disengaged  Active     Active  Active Average Average
-#> 6 Average Average Disengaged Average Disengaged Average Average Average
+#>         1          2          3          4          5          6       7       8       9
+#> 1  Active Disengaged Disengaged Disengaged     Active     Active  Active  Active Average
+#> 2 Average    Average    Average    Average    Average    Average Average Average Average
+#> 3 Average     Active     Active     Active     Active     Active  Active  Active  Active
+#> 4  Active     Active     Active     Active     Active    Average Average  Active  Active
+#> 5  Active     Active     Active    Average     Active    Average  Active  Active  Active
+#> 6 Average    Average Disengaged    Average Disengaged Disengaged Average Average Average
+#>           10      11         12      13      14      15
+#> 1     Active Average     Active    <NA>    <NA>    <NA>
+#> 2     Active Average    Average Average Average Average
+#> 3    Average  Active     Active  Active  Active  Active
+#> 4     Active Average     Active Average  Active Average
+#> 5 Disengaged  Active     Active  Active Average Average
+#> 6 Disengaged Average Disengaged Average Average Average
 ```
 
-This first step fixes the scope of the claim: the empirical units are
-students, the events are weekly states, and the ordering is column
-order.
+The second part uses `group_regulation_long`, an event log of
+collaborative learning with one coded regulation action per row.
+
+- **Actor:** `Actor`, the student who acted; 2,000 actors.
+- **Action:** `Action`, one of nine regulation codes (`adapt`,
+  `cohesion`, `consensus`, `coregulate`, `discuss`, `emotion`,
+  `monitor`, `plan`, `synthesis`).
+- **Time:** `Time`, the time stamp that orders the actions.
+- **Group:** `Achiever`, `High` or `Low` achievement, fixed for each
+  actor.
+
+``` r
+
+head(group_regulation_long)
+#>   Actor Achiever Group Course                Time    Action
+#> 1     1     High     1      A 2025-01-01 08:27:07  cohesion
+#> 2     1     High     1      A 2025-01-01 08:35:20 consensus
+#> 3     1     High     1      A 2025-01-01 08:42:18   discuss
+#> 4     1     High     1      A 2025-01-01 08:50:00 synthesis
+#> 5     1     High     1      A 2025-01-01 08:52:25     adapt
+#> 6     1     High     1      A 2025-01-01 08:57:31 consensus
+```
 
 ## Fit the model
 
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-estimates the transition table, the counts expected under independence,
-and the adjusted residual for each transition. The adjusted residual is
-the local test statistic: positive values mark over-represented
-transitions and negative values mark avoided transitions.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) turns
+the rows into sequences, counts every lag-1 transition, computes the
+counts expected under independence, and tests each cell. The print
+method gives the size of the data, the tablewise independence test, and
+the strongest favoured transitions.
 
 ``` r
 
@@ -70,87 +110,91 @@ fit
 #>     Disengaged 0.250  ████████████████
 ```
 
-## Read the fitted transitions
+The model rests on 1,734 transitions from 136 sequences: the two empty
+rows contribute nothing. The likelihood-ratio test of independence is G²
+= 618.3 on 4 degrees of freedom, so the weekly states are far from
+independent of the previous week’s state. Seven of the nine transitions
+depart from chance, and the three favoured ones are the three
+self-transitions: `Active -> Active` (z = 21.7),
+`Disengaged -> Disengaged` (z = 15.4), and `Average -> Average` (z =
+12.5). Engagement is persistent.
 
-The fitted object is read through verbs.
+## Overview of the fit
+
+[`summary()`](https://rdrr.io/r/base/summary.html) returns the same
+overview as one table row, and the `nodes` table describes the states:
+how many transitions leave and enter each state, their shares, and the
+share of sequences that start in it.
+
+``` r
+
+as.data.frame(summary(fit))
+#>      engine lag n_states n_sequences n_events n_transitions n_significant alpha lrx2
+#> 1 classical   1        3         136     1870          1734             7  0.05  618
+#>   lrx2_df    lrx2_p  x2 x2_df      x2_p
+#> 1       4 1.69e-132 629     4 7.41e-135
+as.data.frame(summary(fit), what = "nodes")
+#>        state outgoing incoming out_share in_share init_prob
+#> 1     Active      658      651     0.379    0.375     0.382
+#> 2    Average      751      763     0.433    0.440     0.368
+#> 3 Disengaged      325      320     0.187    0.185     0.250
+```
+
+`Average` carries the largest share of activity (0.433 of outgoing
+transitions), `Disengaged` the smallest (0.187). A quarter of the
+students (0.250) start the course disengaged, against 0.382 who start
+active.
+
+## Which transitions depart from chance
+
 [`transitions()`](https://pak.dynasite.org/lagdynamics/reference/transitions.md)
-returns one row per `from -> to` edge.
+returns one row per transition, with the observed and expected counts,
+the transition probability, the adjusted residual and its p-value, and
+effect sizes (Yule’s Q, kappa, lift). `sort = "strength"` orders the
+rows by the absolute residual; `significant = TRUE` would keep only the
+transitions significant at `alpha = 0.05`.
 
 ``` r
 
-transitions(fit)
-#>         from         to lag count expected  prob prob_col adj_res         p
-#> 1     Active     Active   1   459      247 0.698   0.7051  21.663 4.60e-104
-#> 2    Average     Active   1   153      282 0.204   0.2350 -12.906  4.16e-38
-#> 3 Disengaged     Active   1    39      122 0.120   0.0599 -10.549  5.11e-26
-#> 4     Active    Average   1   176      290 0.267   0.2307 -11.319  1.06e-29
-#> 5    Average    Average   1   458      330 0.610   0.6003  12.453  1.35e-35
-#> 6 Disengaged    Average   1   129      143 0.397   0.1691  -1.736  8.25e-02
-#> 7     Active Disengaged   1    23      121 0.035   0.0719 -12.557  3.64e-36
-#> 8    Average Disengaged   1   140      139 0.186   0.4375   0.176  8.60e-01
-#> 9 Disengaged Disengaged   1   157       60 0.483   0.4906  15.390  1.90e-53
-#>   yules_q   kappa kappa_z  kappa_p  lift  sign significant
-#> 1   0.828  0.4438   19.19 4.68e-82 1.858  over        TRUE
-#> 2  -0.601 -0.4994  -14.70 6.81e-49 0.543 under        TRUE
-#> 3  -0.698 -0.7069  -11.46 2.03e-30 0.320 under        TRUE
-#> 4  -0.534 -0.4242  -12.48 9.39e-36 0.608 under        TRUE
-#> 5   0.553  0.2275    9.83 7.97e-23 1.386  over        TRUE
-#> 6  -0.108 -0.1618   -2.96 3.03e-03 0.902 under       FALSE
-#> 7  -0.826 -0.8272  -13.41 5.14e-41 0.189 under        TRUE
-#> 8   0.011 -0.0903   -1.66 9.79e-02 1.010  over       FALSE
-#> 9   0.754  0.3136   13.56 7.34e-42 2.618  over        TRUE
+transitions(fit, sort = "strength")
+#>         from         to lag count expected  prob prob_col adj_res         p yules_q
+#> 1     Active     Active   1   459      247 0.698   0.7051  21.663 4.60e-104   0.828
+#> 2 Disengaged Disengaged   1   157       60 0.483   0.4906  15.390  1.90e-53   0.754
+#> 3    Average     Active   1   153      282 0.204   0.2350 -12.906  4.16e-38  -0.601
+#> 4     Active Disengaged   1    23      121 0.035   0.0719 -12.557  3.64e-36  -0.826
+#> 5    Average    Average   1   458      330 0.610   0.6003  12.453  1.35e-35   0.553
+#> 6     Active    Average   1   176      290 0.267   0.2307 -11.319  1.06e-29  -0.534
+#> 7 Disengaged     Active   1    39      122 0.120   0.0599 -10.549  5.11e-26  -0.698
+#> 8 Disengaged    Average   1   129      143 0.397   0.1691  -1.736  8.25e-02  -0.108
+#> 9    Average Disengaged   1   140      139 0.186   0.4375   0.176  8.60e-01   0.011
+#>     kappa kappa_z  kappa_p  lift  sign significant
+#> 1  0.4438   19.19 4.68e-82 1.858  over        TRUE
+#> 2  0.3136   13.56 7.34e-42 2.618  over        TRUE
+#> 3 -0.4994  -14.70 6.81e-49 0.543 under        TRUE
+#> 4 -0.8272  -13.41 5.14e-41 0.189 under        TRUE
+#> 5  0.2275    9.83 7.97e-23 1.386  over        TRUE
+#> 6 -0.4242  -12.48 9.39e-36 0.608 under        TRUE
+#> 7 -0.7069  -11.46 2.03e-30 0.320 under        TRUE
+#> 8 -0.1618   -2.96 3.03e-03 0.902 under       FALSE
+#> 9 -0.0903   -1.66 9.79e-02 1.010  over       FALSE
 ```
 
-For interpretation, it is usually clearer to begin with transitions that
-depart from chance.
+Four of the six moves between different states are avoided. The
+strongest avoidance is `Average -> Active` (z = -12.9, Yule’s Q =
+-0.601), followed closely by `Active -> Disengaged` (z = -12.6): an
+active student almost never drops to disengagement in one week (23
+observed against 121 expected, probability 0.035). The remaining two
+moves, `Disengaged -> Average` (z = -1.74, p = 0.083) and
+`Average -> Disengaged` (z = 0.18, p = 0.86), occur about as often as
+chance predicts. The probability column is the transition probability
+that a transition network displays; the residual and Yule’s Q say
+whether that probability is larger or smaller than chance.
 
-``` r
+## Display the model
 
-transitions(fit, significant = TRUE)
-#>         from         to lag count expected  prob prob_col adj_res         p
-#> 1     Active     Active   1   459      247 0.698   0.7051    21.7 4.60e-104
-#> 2    Average     Active   1   153      282 0.204   0.2350   -12.9  4.16e-38
-#> 3 Disengaged     Active   1    39      122 0.120   0.0599   -10.5  5.11e-26
-#> 4     Active    Average   1   176      290 0.267   0.2307   -11.3  1.06e-29
-#> 5    Average    Average   1   458      330 0.610   0.6003    12.5  1.35e-35
-#> 6     Active Disengaged   1    23      121 0.035   0.0719   -12.6  3.64e-36
-#> 7 Disengaged Disengaged   1   157       60 0.483   0.4906    15.4  1.90e-53
-#>   yules_q  kappa kappa_z  kappa_p  lift  sign significant
-#> 1   0.828  0.444   19.19 4.68e-82 1.858  over        TRUE
-#> 2  -0.601 -0.499  -14.70 6.81e-49 0.543 under        TRUE
-#> 3  -0.698 -0.707  -11.46 2.03e-30 0.320 under        TRUE
-#> 4  -0.534 -0.424  -12.48 9.39e-36 0.608 under        TRUE
-#> 5   0.553  0.227    9.83 7.97e-23 1.386  over        TRUE
-#> 6  -0.826 -0.827  -13.41 5.14e-41 0.189 under        TRUE
-#> 7   0.754  0.314   13.56 7.34e-42 2.618  over        TRUE
-```
-
-The companion tables keep the transition interpretation grounded in node
-volume, starting states, and tablewise tests.
-
-``` r
-
-nodes(fit)
-#>        state outgoing incoming
-#> 1     Active      658      651
-#> 2    Average      751      763
-#> 3 Disengaged      325      320
-tests(fit)
-#>   test statistic df         p
-#> 1 lrx2       618  4 1.69e-132
-#> 2   x2       629  4 7.41e-135
-initial(fit)
-#>        state init_prob
-#> 1     Active     0.382
-#> 2    Average     0.368
-#> 3 Disengaged     0.250
-```
-
-## Visualise the fitted model
-
-The default plot is the residual heatmap. It displays the LSA model
-directly: rows are source states, columns are target states, and colour
-is the adjusted residual.
+A residual heatmap shows the residual of every cell: rows are the
+current state, columns the next state, and the colour gives the sign and
+size of the departure from chance.
 
 ``` r
 
@@ -159,35 +203,36 @@ plot(fit)
 
 ![](workflow_files/figure-html/heatmap-1.png)
 
-The residual network shows the same departure-from-chance model as
-directed edges.
+The three red cells are the self-transitions and the blue cells the
+avoided moves between states, which is the persistence reported above in
+one display. The rows are ordered by how many transitions leave each
+state, so the self-transitions do not form a visual diagonal.
 
-``` r
-
-plot(fit, type = "network")
-```
-
-![](workflow_files/figure-html/residual-network-1.png)
-
-A TNA-style transition network is a different view of the same process:
-edge weights are conditional transition probabilities rather than
-residuals.
+A transition network draws the same process with edges weighted by
+transition probability, the form used in transition network analysis. It
+answers a different question: where the process tends to go next, rather
+than which moves are surprising.
 
 ``` r
 
 plot(fit, type = "network", weights = "tna")
 ```
 
-![](workflow_files/figure-html/tna-network-1.png)
+![](workflow_files/figure-html/network-tna-1.png)
 
-Use the plotting vignette for chord diagrams, sunbursts, comparison
-heatmaps, and uncertainty plots.
+The two displays answer different questions, and they part ways on
+`Disengaged -> Average`: with a probability of 0.397 it is one of the
+heaviest edges in the transition network, yet its residual is not
+significant, because `Average` is common enough that chance alone
+predicts a move of that size. Every display is covered in [the plotting
+guide](https://pak.dynasite.org/lagdynamics/articles/plotting.md).
 
-## Add uncertainty evidence
+## How precise are the transition probabilities
 
-An edge claim needs more than a fitted residual.
 [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
-gives analytic credible intervals for transition probabilities.
+gives analytic credible intervals for each transition probability from a
+Dirichlet-multinomial posterior, and marks an edge as stable when its
+residual keeps its sign across the interval.
 
 ``` r
 
@@ -198,103 +243,137 @@ cert
 #>   prior:         Dirichlet(0.50)
 #>   CI level:      95%  |  inference: stability
 #>   certain edges: 7 of 9
-transitions(cert) |> head(4)
-#>         from      to observed prob_observed prob_mean prob_se prob_ci_low
-#> 1     Active  Active      459         0.698     0.697  0.0179      0.6611
-#> 2    Average  Active      153         0.204     0.204  0.0147      0.1760
-#> 3 Disengaged  Active       39         0.120     0.121  0.0180      0.0879
-#> 4     Active Average      176         0.267     0.268  0.0172      0.2345
-#>   prob_ci_high  p_value stable adj_res_observed adj_res_stable
-#> 1        0.731 5.56e-20   TRUE             21.7           TRUE
-#> 2        0.233 6.06e-04   TRUE            -12.9           TRUE
-#> 3        0.158 9.45e-02  FALSE            -10.5          FALSE
-#> 4        0.302 1.21e-04   TRUE            -11.3           TRUE
+transitions(cert, sort = "strength")
+#>         from         to observed prob_observed prob_mean prob_se prob_ci_low prob_ci_high
+#> 1     Active     Active      459         0.698    0.6967 0.01789      0.6611        0.731
+#> 2 Disengaged Disengaged      157         0.483    0.4824 0.02761      0.4284        0.537
+#> 3    Average     Active      153         0.204    0.2040 0.01468      0.1760        0.233
+#> 4     Active Disengaged       23         0.035    0.0356 0.00721      0.0229        0.051
+#> 5    Average    Average      458         0.610    0.6093 0.01777      0.5742        0.644
+#> 6     Active    Average      176         0.267    0.2676 0.01723      0.2345        0.302
+#> 7 Disengaged     Active       39         0.120    0.1210 0.01802      0.0879        0.158
+#> 8 Disengaged    Average      129         0.397    0.3966 0.02703      0.3443        0.450
+#> 9    Average Disengaged      140         0.186    0.1867 0.01420      0.1597        0.215
+#>    p_value stable adj_res_observed adj_res_stable
+#> 1 5.56e-20   TRUE           21.663           TRUE
+#> 2 9.44e-06   TRUE           15.390           TRUE
+#> 3 6.06e-04   TRUE          -12.906           TRUE
+#> 4 2.19e-01  FALSE          -12.557          FALSE
+#> 5 3.14e-17   TRUE           12.453           TRUE
+#> 6 1.21e-04   TRUE          -11.319           TRUE
+#> 7 9.45e-02  FALSE          -10.549          FALSE
+#> 8 2.23e-04   TRUE           -1.736           TRUE
+#> 9 1.17e-03   TRUE            0.176           TRUE
 ```
 
+Seven of the nine probabilities are certain. The probability of the
+strongest edge, `Active -> Active`, lies between 0.661 and 0.731 with
+95% credibility. The two uncertain ones are the two rarest transitions,
+`Active -> Disengaged` (23 observations, interval 0.023 to 0.051) and
+`Disengaged -> Active` (39 observations): their intervals are wide
+relative to the probability itself, so the posterior does not stay
+within 75% to 125% of the observed value. Their residuals are strongly
+negative all the same; the uncertainty concerns the size of a small
+probability, not the avoidance.
+
+## Do the residuals hold when sequences are resampled
+
 [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md)
-resamples sequences, refits the model, and reports edge-level
-variability. It is useful when the population may be a mixture of
-different sequence types.
+resamples whole sequences with replacement, refits the model on each
+resample, and reports a percentile interval for every statistic (Efron,
+1979). Resampling sequences keeps each student’s transitions together,
+so the interval reflects variation between students. The seed makes the
+resamples reproducible.
 
 ``` r
 
-boot <- bootstrap_lsa(fit, R = 100)
+set.seed(2026)
+boot <- bootstrap_lsa(fit, R = 1000)
 boot
 #> <lsa_bootstrap>
 #>   engine:        classical
 #>   level:         sequence
-#>   replicates:    100
+#>   replicates:    1000
 #>   CI level:      95%
 #>   stable edges:  7 of 9
-transitions(boot) |> head(4)
-#>         from      to observed count_mean count_se count_ci_low count_ci_high
-#> 1     Active  Active      459      465.2    51.55          378           560
-#> 2    Average  Active      153      153.9    16.30          126           187
-#> 3 Disengaged  Active       39       39.1     6.37           27            52
-#> 4     Active Average      176      178.4    17.68          148           217
-#>   adj_res_observed adj_res_mean adj_res_se adj_res_ci_low adj_res_ci_high
-#> 1             21.7         21.5       1.46           18.2           23.92
-#> 2            -12.9        -13.0       1.41          -15.6          -10.60
-#> 3            -10.5        -10.4       1.26          -12.5           -8.16
-#> 4            -11.3        -11.3       1.53          -14.1           -8.63
-#>   adj_res_p_boot adj_res_stable prob_observed prob_mean prob_ci_low
-#> 1              0           TRUE         0.698     0.697       0.633
-#> 2              0           TRUE         0.204     0.206       0.162
-#> 3              0           TRUE         0.120     0.124       0.089
-#> 4              0           TRUE         0.267     0.269       0.223
-#>   prob_ci_high yules_q_observed yules_q_mean yules_q_ci_low yules_q_ci_high
-#> 1        0.746            0.828        0.824          0.743           0.871
-#> 2        0.256           -0.601       -0.603         -0.690          -0.508
-#> 3        0.166           -0.698       -0.690         -0.798          -0.575
-#> 4        0.324           -0.534       -0.530         -0.633          -0.418
+transitions(boot, significant = TRUE, sort = "strength") |> head(5)
+#>         from         to observed count_mean count_se count_ci_low count_ci_high
+#> 1     Active     Active      459      461.1    52.50          360           568
+#> 2 Disengaged Disengaged      157      156.1    28.06          106           213
+#> 3    Average     Active      153      152.8    14.79          124           182
+#> 4     Active Disengaged       23       22.7     4.99           14            32
+#> 5    Average    Average      458      458.8    39.30          383           532
+#>   adj_res_observed adj_res_mean adj_res_se adj_res_ci_low adj_res_ci_high adj_res_p_boot
+#> 1             21.7         21.6       1.55          18.65           24.61              0
+#> 2             15.4         15.3       1.96          11.10           18.95              0
+#> 3            -12.9        -12.9       1.52         -15.79           -9.99              0
+#> 4            -12.6        -12.5       1.06         -14.68          -10.42              0
+#> 5             12.5         12.5       1.37           9.84           15.16              0
+#>   adj_res_stable prob_observed prob_mean prob_ci_low prob_ci_high yules_q_observed
+#> 1           TRUE         0.698    0.6974      0.6371        0.752            0.828
+#> 2           TRUE         0.483    0.4800      0.3846        0.564            0.754
+#> 3           TRUE         0.204    0.2041      0.1623        0.247           -0.601
+#> 4           TRUE         0.035    0.0346      0.0205        0.049           -0.826
+#> 5           TRUE         0.610    0.6102      0.5640        0.655            0.553
+#>   yules_q_mean yules_q_ci_low yules_q_ci_high
+#> 1        0.826          0.760           0.882
+#> 2        0.750          0.633           0.834
+#> 3       -0.601         -0.700          -0.489
+#> 4       -0.826         -0.900          -0.745
+#> 5        0.553          0.451           0.648
 ```
 
+Seven of the nine residuals are stable across 1,000 resamples of
+students, and every interval shown excludes zero by a wide margin: the
+residual of `Active -> Disengaged` stays between -14.7 and -10.4, so the
+avoidance of that move holds across students even though its probability
+is small. The persistence findings and the avoided moves are therefore
+not produced by a few unusual students.
+
+## Is the whole network reproducible
+
 [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
-moves from edge evidence to whole-network evidence by repeated
-split-half refitting.
+splits the sequences into two random halves, fits the model to each
+half, and correlates the two sets of edge weights. A high split-half
+correlation means the network as a whole would be recovered from a
+different sample of the same size.
 
 ``` r
 
-reliability_lsa(fit, R = 30)
+rel <- reliability_lsa(fit, R = 100)
+rel
 #> <lsa_reliability>
 #>   engine:        classical
-#>   replicates:    30
+#>   replicates:    100
 #>   weights:       prob
 #>   method:        pearson
 #>   n sequences:   136
-#>   split-half r:  0.969  (sd = 0.021)
-#>   95% CI:        [0.925, 0.993]
+#>   split-half r:  0.961  (sd = 0.034)
+#>   95% CI:        [0.890, 0.993]
+#>   failed:        0 of 100 replicates
 ```
 
-## Start from a raw event log
+Across 100 random splits the two halves agree closely: the mean
+split-half correlation is 0.961, with a 95% interval from 0.890 to
+0.993, and no split failed. The engagement network is reproducible at
+this sample size.
 
-Real process data often arrives as a long event log. The bundled
-`group_regulation_long` data has one timestamped regulation action per
-row, plus an achievement-group label.
+## From an event log to sequences
+
+Process data usually arrives as an event log rather than as wide
+sequences.
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) builds
+the sequences itself when the columns are named: `actor` identifies the
+sequence, `action` is the state, and `time` orders the events. A new
+sequence also starts whenever two consecutive events of an actor are
+more than `time_threshold` seconds apart (900 by default). The column
+grammar and its options are covered in [the event-log
+guide](https://pak.dynasite.org/lagdynamics/articles/event-logs.md).
 
 ``` r
 
-head(group_regulation_long)
-#>   Actor Achiever Group Course                Time    Action
-#> 1     1     High     1      A 2025-01-01 08:27:07  cohesion
-#> 2     1     High     1      A 2025-01-01 08:35:20 consensus
-#> 3     1     High     1      A 2025-01-01 08:42:18   discuss
-#> 4     1     High     1      A 2025-01-01 08:50:00 synthesis
-#> 5     1     High     1      A 2025-01-01 08:52:25     adapt
-#> 6     1     High     1      A 2025-01-01 08:57:31 consensus
-```
-
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) can
-recover sequences and fit the model in one call. `actor` identifies the
-sequence, `action` identifies the event state, and `time` orders events.
-If there is no actor column, `action` alone is valid: the log is treated
-as one stream, which `time` then splits into a new sequence wherever two
-events are more than `time_threshold` seconds (default 900) apart.
-
-``` r
-
-fit_log <- lsa(group_regulation_long, actor = "Actor",
-               action = "Action", time = "Time")
+fit_log <- lsa(group_regulation_long, actor = "Actor", action = "Action",
+               time = "Time")
 fit_log
 #> Lag Sequential Analysis  -  classical  (lag 1, directed)
 #>   9 states | 25533 transitions | 27533 events | 2000 sequences
@@ -322,129 +401,124 @@ fit_log
 #>     adapt      0.011  █
 ```
 
-The fitted probabilities are exposed for downstream transition-network
-workflows.
+The 27,533 actions form 2,000 sequences, one per actor, and 25,533
+transitions. Seventy-two of the 81 transitions depart from chance. The
+strongest favoured transition is `emotion -> cohesion` (z = 58.2),
+followed by `discuss -> synthesis` (z = 48.0).
 
-``` r
+## One model per group
 
-transition_probabilities(fit_log)
-#>               adapt cohesion consensus coregulate discuss emotion monitor
-#> adapt      0.000000   0.2731     0.477     0.0216  0.0589  0.1198  0.0334
-#> cohesion   0.002950   0.0271     0.498     0.1192  0.0596  0.1156  0.0330
-#> consensus  0.004740   0.0149     0.082     0.1877  0.1880  0.0727  0.0466
-#> coregulate 0.016244   0.0360     0.135     0.0234  0.2736  0.1721  0.0863
-#> discuss    0.071374   0.0476     0.321     0.0843  0.1949  0.1058  0.0223
-#> emotion    0.002467   0.3253     0.320     0.0342  0.1019  0.0768  0.0363
-#> monitor    0.011165   0.0558     0.159     0.0579  0.3754  0.0907  0.0181
-#> plan       0.000975   0.0252     0.290     0.0172  0.0679  0.1468  0.0755
-#> synthesis  0.234663   0.0337     0.466     0.0445  0.0629  0.0706  0.0123
-#>              plan synthesis
-#> adapt      0.0157   0.00000
-#> cohesion   0.1410   0.00354
-#> consensus  0.3958   0.00758
-#> coregulate 0.2391   0.01878
-#> discuss    0.0116   0.14098
-#> emotion    0.0998   0.00282
-#> monitor    0.2156   0.01605
-#> plan       0.3742   0.00179
-#> synthesis  0.0752   0.00000
-initial(fit_log)
-#>        state init_prob
-#> 1      adapt    0.0115
-#> 2   cohesion    0.0605
-#> 3  consensus    0.2140
-#> 4 coregulate    0.0190
-#> 5    discuss    0.1755
-#> 6    emotion    0.1515
-#> 7    monitor    0.1440
-#> 8       plan    0.2045
-#> 9  synthesis    0.0195
-```
-
-## Fit groups
-
-For group-specific models, name the grouping column.
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
-estimates one model per group under the same state labels.
+Naming a grouping column with `group` fits one model per group under the
+same set of states. The grouping column must be constant within each
+sequence.
 
 ``` r
 
 gfit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
             time = "Time", group = "Achiever")
-gfit
-#> <lsa_group>
-#>   engine:    classical
-#>   states:    9 (adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis)
-#>   groups:    2
-#>     - High:        1000 sequences
-#>     - Low:         1000 sequences
+summary(gfit)
+#>   group    engine lag n_states n_sequences n_events n_transitions n_significant alpha
+#> 1  High classical   1        9        1000    13721         12721            66  0.05
+#> 2   Low classical   1        9        1000    13812         12812            67  0.05
+#>   lrx2 lrx2_df lrx2_p   x2 x2_df x2_p
+#> 1 6147      64      0 6807    64    0
+#> 2 7715      64      0 9197    64    0
 ```
 
-The reading verbs now return a leading `group` column.
+Each group contributes 1,000 sequences: 12,721 transitions for the high
+achievers and 12,812 for the low achievers. Both tables reject
+independence, and the groups have a similar number of significant
+transitions (66 and 67). Every reading verb returns a leading `group`
+column for a grouped fit.
 
 ``` r
 
-transitions(gfit, significant = TRUE) |> head(6)
-#>   group       from    to lag count expected    prob prob_col adj_res         p
-#> 1  High  consensus adapt   1    14    38.13 0.00413   0.0979   -4.59  4.45e-06
-#> 2  High coregulate adapt   1    20    10.05 0.02237   0.1399    3.27  1.06e-03
-#> 3  High    discuss adapt   1    48    22.52 0.02396   0.3357    5.88  4.00e-09
-#> 4  High    emotion adapt   1     5    17.42 0.00323   0.0350   -3.19  1.40e-03
-#> 5  High       plan adapt   1     4    32.51 0.00138   0.0280   -5.72  1.06e-08
-#> 6  High  synthesis adapt   1    40     3.13 0.14388   0.2797   21.21 7.61e-100
-#>   yules_q   kappa kappa_z  kappa_p   lift  sign significant
-#> 1  -0.544 -0.6606   -4.98 6.36e-07  0.367 under        TRUE
-#> 2   0.371  0.0636    2.90 3.68e-03  1.990  over        TRUE
-#> 3   0.466  0.1803    5.21 1.86e-07  2.132  over        TRUE
-#> 4  -0.589 -0.7375   -3.46 5.48e-04  0.287 under        TRUE
-#> 5  -0.824 -0.8859   -5.99 2.04e-09  0.123 under        TRUE
-#> 6   0.905  0.2406   19.62 1.08e-85 12.800  over        TRUE
-nodes(gfit) |> head(6)
-#>   group      state outgoing incoming
-#> 1  High      adapt      141      143
-#> 2  High   cohesion      938      936
-#> 3  High  consensus     3392     3439
-#> 4  High coregulate      894      954
-#> 5  High    discuss     2003     1986
-#> 6  High    emotion     1550     1517
+transitions(gfit, significant = TRUE, sort = "strength") |> head(6)
+#>   group      from         to lag count expected   prob prob_col adj_res         p yules_q
+#> 1  High   emotion   cohesion   1   505    114.0 0.3258  0.53953    40.6  0.00e+00   0.847
+#> 2  High consensus  consensus   1   283    917.0 0.0834  0.08229   -28.6 3.68e-180  -0.698
+#> 3  High   discuss  synthesis   1   213     46.1 0.1063  0.72696    27.1 1.79e-161   0.881
+#> 4  High   discuss       plan   1    25    458.8 0.0125  0.00858   -25.1 2.35e-139  -0.934
+#> 5  High consensus coregulate   1   580    254.4 0.1710  0.60797    24.8 1.21e-135   0.663
+#> 6  High consensus       plan   1  1236    777.0 0.3644  0.42416    21.9 2.64e-106   0.447
+#>    kappa kappa_z   kappa_p   lift  sign significant
+#> 1  0.425    37.7 6.36e-311 4.4280  over        TRUE
+#> 2 -0.709   -30.1 5.36e-199 0.3086 under        TRUE
+#> 3  0.613    25.5 5.39e-143 4.6169  over        TRUE
+#> 4 -0.949   -26.0 3.81e-149 0.0545 under        TRUE
+#> 5  0.462    24.6 9.79e-134 2.2801  over        TRUE
+#> 6  0.180    19.0  3.49e-80 1.5907  over        TRUE
 ```
 
-## Compare groups
+The strongest residual in the high achievers is `emotion -> cohesion` (z
+= 40.6). The question of the next section is whether any transition is
+stronger in one group than in the other.
+
+## Do the groups differ
 
 [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
-tests whether groups differ by permuting group labels at the sequence
-level. The result includes edge-level differences and an omnibus
-comparison.
+tests the difference between the groups edge by edge. The statistic is
+the difference in the log odds ratio of each transition between the
+groups; its null distribution comes from permuting the group labels of
+whole sequences, `R` times. With many edges tested at once, the p-values
+are corrected for multiplicity: `adjust = "BH"` applies the
+Benjamini-Hochberg false discovery rate correction, and the
+`significant` column below refers to the adjusted p-values (`p_adj`).
+The package default is no adjustment, so the argument is passed
+explicitly.
 
 ``` r
 
-cmp <- compare_lsa(gfit, R = 100, adjust = "BH")
+set.seed(2026)
+cmp <- compare_lsa(gfit, R = 1000, adjust = "BH")
 cmp
 #> <lsa_comparison>
 #>   groups:   High vs Low
 #>   measure:  log_or difference (High - Low)
-#>   R:        100 label permutations
-#>   edges:    35 significant of 78 tested (adjust = BH)
-#>   omnibus:  statistic = 79.48, p = 0.009901
-transitions(cmp) |> head(6)
-#>         from    to log_or_a log_or_b   diff p_perm  p_adj significant
-#> 1      adapt adapt   -1.183    -3.17  1.984     NA     NA       FALSE
-#> 2   cohesion adapt   -0.794    -3.92  3.127 0.0099 0.0249        TRUE
-#> 3  consensus adapt   -1.219    -1.97  0.748 0.0594 0.1030       FALSE
-#> 4 coregulate adapt    0.778    -1.08  1.855 0.0099 0.0249        TRUE
-#> 5    discuss adapt    1.010     2.25 -1.241 0.0099 0.0249        TRUE
-#> 6    emotion adapt   -1.352    -3.10  1.751 0.0891 0.1390       FALSE
+#>   R:        1000 label permutations
+#>   edges:    39 significant of 78 tested (adjust = BH)
+#>   omnibus:  statistic = 79.48, p = 0.000999
+as.data.frame(cmp, what = "global")
+#>   group_a group_b statistic  p_value    R
+#> 1    High     Low      79.5 0.000999 1000
 ```
 
-Several permutation p-values equal 0.0099, which is 1 / (1 + R): the
-smallest value 100 permutations can produce. Those edges are as extreme
-as the permutation null allows at this `R`, so the run identifies them
-but cannot rank them; a reported analysis uses `R = 1000` or more. Rows
-with `p_perm = NA` (here `adapt -> adapt`) were not tested because their
-pooled count is below `min_count`.
+The omnibus test rejects the hypothesis that the two groups share one
+transition structure (statistic 79.5, p = 0.000999). That p-value is 1 /
+(R + 1), the smallest value 1,000 permutations can give, so the
+difference is at least as extreme as the permutation null allows. Of the
+78 edges with enough observations to test (the default `min_count = 5`),
+39 differ after the Benjamini-Hochberg correction. Sorting by the size
+of the difference shows the largest ones.
 
-The default comparison plot is a back-to-back barrel display. It shows
-direction, magnitude, and the permutation p-value for each edge.
+``` r
+
+transitions(cmp, significant = TRUE, sort = "strength") |> head(8)
+#>        from         to log_or_a log_or_b  diff   p_perm   p_adj significant
+#> 1  cohesion      adapt   -0.794   -3.921  3.13 0.000999 0.00354        TRUE
+#> 2   emotion  synthesis   -1.619   -4.522  2.90 0.000999 0.00354        TRUE
+#> 3      plan  synthesis   -2.145   -4.951  2.81 0.001998 0.00577        TRUE
+#> 4  cohesion  synthesis   -1.355   -3.945  2.59 0.005994 0.01461        TRUE
+#> 5 synthesis    monitor   -3.229   -0.975 -2.25 0.008991 0.02063        TRUE
+#> 6 synthesis       plan   -0.581   -2.680  2.10 0.000999 0.00354        TRUE
+#> 7     adapt coregulate   -3.146   -1.176 -1.97 0.013986 0.02871        TRUE
+#> 8      plan      adapt   -2.338   -4.230  1.89 0.024975 0.04995        TRUE
+```
+
+The `diff` column is the high-achiever log odds ratio minus the
+low-achiever one. The largest difference is `cohesion -> adapt` (3.13):
+the move is avoided in both groups but far more strongly by the low
+achievers (-3.921 against -0.794). Three of the next differences end in
+`synthesis` (`emotion`, `plan`, and `cohesion -> synthesis`), each
+avoided much more strongly by the low achievers. The negative
+differences run the other way: `synthesis -> monitor` (-2.25) is avoided
+more strongly by the high achievers.
+
+A comparison barrel plot shows the two groups side by side for the most
+frequent transitions: the high achievers’ transition probability runs to
+the left and the low achievers’ to the right, the bar labels give the
+counts, the fill gives the log odds ratio, and the centre carries the
+adjusted p-value of the difference.
 
 ``` r
 
@@ -453,28 +527,38 @@ plot(cmp)
 
 ![](workflow_files/figure-html/barrel-1.png)
 
-## In short
+Seven of the twelve most frequent transitions differ between the groups.
+The high achievers move between discussion and consensus far more often
+(`discuss -> consensus`: 851 against 418 observations;
+`consensus -> discuss`: 789 against 401), while the low achievers more
+often follow discussion with synthesis (`discuss -> synthesis`: 344
+against 213). The backbone transition `consensus -> plan` is equally
+frequent in both groups (p = 0.104).
 
-The complete analysis is a claim-to-evidence chain:
+## When to use which
 
-``` r
+| Claim | Evidence | Call |
+|----|----|----|
+| The process is not memoryless | Tablewise G² test | [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md), [`tests()`](https://pak.dynasite.org/lagdynamics/reference/tests.md) |
+| This transition is favoured or avoided | Adjusted residual | `transitions(fit, significant = TRUE)` |
+| The transition probability is known to this precision | Credible interval | [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md) |
+| The residual holds across students | Sequence bootstrap | [`bootstrap_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bootstrap_lsa.md) |
+| The network would reproduce in new data | Split-half correlation | [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md) |
+| The groups differ on this transition | Permutation test, BH-adjusted | `compare_lsa(adjust = "BH")` |
 
-fit <- lsa(engagement)
-transitions(fit, significant = TRUE)
-plot(fit)
-plot(fit, type = "network", weights = "tna")
+Descriptive claims use the fitted tables and the displays. A claim about
+one edge adds an interval, a claim about the whole network adds
+reliability, and a claim about groups adds the permutation comparison
+with the multiplicity correction stated.
 
-certainty_lsa(fit)
-bootstrap_lsa(fit)
-reliability_lsa(fit)
+## References
 
-log_fit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
-               time = "Time")
-group_fit <- lsa(group_regulation_long, actor = "Actor", action = "Action",
-                 time = "Time", group = "Achiever")
-compare_lsa(group_fit)
-```
+Bakeman, R., & Gottman, J. M. (1997). *Observing interaction: An
+introduction to sequential analysis* (2nd ed.). Cambridge University
+Press.
 
-Descriptive claims use the fitted transition tables and plots. Edge
-claims add uncertainty. Whole-network claims add reliability or
-stability. Group-difference claims use permutation comparison.
+Bakeman, R., & Quera, V. (2011). *Sequential analysis and observational
+methods for the behavioral sciences*. Cambridge University Press.
+
+Efron, B. (1979). Bootstrap methods: Another look at the jackknife. *The
+Annals of Statistics*, 7(1), 1-26.

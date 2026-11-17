@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Plotting lag-sequential models • lagdynamics</title>
+<title>Plotting lag sequential models • lagdynamics</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Plotting lag-sequential models">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Plotting lag sequential models">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.33</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.34.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,17 +28,29 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item"><a class="nav-link" href="../articles/lagdynamics.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/intro.html">Introduction</a></li>
-    <li><a class="dropdown-item" href="../articles/interop.html">Interoperability: wide data, long logs, tna, and Nestimate</a></li>
-    <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow: from sequences to a group comparison</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Vignettes</h6></li>
+    <li><a class="dropdown-item" href="../articles/lsa.html">Lag sequential analysis</a></li>
     <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
-    <li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
-    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
+    <li><a class="dropdown-item" href="../articles/confirmatory.html">Evaluating transitions</a></li>
+    <li><a class="dropdown-item" href="../articles/group-comparison.html">Comparing groups</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/event-logs.html">Event logs and interoperability</a></li>
+    <li><a class="dropdown-item" href="../articles/engines.html">Engines: classical, two-cell, bidirectional and dominance tests</a></li>
+    <li><a class="dropdown-item" href="../articles/lags-structural-zeros.html">Lags and structural zeros</a></li>
+    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag sequential models</a></li>
+    <li><a class="dropdown-item" href="../articles/transfer-entropy.html">Transfer entropy between states</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Case studies</h6></li>
+    <li><a class="dropdown-item" href="../articles/case-engagement.html">Case study: the dynamics of course engagement</a></li>
+    <li><a class="dropdown-item" href="../articles/case-group-regulation.html">Case study: regulation in high and low achieving groups</a></li>
+    <li><a class="dropdown-item" href="../articles/case-ai.html">Case study: AI behaviour in vibe-coding sessions</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -61,26 +73,80 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Plotting lag-sequential models</h1>
-                        <h4 data-toc-skip class="author">Mohammed
-Saqr</h4>
-                        <h4 data-toc-skip class="author">Sonsoles
-López-Pernas</h4>
+      <h1>Plotting lag sequential models</h1>
+                        <h4 data-toc-skip class="author">Written by <a href="https://saqr.me" class="external-link">Mohammed Saqr</a> and <a href="https://sonsoles.me" class="external-link">Sonsoles López-Pernas</a>
+</h4>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/plotting.Rmd" class="external-link"><code>vignettes/plotting.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/vignettes/articles/plotting.Rmd" class="external-link"><code>vignettes/articles/plotting.Rmd</code></a></small>
       <div class="d-none name"><code>plotting.Rmd</code></div>
     </div>
 
     
     
-<p><code>lagdynamics</code> has one plotting verb,
-<code>plot(fit, type = )</code>, plus dedicated plots for the resampling
-and comparison results. Every view of a fit displays the same quantity –
-the adjusted residual, the departure of a transition from chance – and
-differs only in geometry. The single fit used throughout is the bundled
-<code>engagement</code> data (138 students, three engagement
-states).</p>
+<p>A lag sequential model is a table: for every ordered pair of states
+it holds the observed count of the transition, the count expected if
+successive events were independent, the transition probability, and the
+adjusted residual that measures the departure from chance. Each display
+in the package draws that table in a different geometry, and each
+geometry suits a different question. A residual heatmap answers which
+transitions are favoured or avoided. A residual network shows the same
+answer as directed edges, so paths through the process can be traced. A
+transition network draws the probabilities instead, and answers where
+the process tends to go next. A chord diagram and a sunburst show how
+the outgoing flow of each state is divided. Forest plots add the
+interval of each edge, and barrel plots set two groups side by side.</p>
+<p>All views of a fit come from one verb,
+<code>plot(fit, type = )</code>; the inference results (bootstrap,
+comparisons) have their own <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods. This guide
+draws each display on the bundled data and says what it shows.</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mohsaqr/lagdynamics" class="external-link">lagdynamics</a></span><span class="op">)</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
+</h2>
+<ul>
+<li>
+<code>engagement</code>: weekly engagement states of 136 students
+over a course, three states (<code>Active</code>, <code>Average</code>,
+<code>Disengaged</code>). Used for the single-fit displays.</li>
+<li>
+<code>group_regulation_long</code>: an event log of nine
+collaborative regulation actions by 2,000 students.
+<strong>Actor:</strong> <code>Actor</code>. <strong>Action:</strong>
+<code>Action</code>. <strong>Time:</strong> <code>Time</code>.
+<strong>Group:</strong> <code>Achiever</code> (<code>High</code>,
+<code>Low</code>). Used for the grouped displays and the
+comparisons.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">engagement</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit</span>, sort <span class="op">=</span> <span class="st">"strength"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         from         to lag count expected  prob prob_col adj_res         p yules_q</span></span>
+<span><span class="co">#&gt; 1     Active     Active   1   459      247 0.698   0.7051  21.663 4.60e-104   0.828</span></span>
+<span><span class="co">#&gt; 2 Disengaged Disengaged   1   157       60 0.483   0.4906  15.390  1.90e-53   0.754</span></span>
+<span><span class="co">#&gt; 3    Average     Active   1   153      282 0.204   0.2350 -12.906  4.16e-38  -0.601</span></span>
+<span><span class="co">#&gt; 4     Active Disengaged   1    23      121 0.035   0.0719 -12.557  3.64e-36  -0.826</span></span>
+<span><span class="co">#&gt; 5    Average    Average   1   458      330 0.610   0.6003  12.453  1.35e-35   0.553</span></span>
+<span><span class="co">#&gt; 6     Active    Average   1   176      290 0.267   0.2307 -11.319  1.06e-29  -0.534</span></span>
+<span><span class="co">#&gt; 7 Disengaged     Active   1    39      122 0.120   0.0599 -10.549  5.11e-26  -0.698</span></span>
+<span><span class="co">#&gt; 8 Disengaged    Average   1   129      143 0.397   0.1691  -1.736  8.25e-02  -0.108</span></span>
+<span><span class="co">#&gt; 9    Average Disengaged   1   140      139 0.186   0.4375   0.176  8.60e-01   0.011</span></span>
+<span><span class="co">#&gt;     kappa kappa_z  kappa_p  lift  sign significant</span></span>
+<span><span class="co">#&gt; 1  0.4438   19.19 4.68e-82 1.858  over        TRUE</span></span>
+<span><span class="co">#&gt; 2  0.3136   13.56 7.34e-42 2.618  over        TRUE</span></span>
+<span><span class="co">#&gt; 3 -0.4994  -14.70 6.81e-49 0.543 under        TRUE</span></span>
+<span><span class="co">#&gt; 4 -0.8272  -13.41 5.14e-41 0.189 under        TRUE</span></span>
+<span><span class="co">#&gt; 5  0.2275    9.83 7.97e-23 1.386  over        TRUE</span></span>
+<span><span class="co">#&gt; 6 -0.4242  -12.48 9.39e-36 0.608 under        TRUE</span></span>
+<span><span class="co">#&gt; 7 -0.7069  -11.46 2.03e-30 0.320 under        TRUE</span></span>
+<span><span class="co">#&gt; 8 -0.1618   -2.96 3.03e-03 0.902 under       FALSE</span></span>
+<span><span class="co">#&gt; 9 -0.0903   -1.66 9.79e-02 1.010  over       FALSE</span></span></code></pre></div>
+<p>The table behind every display below: the three self-transitions are
+favoured (z from 12.453 to 21.663), four moves between states are
+avoided (z from -10.549 to -12.906), and two moves,
+<code>Disengaged -&gt; Average</code> and
+<code>Average -&gt; Disengaged</code>, are at chance.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -88,184 +154,382 @@ states).</p>
 <col width="33%">
 </colgroup>
 <thead><tr class="header">
-<th>view</th>
-<th>call</th>
-<th>backend</th>
+<th>Display</th>
+<th>Call</th>
+<th>Draws</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td>residual heatmap</td>
+<td>Residual heatmap</td>
 <td><code>plot(fit)</code></td>
-<td>ggplot2</td>
+<td>adjusted residuals (or probabilities, counts)</td>
 </tr>
 <tr class="even">
-<td>residual network</td>
+<td>Residual network</td>
 <td><code>plot(fit, type = "network")</code></td>
-<td>cograph</td>
+<td>adjusted residuals as edges</td>
 </tr>
 <tr class="odd">
-<td>transition (TNA) network</td>
+<td>Transition network</td>
 <td><code>plot(fit, type = "network", weights = "tna")</code></td>
-<td>cograph</td>
+<td>transition probabilities as edges</td>
 </tr>
 <tr class="even">
-<td>chord diagram</td>
+<td>Chord diagram</td>
 <td><code>plot(fit, type = "chord")</code></td>
-<td>cograph</td>
+<td>transition flow, coloured by residual</td>
 </tr>
 <tr class="odd">
-<td>polar sunburst</td>
+<td>Sunburst</td>
 <td><code>plot(fit, type = "sunburst")</code></td>
-<td>ggplot2</td>
+<td>each state’s outgoing distribution</td>
 </tr>
 <tr class="even">
-<td>uncertainty forest</td>
-<td>
-<code>plot(bootstrap_lsa(fit))</code>,
-<code>plot(certainty_lsa(fit))</code>
-</td>
-<td>ggplot2</td>
+<td>Forest plot</td>
+<td><code>plot(bootstrap_lsa(fit))</code></td>
+<td>edge intervals</td>
 </tr>
 <tr class="odd">
-<td>group barrel</td>
+<td>Barrel plot</td>
 <td>
-<code>plot(compare_lsa(g))</code>,
-<code>plot(bayes_compare_lsa(g))</code>
+<code>plot(compare_lsa(gfit))</code>,
+<code>plot(bayes_compare_lsa(gfit))</code>
 </td>
-<td>ggplot2</td>
+<td>two groups side by side</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Colour.</strong> Two conventions are used, by purpose. The
-residual <em>heatmap</em>, <em>chord</em>, and <em>sunburst</em> use the
-residual diverging scale (warm = over- represented, cool = avoided). The
-<em>network</em> and <em>group comparison</em> plots follow the wider
-Transition Network Analysis (TNA) convention – <strong>blue = more than
-chance</strong>, <strong>red = less</strong> (avoided edges dashed) – so
-an <code>lsa</code> network reads like any other transition network.</p>
+</div>
 <div class="section level2">
 <h2 id="residual-heatmap">Residual heatmap<a class="anchor" aria-label="anchor" href="#residual-heatmap"></a>
 </h2>
-<p>The default. Rows are the current state, columns the next; colour is
-the adjusted residual. <code>which</code> selects the matrix.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                       <span class="co"># adjusted residuals (default)</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/heatmap-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, which <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>       <span class="co"># transition probabilities</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/heatmap-2.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<p>A residual heatmap is the default display. Rows are the current
+state, ordered by how many transitions leave them, columns are the next
+state, and the fill is the adjusted residual on a diverging scale
+centred at zero: warm (red) cells are over-represented and cool (blue)
+cells avoided. The cell with the largest absolute residual in each row
+is labelled in bold.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/heatmap-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The three red cells are the self-transitions: each state tends to
+repeat, most strongly <code>Active</code> (z = 21.663). Because the rows
+are ordered by volume, they do not form a visual diagonal. The blue
+cells are the avoided moves, and the two near-white cells,
+<code>Average -&gt; Disengaged</code> (z = 0.176) and
+<code>Disengaged -&gt; Average</code> (z = -1.736), are the moves that
+occur at chance.</p>
+<p><code>which</code> changes the quantity in the cells:
+<code>"prob"</code> for transition probabilities, <code>"count"</code>
+for observed counts, <code>"expected"</code> for the counts expected
+under independence. The probability heatmap uses a sequential scale
+fixed from 0 to 1, and the bold cell of each row is its most likely next
+state.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, which <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/heatmap-prob-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>Every state’s most likely next state is itself. The probability view
+also shows what the residual view hides: a disengaged student moves to
+<code>Average</code> with probability 0.397, nearly as often as staying
+disengaged (0.483), even though that move is no more frequent than
+chance predicts.</p>
 </div>
 <div class="section level2">
 <h2 id="residual-network">Residual network<a class="anchor" aria-label="anchor" href="#residual-network"></a>
 </h2>
-<p>The same residuals as a directed graph: <strong>blue</strong> edges
-(solid) are over-represented, <strong>red</strong> edges (dashed, with a
-soft halo) are avoided.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/net-residual-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level2">
-<h2 id="transition-network-a-tna-model">Transition network (a TNA model)<a class="anchor" aria-label="anchor" href="#transition-network-a-tna-model"></a>
-</h2>
-<p>Weight the edges by probability and the view becomes the familiar
-transition network, drawn in the Transition Network Analysis (TNA) style
-by <code><a href="https://sonsoles.me/cograph/reference/splot.html" class="external-link">cograph::splot()</a></code>: coloured nodes, a per-node
-initial-probability ring, and weighted directed edges. This shows what
-happens, where the residual network shows what is surprising.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span>, weights <span class="op">=</span> <span class="st">"tna"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/net-transition-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
-</div>
-<div class="section level2">
-<h2 id="chord-and-sunburst">Chord and sunburst<a class="anchor" aria-label="anchor" href="#chord-and-sunburst"></a>
-</h2>
-<p>A chord diagram of the transition flow, and a polar sunburst of each
-state’s outgoing distribution.</p>
+<p>A residual network draws each transition as a directed edge whose
+width is the size of the adjusted residual, labelled with its value. It
+follows the colour convention of transition network analysis, which is
+the reverse of the heatmap: blue edges are over-represented, red edges
+are avoided.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"chord"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/chord-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/net-residual-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The blue self-loops carry the persistence, and the red edges between
+<code>Active</code> and the other two states carry the avoidance:
+students rarely move out of <code>Active</code>, and rarely move into
+it. The faint edges between <code>Average</code> and
+<code>Disengaged</code> are the two moves at chance.</p>
+<p>With more states the network fills up: the nine-state regulation
+process has 72 significant residuals out of 81.
+<code>significant = TRUE</code> keeps only the significant edges, and
+<code>top</code> keeps the strongest ones by absolute residual.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"sunburst"</span><span class="op">)</span>                 <span class="co"># rose (default)</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/sunburst-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">fit_regulation</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/transitions.html">transitions</a></span><span class="op">(</span><span class="va">fit_regulation</span>, sort <span class="op">=</span> <span class="st">"strength"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        from        to lag count expected   prob prob_col adj_res         p yules_q  kappa</span></span>
+<span><span class="co">#&gt; 1   emotion  cohesion   1   923    190.9 0.3253   0.5373    58.2  0.00e+00   0.860  0.439</span></span>
+<span><span class="co">#&gt; 2   discuss synthesis   1   557    106.8 0.1410   0.8072    48.0  0.00e+00   0.927  0.721</span></span>
+<span><span class="co">#&gt; 3 synthesis     adapt   1   153     13.6 0.2347   0.2881    38.8  0.00e+00   0.904  0.256</span></span>
+<span><span class="co">#&gt; 4   discuss      plan   1    46    961.6 0.0116   0.0074   -36.9 2.20e-298  -0.943 -0.955</span></span>
+<span><span class="co">#&gt; 5 consensus consensus   1   519   1578.7 0.0820   0.0815   -35.5 5.32e-276  -0.661 -0.691</span></span>
+<span><span class="co">#&gt;   kappa_z   kappa_p    lift  sign significant</span></span>
+<span><span class="co">#&gt; 1    55.0  0.00e+00  4.8353  over        TRUE</span></span>
+<span><span class="co">#&gt; 2    46.1  0.00e+00  5.2168  over        TRUE</span></span>
+<span><span class="co">#&gt; 3    37.0 2.44e-299 11.2837  over        TRUE</span></span>
+<span><span class="co">#&gt; 4   -38.2 2.88e-319  0.0478 under        TRUE</span></span>
+<span><span class="co">#&gt; 5   -37.6 7.65e-309  0.3287 under        TRUE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit_regulation</span>, type <span class="op">=</span> <span class="st">"network"</span>, top <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/net-residual-large-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The fifteen strongest edges trace the main route through the process,
+<code>emotion -&gt; cohesion</code> (z = 58.2) and
+<code>discuss -&gt; synthesis -&gt; adapt</code> (z = 48.0 and 38.8),
+and the strongest avoidances, <code>discuss -&gt; plan</code> (z =
+-36.9) and the repetition of <code>consensus</code> (z = -35.5).</p>
+</div>
+<div class="section level2">
+<h2 id="transition-network">Transition network<a class="anchor" aria-label="anchor" href="#transition-network"></a>
+</h2>
+<p>With <code>weights = "tna"</code> the edges carry transition
+probabilities and the display becomes the transition network of
+transition network analysis, drawn by <code><a href="https://sonsoles.me/cograph/reference/splot.html" class="external-link">cograph::splot()</a></code>:
+coloured nodes, a ring on each node for its initial probability, and
+edges weighted by the probability of the move.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"sunburst"</span>, style <span class="op">=</span> <span class="st">"wedge"</span><span class="op">)</span>  <span class="co"># frequency wedges</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/sunburst-2.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span>, weights <span class="op">=</span> <span class="st">"tna"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/net-transition-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The self-loops are the heaviest edges (probabilities 0.698, 0.610,
+and 0.483), and the edge from <code>Disengaged</code> to
+<code>Average</code> (0.397) is heavier than any other move between
+states. The transition network shows how often each move happens; it
+does not show whether that is more or less often than chance, which is
+the question the residual network answers.</p>
 </div>
 <div class="section level2">
-<h2 id="uncertainty-forests">Uncertainty forests<a class="anchor" aria-label="anchor" href="#uncertainty-forests"></a>
+<h2 id="chord-diagram">Chord diagram<a class="anchor" aria-label="anchor" href="#chord-diagram"></a>
 </h2>
-<p>A fitted edge is one estimate; the forest shows its interval. Both
-the resampling bootstrap and the analytic certainty plot as a circular
-forest of per-edge intervals.</p>
+<p>A chord diagram places the states on a circle and draws each
+transition as a ribbon whose width is its count; the ribbon colour is
+the adjusted residual, warm for over-represented and cool for avoided
+transitions, as in the heatmap. <code>width = "prob"</code> sizes
+ribbons by probability instead.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">200</span><span class="op">)</span><span class="op">)</span>            <span class="co"># resampling CIs</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/forest-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/certainty_lsa.html">certainty_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span>                     <span class="co"># analytic credible intervals</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/forest-2.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"chord"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/chord-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The warm self-transition ribbons of <code>Active</code> and
+<code>Average</code> take most of the circle, and the thin cool ribbons
+connect <code>Active</code> with the other two states. The chord diagram
+shows the volume of each transition and its sign at once; it does not
+label values, so it complements a heatmap rather than replacing it.</p>
 </div>
 <div class="section level2">
-<h2 id="group-comparison">Group comparison<a class="anchor" aria-label="anchor" href="#group-comparison"></a>
+<h2 id="sunburst">Sunburst<a class="anchor" aria-label="anchor" href="#sunburst"></a>
 </h2>
-<p>For a real grouping we use the bundled long event log
-<code>group_regulation_long</code>, and fit one model per achievement
-group.</p>
+<p>A sunburst draws each source state as a sector of a polar plot and
+divides it among the next states. The default rose style gives every
+cell the same angle and sets the bar height by count; the wedge style
+sets the angle by frequency. The fill is the adjusted residual on the
+heatmap scale.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"sunburst"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/sunburst-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gfit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation_long</span>, actor <span class="op">=</span> <span class="st">"Actor"</span>,</span>
-<span>            action <span class="op">=</span> <span class="st">"Action"</span>, time <span class="op">=</span> <span class="st">"Time"</span>, group <span class="op">=</span> <span class="st">"Achiever"</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> on a comparison draws a back-to-back
-<strong>barrel</strong>: each group’s bar runs to one side, the higher
-group’s bar is bordered (darker for a larger difference), and the centre
-chip carries the difference p-value.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"sunburst"</span>, style <span class="op">=</span> <span class="st">"wedge"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/sunburst-2.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The inner ring holds the three source states and the outer ring their
+next states. In the wedge style the large warm wedge of
+<code>Active -&gt; Active</code> shows that most of the flow out of
+<code>Active</code> returns to it; the narrow cool wedges beside it are
+the avoided exits.</p>
+</div>
+<div class="section level2">
+<h2 id="forest-plots-of-edge-uncertainty">Forest plots of edge uncertainty<a class="anchor" aria-label="anchor" href="#forest-plots-of-edge-uncertainty"></a>
+</h2>
+<p>A fitted residual is one estimate. A forest plot shows its interval:
+one row per edge, ordered by the observed residual, with non-significant
+edges in grey. The forest is circular: each spoke is an edge, the square
+is the estimate, the bar is the 95% interval, and the dashed ring marks
+zero. The bootstrap resamples whole sequences; the seed makes the
+resamples reproducible.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span>, R <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span>                                    <span class="co"># frequency-ranked rows</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/barrel-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">boot</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">boot</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/forest-boot-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The seven significant residuals have intervals well clear of the
+dashed ring, red outside it and blue inside, and the two moves at chance
+(<code>Disengaged -&gt; Average</code>,
+<code>Average -&gt; Disengaged</code>) sit on the ring in grey. None of
+the conclusions drawn from the heatmap changes under resampling.</p>
+</div>
+<div class="section level2">
+<h2 id="barrel-plots-of-a-group-comparison">Barrel plots of a group comparison<a class="anchor" aria-label="anchor" href="#barrel-plots-of-a-group-comparison"></a>
+</h2>
+<p>A comparison needs a grouped fit. <code>group = "Achiever"</code>
+fits one model for the high and one for the low achievers.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span>, rank <span class="op">=</span> <span class="st">"effect"</span><span class="op">)</span>                   <span class="co"># surface avoided (red) edges</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/barrel-2.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="va">gfit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lsa.html">lsa</a></span><span class="op">(</span><span class="va">group_regulation_long</span>, actor <span class="op">=</span> <span class="st">"Actor"</span>, action <span class="op">=</span> <span class="st">"Action"</span>,</span>
+<span>            time <span class="op">=</span> <span class="st">"Time"</span>, group <span class="op">=</span> <span class="st">"Achiever"</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/compare_lsa.html">compare_lsa()</a></code> tests every edge by permuting group labels
+across sequences. The p-values are Benjamini-Hochberg adjusted
+(<code>adjust = "BH"</code>), and the plot reports the adjusted values.
+A barrel plot sets the two groups back to back: the first group’s
+transition probability runs to the left and the second group’s to the
+right, the bar labels give the counts, the fill gives the log odds
+ratio, the group with the higher value is outlined (darker for a larger
+difference), and the centre chip carries the p-value of the difference,
+starred when significant.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span>, style <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span>                 <span class="co"># full-grid difference</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/barrel-3.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
-<p>The Bayesian comparison reuses the same barrel, with the credible
-posterior in place of the permutation p-value.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">cmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span>, R <span class="op">=</span> <span class="fl">1000</span>, adjust <span class="op">=</span> <span class="st">"BH"</span><span class="op">)</span></span>
+<span><span class="va">cmp</span></span>
+<span><span class="co">#&gt; &lt;lsa_comparison&gt;</span></span>
+<span><span class="co">#&gt;   groups:   High vs Low</span></span>
+<span><span class="co">#&gt;   measure:  log_or difference (High - Low)</span></span>
+<span><span class="co">#&gt;   R:        1000 label permutations</span></span>
+<span><span class="co">#&gt;   edges:    39 significant of 78 tested (adjust = BH)</span></span>
+<span><span class="co">#&gt;   omnibus:  statistic = 79.48, p = 0.000999</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/barrel-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>Of the 78 edges tested, 39 differ after the correction, and the plot
+shows seven of them among the twelve most frequent transitions. The high
+achievers outweigh the low achievers on
+<code>discuss -&gt; consensus</code> (851 against 418 observations) and
+<code>consensus -&gt; discuss</code> (789 against 401); the low
+achievers outweigh them on <code>discuss -&gt; synthesis</code> (344
+against 213).</p>
+<p>The default rows are the twelve most frequent transitions, the
+backbone of the process. <code>rank = "effect"</code> chooses the rows
+by the strength of the association in either group, which brings the
+avoided transitions into view.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/bayes-barrel-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span>, rank <span class="op">=</span> <span class="st">"effect"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/barrel-effect-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The effect ranking brings up rare transitions that both groups avoid,
+red bars of a handful of observations, and shows that several of them
+differ: <code>emotion -&gt; synthesis</code>,
+<code>plan -&gt; synthesis</code>,
+<code>cohesion -&gt; synthesis</code>, and
+<code>cohesion -&gt; adapt</code> occur almost only among the high
+achievers. Their counts are small, so these differences rest on few
+events.</p>
+<p><code>style = "heatmap"</code> draws the difference for every cell of
+the table at once.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cmp</span>, style <span class="op">=</span> <span class="st">"heatmap"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/compare-heatmap-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>Blue cells are higher among the high achievers, red cells among the
+low achievers, and significant cells are bold. The column of transitions
+into <code>synthesis</code> and the column into <code>adapt</code> hold
+the largest differences, with <code>cohesion -&gt; adapt</code> the
+largest of all.</p>
+<p>The Bayesian comparison uses the same barrel. Its centre chip carries
+a two-sided Bayesian p-value from the Dirichlet-multinomial posterior of
+the difference in place of the permutation p-value, again
+Benjamini-Hochberg adjusted.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bcmp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span>, adjust <span class="op">=</span> <span class="st">"BH"</span>, seed <span class="op">=</span> <span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">bcmp</span></span>
+<span><span class="co">#&gt; &lt;lsa_bayes&gt;  (Bayesian Dirichlet-Multinomial comparison)</span></span>
+<span><span class="co">#&gt;   groups:    High vs Low</span></span>
+<span><span class="co">#&gt;   prior:     Dirichlet(0.50)  |  draws: 10000  |  CI: 95%</span></span>
+<span><span class="co">#&gt;   edges:     38 credibly different of 81 compared</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bcmp</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/barrel-bayes-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The Bayesian comparison finds 38 credibly different edges of the 81
+compared, close to the 39 of the permutation test. Among the twelve
+frequent transitions it marks nine as different, against seven in the
+permutation barrel. The two tests answer different questions: the
+Bayesian comparison tests the transition probabilities, the permutation
+test the log odds ratios. <code>consensus -&gt; plan</code> differs in
+probability between the groups but not in its association, and the
+barrels show both answers side by side.</p>
 </div>
 <div class="section level2">
 <h2 id="grouped-fits">Grouped fits<a class="anchor" aria-label="anchor" href="#grouped-fits"></a>
 </h2>
-<p>Every <code>type</code> works on a grouped fit, drawing one figure
-per group (<code>combined = FALSE</code>, the default) or a single tiled
-figure (<code>combined = TRUE</code>).</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span>                                   <span class="co"># one heatmap per group</span></span></code></pre></div>
-<p><img src="plotting_files/figure-html/grouped-1.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"><img src="plotting_files/figure-html/grouped-2.png" class="r-plt" alt="" width="100%" style="display: block; margin: auto;"></p>
+<p>Every <code>type</code> works on a grouped fit. By default each group
+is drawn as its own full-size figure, titled with the group name.</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/grouped-heatmap-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"><img src="plotting_files/figure-html/grouped-heatmap-2.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>Each heatmap orders its rows by the group’s own outgoing volume, so
+the row order differs between the groups; compare cells by their labels.
+Grey cells are transitions that never occur in that group. The strongest
+cell in both groups is <code>emotion -&gt; cohesion</code>.</p>
+<p><code>combined = TRUE</code> tiles the groups into one figure, which
+suits the networks.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gfit</span>, type <span class="op">=</span> <span class="st">"network"</span>, top <span class="op">=</span> <span class="fl">12</span>, combined <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/grouped-network-1.png" class="r-plt" alt="" width="864" style="display: block; margin: auto;"></p>
+<p>Drawn with the same layout, the two residual networks share
+<code>emotion -&gt; cohesion</code>, the route
+<code>discuss -&gt; synthesis -&gt; adapt</code>, and the avoided
+repetition of <code>consensus</code>. Only the low achievers’ twelve
+strongest edges include <code>discuss -&gt; adapt</code> and
+<code>adapt -&gt; cohesion</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="the-worker-functions">The worker functions<a class="anchor" aria-label="anchor" href="#the-worker-functions"></a>
 </h2>
-<p><code>plot(fit, type = )</code> is a front door over exported
-workers, each with its own full argument list:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_transitions.html">plot_transitions</a></span><span class="op">(</span><span class="va">fit</span>, weights <span class="op">=</span> <span class="st">"residuals"</span>, significant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># network</span></span>
-<span><span class="fu"><a href="../reference/plot_chords.html">plot_chords</a></span><span class="op">(</span><span class="va">fit</span>, width <span class="op">=</span> <span class="st">"prob"</span><span class="op">)</span>                                  <span class="co"># chord</span></span>
-<span><span class="fu"><a href="../reference/plot_polar.html">plot_polar</a></span><span class="op">(</span><span class="va">fit</span>, style <span class="op">=</span> <span class="st">"wedge"</span><span class="op">)</span>                                  <span class="co"># sunburst</span></span>
-<span><span class="fu"><a href="../reference/plot_forest.html">plot_forest</a></span><span class="op">(</span><span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>, n_top <span class="op">=</span> <span class="fl">12</span><span class="op">)</span>                       <span class="co"># forest</span></span></code></pre></div>
+<p><code>plot(fit, type = )</code> passes its extra arguments to one
+worker per display, and each worker documents the full set of options:
+<code><a href="../reference/plot_transitions.html">plot_transitions()</a></code> for the networks,
+<code><a href="../reference/plot_chords.html">plot_chords()</a></code> for the chord diagram,
+<code><a href="../reference/plot_polar.html">plot_polar()</a></code> for the sunburst, and
+<code><a href="../reference/plot_forest.html">plot_forest()</a></code> for the forest plots. Calling a worker
+directly is equivalent. For example, the forest plot of Yule’s Q for the
+five strongest edges:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_forest.html">plot_forest</a></span><span class="op">(</span><span class="va">boot</span>, metric <span class="op">=</span> <span class="st">"yules_q"</span>, n_top <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></code></pre></div>
+<p><img src="plotting_files/figure-html/worker-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
+<p>The five edges with the largest absolute Yule’s Q are the three
+self-transitions and two avoided moves into and out of
+<code>Active</code>; every interval lies clear of zero, so the strength
+of these associations holds across resamples as well as their sign.</p>
 </div>
 <div class="section level2">
-<h2 id="in-short">In short<a class="anchor" aria-label="anchor" href="#in-short"></a>
+<h2 id="when-to-use-which">When to use which<a class="anchor" aria-label="anchor" href="#when-to-use-which"></a>
 </h2>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span>                                   <span class="co"># residual heatmap (default)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span><span class="op">)</span>                 <span class="co"># residual network (blue = more)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"network"</span>, weights <span class="op">=</span> <span class="st">"tna"</span><span class="op">)</span>   <span class="co"># transition network (a TNA model)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"chord"</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span>, type <span class="op">=</span> <span class="st">"sunburst"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/bootstrap_lsa.html">bootstrap_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/certainty_lsa.html">certainty_lsa</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span>   <span class="co"># uncertainty forests</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/compare_lsa.html">compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span><span class="op">)</span>  <span class="co"># group barrels</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gfit</span><span class="op">)</span>                                  <span class="co"># grouped: one panel per group</span></span></code></pre></div>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>Question</th>
+<th>Display</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Which transitions are favoured or avoided?</td>
+<td>Residual heatmap</td>
+</tr>
+<tr class="even">
+<td>Which paths through the process are favoured?</td>
+<td>Residual network, <code>significant = TRUE</code> or
+<code>top =</code> with many states</td>
+</tr>
+<tr class="odd">
+<td>Where does the process tend to go next?</td>
+<td>Transition network (<code>weights = "tna"</code>)</td>
+</tr>
+<tr class="even">
+<td>How is each state’s outgoing flow divided?</td>
+<td>Chord diagram, sunburst</td>
+</tr>
+<tr class="odd">
+<td>How precise is each edge?</td>
+<td>Forest plot of the bootstrap result</td>
+</tr>
+<tr class="even">
+<td>Which transitions differ between two groups?</td>
+<td>Barrel plot; <code>rank = "effect"</code> for avoided
+transitions</td>
+</tr>
+<tr class="odd">
+<td>What does each group look like?</td>
+<td>
+<code>plot(gfit)</code>, or <code>combined = TRUE</code> for one
+figure</td>
+</tr>
+</tbody>
+</table>
+<p>The residual displays carry the lag sequential claim, which
+transitions depart from chance. The probability displays describe the
+process without a reference to chance. A report that shows a transition
+network should say so, since a heavy edge there can be a transition that
+occurs no more often than chance predicts.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

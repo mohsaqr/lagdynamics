@@ -1,6 +1,13 @@
-# List All Registered LSA Engines
+# List the registered engines
 
-List All Registered LSA Engines
+`list_lsa_engines()` lists the engines available in the session, the
+five built-in ones and any added with
+[`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
+with a one-line description of each. Each engine of
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+implements one test of the transition table. Use the list to choose the
+`engine` argument of
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md).
 
 ## Usage
 
@@ -10,12 +17,13 @@ list_lsa_engines()
 
 ## Value
 
-A `data.frame`, one row per registered engine, with columns `name`,
-`description`, and `requires` (comma-separated package names, `""` when
-none).
+A `data.frame` with one row per registered engine, in alphabetical
+order, and the columns `name`, `description` and `requires`
+(comma-separated package names, `""` when none).
 
 ## See also
 
+[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md),
 [`register_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/register_lsa_engine.md),
 [`get_lsa_engine()`](https://pak.dynasite.org/lagdynamics/reference/get_lsa_engine.md)
 

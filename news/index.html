@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.33</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.34.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -15,16 +15,28 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/lagdynamics.html">Get started</a></li>
-<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+      <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/intro.html">Introduction</a></li>
-    <li><a class="dropdown-item" href="../articles/interop.html">Interoperability: wide data, long logs, tna, and Nestimate</a></li>
-    <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow: from sequences to a group comparison</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Vignettes</h6></li>
+    <li><a class="dropdown-item" href="../articles/lsa.html">Lag sequential analysis</a></li>
     <li><a class="dropdown-item" href="../articles/lag-transition-networks.html">Lag transition networks</a></li>
-    <li><a class="dropdown-item" href="../articles/confirmatory.html">Confirmatory testing: matching claims to evidence</a></li>
-    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag-sequential models</a></li>
+    <li><a class="dropdown-item" href="../articles/confirmatory.html">Evaluating transitions</a></li>
+    <li><a class="dropdown-item" href="../articles/group-comparison.html">Comparing groups</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Guides</h6></li>
+    <li><a class="dropdown-item" href="../articles/workflow.html">A complete workflow</a></li>
+    <li><a class="dropdown-item" href="../articles/event-logs.html">Event logs and interoperability</a></li>
+    <li><a class="dropdown-item" href="../articles/engines.html">Engines: classical, two-cell, bidirectional and dominance tests</a></li>
+    <li><a class="dropdown-item" href="../articles/lags-structural-zeros.html">Lags and structural zeros</a></li>
+    <li><a class="dropdown-item" href="../articles/plotting.html">Plotting lag sequential models</a></li>
+    <li><a class="dropdown-item" href="../articles/transfer-entropy.html">Transfer entropy between states</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Case studies</h6></li>
+    <li><a class="dropdown-item" href="../articles/case-engagement.html">Case study: the dynamics of course engagement</a></li>
+    <li><a class="dropdown-item" href="../articles/case-group-regulation.html">Case study: regulation in high and low achieving groups</a></li>
+    <li><a class="dropdown-item" href="../articles/case-ai.html">Case study: AI behaviour in vibe-coding sessions</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -43,15 +55,44 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.33" id="lagdynamics-033">lagdynamics 0.33<a class="anchor" aria-label="anchor" href="#lagdynamics-033"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.34.1" id="lagdynamics-0341">lagdynamics 0.34.1<a class="anchor" aria-label="anchor" href="#lagdynamics-0341"></a></h2>
+<p>This release collects all changes since the CRAN release 0.32 (including the unreleased 0.33).</p>
 <div class="section level3">
-<h3 id="documentation-0-33">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-33"></a></h3>
-<ul><li>Every exported S3 method now has a help page with a <code>Value</code> section: <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>, <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> and <code><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs()</a></code> for fits (new topic <code><a href="../reference/lsa-methods.html">?"lsa-methods"</a></code>), and the <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> / <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> methods of every inference, comparison, lag and data object, each documented on its constructor’s page.</li>
+<h3 id="changes-to-results-0-34-1">Changes to results<a class="anchor" aria-label="anchor" href="#changes-to-results-0-34-1"></a></h3>
+<ul><li>
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> on a fit now returns a <code>summary.lsa</code> object instead of printing the fit and its matrices. The object holds two tidy tables, a one-row overview and a per-state activity table; it prints when shown, and <code>as.data.frame(summary(fit), what = "nodes")</code> returns either table. Grouped fits are unchanged (one row per group).</li>
 <li>
-<code><a href="../reference/lsa.html">?lsa</a></code> documents the engine wrappers (<code><a href="../reference/lsa.html">lsa_classical()</a></code> and siblings), adds method references, and warns that combining <code>actor</code> and <code>session</code> overflows R’s integer range once distinct actors x distinct sessions exceeds about 2.1e9, silently dropping sequences; the fix (pass a globally unique session id as <code>actor</code>) is given there and in the interoperability vignette.</li>
-<li>Examples read results with <code><a href="../reference/transitions.html">transitions()</a></code>, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> and the print methods instead of reaching into objects with <code>$</code>, and group examples use the recorded <code>Achiever</code> column of <code>group_regulation_long</code> instead of a derived grouping vector. Resampling examples now run a small unwrapped version before the <code>\donttest{}</code> full-size call.</li>
-<li>Corrected return-value descriptions: the column names of <code><a href="../reference/bootstrap_lsa.html">bootstrap_lsa()</a></code> edges, the conditional columns of <code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code>, the engine-function contract of <code><a href="../reference/register_lsa_engine.html">register_lsa_engine()</a></code>, and the size of the <code>engagement</code> data (136 non-empty sequences). Details that were attached to the wrong roxygen tag (<code><a href="../reference/permute_lsa.html">permute_lsa()</a></code>, <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code>, <code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code>) now sit in Details.</li>
-<li>README: CRAN install line, a bundled-data example, and the missing <code>intro</code> vignette. Vignettes gain interpretation of the printed results in the quick start, the permutation-null section of the confirmatory vignette and the comparison step of the workflow, and correct several stale statements (engine count, <code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code> returns a matrix, state capitalization, time-gap splitting of long logs).</li>
+<code><a href="../reference/transition_probabilities.html">transition_probabilities()</a></code> now returns a tidy data frame with columns <code>from</code>, <code>to</code> and <code>prob</code> (one row per pair of states; grouped fits gain a leading <code>group</code> column) instead of a matrix or a list of matrices.</li>
+<li>
+<code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> on <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code> and <code><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code> results gains <code>what = "global"</code> for the omnibus test, and on <code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code> results <code>what = "summary"</code> for a one-row summary of the replicates.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="reliability-and-stability-0-34-1">Reliability and stability<a class="anchor" aria-label="anchor" href="#reliability-and-stability-0-34-1"></a></h3>
+<ul><li>
+<code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code> and <code><a href="../reference/stability_lsa.html">stability_lsa()</a></code> now treat only the documented degenerate case (a resample with no transitions) as a failed replicate; any other error is reported to the caller. The number of failed replicates is stored in the result (<code>n_failed</code>) and shown by <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="errors-and-output-0-34-1">Errors and output<a class="anchor" aria-label="anchor" href="#errors-and-output-0-34-1"></a></h3>
+<ul><li>User-facing errors are classed conditions: <code>lagdynamics_bad_input</code>, <code>lagdynamics_needs_events</code>, <code>lagdynamics_no_transitions</code>, <code>lagdynamics_unknown_engine</code>, <code>lagdynamics_unsupported_option</code>, <code>lagdynamics_incompatible_fits</code>, <code>lagdynamics_missing_package</code> and <code>lagdynamics_ipf_infeasible</code>, each also of class <code>lagdynamics_error</code>. Argument checks state the expected value in their message.</li>
+<li>Console output and plot subtitles use ASCII replacements for the block glyph, the superscript in G^2 and the middle dot when the session is not UTF-8.</li>
+<li>
+<code>transfer_entropy(seed = )</code> and <code>bayes_compare_lsa(seed = )</code> restore the caller’s random number stream on exit.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-34-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-34-1"></a></h3>
+<ul><li>New documentation structure. Vignettes: lag sequential analysis, lag transition networks, evaluating transitions and comparing groups. Guides (on the package website): a complete workflow, event logs and interoperability, engines, lags and structural zeros, plotting, and transfer entropy. Case studies: course engagement, regulation in high and low achieving groups, and AI behaviour in programming sessions.</li>
+<li>Help pages rewritten: each describes what the method or display represents, what the function estimates, and which related function to use instead, and documents the structure of its return value and the conditions it raises. Every exported S3 method has a help page with a <code>Value</code> section.</li>
+<li>The engine-registration example defines a complete engine instead of calling a registered engine’s internals.</li>
+<li>README is generated from <code>README.Rmd</code>, so its numbers come from the rendered output.</li>
+<li>
+<code><a href="../reference/lsa.html">?lsa</a></code> documents the engine wrappers (<code><a href="../reference/lsa.html">lsa_classical()</a></code> and siblings) on a topic named <code>lsa</code>, and warns that combining <code>actor</code> and <code>session</code> overflows R’s integer range once distinct actors x distinct sessions exceeds about 2.1e9; the fix (pass a globally unique session id as <code>actor</code>) is given there and in the event-log guide.</li>
+<li>Corrected return-value descriptions: the column names of <code><a href="../reference/bootstrap_lsa.html">bootstrap_lsa()</a></code> edges, the conditional columns of <code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code>, the engine-function contract of <code><a href="../reference/register_lsa_engine.html">register_lsa_engine()</a></code>, and the size of the <code>engagement</code> data (136 non-empty sequences).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="package-0-34-1">Package<a class="anchor" aria-label="anchor" href="#package-0-34-1"></a></h3>
+<ul><li>
+<code>graphics</code> and <code>parallel</code> are declared in Imports.</li>
+<li>Authors carry ORCID identifiers; the documentation website is listed in <code>URL</code>.</li>
 </ul></div>
 </div>
     <div class="section level2">
