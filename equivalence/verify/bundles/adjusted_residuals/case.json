@@ -1,0 +1,522 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Expected counts, adjusted residuals and their p-values",
+  "description": "For the lag-1 table of the engagement sequences: the count expected under independence, the adjusted (standardised) residual of Haberman (1973) and its two-sided normal p-value. lsa() against stats::chisq.test()$expected and $stdres on the same table, and against the formulas written out.",
+  "covers": [
+    "lsa()",
+    "transitions()",
+    "lsa_classical()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "stats",
+      "name": "stats::chisq.test()",
+      "version": "4.6.2",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "base",
+      "name": "Base R, from the definition",
+      "version": "4.6.2",
+      "authority": "independent",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 309,
+          "sha256": "0fb4bcee62652922a661a6de541acc7f35d59455357fcff4b6873394e2621249",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "stats",
+          "path": "stats/script.R",
+          "bytes": 834,
+          "sha256": "66a70f9bcb310628d96677db6a44af8b4f8e908cb4909b8211287df5fc7b48f3",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "base",
+          "path": "base/script.R",
+          "bytes": 1102,
+          "sha256": "aca85958a444cd048d45173f00231329c1c84d970af56b8abccc9e765c83072d",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 934,
+          "sha256": "db7916e8a75800562cd1b69214cb7ebb5b467ccfce56fceff43460cdba945d42",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "stats",
+          "path": "stats/console.txt",
+          "bytes": 1774,
+          "sha256": "76d0ef0b217b5b4b6a688ca8646727f540f53bfc86b002a5023c1e6abc49ae09",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "base",
+          "path": "base/console.txt",
+          "bytes": 1964,
+          "sha256": "d0d73699dbacaaa767088865736ff75342dc4a0794a36013a85ab44186d94a31",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/engagement.csv",
+          "bytes": 19325,
+          "sha256": "a98a2f13d88d174952ec7720c5b1ff439a53f0db5d32211eaaab6248e871dc02",
+          "label": "Engagement sequences"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "expected: Active -> Active",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 247.034602076125,
+        "stats": 247.034602076125,
+        "base": 247.034602076125
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Average -> Active",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 281.949826989619,
+        "stats": 281.949826989619,
+        "base": 281.949826989619
+      },
+      "difference": 2.01608277145355e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Disengaged -> Active",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 122.015570934256,
+        "stats": 122.015570934256,
+        "base": 122.015570934256
+      },
+      "difference": 1.1646755087397e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Active -> Average",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 289.535178777393,
+        "stats": 289.535178777393,
+        "base": 289.535178777393
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Average -> Average",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 330.457324106113,
+        "stats": 330.457324106113,
+        "base": 330.457324106113
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Disengaged -> Average",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 143.007497116494,
+        "stats": 143.007497116494,
+        "base": 143.007497116494
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Active -> Disengaged",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 121.430219146482,
+        "stats": 121.430219146482,
+        "base": 121.430219146482
+      },
+      "difference": 1.17028980224925e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Average -> Disengaged",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 138.592848904268,
+        "stats": 138.592848904268,
+        "base": 138.592848904268
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: Disengaged -> Disengaged",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 59.9769319492503,
+        "stats": 59.9769319492503,
+        "base": 59.9769319492503
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Active -> Active",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 21.6628107367345,
+        "stats": 21.6628107367345,
+        "base": 21.6628107367345
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Average -> Active",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -12.9060384157642,
+        "stats": -12.9060384157642,
+        "base": -12.9060384157642
+      },
+      "difference": 4.12912959540823e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Disengaged -> Active",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -10.5494859763148,
+        "stats": -10.5494859763148,
+        "base": -10.5494859763148
+      },
+      "difference": 3.36766519883233e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Active -> Average",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -11.3191319194428,
+        "stats": -11.3191319194428,
+        "base": -11.3191319194428
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Average -> Average",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 12.4526147601505,
+        "stats": 12.4526147601505,
+        "base": 12.4526147601505
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Disengaged -> Average",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -1.73646134682488,
+        "stats": -1.73646134682488,
+        "base": -1.73646134682488
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Active -> Disengaged",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -12.556925435669,
+        "stats": -12.556925435669,
+        "base": -12.556925435669
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Average -> Disengaged",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 0.175799627938638,
+        "stats": 0.175799627938638,
+        "base": 0.175799627938638
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: Disengaged -> Disengaged",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 15.3904660948493,
+        "stats": 15.3904660948493,
+        "base": 15.3904660948493
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Active -> Active",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 4.60276454170295e-104,
+        "stats": 4.60276454170295e-104,
+        "base": 4.60276454170295e-104
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Average -> Active",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 4.16167237575096e-38,
+        "stats": 4.16167237575086e-38,
+        "base": 4.16167237575115e-38
+      },
+      "difference": 6.92407809384093e-14,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Disengaged -> Active",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 5.1075752208651e-26,
+        "stats": 5.10757522086491e-26,
+        "base": 5.1075752208651e-26
+      },
+      "difference": 3.79832850706205e-14,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Active -> Average",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 1.05511522298414e-29,
+        "stats": 1.05511522298414e-29,
+        "base": 1.05511522298414e-29
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Average -> Average",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 1.35337449875906e-35,
+        "stats": 1.35337449875906e-35,
+        "base": 1.35337449875906e-35
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Disengaged -> Average",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 0.0824822932105827,
+        "stats": 0.0824822932105827,
+        "base": 0.0824822932105827
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Active -> Disengaged",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 3.6421235198042e-36,
+        "stats": 3.6421235198042e-36,
+        "base": 3.6421235198042e-36
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Average -> Disengaged",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 0.860451361947022,
+        "stats": 0.860451361947022,
+        "base": 0.860451361947022
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: Disengaged -> Disengaged",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 1.89661155908492e-53,
+        "stats": 1.89661155908492e-53,
+        "base": 1.89661155908492e-53
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

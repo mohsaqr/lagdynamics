@@ -1,0 +1,58 @@
+
+> sequences <- read.csv("../data/engagement.csv", na.strings = "")
+
+> states <- sort(unique(na.omit(unlist(sequences))))
+
+> count_pairs <- function(lag) {
++   pairs <- do.call(rbind, lapply(seq_len(nrow(sequences)), function(row) {
++     events <- as.character(na.omit(unlist(sequences[row, ])))
++     data.frame(from = head(events, -lag), to = tail(events, -lag))
++   }))
++   table(from = factor(pairs$from, states), to = factor(pairs$to, states))
++ }
+
+> counts <- count_pairs(lag = 1)
+
+> counts
+            to
+from         Active Average Disengaged
+  Active        459     176         23
+  Average       153     458        140
+  Disengaged     39     129        157
+
+> cells <- as.data.frame(counts, responseName = "count")
+
+> transition <- paste(cells$from, "->", cells$to)
+
+> observed <- unclass(counts)
+
+> total <- sum(observed)
+
+> row_total <- rowSums(observed)[row(observed)]
+
+> column_total <- colSums(observed)[col(observed)]
+
+> # The 2 x 2 collapse of a cell: n_a = given then target, n_b = given then other,
+> # n_c = other then target, n_d = other then other. Q = (ad - bc) / (ad + bc).
+> n_a <- as.vector(observed)
+
+> n_b <- row_total - n_a
+
+> n_c <- column_total - n_a
+
+> n_d <- total - row_total - column_total + n_a
+
+> result <- data.frame(transition = transition, yules_q = (n_a * n_d - n_b * n_c) / (n_a * n_d + n_b * n_c),
++                      lift = n_a / (row_total * column_total / total), prob_col = n_a / column_total)
+
+> result
+                transition     yules_q      lift   prob_col
+1         Active -> Active  0.82787794 1.8580393 0.70506912
+2        Average -> Active -0.60105804 0.5426497 0.23502304
+3     Disengaged -> Active -0.69839167 0.3196313 0.05990783
+4        Active -> Average -0.53352593 0.6078709 0.23066841
+5       Average -> Average  0.55305097 1.3859581 0.60026212
+6    Disengaged -> Average -0.10831746 0.9020506 0.16906946
+7     Active -> Disengaged -0.82647982 0.1894092 0.07187500
+8    Average -> Disengaged  0.01097122 1.0101531 0.43750000
+9 Disengaged -> Disengaged  0.75441020 2.6176731 0.49062500

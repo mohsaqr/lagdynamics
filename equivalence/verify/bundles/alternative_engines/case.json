@@ -1,0 +1,932 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Two-cell, bidirectional and dominance engines",
+  "description": "The four non-classical engines on the 3 x 3 table of the package's engine tests. Two-cell: odds ratio, log odds ratio, its Wald standard error and z of each cell's 2 x 2 collapse (Bakeman and Gottman 1997). Bidirectional: Haberman residuals of the symmetrised table O + t(O), by stats::chisq.test(). Parallel dominance: (O - t(O)) / sqrt(E + t(E)). Non-parallel dominance: (O - t(O)) / sqrt(O + t(O)).",
+  "covers": [
+    "lsa()",
+    "lsa_two_cell()",
+    "lsa_bidirectional()",
+    "lsa_parallel_dominance()",
+    "lsa_nonparallel_dominance()",
+    "transitions()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "stats",
+      "name": "Base R and stats::chisq.test()",
+      "version": "4.6.2",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 1045,
+          "sha256": "8e21a78cc04c1051398738580d357ca0a1f97d1a302d06a71d12af0dd1a8b846",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/three-codes.tsv"
+            ]
+          }
+        },
+        {
+          "side": "stats",
+          "path": "stats/script.R",
+          "bytes": 1230,
+          "sha256": "1de964cbf38af383f36ee9bf236b576be726fa9bdf76485b2432007353033900",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/three-codes.tsv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 2251,
+          "sha256": "f6c4d9528e8e38a784fa3f4ebe31cca046cef9e79e75d5451d4eb91771d099b4",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "stats",
+          "path": "stats/console.txt",
+          "bytes": 2533,
+          "sha256": "24ff6615f558aa8b6c351e1b367acbd1fd9945561da337987f5e760c32a3eb4b",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/three-codes.tsv",
+          "bytes": 34,
+          "sha256": "54a89201da71af372c375d94699ede17ba358987580bc770bc92b03a0f9be1ba",
+          "label": "3 x 3 transition table"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "odds_ratio: x -> x",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 6.32967032967033,
+        "stats": 6.32967032967033
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: x -> y",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 0.705882352941177,
+        "stats": 0.705882352941177
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: x -> z",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 0.278846153846154,
+        "stats": 0.278846153846154
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: y -> x",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 0.507936507936508,
+        "stats": 0.507936507936508
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: y -> y",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 4,
+        "stats": 4
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: y -> z",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 0.378947368421053,
+        "stats": 0.378947368421053
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: z -> x",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 0.236111111111111,
+        "stats": 0.236111111111111
+      },
+      "difference": 2.77555756156289e-17,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: z -> y",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 0.357277882797732,
+        "stats": 0.357277882797732
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "odds_ratio: z -> z",
+      "kind": "odds_ratio",
+      "values": {
+        "lagdynamics": 7.09090909090909,
+        "stats": 7.09090909090909
+      },
+      "difference": 8.88178419700125e-16,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: x -> x",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": 1.84524815417904,
+        "stats": 1.84524815417904
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: x -> y",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": -0.348306694268216,
+        "stats": -0.348306694268216
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: x -> z",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": -1.2770950691549,
+        "stats": -1.2770950691549
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: y -> x",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": -0.677398823591806,
+        "stats": -0.677398823591806
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: y -> y",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": 1.38629436111989,
+        "stats": 1.38629436111989
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: y -> z",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": -0.970357953144431,
+        "stats": -0.970357953144431
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: z -> x",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": -1.44345277495984,
+        "stats": -1.44345277495984
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: z -> y",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": -1.02924141679866,
+        "stats": -1.02924141679866
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or: z -> z",
+      "kind": "log_or",
+      "values": {
+        "lagdynamics": 1.95881355389122,
+        "stats": 1.95881355389122
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: x -> x",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.5691633214174,
+        "stats": 0.5691633214174
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: x -> y",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.509491025602356,
+        "stats": 0.509491025602356
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: x -> z",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.568281881712085,
+        "stats": 0.568281881712085
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: y -> x",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.623927651483499,
+        "stats": 0.623927651483499
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: y -> y",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.508265022732564,
+        "stats": 0.508265022732564
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: y -> z",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.540954322422299,
+        "stats": 0.540954322422299
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: z -> x",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.679913329091475,
+        "stats": 0.679913329091475
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: z -> y",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.516575939851355,
+        "stats": 0.516575939851355
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "log_or_se: z -> z",
+      "kind": "log_or_se",
+      "values": {
+        "lagdynamics": 0.516284917995981,
+        "stats": 0.516284917995981
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: x -> x",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": 3.24203630969012,
+        "stats": 3.24203630969012
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: x -> y",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": -0.683636564268081,
+        "stats": -0.683636564268081
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: x -> z",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": -2.24729154712331,
+        "stats": -2.24729154712331
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: y -> x",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": -1.08570091737587,
+        "stats": -1.08570091737587
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: y -> y",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": 2.7275029740721,
+        "stats": 2.7275029740721
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: y -> z",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": -1.79378907409287,
+        "stats": -1.79378907409287
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: z -> x",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": -2.12299526012916,
+        "stats": -2.12299526012916
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: z -> y",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": -1.99243003283278,
+        "stats": -1.99243003283278
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "two_cell_z: z -> z",
+      "kind": "two_cell_z",
+      "values": {
+        "lagdynamics": 3.79405534737405,
+        "stats": 3.79405534737405
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: x -> x",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": 4.71863374996912,
+        "stats": 4.71863374996912
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: x -> y",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": -1.16492688551286,
+        "stats": -1.16492688551286
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: x -> z",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": -3.19881593985463,
+        "stats": -3.19881593985463
+      },
+      "difference": 4.44089209850063e-16,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: y -> x",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": -1.16492688551286,
+        "stats": -1.16492688551286
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: y -> y",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": 3.88782188522866,
+        "stats": 3.88782188522866
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: y -> z",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": -2.73093690880881,
+        "stats": -2.73093690880881
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: z -> x",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": -3.19881593985463,
+        "stats": -3.19881593985463
+      },
+      "difference": 4.44089209850063e-16,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: z -> y",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": -2.73093690880881,
+        "stats": -2.73093690880881
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "bidirectional_z: z -> z",
+      "kind": "bidirectional_z",
+      "values": {
+        "lagdynamics": 5.61135409941453,
+        "stats": 5.61135409941453
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: x -> x",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": 0,
+        "stats": 0
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: x -> y",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": 1.0222025039999,
+        "stats": 1.0222025039999
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: x -> z",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": 0.487768608679754,
+        "stats": 0.487768608679754
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: y -> x",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": -1.0222025039999,
+        "stats": -1.0222025039999
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: y -> y",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": 0,
+        "stats": 0
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: y -> z",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": -0.218543345883261,
+        "stats": -0.218543345883261
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: z -> x",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": -0.487768608679754,
+        "stats": -0.487768608679754
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: z -> y",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": 0.218543345883261,
+        "stats": 0.218543345883261
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "parallel_dominance_z: z -> z",
+      "kind": "parallel_dominance_z",
+      "values": {
+        "lagdynamics": 0,
+        "stats": 0
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: x -> x",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": 0,
+        "stats": 0
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: x -> y",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": 1.15470053837925,
+        "stats": 1.15470053837925
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: x -> z",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": 0.707106781186547,
+        "stats": 0.707106781186547
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: y -> x",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": -1.15470053837925,
+        "stats": -1.15470053837925
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: y -> y",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": 0,
+        "stats": 0
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: y -> z",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": -0.277350098112615,
+        "stats": -0.277350098112615
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: z -> x",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": -0.707106781186547,
+        "stats": -0.707106781186547
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: z -> y",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": 0.277350098112615,
+        "stats": 0.277350098112615
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "nonparallel_dominance_z: z -> z",
+      "kind": "nonparallel_dominance_z",
+      "values": {
+        "lagdynamics": 0,
+        "stats": 0
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

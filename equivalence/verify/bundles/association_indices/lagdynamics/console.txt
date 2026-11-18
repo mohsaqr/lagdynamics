@@ -1,0 +1,20 @@
+
+> sequences <- read.csv("../data/engagement.csv", na.strings = "")
+
+> fit <- lsa(sequences, lag = 1)
+
+> result <- transitions(fit) |>
++   transform(transition = paste(from, "->", to)) |>
++   subset(select = c(transition, yules_q, lift, prob_col))
+
+> result
+                transition     yules_q      lift   prob_col
+1         Active -> Active  0.82787794 1.8580393 0.70506912
+2        Average -> Active -0.60105804 0.5426497 0.23502304
+3     Disengaged -> Active -0.69839167 0.3196313 0.05990783
+4        Active -> Average -0.53352593 0.6078709 0.23066841
+5       Average -> Average  0.55305097 1.3859581 0.60026212
+6    Disengaged -> Average -0.10831746 0.9020506 0.16906946
+7     Active -> Disengaged -0.82647982 0.1894092 0.07187500
+8    Average -> Disengaged  0.01097122 1.0101531 0.43750000
+9 Disengaged -> Disengaged  0.75441020 2.6176731 0.49062500

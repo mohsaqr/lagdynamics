@@ -1,0 +1,37 @@
+
+> sequences <- read.csv("../data/engagement.csv", na.strings = "")
+
+> fit <- lsa(sequences, lag = 1)
+
+> fit
+Lag Sequential Analysis  -  classical  (lag 1, directed)
+  3 states | 1734 transitions | 1870 events | 136 sequences
+  states: Active, Average, Disengaged
+  independence: G² = 618.3, df = 4, p <2e-16
+
+  Significant transitions (p < 0.05): 7 of 9
+  strongest over-represented (of 3):
+    Active -> Active          z =  +21.7  ***
+    Disengaged -> Disengaged  z =  +15.4  ***
+    Average -> Average        z =  +12.5  ***
+
+  Initial states:
+    Active     0.382  ████████████████████████
+    Average    0.368  ███████████████████████
+    Disengaged 0.250  ████████████████
+
+> result <- transitions(fit) |>
++   transform(transition = paste(from, "->", to)) |>
++   subset(select = c(transition, count, prob))
+
+> result
+                transition count       prob
+1         Active -> Active   459 0.69756839
+2        Average -> Active   153 0.20372836
+3     Disengaged -> Active    39 0.12000000
+4        Active -> Average   176 0.26747720
+5       Average -> Average   458 0.60985353
+6    Disengaged -> Average   129 0.39692308
+7     Active -> Disengaged    23 0.03495441
+8    Average -> Disengaged   140 0.18641811
+9 Disengaged -> Disengaged   157 0.48307692

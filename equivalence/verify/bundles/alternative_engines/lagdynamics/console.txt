@@ -1,0 +1,42 @@
+
+> observed <- as.matrix(read.delim("../data/three-codes.tsv", row.names = 1))
+
+> two_cell <- lsa(observed, engine = "two_cell") |> transitions() |>
++   transform(transition = paste(from, "->", to), two_cell_z = adj_res) |>
++   subset(select = c(transition, odds_ratio, log_or, log_or_se, two_cell_z))
+
+> bidirectional <- lsa(observed, engine = "bidirectional") |> transitions() |>
++   transform(transition = paste(from, "->", to), bidirectional_z = adj_res) |>
++   subset(select = c(transition, bidirectional_z))
+
+> parallel <- lsa(observed, engine = "parallel_dominance") |> transitions() |>
++   transform(transition = paste(from, "->", to), parallel_dominance_z = adj_res) |>
++   subset(select = c(transition, parallel_dominance_z))
+
+> nonparallel <- lsa(observed, engine = "nonparallel_dominance") |> transitions() |>
++   transform(transition = paste(from, "->", to), nonparallel_dominance_z = adj_res) |>
++   subset(select = c(transition, nonparallel_dominance_z))
+
+> result <- Reduce(merge, list(two_cell, bidirectional, parallel, nonparallel))
+
+> result
+  transition odds_ratio     log_or log_or_se two_cell_z bidirectional_z
+1     x -> x  6.3296703  1.8452482 0.5691633  3.2420363        4.718634
+2     x -> y  0.7058824 -0.3483067 0.5094910 -0.6836366       -1.164927
+3     x -> z  0.2788462 -1.2770951 0.5682819 -2.2472915       -3.198816
+4     y -> x  0.5079365 -0.6773988 0.6239277 -1.0857009       -1.164927
+5     y -> y  4.0000000  1.3862944 0.5082650  2.7275030        3.887822
+6     y -> z  0.3789474 -0.9703580 0.5409543 -1.7937891       -2.730937
+7     z -> x  0.2361111 -1.4434528 0.6799133 -2.1229953       -3.198816
+8     z -> y  0.3572779 -1.0292414 0.5165759 -1.9924300       -2.730937
+9     z -> z  7.0909091  1.9588136 0.5162849  3.7940553        5.611354
+  parallel_dominance_z nonparallel_dominance_z
+1            0.0000000               0.0000000
+2            1.0222025               1.1547005
+3            0.4877686               0.7071068
+4           -1.0222025              -1.1547005
+5            0.0000000               0.0000000
+6           -0.2185433              -0.2773501
+7           -0.4877686              -0.7071068
+8            0.2185433               0.2773501
+9            0.0000000               0.0000000

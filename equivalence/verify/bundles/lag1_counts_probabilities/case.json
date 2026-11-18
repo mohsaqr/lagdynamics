@@ -1,0 +1,395 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Lag-1 transition counts and probabilities",
+  "description": "How often each engagement state follows each other state one step later, and the row-conditional probability of that transition, for the 138 bundled engagement sequences. Counted by lsa(), by a plain table of consecutive pairs, and by tna (frequency and relative models).",
+  "covers": [
+    "lsa()",
+    "transitions()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "base",
+      "name": "Base R, from the definition",
+      "version": "4.6.2",
+      "authority": "independent",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "tna",
+      "name": "tna",
+      "version": "1.3.1",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 255,
+          "sha256": "df488907eaaa0697f1c8110ceaee8dc89d29f343311266f25b57d694808b15f2",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "base",
+          "path": "base/script.R",
+          "bytes": 713,
+          "sha256": "af2cddfff30bb116a946a1afc0607ed04f45bfa56c0f6492bfa63d32f06de0b5",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "tna",
+          "path": "tna/script.R",
+          "bytes": 407,
+          "sha256": "2ad02d9daaf1d0d58e2169d462e5ba884b6bb6fe19fd668a6d245a63d22e709c",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 1392,
+          "sha256": "05de096b0dd00a1530d1e9d4080e2910bd5385b60201a61485ff6338590a8497",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "base",
+          "path": "base/console.txt",
+          "bytes": 1365,
+          "sha256": "0a7125f156ed09215d8e88c3c1a45a9dbda8f21d06f96f3468d7c42f62a8c34c",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "tna",
+          "path": "tna/console.txt",
+          "bytes": 1632,
+          "sha256": "cf934bbdff7e543b0b7186696c91f3a6f174adad5e734de16d4e44dcfc53be72",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/engagement.csv",
+          "bytes": 19325,
+          "sha256": "a98a2f13d88d174952ec7720c5b1ff439a53f0db5d32211eaaab6248e871dc02",
+          "label": "Engagement sequences"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "count: Active -> Active",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 459,
+        "base": 459,
+        "tna": 459
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Average -> Active",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 153,
+        "base": 153,
+        "tna": 153
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Disengaged -> Active",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 39,
+        "base": 39,
+        "tna": 39
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Active -> Average",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 176,
+        "base": 176,
+        "tna": 176
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Average -> Average",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 458,
+        "base": 458,
+        "tna": 458
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Disengaged -> Average",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 129,
+        "base": 129,
+        "tna": 129
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Active -> Disengaged",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 23,
+        "base": 23,
+        "tna": 23
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Average -> Disengaged",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 140,
+        "base": 140,
+        "tna": 140
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "count: Disengaged -> Disengaged",
+      "kind": "count",
+      "values": {
+        "lagdynamics": 157,
+        "base": 157,
+        "tna": 157
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Active -> Active",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.697568389057751,
+        "base": 0.697568389057751,
+        "tna": 0.697568389057751
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Average -> Active",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.203728362183755,
+        "base": 0.203728362183755,
+        "tna": 0.203728362183755
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Disengaged -> Active",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.12,
+        "base": 0.12,
+        "tna": 0.12
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Active -> Average",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.267477203647416,
+        "base": 0.267477203647416,
+        "tna": 0.267477203647416
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Average -> Average",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.609853528628495,
+        "base": 0.609853528628495,
+        "tna": 0.609853528628495
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Disengaged -> Average",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.396923076923077,
+        "base": 0.396923076923077,
+        "tna": 0.396923076923077
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Active -> Disengaged",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.0349544072948328,
+        "base": 0.0349544072948328,
+        "tna": 0.0349544072948328
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Average -> Disengaged",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.18641810918775,
+        "base": 0.18641810918775,
+        "tna": 0.18641810918775
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob: Disengaged -> Disengaged",
+      "kind": "prob",
+      "values": {
+        "lagdynamics": 0.483076923076923,
+        "base": 0.483076923076923,
+        "tna": 0.483076923076923
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

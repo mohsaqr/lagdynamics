@@ -1,0 +1,227 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Tablewise tests of independence",
+  "description": "The likelihood-ratio (G2) and Pearson (X2) chi-square statistics of the lag-1 engagement table, their degrees of freedom and p-values. tests() against stats::chisq.test() with G2 from its definition, and against stats::loglin().",
+  "covers": [
+    "tests()",
+    "lsa()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "stats",
+      "name": "stats::chisq.test()",
+      "version": "4.6.2",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "loglin",
+      "name": "stats::loglin()",
+      "version": "4.6.2",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 145,
+          "sha256": "759db99755c377074cec2446ab6b6391e9c11dfdbd2ef1493a13905bf07e83ec",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "test",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "stats",
+          "path": "stats/script.R",
+          "bytes": 932,
+          "sha256": "e238c942d44593e1b4c6e17d86524e582994d6b1be8012e778b4c76e8a7bb115",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "test",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "loglin",
+          "path": "loglin/script.R",
+          "bytes": 926,
+          "sha256": "7dcb9d3c2d121604498c70d49b1fce2e01ec6e054d0c2be18f9d049c8649da55",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "test",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 238,
+          "sha256": "d96cfb12f98f2e526a40ce2832dd6a73c5f7bf484b5915213a24d66f05bce270",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "stats",
+          "path": "stats/console.txt",
+          "bytes": 1350,
+          "sha256": "daaa938bc36dfb73a8993529a9252c097dbcfe8759d7a6c4cb02b4ad096649af",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "loglin",
+          "path": "loglin/console.txt",
+          "bytes": 1286,
+          "sha256": "72a74483793407fa9fe2b687909fb79d09b846a6e54bda6f840606908b1a4ba9",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/engagement.csv",
+          "bytes": 19325,
+          "sha256": "a98a2f13d88d174952ec7720c5b1ff439a53f0db5d32211eaaab6248e871dc02",
+          "label": "Engagement sequences"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "statistic: lrx2",
+      "kind": "statistic",
+      "values": {
+        "lagdynamics": 618.305338914807,
+        "stats": 618.305338914807,
+        "loglin": 618.305338914807
+      },
+      "difference": 7.35473757487838e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "statistic: x2",
+      "kind": "statistic",
+      "values": {
+        "lagdynamics": 629.202199130816,
+        "stats": 629.202199130816,
+        "loglin": 629.202199130816
+      },
+      "difference": 3.61368214792204e-16,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "df: lrx2",
+      "kind": "df",
+      "values": {
+        "lagdynamics": 4,
+        "stats": 4,
+        "loglin": 4
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "df: x2",
+      "kind": "df",
+      "values": {
+        "lagdynamics": 4,
+        "stats": 4,
+        "loglin": 4
+      },
+      "difference": 0,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: lrx2",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 1.69151990390012e-132,
+        "stats": 1.69151990390012e-132,
+        "loglin": 1.69151990389974e-132
+      },
+      "difference": 2.26548452994152e-13,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "p: x2",
+      "kind": "p",
+      "values": {
+        "lagdynamics": 7.40656716808636e-135,
+        "stats": 7.40656716808636e-135,
+        "loglin": 7.40656716808552e-135
+      },
+      "difference": 1.13344886185187e-13,
+      "measure": "relative",
+      "tolerance": 1e-10,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Transfer entropy between two streams",
+  "description": "Two coupled streams of 1500 events on four codes, where x drives y and y does not drive x. Transfer entropy in bits in both directions (lag 1, history 1) and its share of the target's remaining uncertainty. transfer_entropy() against infotheo (transfer entropy is the conditional mutual information I(y future; x past | y past)) and against the direct triple sum over the joint distribution.",
+  "covers": [
+    "transfer_entropy()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "infotheo",
+      "name": "infotheo",
+      "version": "1.2.0.1",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "base",
+      "name": "Base R, from the definition",
+      "version": "4.6.2",
+      "authority": "independent",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 276,
+          "sha256": "c717ec05a16ad01dfb02b7fd4c71b95796e8621e5f755b55b340ed9613187e81",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "direction",
+            "reads": [
+              "data/coupled-streams.csv"
+            ]
+          }
+        },
+        {
+          "side": "infotheo",
+          "path": "infotheo/script.R",
+          "bytes": 557,
+          "sha256": "7d9d9e6c9f9fb4988b86187bd2247d7984f03c6d916b92ecc167e98e8838a85e",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "direction",
+            "reads": [
+              "data/coupled-streams.csv"
+            ]
+          }
+        },
+        {
+          "side": "base",
+          "path": "base/script.R",
+          "bytes": 1119,
+          "sha256": "ed5b0e81c4b4198e5aa3a762fa478ffeb4b8437094d37b6e88f9726ec6ad0004",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "direction",
+            "reads": [
+              "data/coupled-streams.csv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 379,
+          "sha256": "88c04165503d487fb30a18dc45bd8f55ee90f8bbc63bb9e1b8eb45f61033db00",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "infotheo",
+          "path": "infotheo/console.txt",
+          "bytes": 700,
+          "sha256": "2772a961fea914ee428d72c932a9144a81aa80954718c326c5f4c5351eb275b2",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "base",
+          "path": "base/console.txt",
+          "bytes": 1273,
+          "sha256": "403a69b8fefc3ca4f83c53dda7929d7d2b15ddd2b36a439d0a4870408c11b8ec",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/coupled-streams.csv",
+          "bytes": 12008,
+          "sha256": "0abd6b6043e42f44b98a71c7f19b412dad7849b3197790f4db77efb9d4f7dbb0",
+          "label": "Two coupled streams"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "te: x -> y",
+      "kind": "te",
+      "values": {
+        "lagdynamics": 0.456818711782589,
+        "infotheo": 0.45681871178259,
+        "base": 0.45681871178259
+      },
+      "difference": 1.72084568816899e-15,
+      "measure": "absolute",
+      "tolerance": 1e-08,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "te: y -> x",
+      "kind": "te",
+      "values": {
+        "lagdynamics": 0.0136959134444157,
+        "infotheo": 0.0136959134444191,
+        "base": 0.0136959134444157
+      },
+      "difference": 3.38444550163075e-15,
+      "measure": "absolute",
+      "tolerance": 1e-08,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "te_normalised: x -> y",
+      "kind": "te_normalised",
+      "values": {
+        "lagdynamics": 0.238867488635693,
+        "infotheo": 0.238867488635693,
+        "base": 0.238867488635694
+      },
+      "difference": 8.60422844084496e-16,
+      "measure": "absolute",
+      "tolerance": 1e-08,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "te_normalised: y -> x",
+      "kind": "te_normalised",
+      "values": {
+        "lagdynamics": 0.00686077535680319,
+        "infotheo": 0.00686077535680488,
+        "base": 0.00686077535680319
+      },
+      "difference": 1.69309011255336e-15,
+      "measure": "absolute",
+      "tolerance": 1e-08,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

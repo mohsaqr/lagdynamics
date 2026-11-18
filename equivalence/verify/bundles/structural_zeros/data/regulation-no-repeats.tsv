@@ -1,0 +1,10 @@
+	adapt	cohesion	consensus	coregulate	discuss	emotion	monitor	plan	synthesis
+adapt	0	139	243	11	30	61	17	8	0
+cohesion	5	0	844	202	101	196	56	239	6
+consensus	30	94	0	1188	1190	460	295	2505	48
+coregulate	32	71	265	0	539	339	170	471	37
+discuss	282	188	1269	333	0	418	88	46	557
+emotion	7	923	909	97	289	0	103	283	8
+monitor	16	80	228	83	538	130	0	309	23
+plan	6	155	1788	106	418	904	465	0	11
+synthesis	153	22	304	29	41	46	8	49	0

@@ -1,0 +1,1982 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Structural zeros: expected counts and adjusted residuals",
+  "description": "A 9 x 9 lag-1 table of the group-regulation sequences with immediate repeats collapsed, so that a state cannot follow itself. lsa(loops = FALSE) fits quasi-independence by iterative proportional fitting; the reference is the same model as a Poisson regression on the 72 possible cells (stats::glm), whose fitted values are the expected counts and whose standardised Pearson residuals are the adjusted residuals.",
+  "covers": [
+    "lsa()",
+    "lsa_ipf()",
+    "transitions()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "stats",
+      "name": "stats::glm() (quasi-independence)",
+      "version": "4.6.2",
+      "authority": "open-source",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 320,
+          "sha256": "a838844df8ba0a02b312783426e6b1922a84ebd8ec3d57f047f9002d215476ee",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/regulation-no-repeats.tsv"
+            ]
+          }
+        },
+        {
+          "side": "stats",
+          "path": "stats/script.R",
+          "bytes": 546,
+          "sha256": "dc7828f541eec725f9f496fd59f3544a997a509a0b182135c929f658f8233972",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/regulation-no-repeats.tsv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 4614,
+          "sha256": "eb9acd56691e47507203adf32e73847a90f94632b5adb4642934b2ac005952c6",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "stats",
+          "path": "stats/console.txt",
+          "bytes": 5117,
+          "sha256": "7dcfdc67ae0462137f64057af691321209fd0d8ff6267cd06d6f79b4da931063",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/regulation-no-repeats.tsv",
+          "bytes": 422,
+          "sha256": "f2684d678ecea08e1633b66adcf34ad0d239bacf070ba0e20e33ab22685f91d6",
+          "label": "Lag-1 counts, repeats collapsed"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "expected: cohesion -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 36.1482607773361,
+        "stats": 36.1482607773183
+      },
+      "difference": 1.78914660864393e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 176.601509988981,
+        "stats": 176.601509989219
+      },
+      "difference": 2.37662334257038e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 42.9304066375927,
+        "stats": 42.9304066375702
+      },
+      "difference": 2.25597318603832e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 75.4196806172917,
+        "stats": 75.4196806172394
+      },
+      "difference": 5.2267523642513e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 60.0383312764867,
+        "stats": 60.0383312764512
+      },
+      "difference": 3.55200313606474e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 30.209259128495,
+        "stats": 30.209259128481
+      },
+      "difference": 1.40012446081528e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 95.9603904949022,
+        "stats": 95.9603904948122
+      },
+      "difference": 8.99973429113743e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> adapt",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 13.6921610789144,
+        "stats": 13.6921610789085
+      },
+      "difference": 5.90283377732703e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 35.1309681847498,
+        "stats": 35.130968184734
+      },
+      "difference": 1.58166812980198e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 584.161921158173,
+        "stats": 584.161921158944
+      },
+      "difference": 7.71024133428e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 142.005064504163,
+        "stats": 142.005064504084
+      },
+      "difference": 7.84723397373455e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 249.472983131808,
+        "stats": 249.472983131629
+      },
+      "difference": 1.79625203600153e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 198.594603997393,
+        "stats": 198.59460399727
+      },
+      "difference": 1.22696519611054e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 99.9260926498747,
+        "stats": 99.9260926498258
+      },
+      "difference": 4.88995510750101e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 317.417478877096,
+        "stats": 317.41747887679
+      },
+      "difference": 3.06101810565451e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> cohesion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 45.2908874967427,
+        "stats": 45.290887496722
+      },
+      "difference": 2.07194261747645e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 170.212523521072,
+        "stats": 170.212523521112
+      },
+      "difference": 4.07567313231993e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 579.332149110525,
+        "stats": 579.332149110622
+      },
+      "difference": 9.73159330897033e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 688.026593941655,
+        "stats": 688.02659394175
+      },
+      "difference": 9.44737621466629e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 1208.71778386193,
+        "stats": 1208.7177838619
+      },
+      "difference": 3.56976670445874e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 962.207717313581,
+        "stats": 962.20771731365
+      },
+      "difference": 6.86668499838561e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 484.150402746912,
+        "stats": 484.150402747009
+      },
+      "difference": 9.6520125225652e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 1537.91463432597,
+        "stats": 1537.91463432555
+      },
+      "difference": 4.21778167947195e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> consensus",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 219.43819517835,
+        "stats": 219.438195178401
+      },
+      "difference": 5.09601250087144e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 43.6377520515645,
+        "stats": 43.6377520515444
+      },
+      "difference": 2.00941485672956e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 148.524633531183,
+        "stats": 148.524633531104
+      },
+      "difference": 7.89270870882319e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 725.613735989539,
+        "stats": 725.613735990489
+      },
+      "difference": 9.50308276514988e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 309.881587214432,
+        "stats": 309.881587214206
+      },
+      "difference": 2.26123120228294e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 246.683269371974,
+        "stats": 246.683269371819
+      },
+      "difference": 1.55040424942854e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 124.122683770207,
+        "stats": 124.122683770145
+      },
+      "difference": 6.19735374129959e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 394.27849432525,
+        "stats": 394.278494324866
+      },
+      "difference": 3.83920450985897e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> coregulate",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 56.2578437458522,
+        "stats": 56.2578437458259
+      },
+      "difference": 2.62829757957661e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 71.6699050702529,
+        "stats": 71.6699050702151
+      },
+      "difference": 3.77298192688613e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 243.934343208047,
+        "stats": 243.934343207901
+      },
+      "difference": 1.45519152283669e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 1191.73571348475,
+        "stats": 1191.73571348623
+      },
+      "difference": 1.48270373756532e-09,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 289.701366583072,
+        "stats": 289.70136658289
+      },
+      "difference": 1.81842096935725e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 405.148424635111,
+        "stats": 405.14842463483
+      },
+      "difference": 2.80806489172392e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 203.856994108311,
+        "stats": 203.856994108196
+      },
+      "difference": 1.15136344902567e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 647.556322932078,
+        "stats": 647.556322931405
+      },
+      "difference": 6.73367139825132e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> discuss",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 92.3969299783807,
+        "stats": 92.3969299783315
+      },
+      "difference": 4.92406115881749e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 56.3250573761261,
+        "stats": 56.3250573760986
+      },
+      "difference": 2.74411604550551e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 191.706907714373,
+        "stats": 191.706907714266
+      },
+      "difference": 1.07064579424332e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 936.579759292406,
+        "stats": 936.579759293607
+      },
+      "difference": 1.20064669317799e-09,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 227.67500638851,
+        "stats": 227.675006388375
+      },
+      "difference": 1.34150468511507e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 399.977023542214,
+        "stats": 399.977023541911
+      },
+      "difference": 3.02804892271524e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 160.210298568416,
+        "stats": 160.210298568331
+      },
+      "difference": 8.46114289743127e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 508.911613705502,
+        "stats": 508.911613704993
+      },
+      "difference": 5.09544406668283e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> emotion",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 72.6143334124531,
+        "stats": 72.6143334124171
+      },
+      "difference": 3.59818841388915e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 24.9623434482713,
+        "stats": 24.9623434482602
+      },
+      "difference": 1.10453868273908e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 84.9613634623761,
+        "stats": 84.9613634623324
+      },
+      "difference": 4.36557456851006e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 415.076818511431,
+        "stats": 415.076818511982
+      },
+      "difference": 5.51153789274395e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 100.901836035523,
+        "stats": 100.901836035469
+      },
+      "difference": 5.49391643289709e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 177.263269638674,
+        "stats": 177.263269638548
+      },
+      "difference": 1.26249233289855e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 141.111588097601,
+        "stats": 141.111588097515
+      },
+      "difference": 8.62314664118458e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 225.541296856543,
+        "stats": 225.541296856328
+      },
+      "difference": 2.15663931157906e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> monitor",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 32.1814839495792,
+        "stats": 32.1814839495648
+      },
+      "difference": 1.44808609547908e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 93.1803058314649,
+        "stats": 93.1803058314076
+      },
+      "difference": 5.73550096305553e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 317.146739355143,
+        "stats": 317.146739354926
+      },
+      "difference": 2.17767137655756e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 1549.41321805767,
+        "stats": 1549.41321805945
+      },
+      "difference": 1.78761183633469e-09,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 376.649891074131,
+        "stats": 376.649891073861
+      },
+      "difference": 2.70233613264281e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 661.694512450151,
+        "stats": 661.694512449565
+      },
+      "difference": 5.85828274779487e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 526.746255316377,
+        "stats": 526.746255315965
+      },
+      "difference": 4.12342160416301e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 265.040912755162,
+        "stats": 265.040912754988
+      },
+      "difference": 1.73656644619768e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: synthesis -> plan",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 120.128165159904,
+        "stats": 120.128165159829
+      },
+      "difference": 7.47917283661081e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: adapt -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 13.881144516633,
+        "stats": 13.8811445166271
+      },
+      "difference": 5.91171556152403e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: cohesion -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 47.2456028415513,
+        "stats": 47.2456028415278
+      },
+      "difference": 2.34905428442289e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: consensus -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 230.817323509763,
+        "stats": 230.817323510073
+      },
+      "difference": 3.10137693304569e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: coregulate -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 56.1098348360281,
+        "stats": 56.1098348359985
+      },
+      "difference": 2.96225266538386e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: discuss -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 98.5731595450715,
+        "stats": 98.573159545003
+      },
+      "difference": 6.85673740008497e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: emotion -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 78.4698099925407,
+        "stats": 78.4698099924941
+      },
+      "difference": 4.65831817564322e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: monitor -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 39.4833562730417,
+        "stats": 39.4833562730233
+      },
+      "difference": 1.83888460014714e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "expected: plan -> synthesis",
+      "kind": "expected",
+      "values": {
+        "lagdynamics": 125.419768485371,
+        "stats": 125.419768485253
+      },
+      "difference": 1.1785061815317e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -5.42782309948145,
+        "stats": -5.42782309948215
+      },
+      "difference": 7.02549129982799e-13,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -13.7286858098908,
+        "stats": -13.7286858099177
+      },
+      "difference": 2.68709499096076e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -1.76035502526257,
+        "stats": -1.76035502526021
+      },
+      "difference": 2.35900188272353e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 26.0081693342416,
+        "stats": 26.0081693342694
+      },
+      "difference": 2.77537992587895e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -7.35660197956121,
+        "stats": -7.35660197956188
+      },
+      "difference": 6.72351063712995e-13,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -2.69167951047313,
+        "stats": -2.69167951047231
+      },
+      "difference": 8.20232770593066e-13,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -10.2842110920894,
+        "stats": -10.2842110920886
+      },
+      "difference": 7.92255150372512e-13,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> adapt",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 38.5530599818056,
+        "stats": 38.5530599818336
+      },
+      "difference": 2.80593326351664e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 18.3607952455474,
+        "stats": 18.3607952455524
+      },
+      "difference": 5.03419528286031e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -26.6083978520955,
+        "stats": -26.608397852121
+      },
+      "difference": 2.55653276326484e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -6.48017952475104,
+        "stats": -6.48017952474446
+      },
+      "difference": 6.58051391155823e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -4.40629091091752,
+        "stats": -4.4062909109051
+      },
+      "difference": 1.24176224858275e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 57.065393849977,
+        "stats": 57.065393849992
+      },
+      "difference": 1.49498191603925e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -2.13452472876579,
+        "stats": -2.13452472876073
+      },
+      "difference": 5.05995245703161e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -10.6099590510759,
+        "stats": -10.6099590510574
+      },
+      "difference": 1.84439130634928e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> cohesion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.63848861514553,
+        "stats": -3.63848861514294
+      },
+      "difference": 2.58504329053721e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 6.94755902973308,
+        "stats": 6.94755902972494
+      },
+      "difference": 8.13482614603345e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 14.4360642003456,
+        "stats": 14.4360642003269
+      },
+      "difference": 1.87920790040152e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -21.5116620326335,
+        "stats": -21.5116620326175
+      },
+      "difference": 1.59943169819599e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 2.4873506401542,
+        "stats": 2.48735064015297
+      },
+      "difference": 1.22435395155662e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -2.37268021854611,
+        "stats": -2.37268021854675
+      },
+      "difference": 6.43041175862891e-13,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -15.0552728107254,
+        "stats": -15.0552728107175
+      },
+      "difference": 7.84616815963091e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 9.62419885604928,
+        "stats": 9.6241988560544
+      },
+      "difference": 5.12478948166972e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> consensus",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 7.15351968598778,
+        "stats": 7.15351968598176
+      },
+      "difference": 6.01740879346835e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -5.22478717280769,
+        "stats": -5.224787172805
+      },
+      "difference": 2.69295696853078e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 4.78233551098553,
+        "stats": 4.78233551099282
+      },
+      "difference": 7.29727389625623e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 22.9359516484927,
+        "stats": 22.9359516484298
+      },
+      "difference": 6.29114538241993e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 1.5052619957407,
+        "stats": 1.5052619957555
+      },
+      "difference": 1.48043799441666e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -10.701994153212,
+        "stats": -10.7019941532014
+      },
+      "difference": 1.05639941239133e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.99226160610647,
+        "stats": -3.99226160610065
+      },
+      "difference": 5.82378589797372e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -17.1280144633867,
+        "stats": -17.1280144633654
+      },
+      "difference": 2.1334045641197e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> coregulate",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.85678785382393,
+        "stats": -3.85678785382088
+      },
+      "difference": 3.05622194218813e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -5.37509930756794,
+        "stats": -5.37509930756325
+      },
+      "difference": 4.69224659127576e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -10.3476870143517,
+        "stats": -10.3476870143404
+      },
+      "difference": 1.1334932992213e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -0.0719830083014981,
+        "stats": -0.0719830083629204
+      },
+      "difference": 6.14222561701183e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 16.7286637886041,
+        "stats": 16.7286637886148
+      },
+      "difference": 1.07540643057291e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -6.75444951343847,
+        "stats": -6.75444951342142
+      },
+      "difference": 1.70539138366621e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 26.22116268687,
+        "stats": 26.2211626868772
+      },
+      "difference": 7.21911419532262e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -11.1919450245018,
+        "stats": -11.1919450244675
+      },
+      "difference": 3.43263195645704e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> discuss",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -5.86305768671598,
+        "stats": -5.86305768671127
+      },
+      "difference": 4.70556926757126e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 0.668240027889411,
+        "stats": 0.668240027893381
+      },
+      "difference": 3.96949140224478e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 0.34355810810166,
+        "stats": 0.343558108110226
+      },
+      "difference": 8.56609227994909e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -21.4831332292294,
+        "stats": -21.4831332292665
+      },
+      "difference": 3.70263819604588e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 8.25102165864569,
+        "stats": 8.25102165865556
+      },
+      "difference": 9.86766224286839e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 1.05415096453893,
+        "stats": 1.05415096455662
+      },
+      "difference": 1.76860748268837e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -2.62266542736318,
+        "stats": -2.62266542735583
+      },
+      "difference": 7.35056460143824e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 21.1386387858716,
+        "stats": 21.1386387858987
+      },
+      "difference": 2.70752309461386e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> emotion",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.36332026274423,
+        "stats": -3.36332026274023
+      },
+      "difference": 3.99236199655206e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -1.65176918785545,
+        "stats": -1.6517691878534
+      },
+      "difference": 2.04614103438416e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.34891198128842,
+        "stats": -3.34891198128381
+      },
+      "difference": 4.6083137306141e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -7.5789516970537,
+        "stats": -7.57895169708451
+      },
+      "difference": 3.08082448441382e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 7.38947928108511,
+        "stats": 7.38947928109199
+      },
+      "difference": 6.88160639583657e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -7.48509449687679,
+        "stats": -7.48509449686741
+      },
+      "difference": 9.37827593361362e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.51530192520399,
+        "stats": -3.51530192519655
+      },
+      "difference": 7.44648787076585e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 18.2757663863185,
+        "stats": 18.2757663863389
+      },
+      "difference": 2.03748129479209e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> monitor",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -4.43264012268076,
+        "stats": -4.43264012267895
+      },
+      "difference": 1.81632486828676e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -9.89041482905283,
+        "stats": -9.890414829046
+      },
+      "difference": 6.83186840433336e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -5.11139385252053,
+        "stats": -5.11139385250537
+      },
+      "difference": 1.51656465163796e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 36.6478638538813,
+        "stats": 36.6478638537702
+      },
+      "difference": 1.11093356736092e-10,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 5.7270823316149,
+        "stats": 5.72708233163016
+      },
+      "difference": 1.52633461425467e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -29.7623805388577,
+        "stats": -29.7623805388211
+      },
+      "difference": 3.66355834557908e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -12.8557362019156,
+        "stats": -12.8557362018908
+      },
+      "difference": 2.48050469053851e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 3.11292428668196,
+        "stats": 3.11292428669375
+      },
+      "difference": 1.17901244323093e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: synthesis -> plan",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -7.30685602238399,
+        "stats": -7.3068560223774
+      },
+      "difference": 6.59117205259463e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: adapt -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -3.81652557265577,
+        "stats": -3.81652557265961
+      },
+      "difference": 3.84581255730154e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: cohesion -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -6.31046254427036,
+        "stats": -6.31046254427639
+      },
+      "difference": 6.02273786398655e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: consensus -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -15.074817025946,
+        "stats": -15.0748170259947
+      },
+      "difference": 4.87538898141793e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: coregulate -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -2.70251289316164,
+        "stats": -2.70251289316167
+      },
+      "difference": 3.59712259978551e-14,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: discuss -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": 50.7086954256331,
+        "stats": 50.7086954257284
+      },
+      "difference": 9.52979917201446e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: emotion -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -8.58526465644647,
+        "stats": -8.58526465645483
+      },
+      "difference": 8.36131164305698e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: monitor -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -2.74115757888967,
+        "stats": -2.74115757889067
+      },
+      "difference": 1.00097707900204e-12,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "adj_res: plan -> synthesis",
+      "kind": "adj_res",
+      "values": {
+        "lagdynamics": -11.4975331654332,
+        "stats": -11.4975331654432
+      },
+      "difference": 1.0034639785772e-11,
+      "measure": "absolute",
+      "tolerance": 1e-06,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

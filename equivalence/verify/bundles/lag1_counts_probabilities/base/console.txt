@@ -1,0 +1,40 @@
+
+> sequences <- read.csv("../data/engagement.csv", na.strings = "")
+
+> states <- sort(unique(na.omit(unlist(sequences))))
+
+> count_pairs <- function(lag) {
++   pairs <- do.call(rbind, lapply(seq_len(nrow(sequences)), function(row) {
++     events <- as.character(na.omit(unlist(sequences[row, ])))
++     data.frame(from = head(events, -lag), to = tail(events, -lag))
++   }))
++   table(from = factor(pairs$from, states), to = factor(pairs$to, states))
++ }
+
+> counts <- count_pairs(lag = 1)
+
+> counts
+            to
+from         Active Average Disengaged
+  Active        459     176         23
+  Average       153     458        140
+  Disengaged     39     129        157
+
+> cells <- as.data.frame(counts, responseName = "count")
+
+> transition <- paste(cells$from, "->", cells$to)
+
+> result <- data.frame(transition = transition, count = cells$count,
++                      prob = as.vector(counts / rowSums(counts)))
+
+> result
+                transition count       prob
+1         Active -> Active   459 0.69756839
+2        Average -> Active   153 0.20372836
+3     Disengaged -> Active    39 0.12000000
+4        Active -> Average   176 0.26747720
+5       Average -> Average   458 0.60985353
+6    Disengaged -> Average   129 0.39692308
+7     Active -> Disengaged    23 0.03495441
+8    Average -> Disengaged   140 0.18641811
+9 Disengaged -> Disengaged   157 0.48307692

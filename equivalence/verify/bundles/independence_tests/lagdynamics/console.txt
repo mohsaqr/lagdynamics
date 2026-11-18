@@ -1,0 +1,11 @@
+
+> sequences <- read.csv("../data/engagement.csv", na.strings = "")
+
+> fit <- lsa(sequences, lag = 1)
+
+> result <- tests(fit)
+
+> result
+  test statistic df             p
+1 lrx2  618.3053  4 1.691520e-132
+2   x2  629.2022  4 7.406567e-135

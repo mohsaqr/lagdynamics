@@ -1,0 +1,460 @@
+{
+  "schema": "prova.verification-case/1",
+  "title": "Yule's Q, lift and column-conditional probability",
+  "description": "Three per-transition association indices of the lag-1 engagement table: Yule's Q of the 2 x 2 collapse of each cell, lift (observed over expected), and the probability of the antecedent given the consequent. transitions() against the definitions written out in base R.",
+  "covers": [
+    "transitions()",
+    "lsa()"
+  ],
+  "generator": "lagdynamics equivalence/verify/export-bundles.R",
+  "created_at": "2026-11-18",
+  "sides": [
+    {
+      "id": "lagdynamics",
+      "name": "lagdynamics",
+      "version": "0.35.0",
+      "primary": true,
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    },
+    {
+      "id": "base",
+      "name": "Base R, from the definition",
+      "version": "4.6.2",
+      "authority": "independent",
+      "source": "live",
+      "run_at": "2026-11-18",
+      "platform": "R version 4.6.2 (2026-10-29), aarch64-apple-darwin23"
+    }
+  ],
+  "sections": [
+    {
+      "id": "code",
+      "title": "Code",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/script.R",
+          "bytes": 263,
+          "sha256": "e942e23184c498814af4b36d53656a22f0fc05c02c44e50e632a84f4cf902bc0",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        },
+        {
+          "side": "base",
+          "path": "base/script.R",
+          "bytes": 1216,
+          "sha256": "e75118e4dd9bd6b6741632d3eb07caea3ecfe9d2b16e576aa2bde388e65d1270",
+          "label": "Script",
+          "type": "code",
+          "language": "r",
+          "run": {
+            "engine": "r",
+            "result": "result",
+            "key": "transition",
+            "reads": [
+              "data/engagement.csv"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Raw output",
+      "items": [
+        {
+          "side": "lagdynamics",
+          "path": "lagdynamics/console.txt",
+          "bytes": 858,
+          "sha256": "5abb9958275b52564404e1b75a88da50bae8cc1b14357a66f42aac5349012c2f",
+          "label": "R console",
+          "type": "text"
+        },
+        {
+          "side": "base",
+          "path": "base/console.txt",
+          "bytes": 2056,
+          "sha256": "28ce4c6ca9a99bff8b31ab7cfcaba1362e742a9dd07a4916ce2409b4d6d520a5",
+          "label": "R console",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "items": [
+        {
+          "path": "data/engagement.csv",
+          "bytes": 19325,
+          "sha256": "a98a2f13d88d174952ec7720c5b1ff439a53f0db5d32211eaaab6248e871dc02",
+          "label": "Engagement sequences"
+        }
+      ]
+    }
+  ],
+  "comparisons": [
+    {
+      "quantity": "yules_q: Active -> Active",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": 0.827877936048869,
+        "base": 0.827877936048869
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Average -> Active",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": -0.601058038918413,
+        "base": -0.601058038918413
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Disengaged -> Active",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": -0.698391674550615,
+        "base": -0.698391674550615
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Active -> Average",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": -0.533525926969794,
+        "base": -0.533525926969794
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Average -> Average",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": 0.553050971644631,
+        "base": 0.553050971644631
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Disengaged -> Average",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": -0.108317464847774,
+        "base": -0.108317464847774
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Active -> Disengaged",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": -0.826479817153483,
+        "base": -0.826479817153483
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Average -> Disengaged",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": 0.0109712230215827,
+        "base": 0.0109712230215827
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "yules_q: Disengaged -> Disengaged",
+      "kind": "yules_q",
+      "values": {
+        "lagdynamics": 0.754410195241384,
+        "base": 0.754410195241384
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Active -> Active",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 1.85803930357318,
+        "base": 1.85803930357318
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Average -> Active",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 0.542649738904195,
+        "base": 0.542649738904195
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Disengaged -> Active",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 0.31963133640553,
+        "base": 0.31963133640553
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Active -> Average",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 0.607870866480498,
+        "base": 0.607870866480498
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Average -> Average",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 1.38595808472059,
+        "base": 1.38595808472059
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Disengaged -> Average",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 0.902050609940518,
+        "base": 0.902050609940518
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Active -> Disengaged",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 0.189409194528875,
+        "base": 0.189409194528875
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Average -> Disengaged",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 1.01015312916112,
+        "base": 1.01015312916112
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "lift: Disengaged -> Disengaged",
+      "kind": "lift",
+      "values": {
+        "lagdynamics": 2.61767307692308,
+        "base": 2.61767307692308
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Active -> Active",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.705069124423963,
+        "base": 0.705069124423963
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Average -> Active",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.235023041474654,
+        "base": 0.235023041474654
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Disengaged -> Active",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.0599078341013825,
+        "base": 0.0599078341013825
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Active -> Average",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.230668414154653,
+        "base": 0.230668414154653
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Average -> Average",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.600262123197903,
+        "base": 0.600262123197903
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Disengaged -> Average",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.169069462647444,
+        "base": 0.169069462647444
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Active -> Disengaged",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.071875,
+        "base": 0.071875
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Average -> Disengaged",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.4375,
+        "base": 0.4375
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    },
+    {
+      "quantity": "prob_col: Disengaged -> Disengaged",
+      "kind": "prob_col",
+      "values": {
+        "lagdynamics": 0.490625,
+        "base": 0.490625
+      },
+      "difference": 0,
+      "measure": "absolute",
+      "tolerance": 1e-12,
+      "rule": "largest difference between any two sides",
+      "status": "agree"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+
+> sequences <- read.csv("../data/engagement.csv", na.strings = "")
+
+> states <- sort(unique(na.omit(unlist(sequences))))
+
+> count_pairs <- function(lag) {
++   pairs <- do.call(rbind, lapply(seq_len(nrow(sequences)), function(row) {
++     events <- as.character(na.omit(unlist(sequences[row, ])))
++     data.frame(from = head(events, -lag), to = tail(events, -lag))
++   }))
++   table(from = factor(pairs$from, states), to = factor(pairs$to, states))
++ }
+
+> counts <- count_pairs(lag = 1)
+
+> counts
+            to
+from         Active Average Disengaged
+  Active        459     176         23
+  Average       153     458        140
+  Disengaged     39     129        157
+
+> cells <- as.data.frame(counts, responseName = "count")
+
+> transition <- paste(cells$from, "->", cells$to)
+
+> model <- loglin(counts, margin = list(1, 2), fit = TRUE, eps = 1e-10, print = FALSE)
+
+> model$lrt
+[1] 618.3053
+
+> model$pearson
+[1] 629.2022
+
+> model$df
+[1] 4
+
+> result <- data.frame(test = c("lrx2", "x2"), statistic = c(model$lrt, model$pearson),
++                      df = c(model$df, model$df),
++                      p = pchisq(c(model$lrt, model$pearson), model$df, lower.tail = FALSE))
+
+> result
+  test statistic df             p
+1 lrx2  618.3053  4 1.691520e-132
+2   x2  629.2022  4 7.406567e-135

@@ -33,3 +33,4 @@
 ^.*\.Rcheck$
 ^lagdynamics_.*\.tar\.gz$
 ^\.DS_Store$
+^equivalence$
