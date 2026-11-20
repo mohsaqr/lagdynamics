@@ -1,0 +1,99 @@
+{
+  "product": "r-lagdynamics",
+  "collection": "equivalence",
+  "title": "Equivalence tests",
+  "references": {
+    "stats": {
+      "authority": "open-source"
+    },
+    "tna": {
+      "authority": "open-source"
+    },
+    "infotheo": {
+      "authority": "open-source"
+    },
+    "LagSequential": {
+      "authority": "open-source",
+      "citation": "O'Connor, B. P. LagSequential: Lag-Sequential Categorical Data Analysis. CRAN package."
+    }
+  },
+  "exports": {
+    "covered": [
+      "lsa()",
+      "lsa_classical()",
+      "lsa_two_cell()",
+      "lsa_bidirectional()",
+      "lsa_parallel_dominance()",
+      "lsa_nonparallel_dominance()",
+      "lsa_ipf()",
+      "lsa_lags()",
+      "lag_profile()",
+      "lsa_transitions()",
+      "lsa_data()",
+      "transitions()",
+      "transitions.lsa()",
+      "transitions.lsa_group()",
+      "transitions.lsa_lags()",
+      "transitions.lsa_bootstrap()",
+      "transitions.lsa_certainty()",
+      "transitions.lsa_permutation()",
+      "transitions.lsa_comparison()",
+      "tests()",
+      "tests.lsa()",
+      "tests.lsa_group()",
+      "nodes()",
+      "nodes.lsa()",
+      "nodes.lsa_group()",
+      "initial()",
+      "initial.lsa()",
+      "initial.lsa_group()",
+      "transition_probabilities()",
+      "transition_probabilities.lsa()",
+      "transition_probabilities.lsa_group()",
+      "nobs.lsa()",
+      "summary.lsa()",
+      "summary.lsa_group()",
+      "as.data.frame.summary.lsa()",
+      "as.data.frame.lsa()",
+      "as.data.frame.lsa_group()",
+      "as.data.frame.lsa_lags()",
+      "as.data.frame.lsa_transitions()",
+      "as.data.frame.lsa_data()",
+      "as.data.frame.lsa_bootstrap()",
+      "as.data.frame.lsa_permutation()",
+      "as.data.frame.lsa_comparison()",
+      "bootstrap_lsa()",
+      "permute_lsa()",
+      "certainty_lsa()",
+      "compare_lsa()",
+      "bayes_compare_lsa()",
+      "lsa_to_tna()",
+      "lsa_to_tna.lsa()",
+      "transfer_entropy()",
+      "print.lsa()",
+      "reliability_lsa()",
+      "reliability_lsa.lsa()",
+      "reliability_lsa.lsa_group()",
+      "as.data.frame.lsa_reliability()",
+      "as.data.frame.lsa_reliability_group()",
+      "stability_lsa()",
+      "transitions.lsa_stability()",
+      "as.data.frame.lsa_stability()",
+      "lsa_to_tna.lsa_group()",
+      "transitions.lsa_comparison_pairwise()",
+      "as.data.frame.lsa_comparison_pairwise()",
+      "as.data.frame.lsa_certainty_group()"
+    ],
+    "not_numeric": {
+      "plot_chords()": "draws a chord diagram",
+      "plot_forest()": "draws a forest plot",
+      "plot_polar()": "draws a polar plot",
+      "plot_transitions()": "draws a transition network",
+      "register_lsa_engine()": "adds an engine to the registry; returns no numbers",
+      "unregister_lsa_engine()": "removes an engine from the registry",
+      "get_lsa_engine()": "returns an engine's function",
+      "list_lsa_engines()": "lists the registered engines by name and description"
+    },
+    "not_yet": {}
+  }
+}

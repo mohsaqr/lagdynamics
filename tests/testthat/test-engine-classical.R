@@ -52,16 +52,14 @@ test_that("classical engine: Yule's Q hand check", {
   expect_equal(unname(fit$yules_q["a", "b"]),  1)
 })
 
-test_that("classical engine: LR p-value matches pchisq", {
+# The likelihood-ratio statistic and its p-value against stats::chisq.test(), stats::pchisq() and
+# stats::loglin() are declared equivalence tests: tests/equivalence/test-tests.R.
+
+test_that("classical engine: the likelihood-ratio test of a 2 x 2 table has one degree of freedom", {
   d  <- lsa_data(c("a", "b", "a", "b", "a", "b", "a", "b", "a"))
   fit <- lsa(d, engine = "classical")
   # df for K=2 with no structural zeros: (K-1)^2 = 1.
   expect_equal(fit$lrx2$df, 1)
-  expect_equal(
-    fit$lrx2$p,
-    stats::pchisq(fit$lrx2$statistic, df = 1, lower.tail = FALSE),
-    tolerance = 1e-12
-  )
 })
 
 test_that("classical engine: edges frame is consistent with matrices", {

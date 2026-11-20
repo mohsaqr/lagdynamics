@@ -1,14 +1,15 @@
 # lsa_to_tna() hands a fit to tna: with prob weights it must reproduce the
 # model tna itself estimates from the same sequences.
 
-test_that("lsa_to_tna() reproduces tna::tna() weights and inits", {
+# The comparison of the weights and initial probabilities with tna::tna() is a declared equivalence test:
+# tests/equivalence/test-tna-bridge.R.
+
+test_that("lsa_to_tna() returns a tna object with the states as labels", {
   skip_if_not_installed("tna")
-  net <- lsa_to_tna(lsa(engagement))
-  ref <- tna::tna(engagement)
+  fit <- lsa(engagement)
+  net <- lsa_to_tna(fit)
   expect_s3_class(net, "tna")
-  expect_equal(unname(net$weights), unname(ref$weights))
-  expect_equal(unname(net$inits), unname(ref$inits))
-  expect_identical(net$labels, ref$labels)
+  expect_identical(net$labels, nodes(fit)$state)
 })
 
 test_that("lsa_to_tna() count weights are the observed counts", {
