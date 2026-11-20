@@ -2,6 +2,8 @@
 
 ## lagdynamics 0.35.0
 
+CRAN release: 2026-11-18
+
 This release collects all changes since the CRAN release 0.32.
 
 ### Changes to results
