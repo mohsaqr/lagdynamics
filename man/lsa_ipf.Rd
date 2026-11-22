@@ -29,13 +29,19 @@ between fitted and observed totals (\code{max_margin_diff}).
 by iterative proportional fitting. When some transitions cannot occur by
 construction (structural zeros, such as self-transitions in a coding scheme
 that merges repeated codes), the quasi-independence model fits expected
-counts that are zero in the forbidden cells and reproduce the observed row
-and column totals; it has no closed form and is found by iterative
-proportional fitting (Wickens, 1989), which rescales the rows and columns of
-the table in turn until both sets of totals match. Under ordinary
+counts that are zero in the forbidden cells and reproduce the row and
+column totals of the possible cells; it has no closed form and is found
+by iterative proportional fitting (Wickens, 1989), which rescales the rows
+and columns of the table in turn until both sets of totals match. Under ordinary
 independence, the expected count of a transition is the product of its row
 and column totals divided by the grand total, a formula that assigns expected
 counts to impossible cells.
+
+Counts that fall in a structural-zero cell are not part of the
+quasi-independence model: the totals the fit reproduces are those of the
+possible cells (Bishop, Fienberg & Holland, 1975; Bakeman & Quera, 1995),
+so the fit equals the Poisson log-linear model \code{count ~ from + to} fitted
+to the possible cells alone.
 
 \code{\link[=lsa]{lsa()}} calls \code{lsa_ipf()} when \code{loops = FALSE} or \code{structural_zeros} is
 given, so it is needed directly only to inspect the expected table or to use
@@ -65,6 +71,14 @@ lsa_ipf(obs, structure = 1 - diag(3))
 
 }
 \references{
+Bakeman, R., & Quera, V. (1995). Log-linear approaches to lag-sequential
+analysis when consecutive codes may and cannot repeat. \emph{Psychological
+Bulletin, 118}(2), 272-284. \doi{10.1037/0033-2909.118.2.272}
+
+Bishop, Y. M. M., Fienberg, S. E., & Holland, P. W. (1975).
+\emph{Discrete multivariate analysis: Theory and practice} (ch. 5). MIT
+Press.
+
 Wickens, T. D. (1989). \emph{Multiway contingency tables analysis for
 the social sciences} (pp. 107-112). Lawrence Erlbaum.
 }

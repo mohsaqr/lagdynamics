@@ -70,7 +70,9 @@
 #'   `from`, `to`, `observed` (count), `prob_observed`, `prob_mean`
 #'   (posterior mean), `prob_se` (posterior standard deviation),
 #'   `prob_ci_low`, `prob_ci_high` (credible interval), `p_value`
-#'   (posterior mass outside the band, or below the threshold), `stable`
+#'   (posterior mass outside the band, or below the threshold; the upper
+#'   tail is computed directly with `pbeta(lower.tail = FALSE)`, so tiny
+#'   masses keep their relative accuracy), `stable`
 #'   (certain), and `adj_res_observed`, `adj_res_stable` (the fit's
 #'   adjusted residual and a copy of `stable`, used by [plot_forest()]).
 #'   Transitions that cannot be estimated (a source state never left, or a
@@ -96,6 +98,11 @@
 #' head(as.data.frame(gcert))
 #'
 #' @references
+#' DiDonato, A. R., & Morris, A. H. (1992). Algorithm 708: Significant
+#' digit computation of the incomplete beta function ratios. \emph{ACM
+#' Transactions on Mathematical Software, 18}(3), 360-373.
+#' \doi{10.1145/131766.131776}
+#'
 #' Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes
 #' resource engagement: A Bayesian differential network analysis.
 #' TNA Workshop 2026.
@@ -156,8 +163,10 @@ certainty_lsa <- function(fit,
   if (inference == "stability") {
     cr_lo <- pmin(W * consistency_range[1], W * consistency_range[2])
     cr_hi <- pmax(W * consistency_range[1], W * consistency_range[2])
+    # Mass outside the band. The upper tail is computed directly, not as
+    # 1 - pbeta(), which cancels below ~1e-16 (DiDonato & Morris, 1992).
     p_val <- stats::pbeta(cr_lo, a, b) +
-      (1 - stats::pbeta(cr_hi, a, b))            # mass outside the band
+      stats::pbeta(cr_hi, a, b, lower.tail = FALSE)
   } else {
     if (is.null(edge_threshold)) {
       nz <- W[is.finite(W) & W > 0]

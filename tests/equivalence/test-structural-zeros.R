@@ -1,8 +1,7 @@
 # Structural zeros. lsa_ipf() fits quasi-independence by iterative proportional fitting; the references are
 # stats::loglin() (the same model by another routine) and stats::glm() (the model as a Poisson regression on
-# the cells that are possible). Then the two findings recorded in equivalence/FINDINGS.md for loops = FALSE:
-# G2 with self-transitions present is a known difference (owner, 2026-11-22); the print header is a declared
-# defect (`defect =`): recorded as a disagreement, and the test fails once it no longer shows.
+# the cells that are possible), also when the data hold self-transitions that loops = FALSE forbids (the
+# forbidden counts are left out of the margins, Bakeman & Quera 1995). Then the print header.
 
 test_that("lsa_ipf() equals stats::loglin() started at the pattern of structural zeros", {
   set.seed(99)
@@ -33,21 +32,20 @@ test_that("lsa(loops = FALSE) on a table without self-transitions equals quasi-i
                    reference = "stats", covers = c("tests()", "lsa()"), quantity = "quasi-independence", tolerance = 1e-6, key = "test")
 })
 
-test_that("with loops = FALSE on data that has self-transitions, G2 is reported negative (known difference)", {
-  # 1074 of the 1734 engagement transitions are self-transitions. Declaring them impossible while they are in
-  # the margins gives expected counts that do not sum to the observed ones, and G2 = 2 sum O log(O / E) < 0.
-  # The package warns (class lagdynamics_structural_zero_counts) and still reports the number.
+test_that("with loops = FALSE on data that has self-transitions, G2 equals glm quasi-independence on the possible cells", {
+  # 1074 of the 1734 engagement transitions are self-transitions. Quasi-independence is a model of the possible
+  # cells (Bakeman & Quera 1995): the self-transitions are left out of its margins, and G2 is the glm deviance on
+  # the six possible cells (5.99, df 1). Before 0.35.3 the margins kept them and G2 was -1184.633.
+  # The package warns (class lagdynamics_structural_zero_counts) that the data contradict the declaration.
   fit <- suppressWarnings(lsa(engagement, loops = FALSE), classes = "lagdynamics_structural_zero_counts")
   cells <- subset(ref_long(ref_pairs(ref_sequences(engagement)), "count"), from != to)
-  model <- stats::glm(count ~ from + to, family = stats::poisson(), data = cells)
-  # A known difference (owner, 2026-11-22): documented and warned as not interpretable; the glm reference fits
-  # another model (the self-transitions left out of the margins).
-  expect_known_difference(
-    subset(tests(fit), test == "lrx2", select = c(test, statistic)), data.frame(test = "lrx2", statistic = stats::deviance(model)),
+  model <- stats::glm(count ~ from + to, family = stats::poisson(), data = cells,
+                      control = stats::glm.control(epsilon = 1e-14, maxit = 100L))
+  expect_reference(
+    subset(tests(fit), test == "lrx2", select = c(test, statistic, df)),
+    data.frame(test = "lrx2", statistic = stats::deviance(model), df = stats::df.residual(model)),
     reference = "stats", covers = c("tests()", "lsa()"), quantity = "G2 with loops = FALSE and self-transitions present",
-    tolerance = 1e-6, key = "test",
-    reason = "With loops = FALSE and self-transitions present, lsa() keeps them in the margins and reports G2 = -1184.633 with a documented, classed warning (lagdynamics_structural_zero_counts) that the tablewise test is not interpretable. The glm reference fits a different model: quasi-independence on the six possible cells, with the self-transitions left out of the margins (deviance 5.99).",
-    agrees_with = "lsa(loops = FALSE) on a table without self-transitions (stats::glm quasi-independence, compared above)")
+    tolerance = 1e-6, key = "test")
 })
 
 test_that("the print header counts significant transitions out of all cells when every cell is possible", {

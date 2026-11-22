@@ -59,7 +59,9 @@ with one row per transition (\code{from -> to} pair) and the columns
 \code{from}, \code{to}, \code{observed} (count), \code{prob_observed}, \code{prob_mean}
 (posterior mean), \code{prob_se} (posterior standard deviation),
 \code{prob_ci_low}, \code{prob_ci_high} (credible interval), \code{p_value}
-(posterior mass outside the band, or below the threshold), \code{stable}
+(posterior mass outside the band, or below the threshold; the upper
+tail is computed directly with \code{pbeta(lower.tail = FALSE)}, so tiny
+masses keep their relative accuracy), \code{stable}
 (certain), and \code{adj_res_observed}, \code{adj_res_stable} (the fit's
 adjusted residual and a copy of \code{stable}, used by \code{\link[=plot_forest]{plot_forest()}}).
 Transitions that cannot be estimated (a source state never left, or a
@@ -114,6 +116,11 @@ head(as.data.frame(gcert))
 
 }
 \references{
+DiDonato, A. R., & Morris, A. H. (1992). Algorithm 708: Significant
+digit computation of the incomplete beta function ratios. \emph{ACM
+Transactions on Mathematical Software, 18}(3), 360-373.
+\doi{10.1145/131766.131776}
+
 Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes
 resource engagement: A Bayesian differential network analysis.
 TNA Workshop 2026.

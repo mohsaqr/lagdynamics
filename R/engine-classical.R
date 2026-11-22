@@ -60,8 +60,12 @@
   prob <- .row_normalize(obs, rt)
 
   # §4 + §5: adjusted residuals and their p-values.
+  # With structural zeros the model is fitted to the possible cells only,
+  # so its margins are those of the possible cells (Bakeman & Quera, 1995).
+  fit_obs <- if (has_struct) obs * structural_zeros else obs
   resid <- .adjusted_residuals(
-    obs = obs, exp_mat = exp_mat, rt = rt, ct = ct, N = N,
+    obs = fit_obs, exp_mat = exp_mat, rt = rowSums(fit_obs),
+    ct = colSums(fit_obs), N = sum(fit_obs),
     structural_zeros = structural_zeros
   )
   z <- resid$z
@@ -91,7 +95,7 @@
   )
 
   # §8: tablewise likelihood-ratio chi-square.
-  lr <- .lrx2(obs, exp_mat, K = K, structural_zeros = structural_zeros)
+  lr <- .lrx2(fit_obs, exp_mat, K = K, structural_zeros = structural_zeros)
 
   list(
     obs = obs,

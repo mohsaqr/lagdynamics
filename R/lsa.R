@@ -112,10 +112,15 @@
 #' * `lagdynamics_needs_events`: `group` was given with a
 #'   transition-count matrix, which cannot be split.
 #'
-#' A warning of class `lagdynamics_structural_zero_counts` is raised when
-#' the data contain transitions in cells declared structural zeros: the
-#' row and column totals then include transitions the model declares
-#' impossible, and the tablewise test and residuals are not interpretable.
+#' With structural zeros (`loops = FALSE` or `structural_zeros`), the
+#' expected counts, adjusted residuals and the tablewise G^2 come from the
+#' quasi-independence model fitted to the possible cells (Bakeman & Quera,
+#' 1995, \emph{Psychological Bulletin}): its margins are the totals of the
+#' possible cells, so transitions that the data contain in a forbidden cell
+#' are left out of the fit. The observed counts and transition probabilities
+#' still report them. A warning of class `lagdynamics_structural_zero_counts`
+#' is raised when this happens, naming the cells, because the data
+#' contradict the declaration.
 #'
 #' @return An object of class `c("lsa", "cograph_network")`. Read it with
 #'   [transitions()] (one row per `from -> to` pair: `from`, `to`, `lag`,
@@ -153,6 +158,10 @@
 #'
 #' Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
 #' Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+#'
+#' Bakeman, R., & Quera, V. (1995). Log-linear approaches to lag-sequential
+#' analysis when consecutive codes may and cannot repeat. \emph{Psychological
+#' Bulletin, 118}(2), 272-284. \doi{10.1037/0033-2909.118.2.272}
 #'
 #' Christensen, R. (1997). \emph{Log-linear models and logistic
 #' regression} (2nd ed.). Springer.
@@ -317,12 +326,10 @@ lsa_nonparallel_dominance <- function(data, ...) {
 }
 
 # Structural zeros declare cells that cannot occur. When the data contain
-# transitions in such cells, the row and column totals still include them
-# while the expected counts are forced to 0, so the tablewise G^2 and the
-# residuals of the remaining cells are not interpretable (G^2 can even be
-# negative). How such counts should be handled (merge repeated codes, drop
-# the forbidden transitions, or refuse) is an open design decision; until
-# it is made, the fit warns with a classed condition.
+# transitions in such cells, the quasi-independence fit leaves them out
+# (its margins are those of the possible cells; Bakeman & Quera, 1995), and
+# the fit warns with a classed condition because the data contradict the
+# declaration.
 .warn_structural_zero_counts <- function(obs, structural_zeros) {
   if (is.null(structural_zeros)) return(invisible(NULL))
   forbidden <- structural_zeros == 0 & obs > 0
@@ -335,10 +342,10 @@ lsa_nonparallel_dominance <- function(data, ...) {
   warning(warningCondition(
     sprintf(paste0(
       "%d transitions fall in cells declared structural zeros: %s%s. ",
-      "The marginal totals include them, so the tablewise test and the ",
-      "residuals are not interpretable. Remove or merge these transitions ",
-      "(for example, collapse repeated codes) before declaring the cells ",
-      "impossible."),
+      "They are left out of the quasi-independence fit (expected counts, ",
+      "residuals and the tablewise test use the possible cells only). ",
+      "If the cells are possible, do not declare them structural zeros; ",
+      "if repeated codes should be merged, collapse them first."),
       as.integer(sum(obs[forbidden])), paste(shown, collapse = ", "),
       if (sum(forbidden) > 5L) ", ..." else ""),
     class = "lagdynamics_structural_zero_counts", call = NULL))

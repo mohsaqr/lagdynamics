@@ -187,10 +187,15 @@ observed transitions but no permitted cell.
 transition-count matrix, which cannot be split.
 }
 
-A warning of class \code{lagdynamics_structural_zero_counts} is raised when
-the data contain transitions in cells declared structural zeros: the
-row and column totals then include transitions the model declares
-impossible, and the tablewise test and residuals are not interpretable.
+With structural zeros (\code{loops = FALSE} or \code{structural_zeros}), the
+expected counts, adjusted residuals and the tablewise G^2 come from the
+quasi-independence model fitted to the possible cells (Bakeman & Quera,
+1995, \emph{Psychological Bulletin}): its margins are the totals of the
+possible cells, so transitions that the data contain in a forbidden cell
+are left out of the fit. The observed counts and transition probabilities
+still report them. A warning of class \code{lagdynamics_structural_zero_counts}
+is raised when this happens, naming the cells, because the data
+contradict the declaration.
 }
 
 \examples{
@@ -215,6 +220,10 @@ Press.
 
 Bakeman, R., & Quera, V. (1995). \emph{Analyzing interaction:
 Sequential analysis with SDIS and GSEQ}. Cambridge University Press.
+
+Bakeman, R., & Quera, V. (1995). Log-linear approaches to lag-sequential
+analysis when consecutive codes may and cannot repeat. \emph{Psychological
+Bulletin, 118}(2), 272-284. \doi{10.1037/0033-2909.118.2.272}
 
 Christensen, R. (1997). \emph{Log-linear models and logistic
 regression} (2nd ed.). Springer.

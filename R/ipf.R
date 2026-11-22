@@ -3,7 +3,7 @@
 # Wickens (1989) ch. 4, pp. 107-112.
 #
 # The function returns the fitted expected-frequency matrix E with the
-# property that rowSums(E) == rowSums(O), colSums(E) == colSums(O),
+# property that rowSums(E) == rowSums(O * S), colSums(E) == colSums(O * S),
 # and E[i, j] == 0 wherever S[i, j] == 0.
 #
 # Validated against stats::loglin() — see tests/testthat/test-ipf.R.
@@ -15,13 +15,19 @@
 #' by iterative proportional fitting. When some transitions cannot occur by
 #' construction (structural zeros, such as self-transitions in a coding scheme
 #' that merges repeated codes), the quasi-independence model fits expected
-#' counts that are zero in the forbidden cells and reproduce the observed row
-#' and column totals; it has no closed form and is found by iterative
-#' proportional fitting (Wickens, 1989), which rescales the rows and columns of
-#' the table in turn until both sets of totals match. Under ordinary
+#' counts that are zero in the forbidden cells and reproduce the row and
+#' column totals of the possible cells; it has no closed form and is found
+#' by iterative proportional fitting (Wickens, 1989), which rescales the rows
+#' and columns of the table in turn until both sets of totals match. Under ordinary
 #' independence, the expected count of a transition is the product of its row
 #' and column totals divided by the grand total, a formula that assigns expected
 #' counts to impossible cells.
+#'
+#' Counts that fall in a structural-zero cell are not part of the
+#' quasi-independence model: the totals the fit reproduces are those of the
+#' possible cells (Bishop, Fienberg & Holland, 1975; Bakeman & Quera, 1995),
+#' so the fit equals the Poisson log-linear model `count ~ from + to` fitted
+#' to the possible cells alone.
 #'
 #' [lsa()] calls `lsa_ipf()` when `loops = FALSE` or `structural_zeros` is
 #' given, so it is needed directly only to inspect the expected table or to use
@@ -59,6 +65,14 @@
 #' lsa_ipf(obs, structure = 1 - diag(3))
 #'
 #' @references
+#' Bakeman, R., & Quera, V. (1995). Log-linear approaches to lag-sequential
+#' analysis when consecutive codes may and cannot repeat. \emph{Psychological
+#' Bulletin, 118}(2), 272-284. \doi{10.1037/0033-2909.118.2.272}
+#'
+#' Bishop, Y. M. M., Fienberg, S. E., & Holland, P. W. (1975).
+#' \emph{Discrete multivariate analysis: Theory and practice} (ch. 5). MIT
+#' Press.
+#'
 #' Wickens, T. D. (1989). \emph{Multiway contingency tables analysis for
 #' the social sciences} (pp. 107-112). Lawrence Erlbaum.
 #'
@@ -91,18 +105,22 @@ lsa_ipf <- function(obs, structure = NULL, tol = 1e-8, max_iter = 200L) {
       is.matrix(structure) && nrow(structure) == K && ncol(structure) == K &&
       all(structure %in% c(0, 1))
   )
-  rt <- rowSums(obs)
-  ct <- colSums(obs)
-  # Sanity: if a row has total > 0 but no estimable cell in it, IPF cannot
-  # converge. Same for columns.
-  if (any(rt > 0 & rowSums(structure) == 0)) {
+  # A state with observed transitions whose cells are all structural zeros
+  # contradicts the declaration beyond repair: refuse.
+  if (any(rowSums(obs) > 0 & rowSums(structure) == 0)) {
     .lsa_stop(class = "ipf_infeasible", "IPF infeasible: a row has positive marginal but no estimable cells.",
          call. = FALSE)
   }
-  if (any(ct > 0 & colSums(structure) == 0)) {
+  if (any(colSums(obs) > 0 & colSums(structure) == 0)) {
     .lsa_stop(class = "ipf_infeasible", "IPF infeasible: a column has positive marginal but no estimable cells.",
          call. = FALSE)
   }
+  # Quasi-independence is a model of the possible cells only (Bishop,
+  # Fienberg & Holland, 1975, ch. 5; Bakeman & Quera, 1995): counts that
+  # fall in a structural-zero cell are not part of the table being fitted,
+  # so the margins the fit reproduces are taken from the possible cells.
+  rt <- rowSums(obs * structure)
+  ct <- colSums(obs * structure)
 
   E <- structure * 1.0
   converged <- FALSE

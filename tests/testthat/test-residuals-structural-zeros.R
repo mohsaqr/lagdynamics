@@ -53,14 +53,16 @@ test_that("expected freqs under structural zeros match IPF directly", {
   expect_equal(unname(fit$exp), unname(ipf$fit), tolerance = 1e-8)
 })
 
-test_that("structural-zero marginals match observed marginals", {
+test_that("structural-zero marginals match the margins of the possible cells", {
+  # Quasi-independence (Bakeman & Quera, 1995): the counts in forbidden
+  # cells are left out, so the fit reproduces the possible-cell totals.
   set.seed(14L)
   seq300 <- sample(c("a", "b", "c"), 300, replace = TRUE)
   S <- 1 - diag(3)
   fit <- lsa_forbidden_counts(seq300, engine = "classical", structural_zeros = S)
-  expect_equal(rowSums(fit$exp), rowSums(fit$obs),
+  expect_equal(rowSums(fit$exp), rowSums(fit$obs * S),
                tolerance = 1e-6, ignore_attr = TRUE)
-  expect_equal(colSums(fit$exp), colSums(fit$obs),
+  expect_equal(colSums(fit$exp), colSums(fit$obs * S),
                tolerance = 1e-6, ignore_attr = TRUE)
 })
 
