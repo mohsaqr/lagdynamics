@@ -7,8 +7,10 @@ a sequence starts in it), and the individual transitions. These methods give
 the first two levels; transitions() gives the third.
 print() shows a compact overview: the engine and lag, the numbers of
 states, transitions, events and sequences, the likelihood-ratio test of
-independence, the strongest over-represented transitions and the
-initial-state distribution. summary() returns a summary.lsa object
+independence, the number of significant transitions out of the cells
+tested (a structural zero, such as a self-transition with loops = FALSE,
+has no p-value and is not counted), the strongest over-represented
+transitions and the initial-state distribution. summary() returns a summary.lsa object
 holding two tables, a one-row overview of the fit and one row per state,
 which are read with as.data.frame(summary(fit), what = ). For a
 grouped fit, summary() returns one overview row per group.
@@ -24,8 +26,10 @@ a sequence starts in it), and the individual transitions. These methods give
 the first two levels; transitions() gives the third.
 print() shows a compact overview: the engine and lag, the numbers of
 states, transitions, events and sequences, the likelihood-ratio test of
-independence, the strongest over-represented transitions and the
-initial-state distribution. summary() returns a summary.lsa object
+independence, the number of significant transitions out of the cells
+tested (a structural zero, such as a self-transition with loops = FALSE,
+has no p-value and is not counted), the strongest over-represented
+transitions and the initial-state distribution. summary() returns a summary.lsa object
 holding two tables, a one-row overview of the fit and one row per state,
 which are read with as.data.frame(summary(fit), what = ). For a
 grouped fit, summary() returns one overview row per group.
@@ -41,7 +45,7 @@ reading verbs transitions(), nodes(), tests() and initial()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,8 +102,10 @@ a sequence starts in it), and the individual transitions. These methods give
 the first two levels; <code><a href="transitions.html">transitions()</a></code> gives the third.</p>
 <p><code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> shows a compact overview: the engine and lag, the numbers of
 states, transitions, events and sequences, the likelihood-ratio test of
-independence, the strongest over-represented transitions and the
-initial-state distribution. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> returns a <code>summary.lsa</code> object
+independence, the number of significant transitions out of the cells
+tested (a structural zero, such as a self-transition with <code>loops = FALSE</code>,
+has no p-value and is not counted), the strongest over-represented
+transitions and the initial-state distribution. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> returns a <code>summary.lsa</code> object
 holding two tables, a one-row overview of the fit and one row per state,
 which are read with <code>as.data.frame(summary(fit), what = )</code>. For a
 grouped fit, <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> returns one overview row per group.

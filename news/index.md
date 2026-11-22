@@ -1,5 +1,13 @@
 # Changelog
 
+## lagdynamics 0.35.2
+
+- [`print()`](https://rdrr.io/r/base/print.html) of a fit counts
+  significant transitions out of the cells that were tested. With
+  `loops = FALSE` the self-transitions are structural zeros without a
+  p-value; the header said “of 81” on a nine-state table where 72 cells
+  are tested, and now says “of 72”.
+
 ## lagdynamics 0.35.0
 
 CRAN release: 2026-11-18

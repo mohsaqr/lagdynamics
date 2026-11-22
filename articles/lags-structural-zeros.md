@@ -326,7 +326,7 @@ constrained_fit
 #>   states: adapt, cohesion, consensus, coregulate, discuss, emotion, monitor, plan, synthesis
 #>   independence: G² = 13116.4, df = 61, p <2e-16
 #> 
-#>   Significant transitions (p < 0.05): 69 of 81
+#>   Significant transitions (p < 0.05): 69 of 78
 #>   strongest over-represented (of 23):
 #>     emotion -> cohesion      z =  +58.3  ***
 #>     discuss -> synthesis     z =  +46.6  ***

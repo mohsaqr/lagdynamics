@@ -15,8 +15,11 @@ gives the third.
 
 [`print()`](https://rdrr.io/r/base/print.html) shows a compact overview:
 the engine and lag, the numbers of states, transitions, events and
-sequences, the likelihood-ratio test of independence, the strongest
-over-represented transitions and the initial-state distribution.
+sequences, the likelihood-ratio test of independence, the number of
+significant transitions out of the cells tested (a structural zero, such
+as a self-transition with `loops = FALSE`, has no p-value and is not
+counted), the strongest over-represented transitions and the
+initial-state distribution.
 [`summary()`](https://rdrr.io/r/base/summary.html) returns a
 `summary.lsa` object holding two tables, a one-row overview of the fit
 and one row per state, which are read with
