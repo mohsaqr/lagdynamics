@@ -3,26 +3,36 @@
 by iterative proportional fitting. When some transitions cannot occur by
 construction (structural zeros, such as self-transitions in a coding scheme
 that merges repeated codes), the quasi-independence model fits expected
-counts that are zero in the forbidden cells and reproduce the observed row
-and column totals; it has no closed form and is found by iterative
-proportional fitting (Wickens, 1989), which rescales the rows and columns of
-the table in turn until both sets of totals match. Under ordinary
+counts that are zero in the forbidden cells and reproduce the row and
+column totals of the possible cells; it has no closed form and is found
+by iterative proportional fitting (Wickens, 1989), which rescales the rows
+and columns of the table in turn until both sets of totals match. Under ordinary
 independence, the expected count of a transition is the product of its row
 and column totals divided by the grand total, a formula that assigns expected
 counts to impossible cells.
+Counts that fall in a structural-zero cell are not part of the
+quasi-independence model: the totals the fit reproduces are those of the
+possible cells (Bishop, Fienberg &amp;amp; Holland, 1975; Bakeman &amp;amp; Quera, 1995),
+so the fit equals the Poisson log-linear model count ~ from + to fitted
+to the possible cells alone.
 lsa() calls lsa_ipf() when loops = FALSE or structural_zeros is
 given, so it is needed directly only to inspect the expected table or to use
 it outside lsa()."><meta property="og:description" content="lsa_ipf() fits the expected counts of a count table with structural zeros
 by iterative proportional fitting. When some transitions cannot occur by
 construction (structural zeros, such as self-transitions in a coding scheme
 that merges repeated codes), the quasi-independence model fits expected
-counts that are zero in the forbidden cells and reproduce the observed row
-and column totals; it has no closed form and is found by iterative
-proportional fitting (Wickens, 1989), which rescales the rows and columns of
-the table in turn until both sets of totals match. Under ordinary
+counts that are zero in the forbidden cells and reproduce the row and
+column totals of the possible cells; it has no closed form and is found
+by iterative proportional fitting (Wickens, 1989), which rescales the rows
+and columns of the table in turn until both sets of totals match. Under ordinary
 independence, the expected count of a transition is the product of its row
 and column totals divided by the grand total, a formula that assigns expected
 counts to impossible cells.
+Counts that fall in a structural-zero cell are not part of the
+quasi-independence model: the totals the fit reproduces are those of the
+possible cells (Bishop, Fienberg &amp;amp; Holland, 1975; Bakeman &amp;amp; Quera, 1995),
+so the fit equals the Poisson log-linear model count ~ from + to fitted
+to the possible cells alone.
 lsa() calls lsa_ipf() when loops = FALSE or structural_zeros is
 given, so it is needed directly only to inspect the expected table or to use
 it outside lsa()."></head><body>
@@ -33,7 +43,7 @@ it outside lsa()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,13 +96,18 @@ it outside lsa()."></head><body>
 by iterative proportional fitting. When some transitions cannot occur by
 construction (structural zeros, such as self-transitions in a coding scheme
 that merges repeated codes), the quasi-independence model fits expected
-counts that are zero in the forbidden cells and reproduce the observed row
-and column totals; it has no closed form and is found by iterative
-proportional fitting (Wickens, 1989), which rescales the rows and columns of
-the table in turn until both sets of totals match. Under ordinary
+counts that are zero in the forbidden cells and reproduce the row and
+column totals of the possible cells; it has no closed form and is found
+by iterative proportional fitting (Wickens, 1989), which rescales the rows
+and columns of the table in turn until both sets of totals match. Under ordinary
 independence, the expected count of a transition is the product of its row
 and column totals divided by the grand total, a formula that assigns expected
 counts to impossible cells.</p>
+<p>Counts that fall in a structural-zero cell are not part of the
+quasi-independence model: the totals the fit reproduces are those of the
+possible cells (Bishop, Fienberg &amp; Holland, 1975; Bakeman &amp; Quera, 1995),
+so the fit equals the Poisson log-linear model <code>count ~ from + to</code> fitted
+to the possible cells alone.</p>
 <p><code><a href="lsa.html">lsa()</a></code> calls <code>lsa_ipf()</code> when <code>loops = FALSE</code> or <code>structural_zeros</code> is
 given, so it is needed directly only to inspect the expected table or to use
 it outside <code><a href="lsa.html">lsa()</a></code>.</p>
@@ -144,7 +159,13 @@ transitions but every one of its cells is a structural zero.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Wickens, T. D. (1989). <em>Multiway contingency tables analysis for
+    <p>Bakeman, R., &amp; Quera, V. (1995). Log-linear approaches to lag-sequential
+analysis when consecutive codes may and cannot repeat. <em>Psychological
+Bulletin, 118</em>(2), 272-284. <a href="https://doi.org/10.1037/0033-2909.118.2.272" class="external-link">doi:10.1037/0033-2909.118.2.272</a></p>
+<p>Bishop, Y. M. M., Fienberg, S. E., &amp; Holland, P. W. (1975).
+<em>Discrete multivariate analysis: Theory and practice</em> (ch. 5). MIT
+Press.</p>
+<p>Wickens, T. D. (1989). <em>Multiway contingency tables analysis for
 the social sciences</em> (pp. 107-112). Lawrence Erlbaum.</p>
     </div>
     <div class="section level2">

@@ -71,7 +71,7 @@ the same object."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -332,10 +332,15 @@ structural zeros.</p></li>
 observed transitions but no permitted cell.</p></li>
 <li><p><code>lagdynamics_needs_events</code>: <code>group</code> was given with a
 transition-count matrix, which cannot be split.</p></li>
-</ul><p>A warning of class <code>lagdynamics_structural_zero_counts</code> is raised when
-the data contain transitions in cells declared structural zeros: the
-row and column totals then include transitions the model declares
-impossible, and the tablewise test and residuals are not interpretable.</p>
+</ul><p>With structural zeros (<code>loops = FALSE</code> or <code>structural_zeros</code>), the
+expected counts, adjusted residuals and the tablewise G^2 come from the
+quasi-independence model fitted to the possible cells (Bakeman &amp; Quera,
+1995, <em>Psychological Bulletin</em>): its margins are the totals of the
+possible cells, so transitions that the data contain in a forbidden cell
+are left out of the fit. The observed counts and transition probabilities
+still report them. A warning of class <code>lagdynamics_structural_zero_counts</code>
+is raised when this happens, naming the cells, because the data
+contradict the declaration.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -344,6 +349,9 @@ introduction to sequential analysis</em> (2nd ed.). Cambridge University
 Press.</p>
 <p>Bakeman, R., &amp; Quera, V. (1995). <em>Analyzing interaction:
 Sequential analysis with SDIS and GSEQ</em>. Cambridge University Press.</p>
+<p>Bakeman, R., &amp; Quera, V. (1995). Log-linear approaches to lag-sequential
+analysis when consecutive codes may and cannot repeat. <em>Psychological
+Bulletin, 118</em>(2), 272-284. <a href="https://doi.org/10.1037/0033-2909.118.2.272" class="external-link">doi:10.1037/0033-2909.118.2.272</a></p>
 <p>Christensen, R. (1997). <em>Log-linear models and logistic
 regression</em> (2nd ed.). Springer.</p>
 <p>Haberman, S. J. (1979). <em>Analysis of qualitative data: Volume 2,

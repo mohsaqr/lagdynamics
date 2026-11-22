@@ -1,5 +1,31 @@
 # Changelog
 
+## lagdynamics 0.35.3
+
+- With structural zeros (`loops = FALSE` or `structural_zeros`) on data
+  that hold transitions in the forbidden cells, the quasi-independence
+  model is now fitted to the possible cells, with the margins of those
+  cells (Bakeman & Quera, 1995, *Psychological Bulletin*; Bishop,
+  Fienberg & Holland, 1975): the forbidden counts are left out of the
+  expected counts, the adjusted residuals and the tablewise tests. The
+  margins used to keep them, so the expected counts did not sum to the
+  counts being fitted and the tablewise G^2 could be negative:
+  `lsa(engagement, loops = FALSE)` reported G^2 = -1184.633 with p = 1
+  and now reports 5.994 on 1 df (p = 0.014), the deviance of the Poisson
+  quasi-independence model `count ~ from + to` fitted by
+  [`glm()`](https://rdrr.io/r/stats/glm.html) to the six possible cells.
+  [`lsa_ipf()`](https://pak.dynasite.org/lagdynamics/reference/lsa_ipf.md)
+  likewise reproduces the totals of the possible cells. Tables whose
+  forbidden cells are empty are unchanged. The warning
+  `lagdynamics_structural_zero_counts` is still raised and now says that
+  the counts are left out.
+- [`certainty_lsa()`](https://pak.dynasite.org/lagdynamics/reference/certainty_lsa.md)
+  computes the upper tail of the Beta posterior with
+  `pbeta(lower.tail = FALSE)` instead of `1 - pbeta()`, which lost
+  relative accuracy for masses below about 1e-16 (Average -\> Average in
+  `engagement`: 3.14102e-17, now 3.14168e-17). No certainty decision
+  changes.
+
 ## lagdynamics 0.35.2
 
 - [`print()`](https://rdrr.io/r/base/print.html) of a fit counts

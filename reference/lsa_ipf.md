@@ -5,12 +5,18 @@ zeros by iterative proportional fitting. When some transitions cannot
 occur by construction (structural zeros, such as self-transitions in a
 coding scheme that merges repeated codes), the quasi-independence model
 fits expected counts that are zero in the forbidden cells and reproduce
-the observed row and column totals; it has no closed form and is found
-by iterative proportional fitting (Wickens, 1989), which rescales the
-rows and columns of the table in turn until both sets of totals match.
-Under ordinary independence, the expected count of a transition is the
-product of its row and column totals divided by the grand total, a
-formula that assigns expected counts to impossible cells.
+the row and column totals of the possible cells; it has no closed form
+and is found by iterative proportional fitting (Wickens, 1989), which
+rescales the rows and columns of the table in turn until both sets of
+totals match. Under ordinary independence, the expected count of a
+transition is the product of its row and column totals divided by the
+grand total, a formula that assigns expected counts to impossible cells.
+
+Counts that fall in a structural-zero cell are not part of the
+quasi-independence model: the totals the fit reproduces are those of the
+possible cells (Bishop, Fienberg & Holland, 1975; Bakeman & Quera,
+1995), so the fit equals the Poisson log-linear model
+`count ~ from + to` fitted to the possible cells alone.
 
 [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) calls
 `lsa_ipf()` when `loops = FALSE` or `structural_zeros` is given, so it
@@ -63,6 +69,14 @@ Errors carry the class `lagdynamics_error` and one of:
   but every one of its cells is a structural zero.
 
 ## References
+
+Bakeman, R., & Quera, V. (1995). Log-linear approaches to lag-sequential
+analysis when consecutive codes may and cannot repeat. *Psychological
+Bulletin, 118*(2), 272-284.
+[doi:10.1037/0033-2909.118.2.272](https://doi.org/10.1037/0033-2909.118.2.272)
+
+Bishop, Y. M. M., Fienberg, S. E., & Holland, P. W. (1975). *Discrete
+multivariate analysis: Theory and practice* (ch. 5). MIT Press.
 
 Wickens, T. D. (1989). *Multiway contingency tables analysis for the
 social sciences* (pp. 107-112). Lawrence Erlbaum.

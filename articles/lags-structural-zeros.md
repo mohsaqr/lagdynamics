@@ -390,13 +390,14 @@ forbidden without building a matrix. The model assumes that these cells
 are empty in the data; when transitions do fall in a forbidden cell,
 [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) warns
 with the condition `lagdynamics_structural_zero_counts`, because the
-margins would then include transitions the model declares impossible.
-Every state repeats in the bundled datasets (459 `Active -> Active`
-transitions in `engagement`), so they are not candidates for this model;
-the example uses a small count table of three dialogue acts with an
-empty diagonal, which
-[`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md) accepts
-directly.
+data contradict the declaration, and leaves those transitions out of the
+fit: the quasi-independence model is fitted to the possible cells, with
+the margins of those cells (Bakeman & Quera, 1995). Every state repeats
+in the bundled datasets (459 `Active -> Active` transitions in
+`engagement`), so they are not candidates for this model; the example
+uses a small count table of three dialogue acts with an empty diagonal,
+which [`lsa()`](https://pak.dynasite.org/lagdynamics/reference/lsa.md)
+accepts directly.
 
 ``` r
 

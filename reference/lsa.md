@@ -245,10 +245,15 @@ Errors carry the class `lagdynamics_error` and one of:
 - `lagdynamics_needs_events`: `group` was given with a transition-count
   matrix, which cannot be split.
 
-A warning of class `lagdynamics_structural_zero_counts` is raised when
-the data contain transitions in cells declared structural zeros: the row
-and column totals then include transitions the model declares
-impossible, and the tablewise test and residuals are not interpretable.
+With structural zeros (`loops = FALSE` or `structural_zeros`), the
+expected counts, adjusted residuals and the tablewise G^2 come from the
+quasi-independence model fitted to the possible cells (Bakeman & Quera,
+1995, *Psychological Bulletin*): its margins are the totals of the
+possible cells, so transitions that the data contain in a forbidden cell
+are left out of the fit. The observed counts and transition
+probabilities still report them. A warning of class
+`lagdynamics_structural_zero_counts` is raised when this happens, naming
+the cells, because the data contradict the declaration.
 
 ## References
 
@@ -258,6 +263,11 @@ Press.
 
 Bakeman, R., & Quera, V. (1995). *Analyzing interaction: Sequential
 analysis with SDIS and GSEQ*. Cambridge University Press.
+
+Bakeman, R., & Quera, V. (1995). Log-linear approaches to lag-sequential
+analysis when consecutive codes may and cannot repeat. *Psychological
+Bulletin, 118*(2), 272-284.
+[doi:10.1037/0033-2909.118.2.272](https://doi.org/10.1037/0033-2909.118.2.272)
 
 Christensen, R. (1997). *Log-linear models and logistic regression* (2nd
 ed.). Springer.

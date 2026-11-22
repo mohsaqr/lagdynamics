@@ -53,7 +53,7 @@ same model, use bayes_compare_lsa()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -208,7 +208,9 @@ with one row per transition (<code>from -&gt; to</code> pair) and the columns
 <code>from</code>, <code>to</code>, <code>observed</code> (count), <code>prob_observed</code>, <code>prob_mean</code>
 (posterior mean), <code>prob_se</code> (posterior standard deviation),
 <code>prob_ci_low</code>, <code>prob_ci_high</code> (credible interval), <code>p_value</code>
-(posterior mass outside the band, or below the threshold), <code>stable</code>
+(posterior mass outside the band, or below the threshold; the upper
+tail is computed directly with <code>pbeta(lower.tail = FALSE)</code>, so tiny
+masses keep their relative accuracy), <code>stable</code>
 (certain), and <code>adj_res_observed</code>, <code>adj_res_stable</code> (the fit's
 adjusted residual and a copy of <code>stable</code>, used by <code><a href="plot_forest.html">plot_forest()</a></code>).
 Transitions that cannot be estimated (a source state never left, or a
@@ -221,7 +223,11 @@ and the number of certain transitions and returns <code>x</code> invisibly.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Johnston, L., &amp; Jendoubi, T. (2026). How delivery mode reshapes
+    <p>DiDonato, A. R., &amp; Morris, A. H. (1992). Algorithm 708: Significant
+digit computation of the incomplete beta function ratios. <em>ACM
+Transactions on Mathematical Software, 18</em>(3), 360-373.
+<a href="https://doi.org/10.1145/131766.131776" class="external-link">doi:10.1145/131766.131776</a></p>
+<p>Johnston, L., &amp; Jendoubi, T. (2026). How delivery mode reshapes
 resource engagement: A Bayesian differential network analysis.
 TNA Workshop 2026.</p>
     </div>
@@ -256,7 +262,7 @@ model.</p></div>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    0.7312156 5.560385e-20   TRUE       21.6628107           TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    0.2334883 6.063196e-04   TRUE      -12.9060384           TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3    0.3020418 1.205186e-04   TRUE      -11.3191319           TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4    0.6438538 3.141020e-17   TRUE       12.4526148           TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    0.6438538 3.141676e-17   TRUE       12.4526148           TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5    0.4501757 2.232689e-04   TRUE       -1.7364613           TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6    0.2153070 1.168633e-03   TRUE        0.1757996           TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7    0.5365741 9.440665e-06   TRUE       15.3904661           TRUE</span>

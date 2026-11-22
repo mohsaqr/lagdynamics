@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,12 @@
       <small>Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.35.3" id="lagdynamics-0353">lagdynamics 0.35.3<a class="anchor" aria-label="anchor" href="#lagdynamics-0353"></a></h2>
+<ul><li>With structural zeros (<code>loops = FALSE</code> or <code>structural_zeros</code>) on data that hold transitions in the forbidden cells, the quasi-independence model is now fitted to the possible cells, with the margins of those cells (Bakeman &amp; Quera, 1995, <em>Psychological Bulletin</em>; Bishop, Fienberg &amp; Holland, 1975): the forbidden counts are left out of the expected counts, the adjusted residuals and the tablewise tests. The margins used to keep them, so the expected counts did not sum to the counts being fitted and the tablewise G^2 could be negative: <code>lsa(engagement, loops = FALSE)</code> reported G^2 = -1184.633 with p = 1 and now reports 5.994 on 1 df (p = 0.014), the deviance of the Poisson quasi-independence model <code>count ~ from + to</code> fitted by <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> to the six possible cells. <code><a href="../reference/lsa_ipf.html">lsa_ipf()</a></code> likewise reproduces the totals of the possible cells. Tables whose forbidden cells are empty are unchanged. The warning <code>lagdynamics_structural_zero_counts</code> is still raised and now says that the counts are left out.</li>
+<li>
+<code><a href="../reference/certainty_lsa.html">certainty_lsa()</a></code> computes the upper tail of the Beta posterior with <code>pbeta(lower.tail = FALSE)</code> instead of <code>1 - pbeta()</code>, which lost relative accuracy for masses below about 1e-16 (Average -&gt; Average in <code>engagement</code>: 3.14102e-17, now 3.14168e-17). No certainty decision changes.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.35.2" id="lagdynamics-0352">lagdynamics 0.35.2<a class="anchor" aria-label="anchor" href="#lagdynamics-0352"></a></h2>
 <ul><li>

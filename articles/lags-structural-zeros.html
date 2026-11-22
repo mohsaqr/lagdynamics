@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -475,13 +475,14 @@ state can never follow itself. <code>loops = FALSE</code> declares the
 whole diagonal forbidden without building a matrix. The model assumes
 that these cells are empty in the data; when transitions do fall in a
 forbidden cell, <code><a href="../reference/lsa.html">lsa()</a></code> warns with the condition
-<code>lagdynamics_structural_zero_counts</code>, because the margins
-would then include transitions the model declares impossible. Every
-state repeats in the bundled datasets (459
-<code>Active -&gt; Active</code> transitions in
-<code>engagement</code>), so they are not candidates for this model; the
-example uses a small count table of three dialogue acts with an empty
-diagonal, which <code><a href="../reference/lsa.html">lsa()</a></code> accepts directly.</p>
+<code>lagdynamics_structural_zero_counts</code>, because the data
+contradict the declaration, and leaves those transitions out of the fit:
+the quasi-independence model is fitted to the possible cells, with the
+margins of those cells (Bakeman &amp; Quera, 1995). Every state repeats
+in the bundled datasets (459 <code>Active -&gt; Active</code>
+transitions in <code>engagement</code>), so they are not candidates for
+this model; the example uses a small count table of three dialogue acts
+with an empty diagonal, which <code><a href="../reference/lsa.html">lsa()</a></code> accepts directly.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">turns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="fl">0</span>, <span class="fl">34</span>, <span class="fl">18</span>,</span>
 <span>                  <span class="fl">27</span>,  <span class="fl">0</span>, <span class="fl">41</span>,</span>

@@ -112,9 +112,11 @@ which returns a data frame with one row per transition (`from -> to`
 pair) and the columns `from`, `to`, `observed` (count), `prob_observed`,
 `prob_mean` (posterior mean), `prob_se` (posterior standard deviation),
 `prob_ci_low`, `prob_ci_high` (credible interval), `p_value` (posterior
-mass outside the band, or below the threshold), `stable` (certain), and
-`adj_res_observed`, `adj_res_stable` (the fit's adjusted residual and a
-copy of `stable`, used by
+mass outside the band, or below the threshold; the upper tail is
+computed directly with `pbeta(lower.tail = FALSE)`, so tiny masses keep
+their relative accuracy), `stable` (certain), and `adj_res_observed`,
+`adj_res_stable` (the fit's adjusted residual and a copy of `stable`,
+used by
 [`plot_forest()`](https://pak.dynasite.org/lagdynamics/reference/plot_forest.md)).
 Transitions that cannot be estimated (a source state never left, or a
 structural zero) are `NA` and never certain.
@@ -128,6 +130,11 @@ their tables with a leading `group` column.
 the number of certain transitions and returns `x` invisibly.
 
 ## References
+
+DiDonato, A. R., & Morris, A. H. (1992). Algorithm 708: Significant
+digit computation of the incomplete beta function ratios. *ACM
+Transactions on Mathematical Software, 18*(3), 360-373.
+[doi:10.1145/131766.131776](https://doi.org/10.1145/131766.131776)
 
 Johnston, L., & Jendoubi, T. (2026). How delivery mode reshapes resource
 engagement: A Bayesian differential network analysis. TNA Workshop 2026.
@@ -169,7 +176,7 @@ transitions(cert, significant = TRUE)
 #> 1    0.7312156 5.560385e-20   TRUE       21.6628107           TRUE
 #> 2    0.2334883 6.063196e-04   TRUE      -12.9060384           TRUE
 #> 3    0.3020418 1.205186e-04   TRUE      -11.3191319           TRUE
-#> 4    0.6438538 3.141020e-17   TRUE       12.4526148           TRUE
+#> 4    0.6438538 3.141676e-17   TRUE       12.4526148           TRUE
 #> 5    0.4501757 2.232689e-04   TRUE       -1.7364613           TRUE
 #> 6    0.2153070 1.168633e-03   TRUE        0.1757996           TRUE
 #> 7    0.5365741 9.440665e-06   TRUE       15.3904661           TRUE
