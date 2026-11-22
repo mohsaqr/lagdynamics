@@ -47,3 +47,19 @@ test_that("print.summary.lsa shows the overview and the state activity", {
   expect_silent(s <- summary(fit))
   expect_identical(withVisible(summary(fit))$visible, TRUE)
 })
+
+test_that("print() counts significant transitions out of the cells tested", {
+  # Three states and no self-transition in the data. With loops = FALSE the
+  # three self-transitions are structural zeros: 9 - 3 = 6 cells are tested.
+  seqs <- data.frame(a = c("A", "B", "C", "A", "C", "B", "A"),
+                     b = c("B", "C", "A", "C", "B", "A", "B"),
+                     c = c("C", "A", "B", "B", "A", "C", "C"),
+                     d = c("A", "B", "C", "A", "B", "A", "A"))
+  header <- function(fit) {
+    grep("Significant transitions", utils::capture.output(print(fit)), value = TRUE)
+  }
+  all_cells <- lsa(seqs)
+  expect_match(header(all_cells), " of 9$")
+  no_loops <- lsa(seqs, loops = FALSE)
+  expect_match(header(no_loops), " of 6$")
+})

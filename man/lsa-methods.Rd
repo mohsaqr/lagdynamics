@@ -85,8 +85,10 @@ the first two levels; \code{\link[=transitions]{transitions()}} gives the third.
 
 \code{print()} shows a compact overview: the engine and lag, the numbers of
 states, transitions, events and sequences, the likelihood-ratio test of
-independence, the strongest over-represented transitions and the
-initial-state distribution. \code{summary()} returns a \code{summary.lsa} object
+independence, the number of significant transitions out of the cells
+tested (a structural zero, such as a self-transition with \code{loops = FALSE},
+has no p-value and is not counted), the strongest over-represented
+transitions and the initial-state distribution. \code{summary()} returns a \code{summary.lsa} object
 holding two tables, a one-row overview of the fit and one row per state,
 which are read with \code{as.data.frame(summary(fit), what = )}. For a
 grouped fit, \code{summary()} returns one overview row per group.

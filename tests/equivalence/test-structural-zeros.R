@@ -59,7 +59,7 @@ test_that("the print header counts significant transitions out of all cells when
                    tolerance = 0)
 })
 
-test_that("FINDING: with loops = FALSE the print header counts significant transitions out of all cells", {
+test_that("with loops = FALSE the print header counts significant transitions out of the cells tested", {
   fit <- suppressWarnings(lsa(group_regulation_long, actor = "Actor", action = "Action", time = "Time", loops = FALSE),
                           classes = "lagdynamics_structural_zero_counts")
   header <- grep("Significant transitions", utils::capture.output(print(fit)), value = TRUE)
@@ -67,6 +67,5 @@ test_that("FINDING: with loops = FALSE the print header counts significant trans
   states <- length(unique(group_regulation_long$Action))
   expect_reference(
     printed_total, states * states - states, reference = "independent: cells that are possible, K * K - K",
-    covers = "print.lsa()", quantity = "transitions the header counts significance out of", tolerance = 0,
-    defect = "Print header counts significance out of all cells with loops = FALSE (equivalence/FINDINGS.md, lagdynamics 0.35.0): the nine self-transitions are declared impossible, so only 72 cells can be tested; the header prints \"of 81\".")
+    covers = "print.lsa()", quantity = "transitions the header counts significance out of", tolerance = 0)
 })

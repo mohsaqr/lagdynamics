@@ -52,8 +52,10 @@ print.lsa <- function(x, ...) {
   }
 
   # --- strongest significant over-represented transitions ---
+  # Out of the cells that were tested: a structural zero (e.g. a
+  # self-transition with loops = FALSE) has no p-value and is not counted.
   cat(sprintf("\n  Significant transitions (p < %g): %d of %d\n",
-              alpha, nsig, nrow(e)))
+              alpha, nsig, sum(is.finite(e$p))))
   sig <- e[is.finite(e$p) & e$significant & is.finite(e$adj_res) &
              e$adj_res > 0, , drop = FALSE]
   if (nrow(sig)) {
