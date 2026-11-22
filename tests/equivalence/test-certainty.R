@@ -28,11 +28,12 @@ test_that("the 95% interval and the mass outside the consistency range equal sta
   expect_reference(ours, ref_cells(p_value = outside), reference = "stats", covers = c("certainty_lsa()", "transitions.lsa_certainty()"),
                    quantity = "posterior mass", tolerance = 1e-12, key = c("from", "to"))
   # As a relative quantity it does not, where the mass is tiny (first run of this test, 2026-11-19: Average ->
-  # Average, 3.14102e-17 against 3.14168e-17). A declared defect.
-  expect_reference(
+  # Average, 3.14102e-17 against 3.14168e-17). A known difference (owner, 2026-11-22): floating point, not a defect.
+  expect_known_difference(
     ours, ref_cells(p_value = outside), reference = "stats", covers = c("certainty_lsa()", "transitions.lsa_certainty()"),
     quantity = "posterior mass, relative", tolerance = 1e-9, measure = "relative", key = c("from", "to"),
-    defect = "Minor: upper tail of the Beta posterior loses relative accuracy near 1e-16 (equivalence/FINDINGS.md, lagdynamics 0.35.0): certainty_lsa() computes the upper tail as 1 - pbeta(q, a, b), which loses relative accuracy once the mass is near 1e-16; stats::pbeta(q, a, b, lower.tail = FALSE) keeps it. Masses of that size are zero for every decision the function makes.")
+    reason = "certainty_lsa() computes the upper tail as 1 - pbeta(), which loses relative accuracy near 1e-16 (3.14102e-17 against 3.14168e-17). As probabilities the two agree to 1e-12 and no certainty decision changes.",
+    agrees_with = "stats::pbeta(lower.tail = FALSE)")
 })
 
 test_that("a grouped fit: each group's Beta posterior moments, interval and mass outside the range", {

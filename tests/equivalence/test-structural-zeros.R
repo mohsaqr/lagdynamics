@@ -1,7 +1,8 @@
 # Structural zeros. lsa_ipf() fits quasi-independence by iterative proportional fitting; the references are
 # stats::loglin() (the same model by another routine) and stats::glm() (the model as a Poisson regression on
 # the cells that are possible). Then the two findings recorded in equivalence/FINDINGS.md for loops = FALSE:
-# each is declared with `defect =`: recorded as a disagreement, and the test fails once it no longer shows.
+# G2 with self-transitions present is a known difference (owner, 2026-11-22); the print header is a declared
+# defect (`defect =`): recorded as a disagreement, and the test fails once it no longer shows.
 
 test_that("lsa_ipf() equals stats::loglin() started at the pattern of structural zeros", {
   set.seed(99)
@@ -32,18 +33,21 @@ test_that("lsa(loops = FALSE) on a table without self-transitions equals quasi-i
                    reference = "stats", covers = c("tests()", "lsa()"), quantity = "quasi-independence", tolerance = 1e-6, key = "test")
 })
 
-test_that("FINDING: with loops = FALSE on data that has self-transitions, G2 is reported negative", {
+test_that("with loops = FALSE on data that has self-transitions, G2 is reported negative (known difference)", {
   # 1074 of the 1734 engagement transitions are self-transitions. Declaring them impossible while they are in
   # the margins gives expected counts that do not sum to the observed ones, and G2 = 2 sum O log(O / E) < 0.
   # The package warns (class lagdynamics_structural_zero_counts) and still reports the number.
   fit <- suppressWarnings(lsa(engagement, loops = FALSE), classes = "lagdynamics_structural_zero_counts")
   cells <- subset(ref_long(ref_pairs(ref_sequences(engagement)), "count"), from != to)
   model <- stats::glm(count ~ from + to, family = stats::poisson(), data = cells)
-  expect_reference(
+  # A known difference (owner, 2026-11-22): documented and warned as not interpretable; the glm reference fits
+  # another model (the self-transitions left out of the margins).
+  expect_known_difference(
     subset(tests(fit), test == "lrx2", select = c(test, statistic)), data.frame(test = "lrx2", statistic = stats::deviance(model)),
     reference = "stats", covers = c("tests()", "lsa()"), quantity = "G2 with loops = FALSE and self-transitions present",
     tolerance = 1e-6, key = "test",
-    defect = "G-squared negative when loops are declared impossible but present (equivalence/FINDINGS.md, lagdynamics 0.35.0): a likelihood-ratio statistic cannot be negative. lsa() reports -1184.633 with a warning that the result is not interpretable; the quasi-independence model on the six possible cells has deviance 5.99 (stats::glm). The statistic should be NA, or the margins should leave the impossible cells out.")
+    reason = "With loops = FALSE and self-transitions present, lsa() keeps them in the margins and reports G2 = -1184.633 with a documented, classed warning (lagdynamics_structural_zero_counts) that the tablewise test is not interpretable. The glm reference fits a different model: quasi-independence on the six possible cells, with the self-transitions left out of the margins (deviance 5.99).",
+    agrees_with = "lsa(loops = FALSE) on a table without self-transitions (stats::glm quasi-independence, compared above)")
 })
 
 test_that("the print header counts significant transitions out of all cells when every cell is possible", {
@@ -64,5 +68,5 @@ test_that("FINDING: with loops = FALSE the print header counts significant trans
   expect_reference(
     printed_total, states * states - states, reference = "independent: cells that are possible, K * K - K",
     covers = "print.lsa()", quantity = "transitions the header counts significance out of", tolerance = 0,
-    defect = "Print header counts significance out of all cells with loops = FALSE (equivalence/FINDINGS.md, lagdynamics 0.35.0): the nine self-transitions are declared impossible, so 72 transitions can be tested; the header prints \"of 81\".")
+    defect = "Print header counts significance out of all cells with loops = FALSE (equivalence/FINDINGS.md, lagdynamics 0.35.0): the nine self-transitions are declared impossible, so only 72 cells can be tested; the header prints \"of 81\".")
 })
