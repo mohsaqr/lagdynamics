@@ -23,10 +23,13 @@ significant_cells <- function(members) {
 
 test_that("the full fit's significance decision of each transition equals stats::chisq.test()", {
   set.seed(1)
-  ours <- transitions(stability_lsa(lsa(group_regulation), R = 20L))
-  expect_reference(ours, ref_cells(observed_sig = significant_cells(sequences)), reference = "stats",
+  result <- stability_lsa(lsa(group_regulation), R = 20L)
+  expected <- ref_cells(observed_sig = significant_cells(sequences))
+  expect_reference(transitions(result), expected, reference = "stats",
                    covers = c("stability_lsa()", "transitions.lsa_stability()"),
                    quantity = "significant in the full fit", tolerance = 0, key = c("from", "to"))
+  expect_reference(as.data.frame(result), expected, reference = "stats", covers = "as.data.frame.lsa_stability()",
+                   quantity = "significant in the full fit, as.data.frame()", tolerance = 0, key = c("from", "to"))
 })
 
 test_that("stability of each transition matches the case-drop written out (Monte Carlo summary)", {

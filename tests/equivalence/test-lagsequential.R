@@ -72,3 +72,15 @@ test_that("codes that cannot follow themselves: loops = FALSE equals LagSequenti
                    "quasi-independence by iterative proportional fitting, the maximum likelihood fit (equal to",
                    "stats::glm() and stats::loglin() in test-structural-zeros.R)."))
 })
+
+test_that("lsa_transitions() at lags 1 and 2 of LagSequential's example sequence equals LagSequential's frequencies", {
+  skip_without_reference("LagSequential")
+  codes <- as.vector(LagSequential::data_sequential)
+  expected <- do.call(rbind, lapply(1:2, \(lag) cbind(lag = lag, subset(lagsequential_cells(codes, lag = lag),
+                                                                      select = c(from, to, count)))))
+  found <- do.call(rbind, lapply(1:2, \(lag) cbind(lag = lag, as.data.frame(lsa_transitions(as.data.frame(t(codes)),
+                                                                                            lag = lag)))))
+  expect_reference(found, expected, reference = "LagSequential",
+                   covers = c("lsa_transitions()", "as.data.frame.lsa_transitions()"),
+                   quantity = "data_sequential, lagged counts", tolerance = 0, key = c("lag", "from", "to"))
+})

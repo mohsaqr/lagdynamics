@@ -86,3 +86,77 @@ test_that("a grouped fit reads each group's own table", {
   expect_reference(initial(fit), starts, reference = by_log, covers = c("initial()", "initial.lsa_group()"), quantity = "by group",
                    tolerance = 1e-12, key = c("group", "state"))
 })
+
+# The same reading verbs against tna, the gold standard: its frequency model (tna::ftna()) holds the lag-1 counts,
+# its relative model (tna::tna()) the transition probabilities and the initial probabilities, and its in- and
+# out-strengths with loops = TRUE the margins of the count table.
+
+test_that("nodes(), nobs() and transition_probabilities() equal tna's frequency and relative models", {
+  skip_without_reference("tna")
+  frequency <- tna::ftna(engagement)
+  strengths <- tna::centralities(frequency, loops = TRUE, measures = c("OutStrength", "InStrength"))
+  expected <- data.frame(state = as.character(strengths$state), outgoing = strengths$OutStrength,
+                         incoming = strengths$InStrength)
+  expect_reference(nodes(lsa(engagement)), expected, reference = "tna", covers = c("nodes()", "nodes.lsa()"),
+                   quantity = "state totals, tna out- and in-strength with loops", tolerance = 0, key = "state")
+  expect_reference(stats::nobs(lsa(engagement)), sum(frequency$weights), reference = "tna", covers = "nobs.lsa()",
+                   quantity = "transitions, sum of tna::ftna() weights", tolerance = 0)
+  expect_reference(transition_probabilities(lsa(engagement)), ref_cells(prob = tna::tna(engagement)$weights),
+                   reference = "tna", covers = c("transition_probabilities()", "transition_probabilities.lsa()"),
+                   quantity = "transition probability, tna::tna()", tolerance = 1e-12, key = c("from", "to"))
+  expect_reference(as.data.frame(lsa(engagement)),
+                   ref_labelled(ref_cells(count = frequency$weights, prob = tna::tna(engagement)$weights)),
+                   reference = "tna", covers = "as.data.frame.lsa()", quantity = "lag 1, as.data.frame(), tna models",
+                   tolerance = 1e-12, key = c("from_label", "to_label"))
+})
+
+test_that("lsa_transitions(): the lag-1 counts and their margins equal tna::ftna()", {
+  skip_without_reference("tna")
+  weights <- tna::ftna(engagement)$weights
+  expected <- ref_cells(count = weights, row_total = matrix(rowSums(weights), 3L, 3L, dimnames = dimnames(weights)),
+                        col_total = matrix(colSums(weights), 3L, 3L, byrow = TRUE, dimnames = dimnames(weights)))
+  expect_reference(as.data.frame(lsa_transitions(engagement)), expected, reference = "tna",
+                   covers = c("lsa_transitions()", "as.data.frame.lsa_transitions()"), quantity = "lag 1, tna::ftna()",
+                   tolerance = 0, key = c("from", "to"))
+})
+
+test_that("a grouped fit: counts, probabilities, margins and initial probabilities equal tna's group models", {
+  skip_without_reference("tna")
+  grouped <- ref_group_wide(group_regulation_long, actor = "Actor", action = "Action", time = "Time", group = "Achiever")
+  frequency <- tna::group_ftna(grouped$wide, group = grouped$group)
+  relative <- tna::group_tna(grouped$wide, group = grouped$group)
+  cells <- merge(ref_tna_groups(frequency, "weights", "count"), ref_tna_groups(relative, "weights", "prob"),
+                 by = c("group", "from", "to"))
+  totals <- do.call(rbind, lapply(names(frequency), \(level) {
+    weights <- frequency[[level]]$weights
+    data.frame(group = level, state = rownames(weights), outgoing = unname(rowSums(weights)),
+               incoming = unname(colSums(weights)))
+  }))
+  fit <- lsa(group_regulation_long, actor = "Actor", action = "Action", time = "Time", group = "Achiever")
+  expect_reference(transitions(fit), cells, reference = "tna", covers = c("transitions()", "transitions.lsa_group()"),
+                   quantity = "by group, tna::group_ftna() and group_tna()", tolerance = 1e-12,
+                   key = c("group", "from", "to"))
+  expect_reference(as.data.frame(fit), ref_labelled(cells), reference = "tna", covers = "as.data.frame.lsa_group()",
+                   quantity = "by group, as.data.frame(), tna group models", tolerance = 1e-12,
+                   key = c("group", "from_label", "to_label"))
+  expect_reference(transition_probabilities(fit), subset(cells, select = -count), reference = "tna",
+                   covers = c("transition_probabilities()", "transition_probabilities.lsa_group()"),
+                   quantity = "by group, probability, tna::group_tna()", tolerance = 1e-12, key = c("group", "from", "to"))
+  expect_reference(nodes(fit), totals, reference = "tna", covers = c("nodes()", "nodes.lsa_group()"),
+                   quantity = "by group, margins of tna::group_ftna()", tolerance = 0, key = c("group", "state"))
+  expect_reference(initial(fit), ref_tna_groups(relative, "inits", "init_prob"), reference = "tna",
+                   covers = c("initial()", "initial.lsa_group()"), quantity = "by group, tna::group_tna() inits",
+                   tolerance = 1e-12, key = c("group", "state"))
+})
+
+test_that("lsa_data(): the events equal stats::reshape() of the wide table to long form, empty rows left out", {
+  long <- stats::reshape(engagement, direction = "long", varying = names(engagement), v.names = "state",
+                         timevar = "index", idvar = "seq_id", times = seq_along(engagement))
+  expected <- subset(long, !is.na(state), select = c(seq_id, index, state))
+  # lsa_data() leaves out the rows without an event (two in engagement) and numbers the sequences that remain 1, 2, ...
+  expected$seq_id <- match(expected$seq_id, sort(unique(expected$seq_id)))
+  rownames(expected) <- NULL
+  expect_reference(as.data.frame(lsa_data(engagement)), expected, reference = "stats",
+                   covers = c("lsa_data()", "as.data.frame.lsa_data()"), quantity = "event, stats::reshape()",
+                   tolerance = 0, key = c("seq_id", "index"))
+})

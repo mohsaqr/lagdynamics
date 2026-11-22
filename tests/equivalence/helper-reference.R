@@ -156,3 +156,35 @@ ref_transfer_entropy <- function(triples) {
   p_fh <- apply(joint, c("f", "h"), sum)[cbind(cells$f, cells$h)]
   sum(cells$p * log2(cells$p * p_h / (p_hs * p_fh)))
 }
+
+#' The sequences of a long event log as a wide table, with each sequence's group
+#'
+#' One row per actor (in the order of split()), padded with NA to the longest sequence; for tna::group_tna()
+#' and tna::group_ftna(), which take a wide table and a group per row.
+#' @param log A data frame.
+#' @param actor,action,time,group Column names.
+#' @return A list: `wide` (a data frame) and `group` (a character vector, one per row of `wide`).
+ref_group_wide <- function(log, actor, action, time, group) {
+  sequences <- ref_log_sequences(log, actor = actor, action = action, time = time)
+  group_of <- tapply(log[[group]], log[[actor]], \(level) level[[1L]])
+  longest <- max(lengths(sequences))
+  wide <- as.data.frame(do.call(rbind, lapply(sequences, \(events) c(events, rep(NA, longest - length(events))))),
+                        stringsAsFactors = FALSE)
+  list(wide = wide, group = unname(group_of[names(sequences)]))
+}
+
+#' A weight matrix or initial vector of each group of a tna group model, one row per cell or state
+#'
+#' @param model A `group_tna` object (tna::group_tna() or tna::group_ftna()).
+#' @param part `"weights"` or `"inits"`.
+#' @param name The name of the value column.
+#' @return A data frame `group`, `from`, `to`, `<name>` (weights) or `group`, `state`, `<name>` (inits).
+ref_tna_groups <- function(model, part, name) {
+  do.call(rbind, lapply(names(model), \(level) {
+    values <- model[[level]][[part]]
+    if (identical(part, "weights")) return(cbind(group = level, ref_long(values, name)))
+    out <- data.frame(group = level, state = model[[level]]$labels, value = unname(values), stringsAsFactors = FALSE)
+    names(out)[[3L]] <- name
+    out
+  }))
+}

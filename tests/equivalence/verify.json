@@ -15,6 +15,18 @@
     "LagSequential": {
       "authority": "open-source",
       "citation": "O'Connor, B. P. LagSequential: Lag-Sequential Categorical Data Analysis. CRAN package."
+    },
+    "markovchain": {
+      "authority": "open-source",
+      "citation": "Spedicato, G. A. (2017). Discrete Time Markov Chains with R. The R Journal 9(2), 84-104. CRAN package markovchain."
+    },
+    "vcd": {
+      "authority": "open-source",
+      "citation": "Meyer, D., Zeileis, A., Hornik, K. vcd: Visualizing Categorical Data. CRAN package."
+    },
+    "boot": {
+      "authority": "open-source",
+      "citation": "Canty, A., Ripley, B. D. boot: Bootstrap R (S-Plus) Functions; Davison, A. C., Hinkley, D. V. (1997). Bootstrap Methods and Their Application."
     }
   },
   "exports": {

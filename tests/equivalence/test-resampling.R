@@ -57,3 +57,60 @@ test_that("the permutation test: p = (1 + exceedances) / (1 + R) over the same s
   expect_reference(as.data.frame(ours), expected, reference = by_shuffling, covers = "as.data.frame.lsa_permutation()",
                    quantity = "permutation, as.data.frame()", tolerance = 1e-10, key = c("from", "to"))
 })
+
+# The sequence bootstrap run by boot::boot() (Canty and Ripley; Davison and Hinkley 1997), the resampling package
+# that ships with R: boot draws the resamples and computes the statistic on each, boot.array(indices = TRUE) hands
+# the same resamples to bootstrap_lsa(). Means and standard errors are those of boot's replicates ($t); the
+# percentile limits are stats::quantile() of those replicates (bootstrap_lsa() takes type 7 quantiles, where
+# boot.ci(type = "perc") interpolates on the normal scale; the limits are compared on the replicates, not with
+# boot.ci()).
+
+test_that("the sequence bootstrap equals boot::boot() over its own resamples, three seeds", {
+  skip_without_reference("boot")
+  cells <- length(states)^2
+  per_sequence <- t(vapply(sequences, \(events) as.vector(ref_pairs(list(events), states = states)), numeric(cells)))
+  as_table <- \(values) matrix(values, length(states), dimnames = list(states, states))
+  statistic <- function(data, drawn) {
+    counts <- colSums(per_sequence[data[drawn], , drop = FALSE])
+    c(counts, as.vector(stats::chisq.test(as_table(counts), correct = FALSE)$stdres),
+      as.vector(prop.table(as_table(counts), margin = 1L)))
+  }
+  rows <- lapply(c(21L, 22L, 23L), \(seed) {
+    set.seed(seed)
+    result <- boot::boot(seq_along(sequences), statistic, R = 150L)
+    replicates <- result$t
+    part <- \(k) replicates[, (k - 1L) * cells + seq_len(cells), drop = FALSE]
+    low <- \(draws) apply(draws, 2L, stats::quantile, probs = 0.025, names = FALSE)
+    high <- \(draws) apply(draws, 2L, stats::quantile, probs = 0.975, names = FALSE)
+    theirs <- data.frame(
+      seed = seed, from = cell_names$from, to = cell_names$to,
+      count_mean = colMeans(part(1L)), count_se = apply(part(1L), 2L, stats::sd),
+      count_ci_low = low(part(1L)), count_ci_high = high(part(1L)),
+      adj_res_mean = colMeans(part(2L)), adj_res_se = apply(part(2L), 2L, stats::sd),
+      adj_res_ci_low = low(part(2L)), adj_res_ci_high = high(part(2L)),
+      prob_mean = colMeans(part(3L)), prob_ci_low = low(part(3L)), prob_ci_high = high(part(3L)))
+    ours <- bootstrap_lsa(lsa(engagement), R = 150L, level = "sequence", level_alpha = 0.95,
+                          indices = boot::boot.array(result, indices = TRUE))
+    list(theirs = theirs, ours = cbind(seed = seed, transitions(ours)), frame = cbind(seed = seed, as.data.frame(ours)))
+  })
+  theirs <- do.call(rbind, lapply(rows, `[[`, "theirs"))
+  expect_reference(do.call(rbind, lapply(rows, `[[`, "ours")), theirs, reference = "boot",
+                   covers = c("bootstrap_lsa()", "transitions.lsa_bootstrap()"), quantity = "bootstrap, boot::boot()",
+                   tolerance = 1e-10, key = c("seed", "from", "to"))
+  expect_reference(do.call(rbind, lapply(rows, `[[`, "frame")), theirs, reference = "boot",
+                   covers = "as.data.frame.lsa_bootstrap()", quantity = "bootstrap, boot::boot(), as.data.frame()",
+                   tolerance = 1e-10, key = c("seed", "from", "to"))
+})
+
+test_that("the permutation result's observed counts and residuals equal stats::chisq.test()", {
+  test <- stats::chisq.test(ref_pairs(sequences, states = states), correct = FALSE)
+  set.seed(4)
+  ours <- permute_lsa(lsa(engagement), R = 19L)
+  expected <- ref_cells(observed_count = test$observed, observed_adj_res = test$stdres)
+  expect_reference(transitions(ours), expected, reference = "stats",
+                   covers = c("permute_lsa()", "transitions.lsa_permutation()"),
+                   quantity = "observed table of the permutation test", tolerance = 1e-10, key = c("from", "to"))
+  expect_reference(as.data.frame(ours), expected, reference = "stats", covers = "as.data.frame.lsa_permutation()",
+                   quantity = "observed table of the permutation test, as.data.frame()", tolerance = 1e-10,
+                   key = c("from", "to"))
+})

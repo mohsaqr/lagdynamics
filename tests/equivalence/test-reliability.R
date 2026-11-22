@@ -122,3 +122,79 @@ test_that("a grouped fit: each group's split-half correlations match the procedu
   declare_monte_carlo(rows, c("reliability_lsa.lsa_group()", "as.data.frame.lsa_reliability_group()"),
                       "group_regulation_long by achievement")
 })
+
+# tna::reliability() (tna, the gold standard) is the same split-half procedure for a transition network: random
+# halves of round(n / 2) sequences, each half's weight matrix, the halves compared over all cells (its "Pearson" and
+# "Spearman" metrics are stats::cor() of the vectorised matrices). With tna::tna() the weights are the transition
+# probabilities (weights = "prob"), with tna::ftna() the counts (weights = "count"). The halves are drawn inside both
+# functions, so this is a Monte Carlo comparison with the same rule fixed beforehand (four standard errors, above),
+# the spread taken from tna's own replicates. engagement has 138 sequences, so round(n / 2) = n %/% 2.
+
+monte_carlo_tna <- function(fit, model, weights, method, metric, label) {
+  lapply(seeds, \(s) {
+    set.seed(s)
+    ours <- as.data.frame(reliability_lsa(fit, R = replicates, weights = weights, method = method), what = "summary")
+    set.seed(2000 + s)
+    found <- tna::reliability(model, iter = replicates)$metrics
+    theirs <- found$value[found$metric == metric]
+    list(ours = data.frame(case = sprintf("%s, seed %d", label, s), mean = ours$mean, sd = ours$sd),
+         theirs = data.frame(case = sprintf("%s, seed %d", label, s), mean = mean(theirs), sd = stats::sd(theirs)),
+         spread = stats::sd(theirs), sd_error = sd_standard_error(theirs))
+  })
+}
+
+declare_monte_carlo_tna <- function(rows, covers, label) {
+  ours <- do.call(rbind, lapply(rows, `[[`, "ours"))
+  theirs <- do.call(rbind, lapply(rows, `[[`, "theirs"))
+  spread <- max(vapply(rows, `[[`, numeric(1), "spread"))
+  sd_error <- max(vapply(rows, `[[`, numeric(1), "sd_error"))
+  expect_reference(subset(ours, select = c(case, mean)), subset(theirs, select = c(case, mean)), reference = "tna",
+                   covers = covers, quantity = sprintf("Monte Carlo summary: mean split-half correlation, tna, %s", label),
+                   tolerance = 4 * sqrt(2) * spread / sqrt(replicates), key = "case")
+  expect_reference(subset(ours, select = c(case, sd)), subset(theirs, select = c(case, sd)), reference = "tna",
+                   covers = covers, quantity = sprintf("Monte Carlo summary: sd of split-half correlations, tna, %s", label),
+                   tolerance = 4 * sqrt(2) * sd_error, key = "case")
+}
+
+covers_lsa <- c("reliability_lsa()", "reliability_lsa.lsa()", "as.data.frame.lsa_reliability()")
+
+test_that("split-half Pearson correlations of transition probabilities equal tna::reliability() (Monte Carlo)", {
+  skip_without_reference("tna")
+  rows <- monte_carlo_tna(lsa(engagement), tna::tna(engagement), "prob", "pearson", "Pearson", "engagement, prob")
+  declare_monte_carlo_tna(rows, covers_lsa, "engagement, prob, pearson")
+})
+
+test_that("split-half Spearman correlations of transition probabilities equal tna::reliability() (Monte Carlo)", {
+  skip_without_reference("tna")
+  rows <- monte_carlo_tna(lsa(engagement), tna::tna(engagement), "prob", "spearman", "Spearman", "engagement, prob")
+  declare_monte_carlo_tna(rows, covers_lsa, "engagement, prob, spearman")
+})
+
+test_that("split-half Pearson correlations of counts equal tna::reliability() of the frequency model (Monte Carlo)", {
+  skip_without_reference("tna")
+  rows <- monte_carlo_tna(lsa(engagement), tna::ftna(engagement), "count", "pearson", "Pearson", "engagement, count")
+  declare_monte_carlo_tna(rows, covers_lsa, "engagement, count, pearson")
+})
+
+test_that("a grouped fit: each group's split-half correlations equal tna::reliability() of its model (Monte Carlo)", {
+  skip_without_reference("tna")
+  grouped <- ref_group_wide(group_regulation_long, actor = "Actor", action = "Action", time = "Time", group = "Achiever")
+  fit <- lsa(group_regulation_long, actor = "Actor", action = "Action", time = "Time", group = "Achiever")
+  levels <- sort(unique(grouped$group))
+  rows <- lapply(seeds, \(s) {
+    set.seed(s)
+    ours <- as.data.frame(reliability_lsa(fit, R = replicates), what = "summary")
+    set.seed(2000 + s)
+    per_group <- lapply(levels, \(level) {
+      found <- tna::reliability(tna::tna(subset(grouped$wide, grouped$group == level)), iter = replicates)$metrics
+      found$value[found$metric == "Pearson"]
+    })
+    list(ours = data.frame(case = sprintf("%s, seed %d", ours$group, s), mean = ours$mean, sd = ours$sd),
+         theirs = data.frame(case = sprintf("%s, seed %d", levels, s), mean = vapply(per_group, mean, numeric(1)),
+                             sd = vapply(per_group, stats::sd, numeric(1))),
+         spread = max(vapply(per_group, stats::sd, numeric(1))),
+         sd_error = max(vapply(per_group, sd_standard_error, numeric(1))))
+  })
+  declare_monte_carlo_tna(rows, c("reliability_lsa.lsa_group()", "as.data.frame.lsa_reliability_group()"),
+                          "group_regulation_long by achievement")
+})

@@ -58,3 +58,53 @@ test_that("a grouped fit: each group's Beta posterior moments, interval and mass
                    covers = "as.data.frame.lsa_certainty_group()", quantity = "posterior per group",
                    tolerance = 1e-12, key = c("group", "from", "to"))
 })
+
+# markovchain::markovchainFit(method = "map") is a Bayesian fit of a Markov chain with a Dirichlet prior on each row
+# (hyperparameter matrix): its expectedValue, standardError and confidenceInterval are the posterior mean, standard
+# deviation and equal-tailed interval of each transition probability. markovchain takes hyperparameters of at
+# least 1, so the comparison is at prior = 1 (uniform) and prior = 2.
+
+test_that("posterior mean, sd and 95% interval equal markovchain::markovchainFit(method = 'map')", {
+  skip_without_reference("markovchain")
+  sequences <- ref_sequences(engagement)
+  rows <- lapply(c(1, 2), \(pseudo) {
+    states <- sort(unique(unlist(sequences)))
+    fit <- markovchain::markovchainFit(data = sequences, method = "map", confidencelevel = 0.95,
+                                       hyperparam = matrix(pseudo, length(states), length(states),
+                                                           dimnames = list(states, states)))
+    interval <- fit$confidenceInterval
+    theirs <- cbind(prior = pseudo, ref_cells(prob_mean = fit$expectedValue, prob_se = fit$standardError,
+                                              prob_ci_low = interval$lowerEndpointMatrix,
+                                              prob_ci_high = interval$upperEndpointMatrix))
+    ours <- cbind(prior = pseudo, transitions(certainty_lsa(lsa(engagement), prior = pseudo, level_alpha = 0.95)))
+    list(ours = ours, theirs = theirs)
+  })
+  # Closed-form moments and Beta quantiles on both sides (markovchain by stats::qbeta()); relative for the quantiles.
+  expect_reference(do.call(rbind, lapply(rows, `[[`, "ours")), do.call(rbind, lapply(rows, `[[`, "theirs")),
+                   reference = "markovchain", covers = c("certainty_lsa()", "transitions.lsa_certainty()"),
+                   quantity = "Dirichlet posterior, priors 1 and 2", tolerance = 1e-9, measure = "relative",
+                   key = c("prior", "from", "to"))
+})
+
+test_that("a grouped fit: each group's posterior mean, sd and interval equal markovchain on its sequences", {
+  skip_without_reference("markovchain")
+  log_sequences <- ref_log_sequences(group_regulation_long, actor = "Actor", action = "Action", time = "Time")
+  achiever <- tapply(group_regulation_long$Achiever, group_regulation_long$Actor, \(level) level[[1L]])
+  groups <- split(log_sequences, achiever[names(log_sequences)])
+  states <- sort(unique(group_regulation_long$Action))
+  expected <- do.call(rbind, lapply(names(groups), \(level) {
+    fit <- markovchain::markovchainFit(data = unname(groups[[level]]), method = "map", confidencelevel = 0.95,
+                                       possibleStates = states,
+                                       hyperparam = matrix(1, length(states), length(states),
+                                                           dimnames = list(states, states)))
+    interval <- fit$confidenceInterval
+    cbind(group = level, ref_cells(prob_mean = fit$expectedValue, prob_se = fit$standardError,
+                                   prob_ci_low = interval$lowerEndpointMatrix,
+                                   prob_ci_high = interval$upperEndpointMatrix))
+  }))
+  ours <- as.data.frame(certainty_lsa(lsa(group_regulation_long, actor = "Actor", action = "Action", time = "Time",
+                                          group = "Achiever"), prior = 1, level_alpha = 0.95))
+  expect_reference(ours, expected, reference = "markovchain", covers = "as.data.frame.lsa_certainty_group()",
+                   quantity = "Dirichlet posterior per group, prior 1", tolerance = 1e-9, measure = "relative",
+                   key = c("group", "from", "to"))
+})
