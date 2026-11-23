@@ -1,7 +1,10 @@
 # transfer_entropy(): directed information flow between two categorical streams, in bits. Three references:
 # the triple sum over the joint distribution written from the definition; infotheo (transfer entropy is the
 # conditional mutual information I(target future; source past | target past)); and exact values for a
-# deterministic copy.
+# deterministic copy. The surrogate test (te_effective and p) is compared at the end with the source permutation
+# written out, a Monte Carlo summary: no established implementation of a surrogate test for discrete transfer
+# entropy is installed on the ci machine (RTransferEntropy, IDTxl, pyinform, JIDT are not), so that evidence is
+# a computation of this file (Indirect), not an outside program.
 
 streams <- ref_streams()
 
@@ -72,4 +75,36 @@ test_that("one sequence: the state network equals the triple sum on indicator st
   # Absolute: some edges are of the order 1e-9, where the two routes still agree to 1e-14.
   expect_reference(transfer_entropy(longer$y, test = "none"), pairs, reference = "independent: triple sum over the joint distribution, base R",
                    covers = "transfer_entropy()", quantity = "state network", tolerance = 1e-9, key = c("from", "to"))
+})
+
+# The surrogate test of transfer_entropy(): the source's values are permuted over the pooled triples, which keeps
+# both marginals and breaks the coupling; te_effective is the observed value minus the mean of the surrogates and
+# p = (1 + the number of surrogates at or above the observed value) / (R + 1). Written out below on ref_triples()
+# with its own seeds (three). Tolerances per number, fixed before the run: te_effective, four standard errors of the
+# difference of two means of R surrogates, 4 sd sqrt(2 / R) with sd the reference surrogates' spread; p, four
+# standard errors of the difference of two shares (ref_share_se()).
+test_that("surrogate test: effective transfer entropy and p match the source permutation written out (Monte Carlo)", {
+  surrogates <- 999L
+  surrogate_test <- function(source, target, from, to) {
+    triples <- ref_triples(source, target)
+    observed <- ref_transfer_entropy(triples)
+    null <- replicate(surrogates, ref_transfer_entropy(transform(triples, driver = sample(driver))))
+    data.frame(from = from, to = to, te_effective = observed - mean(null),
+               p = (1 + sum(null >= observed)) / (surrogates + 1), spread = stats::sd(null))
+  }
+  rows <- lapply(1:3, \(s) {
+    ours <- with(streams, transfer_entropy(x = x, y = y, R = surrogates, seed = s))
+    set.seed(1000 + s)
+    theirs <- rbind(surrogate_test(streams$x, streams$y, "x", "y"), surrogate_test(streams$y, streams$x, "y", "x"))
+    list(ours = transform(ours, seed = s), theirs = transform(theirs, seed = s))
+  })
+  ours <- do.call(rbind, lapply(rows, `[[`, "ours"))
+  theirs <- do.call(rbind, lapply(rows, `[[`, "theirs"))
+  by_permutation <- "independent: source permutation surrogates (Schreiber 2000), base R"
+  expect_each_cell(ours, theirs, tolerance = 4 * theirs$spread * sqrt(2 / surrogates), key = c("seed", "from", "to"),
+                   value = "te_effective", reference = by_permutation, covers = "transfer_entropy()",
+                   quantity = "Monte Carlo summary: effective transfer entropy, lag 1, history 1")
+  expect_each_cell(ours, theirs, tolerance = 4 * ref_share_se(theirs$p, surrogates, surrogates),
+                   key = c("seed", "from", "to"), value = "p", reference = by_permutation, covers = "transfer_entropy()",
+                   quantity = "Monte Carlo summary: surrogate p-value, lag 1, history 1")
 })

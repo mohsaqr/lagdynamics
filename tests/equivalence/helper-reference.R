@@ -188,3 +188,48 @@ ref_tna_groups <- function(model, part, name) {
     out
   }))
 }
+
+#' One comparison per cell of a Monte Carlo table, each at its own tolerance
+#'
+#' expect_reference() takes one tolerance for a table. A Monte Carlo summary needs one per number: four standard
+#' errors of that number, from the reference's own draws. Each row of `expected` becomes one comparison, whose
+#' quantity names its keys; a key on one side only is compared with NA and fails as missing.
+#' @param actual,expected Data frames with the `key` columns and the column `value`.
+#' @param tolerance One tolerance per row of `expected`, fixed before the comparison (NA where `expected` is NA).
+#' @param key,value Column names.
+#' @param quantity What the numbers are; the keys of each row are appended.
+#' @param ... Passed to expect_reference(): reference, covers, note, authority.
+#' @return NULL, invisibly.
+expect_each_cell <- function(actual, expected, tolerance, key, value, quantity, ...) {
+  undefined <- is.na(expected[[value]])
+  stopifnot("one tolerance per row of `expected`" = length(tolerance) == nrow(expected),
+            "tolerances must be finite and non-negative where the reference has a value" =
+              all(undefined | (is.finite(tolerance) & tolerance >= 0)))
+  # where the reference has no value (an untested cell) nothing is judged: NA on both sides is not comparable, a
+  # value on one side only is missing
+  tolerance[undefined] <- 0
+  expected <- data.frame(expected[c(key, value)], tolerance_ = tolerance)
+  names(expected)[match(value, names(expected))] <- "reference_"
+  actual <- actual[c(key, value)]
+  names(actual)[match(value, names(actual))] <- "package_"
+  matched <- merge(expected, actual, by = key, all = TRUE, sort = TRUE)
+  labels <- do.call(paste, c(lapply(matched[key], as.character), sep = ", "))
+  invisible(Map(\(ours, theirs, allowed, label) {
+    expect_reference(ours, theirs, quantity = sprintf("%s: %s", quantity, label),
+                     tolerance = if (is.na(allowed)) 0 else allowed, ...)
+  }, matched$package_, matched$reference_, matched$tolerance_, labels))
+  invisible(NULL)
+}
+
+#' Standard error of the difference of two Monte Carlo shares, from the reference's share
+#'
+#' Each share is a mean of Bernoulli draws: the package's over `n_package` draws, the reference's over
+#' `n_reference`. The variance p (1 - p) is taken at the reference's share, held at least 1 / n_reference away
+#' from 0 and 1: a share of exactly 0 or 1 in the reference's draws does not prove a variance of 0.
+#' @param share The reference's shares.
+#' @param n_package,n_reference The numbers of draws.
+#' @return One standard error per share.
+ref_share_se <- function(share, n_package, n_reference) {
+  bounded <- pmin(pmax(share, 1 / n_reference), 1 - 1 / n_reference)
+  sqrt(bounded * (1 - bounded) * (1 / n_package + 1 / n_reference))
+}

@@ -3,10 +3,12 @@
 #  - exact: whether each transition is significant in the full fit, from stats::chisq.test()'s adjusted residuals
 #    and 2 * pnorm(-|z|) at the fit's alpha;
 #  - statistical: each transition's stability (the share of subsets of 80% of the sequences in which it is
-#    significant) against the same case-drop written out in base R, a Monte Carlo summary. Each share is a mean of R
-#    Bernoulli draws, so the difference of two independent shares has a standard error of at most
-#    sqrt(2 * 0.25 / R) (the variance of a Bernoulli draw is at most 1/4); the tolerance is four of those, fixed
-#    before any run: 4 * sqrt(0.5 / 400) = 0.141.
+#    significant) against the same case-drop written out in base R, a Monte Carlo summary over three seeds. Each
+#    share is a mean of R Bernoulli draws, so the difference of two independent shares has the standard error
+#    sqrt(p (1 - p) (1 / R + 1 / R)); p is the reference's share of that cell, held at least 1 / R from 0 and 1
+#    (ref_share_se()). Each cell is judged at four of its own standard errors, fixed before the run (until
+#    0.35.4 one tolerance, 4 * sqrt(0.5 / R) = 0.141, the bound at p = 1/2, served every cell, also shares of 0
+#    or 1).
 
 subsets <- 400L
 seeds <- 1:3
@@ -45,9 +47,11 @@ test_that("stability of each transition matches the case-drop written out (Monte
     list(ours = transform(subset(ours, select = c(from, to, stability)), seed = s),
          theirs = transform(theirs, seed = s))
   })
-  expect_reference(do.call(rbind, lapply(rows, `[[`, "ours")), do.call(rbind, lapply(rows, `[[`, "theirs")),
-                   reference = "independent: case-drop resampling of whole sequences (Epskamp et al. 2018), base R",
-                   covers = c("stability_lsa()", "as.data.frame.lsa_stability()", "transitions.lsa_stability()"),
+  ours <- do.call(rbind, lapply(rows, `[[`, "ours"))
+  theirs <- do.call(rbind, lapply(rows, `[[`, "theirs"))
+  expect_each_cell(ours, theirs, tolerance = 4 * ref_share_se(theirs$stability, subsets, subsets),
+                   key = c("seed", "from", "to"), value = "stability",
                    quantity = "Monte Carlo summary: share of subsets significant",
-                   tolerance = 4 * sqrt(0.5 / subsets), key = c("seed", "from", "to"))
+                   reference = "independent: case-drop resampling of whole sequences (Epskamp et al. 2018), base R",
+                   covers = c("stability_lsa()", "as.data.frame.lsa_stability()", "transitions.lsa_stability()"))
 })

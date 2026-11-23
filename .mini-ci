@@ -21,3 +21,11 @@ fetch .ci/verify-capture
 # comparison with a reference, recorded in .ci/verify-capture/capture.json. Then, on the Mac:
 #   sh ../equivalence/push.sh lagdynamics
 job verify Rscript -e 'source("tests/equivalence/helper-verify.R"); verify_tests(lib = "~/equiv-lib")'
+
+# The legacy comparison case of the equivalence repository (../equivalence/lagdynamics/export-bundles.R), run here
+# rather than on the Mac: mini-ci legacy (add case names after the script for others). The bundle comes back in
+# .ci/legacy-bundles/; copy it to ../equivalence/lagdynamics/bundles/ and push it by hand (see ../equivalence/CLAUDE.md).
+include ../equivalence/lagdynamics/export-bundles.R
+include ../prova/.claude/worktrees/verify/reporters/verify.R
+fetch .ci/legacy-bundles
+job legacy mkdir -p .ci/legacy-bundles && PROVA_VERIFY_R=../prova/.claude/worktrees/verify/reporters/verify.R Rscript ../equivalence/lagdynamics/export-bundles.R alternative_engines && cp -R ../equivalence/lagdynamics/bundles/alternative_engines .ci/legacy-bundles/

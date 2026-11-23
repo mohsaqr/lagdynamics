@@ -27,6 +27,10 @@
     "boot": {
       "authority": "open-source",
       "citation": "Canty, A., Ripley, B. D. boot: Bootstrap R (S-Plus) Functions; Davison, A. C., Hinkley, D. V. (1997). Bootstrap Methods and Their Application."
+    },
+    "gtools": {
+      "authority": "open-source",
+      "citation": "Warnes, G. R., Bolker, B., Lumley, T. gtools: Various R Programming Tools. CRAN package (rdirichlet(), Dirichlet draws)."
     }
   },
   "exports": {

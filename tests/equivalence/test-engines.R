@@ -14,9 +14,30 @@ test_that("two-cell: odds ratio, log odds ratio, standard error, z and p equal t
   expect_reference(transitions(lsa_two_cell(three)), expected, reference = "independent: the definitions, base R",
                    covers = c("lsa_two_cell()", "lsa()", "transitions()"), quantity = "two-cell", tolerance = 1e-12,
                    key = c("from", "to"))
+  # The p-value of the z written out above: a formula of this test, not a separate program (until 0.35.4 it was
+  # labelled "stats" because it calls stats::pnorm()).
   expect_reference(transitions(lsa(three, engine = "two_cell")), ref_cells(p = 2 * stats::pnorm(-abs(z))),
-                   reference = "stats", covers = c("lsa_two_cell()", "lsa()"), quantity = "two-cell", tolerance = 1e-12,
-                   key = c("from", "to"), note = "2 * stats::pnorm(-|z|) of the z written out from the definition.")
+                   reference = "independent: 2 * pnorm(-|z|) of the z from the definition, base R",
+                   covers = c("lsa_two_cell()", "lsa()"), quantity = "two-cell p", tolerance = 1e-12,
+                   key = c("from", "to"))
+})
+
+# Outside reference for the two-cell engine: vcd::loddsratio() on each cell's 2 x 2 collapse gives the log odds
+# ratio and its Wald standard error, and its summary() the z test (lmtest's coeftest). No collapse of this table
+# holds a zero, so vcd adds nothing to the cells (its default `correct = any(x == 0)`) and neither does
+# lsa_two_cell().
+test_that("two-cell: log odds ratio, standard error, z and p equal vcd::loddsratio()", {
+  skip_without_reference("vcd")
+  cell <- ref_collapse(three)
+  tests <- Map(\(a, b, c, d) summary(vcd::loddsratio(matrix(c(a, c, b, d), 2L), log = TRUE)),
+               as.vector(cell$a), as.vector(cell$b), as.vector(cell$c), as.vector(cell$d))
+  column <- \(name) matrix(vapply(tests, \(test) unname(test[1L, name]), numeric(1)), nrow(three),
+                           dimnames = dimnames(three))
+  expected <- ref_cells(log_or = column("Estimate"), log_or_se = column("Std. Error"), adj_res = column("z value"),
+                        p = column("Pr(>|z|)"))
+  expect_reference(transitions(lsa_two_cell(three)), expected, reference = "vcd",
+                   covers = c("lsa_two_cell()", "lsa()", "transitions()"), quantity = "two-cell, vcd",
+                   tolerance = 1e-12, key = c("from", "to"))
 })
 
 test_that("bidirectional: residuals equal stats::chisq.test() on the symmetrised table", {

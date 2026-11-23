@@ -61,16 +61,16 @@ monte_carlo_rows <- function(fit, sequences, weights, method, label) {
 declare_monte_carlo <- function(rows, covers, label) {
   ours <- do.call(rbind, lapply(rows, `[[`, "ours"))
   theirs <- do.call(rbind, lapply(rows, `[[`, "theirs"))
-  spread <- max(vapply(rows, `[[`, numeric(1), "spread"))
-  sd_error <- max(vapply(rows, `[[`, numeric(1), "sd_error"))
-  expect_reference(subset(ours, select = c(case, mean)), subset(theirs, select = c(case, mean)),
+  # one tolerance per seed (and group), from that row's reference draws (since 0.35.4; it was the largest over the
+  # rows)
+  spread <- unlist(lapply(rows, `[[`, "spread"))
+  sd_error <- unlist(lapply(rows, `[[`, "sd_error"))
+  expect_each_cell(ours, theirs, tolerance = 4 * sqrt(2) * spread / sqrt(replicates), key = "case", value = "mean",
                    reference = split_half, covers = covers,
-                   quantity = sprintf("Monte Carlo summary: mean split-half correlation, %s", label),
-                   tolerance = 4 * sqrt(2) * spread / sqrt(replicates), key = "case")
-  expect_reference(subset(ours, select = c(case, sd)), subset(theirs, select = c(case, sd)),
+                   quantity = sprintf("Monte Carlo summary: mean split-half correlation, %s", label))
+  expect_each_cell(ours, theirs, tolerance = 4 * sqrt(2) * sd_error, key = "case", value = "sd",
                    reference = split_half, covers = covers,
-                   quantity = sprintf("Monte Carlo summary: sd of split-half correlations, %s", label),
-                   tolerance = 4 * sqrt(2) * sd_error, key = "case")
+                   quantity = sprintf("Monte Carlo summary: sd of split-half correlations, %s", label))
 }
 
 test_that("the summary of a run is the mean, sd and 2.5% / 97.5% quantiles of its own replicates", {
@@ -116,8 +116,8 @@ test_that("a grouped fit: each group's split-half correlations match the procedu
     list(ours = data.frame(case = sprintf("%s, seed %d", ours$group, s), mean = ours$mean, sd = ours$sd),
          theirs = data.frame(case = sprintf("%s, seed %d", names(groups), s),
                              mean = vapply(per_group, mean, numeric(1)), sd = vapply(per_group, stats::sd, numeric(1))),
-         spread = max(vapply(per_group, stats::sd, numeric(1))),
-         sd_error = max(vapply(per_group, sd_standard_error, numeric(1))))
+         spread = vapply(per_group, stats::sd, numeric(1)),
+         sd_error = vapply(per_group, sd_standard_error, numeric(1)))
   })
   declare_monte_carlo(rows, c("reliability_lsa.lsa_group()", "as.data.frame.lsa_reliability_group()"),
                       "group_regulation_long by achievement")
@@ -146,14 +146,16 @@ monte_carlo_tna <- function(fit, model, weights, method, metric, label) {
 declare_monte_carlo_tna <- function(rows, covers, label) {
   ours <- do.call(rbind, lapply(rows, `[[`, "ours"))
   theirs <- do.call(rbind, lapply(rows, `[[`, "theirs"))
-  spread <- max(vapply(rows, `[[`, numeric(1), "spread"))
-  sd_error <- max(vapply(rows, `[[`, numeric(1), "sd_error"))
-  expect_reference(subset(ours, select = c(case, mean)), subset(theirs, select = c(case, mean)), reference = "tna",
-                   covers = covers, quantity = sprintf("Monte Carlo summary: mean split-half correlation, tna, %s", label),
-                   tolerance = 4 * sqrt(2) * spread / sqrt(replicates), key = "case")
-  expect_reference(subset(ours, select = c(case, sd)), subset(theirs, select = c(case, sd)), reference = "tna",
-                   covers = covers, quantity = sprintf("Monte Carlo summary: sd of split-half correlations, tna, %s", label),
-                   tolerance = 4 * sqrt(2) * sd_error, key = "case")
+  # one tolerance per seed (and group), from that row's reference draws (since 0.35.4; it was the largest over the
+  # rows)
+  spread <- unlist(lapply(rows, `[[`, "spread"))
+  sd_error <- unlist(lapply(rows, `[[`, "sd_error"))
+  expect_each_cell(ours, theirs, tolerance = 4 * sqrt(2) * spread / sqrt(replicates), key = "case", value = "mean",
+                   reference = "tna", covers = covers,
+                   quantity = sprintf("Monte Carlo summary: mean split-half correlation, tna, %s", label))
+  expect_each_cell(ours, theirs, tolerance = 4 * sqrt(2) * sd_error, key = "case", value = "sd",
+                   reference = "tna", covers = covers,
+                   quantity = sprintf("Monte Carlo summary: sd of split-half correlations, tna, %s", label))
 }
 
 covers_lsa <- c("reliability_lsa()", "reliability_lsa.lsa()", "as.data.frame.lsa_reliability()")
@@ -192,8 +194,8 @@ test_that("a grouped fit: each group's split-half correlations equal tna::reliab
     list(ours = data.frame(case = sprintf("%s, seed %d", ours$group, s), mean = ours$mean, sd = ours$sd),
          theirs = data.frame(case = sprintf("%s, seed %d", levels, s), mean = vapply(per_group, mean, numeric(1)),
                              sd = vapply(per_group, stats::sd, numeric(1))),
-         spread = max(vapply(per_group, stats::sd, numeric(1))),
-         sd_error = max(vapply(per_group, sd_standard_error, numeric(1))))
+         spread = vapply(per_group, stats::sd, numeric(1)),
+         sd_error = vapply(per_group, sd_standard_error, numeric(1)))
   })
   declare_monte_carlo_tna(rows, c("reliability_lsa.lsa_group()", "as.data.frame.lsa_reliability_group()"),
                           "group_regulation_long by achievement")
