@@ -28,4 +28,4 @@ job verify Rscript -e 'source("tests/equivalence/helper-verify.R"); verify_tests
 include ../equivalence/lagdynamics/export-bundles.R
 include ../prova/.claude/worktrees/verify/reporters/verify.R
 fetch .ci/legacy-bundles
-job legacy mkdir -p .ci/legacy-bundles && PROVA_VERIFY_R=../prova/.claude/worktrees/verify/reporters/verify.R Rscript ../equivalence/lagdynamics/export-bundles.R alternative_engines && cp -R ../equivalence/lagdynamics/bundles/alternative_engines .ci/legacy-bundles/
+job legacy mkdir -p .ci/legacy-bundles && PROVA_VERIFY_R=../prova/.claude/worktrees/verify/reporters/verify.R Rscript ../equivalence/lagdynamics/export-bundles.R alternative_engines bidirectional_engine && cp -R ../equivalence/lagdynamics/bundles/alternative_engines ../equivalence/lagdynamics/bundles/bidirectional_engine .ci/legacy-bundles/

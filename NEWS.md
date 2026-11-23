@@ -1,3 +1,11 @@
+# lagdynamics 0.35.5
+
+- No change to any function. The `legacy` ci job exports the legacy comparison
+  cases `alternative_engines` (two-cell and dominance engines against their
+  formulas, an independent computation) and `bidirectional_engine` (the
+  bidirectional engine against `stats::chisq.test()`), which were one case
+  until now.
+
 # lagdynamics 0.35.4
 
 - No change to any function. The equivalence evidence (`tests/equivalence/`,
