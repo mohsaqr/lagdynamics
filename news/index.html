@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,11 @@
       <small>Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.35.4" id="lagdynamics-0354">lagdynamics 0.35.4<a class="anchor" aria-label="anchor" href="#lagdynamics-0354"></a></h2>
+<ul><li>No change to any function. The equivalence evidence (<code>tests/equivalence/</code>, build-ignored) now compares the drawn outputs: the permutation p-values of <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code> (per transition and the omnibus) against the label permutation of whole sequences written out in base R; the credible intervals, probability of direction and effect size of <code><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code> against draws of the Dirichlet posterior by <code>gtools::rdirichlet()</code>; and the surrogate test of <code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code> (<code>te_effective</code>, <code>p</code>) against the source permutation written out. All are seeded Monte Carlo comparisons over three seeds, each number judged at four of its own standard errors. The case-drop shares of <code><a href="../reference/stability_lsa.html">stability_lsa()</a></code> and the split-half summaries of <code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code> are now judged the same way, per number, instead of at one tolerance for the whole table.</li>
+<li>The two-cell engine is compared with <code>vcd::loddsratio()</code> (log odds ratio, standard error, z and p); the p-value of the z written out from the definition is labelled as that formula, not as <code>stats</code>.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.35.3" id="lagdynamics-0353">lagdynamics 0.35.3<a class="anchor" aria-label="anchor" href="#lagdynamics-0353"></a></h2>
 <ul><li>With structural zeros (<code>loops = FALSE</code> or <code>structural_zeros</code>) on data that hold transitions in the forbidden cells, the quasi-independence model is now fitted to the possible cells, with the margins of those cells (Bakeman &amp; Quera, 1995, <em>Psychological Bulletin</em>; Bishop, Fienberg &amp; Holland, 1975): the forbidden counts are left out of the expected counts, the adjusted residuals and the tablewise tests. The margins used to keep them, so the expected counts did not sum to the counts being fitted and the tablewise G^2 could be negative: <code>lsa(engagement, loops = FALSE)</code> reported G^2 = -1184.633 with p = 1 and now reports 5.994 on 1 df (p = 0.014), the deviance of the Poisson quasi-independence model <code>count ~ from + to</code> fitted by <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> to the six possible cells. <code><a href="../reference/lsa_ipf.html">lsa_ipf()</a></code> likewise reproduces the totals of the possible cells. Tables whose forbidden cells are empty are unchanged. The warning <code>lagdynamics_structural_zero_counts</code> is still raised and now says that the counts are left out.</li>

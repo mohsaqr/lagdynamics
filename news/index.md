@@ -1,5 +1,30 @@
 # Changelog
 
+## lagdynamics 0.35.4
+
+- No change to any function. The equivalence evidence
+  (`tests/equivalence/`, build-ignored) now compares the drawn outputs:
+  the permutation p-values of
+  [`compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/compare_lsa.md)
+  (per transition and the omnibus) against the label permutation of
+  whole sequences written out in base R; the credible intervals,
+  probability of direction and effect size of
+  [`bayes_compare_lsa()`](https://pak.dynasite.org/lagdynamics/reference/bayes_compare_lsa.md)
+  against draws of the Dirichlet posterior by `gtools::rdirichlet()`;
+  and the surrogate test of
+  [`transfer_entropy()`](https://pak.dynasite.org/lagdynamics/reference/transfer_entropy.md)
+  (`te_effective`, `p`) against the source permutation written out. All
+  are seeded Monte Carlo comparisons over three seeds, each number
+  judged at four of its own standard errors. The case-drop shares of
+  [`stability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/stability_lsa.md)
+  and the split-half summaries of
+  [`reliability_lsa()`](https://pak.dynasite.org/lagdynamics/reference/reliability_lsa.md)
+  are now judged the same way, per number, instead of at one tolerance
+  for the whole table.
+- The two-cell engine is compared with `vcd::loddsratio()` (log odds
+  ratio, standard error, z and p); the p-value of the z written out from
+  the definition is labelled as that formula, not as `stats`.
+
 ## lagdynamics 0.35.3
 
 - With structural zeros (`loops = FALSE` or `structural_zeros`) on data
