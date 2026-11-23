@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">lagdynamics</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.35.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,6 +54,10 @@
       <small>Source: <a href="https://github.com/mohsaqr/lagdynamics/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.35.5" id="lagdynamics-0355">lagdynamics 0.35.5<a class="anchor" aria-label="anchor" href="#lagdynamics-0355"></a></h2>
+<ul><li>No change to any function. The <code>legacy</code> ci job exports the legacy comparison cases <code>alternative_engines</code> (two-cell and dominance engines against their formulas, an independent computation) and <code>bidirectional_engine</code> (the bidirectional engine against <code><a href="https://rdrr.io/r/stats/chisq.test.html" class="external-link">stats::chisq.test()</a></code>), which were one case until now.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.35.4" id="lagdynamics-0354">lagdynamics 0.35.4<a class="anchor" aria-label="anchor" href="#lagdynamics-0354"></a></h2>
 <ul><li>No change to any function. The equivalence evidence (<code>tests/equivalence/</code>, build-ignored) now compares the drawn outputs: the permutation p-values of <code><a href="../reference/compare_lsa.html">compare_lsa()</a></code> (per transition and the omnibus) against the label permutation of whole sequences written out in base R; the credible intervals, probability of direction and effect size of <code><a href="../reference/bayes_compare_lsa.html">bayes_compare_lsa()</a></code> against draws of the Dirichlet posterior by <code>gtools::rdirichlet()</code>; and the surrogate test of <code><a href="../reference/transfer_entropy.html">transfer_entropy()</a></code> (<code>te_effective</code>, <code>p</code>) against the source permutation written out. All are seeded Monte Carlo comparisons over three seeds, each number judged at four of its own standard errors. The case-drop shares of <code><a href="../reference/stability_lsa.html">stability_lsa()</a></code> and the split-half summaries of <code><a href="../reference/reliability_lsa.html">reliability_lsa()</a></code> are now judged the same way, per number, instead of at one tolerance for the whole table.</li>
